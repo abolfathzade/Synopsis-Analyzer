@@ -180,8 +180,15 @@ const NSString* kMetavisualAudioTranscodeSettion = @"kMetavisualAudioTranscodeSe
     self.transcodeAssetWriterAudioPassthrough = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:nil];
 
     // Metadata
-//    self.transcodeAssetWriterMetadata = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeMetadata outputSettings:nil];
-//    self.transcodeAssetWriterMetadataAdaptor = [AVAssetWriterInputMetadataAdaptor assetWriterInputMetadataAdaptorWithAssetWriterInput:self.transcodeAssetWriterMetadata];
+    CMFormatDescriptionRef metadataFormatDescription = NULL;
+    NSArray *specs = @[
+                       @{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : @"mdta/org.metavisual.somethingsomething",
+                         (__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType : (__bridge NSString *)kCMMetadataBaseDataType_UTF8}];
+    
+    
+    OSStatus err = CMMetadataFormatDescriptionCreateWithMetadataSpecifications(kCFAllocatorDefault, kCMMetadataFormatType_Boxed, (__bridge CFArrayRef)specs, &metadataFormatDescription);
+    self.transcodeAssetWriterMetadata = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeMetadata outputSettings:nil sourceFormatHint:metadataFormatDescription];
+    self.transcodeAssetWriterMetadataAdaptor = [AVAssetWriterInputMetadataAdaptor assetWriterInputMetadataAdaptorWithAssetWriterInput:self.transcodeAssetWriterMetadata];
     
     // Assign all our specific inputs to our Writer
     if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideoPassthrough]
@@ -227,7 +234,7 @@ const NSString* kMetavisualAudioTranscodeSettion = @"kMetavisualAudioTranscodeSe
 
         // 0 = use as much as you want.
         // Probably want to throttle this and set a small usleep to keep threads happy
-        // Or use the CMBufferqueue callbacks
+        // Or use the CMBufferqueue callbacks with a semaphore signal
         CMItemCount numBuffers = 0;
         
 //        CMBufferQueueRef decodeVideoBufferQueue;
@@ -302,7 +309,6 @@ const NSString* kMetavisualAudioTranscodeSettion = @"kMetavisualAudioTranscodeSe
         // Passthrough Video Write from Buffer Queue
         [self.transcodeAssetWriterVideoPassthrough requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
         {
-            
 //            NSLog(@"Started Requesting Media");
             while([self.transcodeAssetWriterVideoPassthrough isReadyForMoreMediaData])
             {
