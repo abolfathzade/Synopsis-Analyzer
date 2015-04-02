@@ -344,7 +344,7 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
                     CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
 
                     NSLog(@"Sample Count %i", sampleCount);
-                                        
+                    
                     CFStringRef desc = CMTimeRangeCopyDescription(kCFAllocatorDefault, currentSampleTimeRange);
                     NSLog(@"Sample Timing Info: %@", desc);
 
@@ -370,12 +370,11 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
                         AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
 
                         [self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group];
-                        
-                        CFRelease(passthroughVideoSampleBuffer);
                     }
                     
                     sampleCount++;
                     lastSampleTimeRange = currentSampleTimeRange;
+                    CFRelease(passthroughVideoSampleBuffer);
                 }
             }
             
