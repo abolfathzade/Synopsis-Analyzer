@@ -310,7 +310,7 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
         
         // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
         __block NSUInteger sampleCount = 0;
-        __block CMTimeRange lastSampleTimeRange = kCMTimeRangeInvalid;
+        __block CMTimeRange lastSampleTimeRange = kCMTimeRangeZero;
         
         // Passthrough Video Write from Buffer Queue
         [self.transcodeAssetWriterVideoPassthrough requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
@@ -357,10 +357,11 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
                     // d - there are probably other issues too.
                     
                     if(CMTIMERANGE_IS_VALID(currentSampleTimeRange)
-                       && CMTIME_COMPARE_INLINE(currentSampleTimeRange.start, >, lastSampleTimeRange.start)
+                       && CMTIME_COMPARE_INLINE(currentSampleTimeRange.start, >=, lastSampleTimeRange.start)
                        && CMTIME_COMPARE_INLINE(currentSampleTimeRange.duration, >, kCMTimeZero)
                        )
                     {
+                        NSLog(@"Sample %i PASSED", sampleCount);
                         // Annotation text item
                         AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
                         textItem.identifier = kMetavisualMetadataIdentifier;
@@ -370,6 +371,10 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
                         AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
 
                         [self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group];
+                    }
+                    else
+                    {
+                        NSLog(@"Sample %i FAILED", sampleCount);
                     }
                     
                     sampleCount++;
