@@ -15,6 +15,8 @@
 const NSString* kMetavisualVideoTranscodeSettion = @"kMetavisualVideoTranscodeSettion";
 const NSString* kMetavisualAudioTranscodeSettion = @"kMetavisualAudioTranscodeSettion";
 
+NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomething";
+
 @interface TranscodeOperation ()
 {
     
@@ -182,7 +184,7 @@ const NSString* kMetavisualAudioTranscodeSettion = @"kMetavisualAudioTranscodeSe
     // Metadata
     CMFormatDescriptionRef metadataFormatDescription = NULL;
     NSArray *specs = @[
-                       @{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : @"mdta/org.metavisual.somethingsomething",
+                       @{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : kMetavisualMetadataIdentifier,
                          (__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType : (__bridge NSString *)kCMMetadataBaseDataType_UTF8}];
     
     
@@ -193,10 +195,10 @@ const NSString* kMetavisualAudioTranscodeSettion = @"kMetavisualAudioTranscodeSe
     // Assign all our specific inputs to our Writer
     if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideoPassthrough]
        && [self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterAudioPassthrough]
-//       && [self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterMetadata]
+       && [self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterMetadata]
        )
     {
-        //[self.transcodeAssetWriter addInput:self.transcodeAssetWriterMetadata];
+        [self.transcodeAssetWriter addInput:self.transcodeAssetWriterMetadata];
 
         if(hasVideo)
             [self.transcodeAssetWriter addInput:self.transcodeAssetWriterVideoPassthrough];
@@ -306,11 +308,16 @@ const NSString* kMetavisualAudioTranscodeSettion = @"kMetavisualAudioTranscodeSe
             dispatch_group_leave(g);
         });
         
+        // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
+        __block NSUInteger sampleCount = 0;
+        __block CMTimeRange lastSampleTimeRange = kCMTimeRangeInvalid;
+        
         // Passthrough Video Write from Buffer Queue
         [self.transcodeAssetWriterVideoPassthrough requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
         {
 //            NSLog(@"Started Requesting Media");
-            while([self.transcodeAssetWriterVideoPassthrough isReadyForMoreMediaData])
+            while([self.transcodeAssetWriterVideoPassthrough isReadyForMoreMediaData]
+                  && [self.transcodeAssetWriterMetadata isReadyForMoreMediaData])
             {
                 // Are we done reading,
                 if(finishedReadingAllPassthroughVideo )
@@ -319,6 +326,7 @@ const NSString* kMetavisualAudioTranscodeSettion = @"kMetavisualAudioTranscodeSe
                     if(CMBufferQueueIsEmpty(passthroughVideoBufferQueue))
                     {
                         [self.transcodeAssetWriterVideo markAsFinished];
+                        [self.transcodeAssetWriterMetadata markAsFinished];
 //                        NSLog(@"Writing Done");
                         
                         dispatch_group_leave(g);
@@ -329,11 +337,45 @@ const NSString* kMetavisualAudioTranscodeSettion = @"kMetavisualAudioTranscodeSe
                 CMSampleBufferRef passthroughVideoSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(passthroughVideoBufferQueue);
                 if(passthroughVideoSampleBuffer)
                 {
-//                    NSLog(@"Dequed Sample Buffer");
-                    
                     [self.transcodeAssetWriterVideoPassthrough appendSampleBuffer:passthroughVideoSampleBuffer];
                     
-                    CFRelease(passthroughVideoSampleBuffer);
+                    CMTime currentSamplePTS = CMSampleBufferGetPresentationTimeStamp(passthroughVideoSampleBuffer);
+                    CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(passthroughVideoSampleBuffer);
+                    CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
+
+                    NSLog(@"Sample Count %i", sampleCount);
+                                        
+                    CFStringRef desc = CMTimeRangeCopyDescription(kCFAllocatorDefault, currentSampleTimeRange);
+                    NSLog(@"Sample Timing Info: %@", desc);
+
+                    // Write Metadata
+                    
+                    // Check that our metadata times are sensible. We need to ensure that each time range is:
+                    // a incremented from the last
+                    // b valid
+                    // c has no zero duration (should be the duration of a frame)
+                    // d - there are probably other issues too.
+                    
+                    if(CMTIMERANGE_IS_VALID(currentSampleTimeRange)
+                       && CMTIME_COMPARE_INLINE(currentSampleTimeRange.start, >, lastSampleTimeRange.start)
+                       && CMTIME_COMPARE_INLINE(currentSampleTimeRange.duration, >, kCMTimeZero)
+                       )
+                    {
+                        // Annotation text item
+                        AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
+                        textItem.identifier = kMetavisualMetadataIdentifier;
+                        textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_UTF8;
+                        textItem.value = [NSString stringWithFormat:@"Sample Numver %lu", (unsigned long)sampleCount];
+                        
+                        AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
+
+                        [self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group];
+                        
+                        CFRelease(passthroughVideoSampleBuffer);
+                    }
+                    
+                    sampleCount++;
+                    lastSampleTimeRange = currentSampleTimeRange;
                 }
             }
             

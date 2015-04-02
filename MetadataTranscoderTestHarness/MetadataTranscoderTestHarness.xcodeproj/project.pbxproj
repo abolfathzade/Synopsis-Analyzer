@@ -67,13 +67,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1BEA4D101ACB2BCC00AB57C1 = {
+		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				1B61BCD91ACB90850013418D /* VideoToolbox.framework */,
 				1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */,
 				1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1BEA4D101ACB2BCC00AB57C1 = {
+			isa = PBXGroup;
+			children = (
 				1BEA4D1B1ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness */,
+				1B61BCDB1ACC70D50013418D /* Frameworks */,
 				1BEA4D2F1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests */,
 				1BEA4D1A1ACB2BCC00AB57C1 /* Products */,
 			);
