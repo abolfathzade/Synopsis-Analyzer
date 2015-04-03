@@ -336,6 +336,18 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
 //                    NSLog(@"Finished Reading waiting to empty queue...");
                     if(CMBufferQueueIsEmpty(passthroughVideoBufferQueue))
                     {
+                        // TODO: AGGREGATE METADATA THAT ISNT PER FRAME
+                        NSError* analyzerError = nil;
+                        for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+                        {
+                            [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
+                            if(analyzerError)
+                            {
+                                NSLog(@"Error Finalizing Analysis - bailing: %@", analyzerError);
+                                break;
+                            }
+                        }
+                    
                         [self.transcodeAssetWriterVideo markAsFinished];
                         [self.transcodeAssetWriterMetadata markAsFinished];
 //                        NSLog(@"Writing Done");
