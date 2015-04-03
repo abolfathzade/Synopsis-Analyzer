@@ -12,6 +12,9 @@
 #import <VideoToolbox/VideoToolbox.h>
 #import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 
+#import "SampleBufferAnalyzerPluginProtocol.h"
+#import "NSDictionary+JSONString.h"
+
 const NSString* kMetavisualVideoTranscodeSettion = @"kMetavisualVideoTranscodeSettion";
 const NSString* kMetavisualAudioTranscodeSettion = @"kMetavisualAudioTranscodeSettion";
 
@@ -25,6 +28,7 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
 @property (atomic, readwrite, strong) NSDictionary* transcodeOptions;
 @property (atomic, readwrite, strong) NSURL* sourceURL;
 @property (atomic, readwrite, strong) NSURL* destinationURL;
+@property (atomic, readwrite, strong) NSArray* availableAnalyzers;
 
 @property (atomic, readwrite, assign) BOOL usingPassthrough;
 
@@ -59,7 +63,7 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
 
 @implementation TranscodeOperation
 
-- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions
+- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions availableAnalyzers:(NSArray*)analyzers
 {
     self = [super init];
     if(self)
@@ -70,6 +74,7 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
         self.sourceURL = sourceURL;
         self.destinationURL = destinationURL;
         self.transcodeOptions = transcodeOptions;
+        self.availableAnalyzers = analyzers;
         
         // if we dont have transcode options, we use passthrough
         // Note we still want to do analysis, so we still spool up our decompressors
@@ -220,6 +225,12 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
         }
     }
     
+    // For every Analyzer, begin an new Analysis Session
+    for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+    {
+        [analyzer beginMetadataAnalysisSession];
+    }
+    
     return error;
 }
 
@@ -362,15 +373,48 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
                        )
                     {
                         NSLog(@"Sample %i PASSED", sampleCount);
-                        // Annotation text item
-                        AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
-                        textItem.identifier = kMetavisualMetadataIdentifier;
-                        textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_UTF8;
-                        textItem.value = [NSString stringWithFormat:@"Sample Numver %lu", (unsigned long)sampleCount];
                         
-                        AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
+                        // For every Analyzer we have:
+                        // A: analyze
+                        // B: aggregate the metadata dictionary into a global dictionary with our plugin identifier as the key for that entry
+                        // C: Once done analysis, convert aggregate metadata to JSON and write out a metadata object and append it.
+                        
+                        NSError* analyzerError = nil;
+                        NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
+                        
+                        for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+                        {
+                            NSString* newMetadataKey = [analyzer pluginIdentifier];
+                            NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:passthroughVideoSampleBuffer error:&analyzerError];
+                        
+                            if(analyzerError)
+                            {
+                                NSLog(@"Error Analyzing Sample buffer - bailing: %@", analyzerError);
+                                break;
+                            }
+                            
+                            [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+                        }
 
-                        [self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group];
+                        // Convert to JSON
+                        if([NSJSONSerialization isValidJSONObject:aggregatedAndAnalyzedMetadata])
+                        {
+                            NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:YES];
+                            
+                            // Annotation text item
+                            AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
+                            textItem.identifier = kMetavisualMetadataIdentifier;
+                            textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_UTF8;
+                            textItem.value = aggregateMetadataAsJSON;
+                            
+                            AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
+
+                            [self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group];
+                        }
+                        else
+                        {
+                            NSLog(@"Unable To Convert Metadata to JSON Format, invalid!");
+                        }
                     }
                     else
                     {

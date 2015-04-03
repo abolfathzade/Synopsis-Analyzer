@@ -15,6 +15,6 @@ extern const NSString* kMetavisualAudioTranscodeSettion;
 
 // Transcode Options may be nil - indicating passthrough
 
-- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions NS_DESIGNATED_INITIALIZER;
+- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions availableAnalyzers:(NSArray*)analyzers NS_DESIGNATED_INITIALIZER;
 
 @end

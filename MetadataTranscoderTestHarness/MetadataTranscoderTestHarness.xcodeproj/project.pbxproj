@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BCD91ACB90850013418D /* VideoToolbox.framework */; };
+		1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */; };
+		1B61BCEE1ACF0E210013418D /* FrameCounterPlugin.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -19,6 +22,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1B61BCEB1ACF0DFC0013418D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1BEA4D111ACB2BCC00AB57C1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1B61BCE01ACF06A70013418D;
+			remoteInfo = FrameCounterPlugin;
+		};
 		1BEA4D2D1ACB2BCD00AB57C1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1BEA4D111ACB2BCC00AB57C1 /* Project object */;
@@ -28,8 +38,28 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		1B61BCED1ACF0E0E0013418D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				1B61BCEE1ACF0E210013418D /* FrameCounterPlugin.bundle in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		1B61BCD91ACB90850013418D /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		1B61BCDC1ACEFEEE0013418D /* SampleBufferAnalyzerPluginProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleBufferAnalyzerPluginProtocol.h; sourceTree = "<group>"; };
+		1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FrameCounterPlugin.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B61BCE41ACF06A70013418D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1B61BCE81ACF090E0013418D /* FrameCounterPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameCounterPlugin.h; sourceTree = "<group>"; };
+		1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FrameCounterPlugin.m; sourceTree = "<group>"; };
+		1B61BCEF1ACF181C0013418D /* NSDictionary+JSONString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+JSONString.h"; sourceTree = "<group>"; };
+		1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+JSONString.m"; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetadataTranscoderTestHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -47,6 +77,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1B61BCDE1ACF06A70013418D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1BEA4D161ACB2BCC00AB57C1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -77,10 +114,29 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		1B61BCE21ACF06A70013418D /* FrameCounterPlugin */ = {
+			isa = PBXGroup;
+			children = (
+				1B61BCE81ACF090E0013418D /* FrameCounterPlugin.h */,
+				1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */,
+				1B61BCE31ACF06A70013418D /* Supporting Files */,
+			);
+			path = FrameCounterPlugin;
+			sourceTree = "<group>";
+		};
+		1B61BCE31ACF06A70013418D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1B61BCE41ACF06A70013418D /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		1BEA4D101ACB2BCC00AB57C1 = {
 			isa = PBXGroup;
 			children = (
 				1BEA4D1B1ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness */,
+				1B61BCE21ACF06A70013418D /* FrameCounterPlugin */,
 				1B61BCDB1ACC70D50013418D /* Frameworks */,
 				1BEA4D2F1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests */,
 				1BEA4D1A1ACB2BCC00AB57C1 /* Products */,
@@ -92,6 +148,7 @@
 			children = (
 				1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */,
 				1BEA4D2C1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests.xctest */,
+				1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -103,6 +160,9 @@
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
 				1BEA4D401ACB2F6F00AB57C1 /* TranscodeOperation.h */,
 				1BEA4D411ACB2F6F00AB57C1 /* TranscodeOperation.m */,
+				1B61BCDC1ACEFEEE0013418D /* SampleBufferAnalyzerPluginProtocol.h */,
+				1B61BCEF1ACF181C0013418D /* NSDictionary+JSONString.h */,
+				1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */,
 				1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */,
 				1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */,
 				1BEA4D1C1ACB2BCC00AB57C1 /* Supporting Files */,
@@ -139,6 +199,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1B61BCE01ACF06A70013418D /* FrameCounterPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B61BCE51ACF06A70013418D /* Build configuration list for PBXNativeTarget "FrameCounterPlugin" */;
+			buildPhases = (
+				1B61BCDD1ACF06A70013418D /* Sources */,
+				1B61BCDE1ACF06A70013418D /* Frameworks */,
+				1B61BCDF1ACF06A70013418D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FrameCounterPlugin;
+			productName = FrameCounterPlugin;
+			productReference = 1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
 		1BEA4D181ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1BEA4D361ACB2BCD00AB57C1 /* Build configuration list for PBXNativeTarget "MetadataTranscoderTestHarness" */;
@@ -146,10 +223,12 @@
 				1BEA4D151ACB2BCC00AB57C1 /* Sources */,
 				1BEA4D161ACB2BCC00AB57C1 /* Frameworks */,
 				1BEA4D171ACB2BCC00AB57C1 /* Resources */,
+				1B61BCED1ACF0E0E0013418D /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1B61BCEC1ACF0DFC0013418D /* PBXTargetDependency */,
 			);
 			name = MetadataTranscoderTestHarness;
 			productName = MetadataTranscoderTestHarness;
@@ -183,6 +262,9 @@
 				LastUpgradeCheck = 0620;
 				ORGANIZATIONNAME = metavisual;
 				TargetAttributes = {
+					1B61BCE01ACF06A70013418D = {
+						CreatedOnToolsVersion = 6.2;
+					};
 					1BEA4D181ACB2BCC00AB57C1 = {
 						CreatedOnToolsVersion = 6.2;
 					};
@@ -207,11 +289,19 @@
 			targets = (
 				1BEA4D181ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness */,
 				1BEA4D2B1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests */,
+				1B61BCE01ACF06A70013418D /* FrameCounterPlugin */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1B61BCDF1ACF06A70013418D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1BEA4D171ACB2BCC00AB57C1 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -231,6 +321,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1B61BCDD1ACF06A70013418D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1BEA4D151ACB2BCC00AB57C1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -238,6 +336,7 @@
 				1BEA4D421ACB2F6F00AB57C1 /* TranscodeOperation.m in Sources */,
 				1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */,
 				1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */,
+				1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,6 +351,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1B61BCEC1ACF0DFC0013418D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1B61BCE01ACF06A70013418D /* FrameCounterPlugin */;
+			targetProxy = 1B61BCEB1ACF0DFC0013418D /* PBXContainerItemProxy */;
+		};
 		1BEA4D2E1ACB2BCD00AB57C1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1BEA4D181ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness */;
@@ -271,6 +375,34 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		1B61BCE61ACF06A70013418D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = FrameCounterPlugin/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		1B61BCE71ACF06A70013418D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = FrameCounterPlugin/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
 		1BEA4D341ACB2BCD00AB57C1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -408,6 +540,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1B61BCE51ACF06A70013418D /* Build configuration list for PBXNativeTarget "FrameCounterPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1B61BCE61ACF06A70013418D /* Debug */,
+				1B61BCE71ACF06A70013418D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		1BEA4D141ACB2BCC00AB57C1 /* Build configuration list for PBXProject "MetadataTranscoderTestHarness" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
