@@ -11,11 +11,12 @@
 		1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */; };
 		1B61BCEE1ACF0E210013418D /* FrameCounterPlugin.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */; };
+		1B61BD021ACF27740013418D /* OpenCVAnalyzerPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.m */; };
+		1B61BD051ACF28710013418D /* OpenCVAnalyzerPlugin.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
 		1BEA4D271ACB2BCD00AB57C1 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
-		1BEA4D331ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D321ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests.m */; };
 		1BEA4D3D1ACB2BDD00AB57C1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
 		1BEA4D421ACB2F6F00AB57C1 /* TranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D411ACB2F6F00AB57C1 /* TranscodeOperation.m */; };
@@ -29,12 +30,12 @@
 			remoteGlobalIDString = 1B61BCE01ACF06A70013418D;
 			remoteInfo = FrameCounterPlugin;
 		};
-		1BEA4D2D1ACB2BCD00AB57C1 /* PBXContainerItemProxy */ = {
+		1B61BD031ACF28660013418D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1BEA4D111ACB2BCC00AB57C1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 1BEA4D181ACB2BCC00AB57C1;
-			remoteInfo = MetadataTranscoderTestHarness;
+			remoteGlobalIDString = 1B61BCF81ACF26710013418D;
+			remoteInfo = OpenCVAnalyzerPlugin;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -45,6 +46,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				1B61BD051ACF28710013418D /* OpenCVAnalyzerPlugin.bundle in CopyFiles */,
 				1B61BCEE1ACF0E210013418D /* FrameCounterPlugin.bundle in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -60,6 +62,10 @@
 		1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FrameCounterPlugin.m; sourceTree = "<group>"; };
 		1B61BCEF1ACF181C0013418D /* NSDictionary+JSONString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+JSONString.h"; sourceTree = "<group>"; };
 		1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+JSONString.m"; sourceTree = "<group>"; };
+		1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenCVAnalyzerPlugin.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B61BCFC1ACF26710013418D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../OpenCVAnalyzerPlugin/Info.plist; sourceTree = "<group>"; };
+		1B61BD001ACF27740013418D /* OpenCVAnalyzerPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenCVAnalyzerPlugin.h; path = ../OpenCVAnalyzerPlugin/OpenCVAnalyzerPlugin.h; sourceTree = "<group>"; };
+		1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OpenCVAnalyzerPlugin.m; path = ../OpenCVAnalyzerPlugin/OpenCVAnalyzerPlugin.m; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetadataTranscoderTestHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -67,9 +73,6 @@
 		1BEA4D211ACB2BCD00AB57C1 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		1BEA4D261ACB2BCD00AB57C1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		1BEA4D2C1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MetadataTranscoderTestHarnessTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1BEA4D311ACB2BCD00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		1BEA4D321ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MetadataTranscoderTestHarnessTests.m; sourceTree = "<group>"; };
 		1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		1BEA4D401ACB2F6F00AB57C1 /* TranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TranscodeOperation.h; sourceTree = "<group>"; };
@@ -84,6 +87,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1B61BCF61ACF26710013418D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1BEA4D161ACB2BCC00AB57C1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -91,13 +101,6 @@
 				1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */,
 				1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */,
 				1BEA4D3D1ACB2BDD00AB57C1 /* AVFoundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1BEA4D291ACB2BCD00AB57C1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,13 +135,40 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		1B61BCF41ACF26590013418D /* Plugins */ = {
+			isa = PBXGroup;
+			children = (
+				1B61BCFA1ACF26710013418D /* OpenCVAnalyzerPlugin */,
+				1B61BCE21ACF06A70013418D /* FrameCounterPlugin */,
+			);
+			name = Plugins;
+			sourceTree = "<group>";
+		};
+		1B61BCFA1ACF26710013418D /* OpenCVAnalyzerPlugin */ = {
+			isa = PBXGroup;
+			children = (
+				1B61BCFB1ACF26710013418D /* Supporting Files */,
+				1B61BD001ACF27740013418D /* OpenCVAnalyzerPlugin.h */,
+				1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.m */,
+			);
+			name = OpenCVAnalyzerPlugin;
+			path = OpenCVAnalyzer;
+			sourceTree = "<group>";
+		};
+		1B61BCFB1ACF26710013418D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1B61BCFC1ACF26710013418D /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		1BEA4D101ACB2BCC00AB57C1 = {
 			isa = PBXGroup;
 			children = (
 				1BEA4D1B1ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness */,
-				1B61BCE21ACF06A70013418D /* FrameCounterPlugin */,
+				1B61BCF41ACF26590013418D /* Plugins */,
 				1B61BCDB1ACC70D50013418D /* Frameworks */,
-				1BEA4D2F1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests */,
 				1BEA4D1A1ACB2BCC00AB57C1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -147,8 +177,8 @@
 			isa = PBXGroup;
 			children = (
 				1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */,
-				1BEA4D2C1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests.xctest */,
 				1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */,
+				1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -179,23 +209,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		1BEA4D2F1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests */ = {
-			isa = PBXGroup;
-			children = (
-				1BEA4D321ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests.m */,
-				1BEA4D301ACB2BCD00AB57C1 /* Supporting Files */,
-			);
-			path = MetadataTranscoderTestHarnessTests;
-			sourceTree = "<group>";
-		};
-		1BEA4D301ACB2BCD00AB57C1 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				1BEA4D311ACB2BCD00AB57C1 /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -216,6 +229,23 @@
 			productReference = 1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
+		1B61BCF81ACF26710013418D /* OpenCVAnalyzerPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B61BCFD1ACF26710013418D /* Build configuration list for PBXNativeTarget "OpenCVAnalyzerPlugin" */;
+			buildPhases = (
+				1B61BCF51ACF26710013418D /* Sources */,
+				1B61BCF61ACF26710013418D /* Frameworks */,
+				1B61BCF71ACF26710013418D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenCVAnalyzerPlugin;
+			productName = OpenCVAnalyzer;
+			productReference = 1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
 		1BEA4D181ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1BEA4D361ACB2BCD00AB57C1 /* Build configuration list for PBXNativeTarget "MetadataTranscoderTestHarness" */;
@@ -228,30 +258,13 @@
 			buildRules = (
 			);
 			dependencies = (
+				1B61BD041ACF28660013418D /* PBXTargetDependency */,
 				1B61BCEC1ACF0DFC0013418D /* PBXTargetDependency */,
 			);
 			name = MetadataTranscoderTestHarness;
 			productName = MetadataTranscoderTestHarness;
 			productReference = 1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */;
 			productType = "com.apple.product-type.application";
-		};
-		1BEA4D2B1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 1BEA4D391ACB2BCD00AB57C1 /* Build configuration list for PBXNativeTarget "MetadataTranscoderTestHarnessTests" */;
-			buildPhases = (
-				1BEA4D281ACB2BCD00AB57C1 /* Sources */,
-				1BEA4D291ACB2BCD00AB57C1 /* Frameworks */,
-				1BEA4D2A1ACB2BCD00AB57C1 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				1BEA4D2E1ACB2BCD00AB57C1 /* PBXTargetDependency */,
-			);
-			name = MetadataTranscoderTestHarnessTests;
-			productName = MetadataTranscoderTestHarnessTests;
-			productReference = 1BEA4D2C1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -265,12 +278,11 @@
 					1B61BCE01ACF06A70013418D = {
 						CreatedOnToolsVersion = 6.2;
 					};
-					1BEA4D181ACB2BCC00AB57C1 = {
+					1B61BCF81ACF26710013418D = {
 						CreatedOnToolsVersion = 6.2;
 					};
-					1BEA4D2B1ACB2BCD00AB57C1 = {
+					1BEA4D181ACB2BCC00AB57C1 = {
 						CreatedOnToolsVersion = 6.2;
-						TestTargetID = 1BEA4D181ACB2BCC00AB57C1;
 					};
 				};
 			};
@@ -288,14 +300,21 @@
 			projectRoot = "";
 			targets = (
 				1BEA4D181ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness */,
-				1BEA4D2B1ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests */,
 				1B61BCE01ACF06A70013418D /* FrameCounterPlugin */,
+				1B61BCF81ACF26710013418D /* OpenCVAnalyzerPlugin */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1B61BCDF1ACF06A70013418D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1B61BCF71ACF26710013418D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -311,13 +330,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		1BEA4D2A1ACB2BCD00AB57C1 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -326,6 +338,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1B61BCF51ACF26710013418D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1B61BD021ACF27740013418D /* OpenCVAnalyzerPlugin.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,14 +360,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		1BEA4D281ACB2BCD00AB57C1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				1BEA4D331ACB2BCD00AB57C1 /* MetadataTranscoderTestHarnessTests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -356,10 +368,10 @@
 			target = 1B61BCE01ACF06A70013418D /* FrameCounterPlugin */;
 			targetProxy = 1B61BCEB1ACF0DFC0013418D /* PBXContainerItemProxy */;
 		};
-		1BEA4D2E1ACB2BCD00AB57C1 /* PBXTargetDependency */ = {
+		1B61BD041ACF28660013418D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 1BEA4D181ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness */;
-			targetProxy = 1BEA4D2D1ACB2BCD00AB57C1 /* PBXContainerItemProxy */;
+			target = 1B61BCF81ACF26710013418D /* OpenCVAnalyzerPlugin */;
+			targetProxy = 1B61BD031ACF28660013418D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -396,6 +408,34 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = FrameCounterPlugin/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
+		1B61BCFE1ACF26710013418D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = OpenCVAnalyzerPlugin/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		1B61BCFF1ACF26710013418D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = OpenCVAnalyzerPlugin/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -501,42 +541,6 @@
 			};
 			name = Release;
 		};
-		1BEA4D3A1ACB2BCD00AB57C1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = MetadataTranscoderTestHarnessTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MetadataTranscoderTestHarness.app/Contents/MacOS/MetadataTranscoderTestHarness";
-			};
-			name = Debug;
-		};
-		1BEA4D3B1ACB2BCD00AB57C1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = MetadataTranscoderTestHarnessTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MetadataTranscoderTestHarness.app/Contents/MacOS/MetadataTranscoderTestHarness";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -545,6 +549,14 @@
 			buildConfigurations = (
 				1B61BCE61ACF06A70013418D /* Debug */,
 				1B61BCE71ACF06A70013418D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		1B61BCFD1ACF26710013418D /* Build configuration list for PBXNativeTarget "OpenCVAnalyzerPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1B61BCFE1ACF26710013418D /* Debug */,
+				1B61BCFF1ACF26710013418D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};
@@ -562,15 +574,6 @@
 			buildConfigurations = (
 				1BEA4D371ACB2BCD00AB57C1 /* Debug */,
 				1BEA4D381ACB2BCD00AB57C1 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		1BEA4D391ACB2BCD00AB57C1 /* Build configuration list for PBXNativeTarget "MetadataTranscoderTestHarnessTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				1BEA4D3A1ACB2BCD00AB57C1 /* Debug */,
-				1BEA4D3B1ACB2BCD00AB57C1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

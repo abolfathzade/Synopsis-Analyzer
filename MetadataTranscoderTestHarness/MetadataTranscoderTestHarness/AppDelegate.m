@@ -65,6 +65,8 @@
                     if(pluginInstance)
                     {
                         [self.analyzerPlugins addObject:pluginInstance];
+                        
+                        NSLog(@"Loaded Plugin: %@", pluginInstance.pluginName);
                     }
                 }
                 else
