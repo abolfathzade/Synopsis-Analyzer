@@ -11,8 +11,14 @@
 		1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */; };
 		1B61BCEE1ACF0E210013418D /* FrameCounterPlugin.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */; };
-		1B61BD021ACF27740013418D /* OpenCVAnalyzerPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.m */; };
+		1B61BD021ACF27740013418D /* OpenCVAnalyzerPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.mm */; };
 		1B61BD051ACF28710013418D /* OpenCVAnalyzerPlugin.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1B61BD061ACF371A0013418D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
+		1B61BD081ACF371A0013418D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
+		1B61BD091ACF37200013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
+		1B61BD0A1ACF37300013418D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
+		1B61BD0B1ACF37300013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
+		1B61BD0C1ACF37390013418D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -65,7 +71,8 @@
 		1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenCVAnalyzerPlugin.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B61BCFC1ACF26710013418D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../OpenCVAnalyzerPlugin/Info.plist; sourceTree = "<group>"; };
 		1B61BD001ACF27740013418D /* OpenCVAnalyzerPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenCVAnalyzerPlugin.h; path = ../OpenCVAnalyzerPlugin/OpenCVAnalyzerPlugin.h; sourceTree = "<group>"; };
-		1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OpenCVAnalyzerPlugin.m; path = ../OpenCVAnalyzerPlugin/OpenCVAnalyzerPlugin.m; sourceTree = "<group>"; };
+		1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = OpenCVAnalyzerPlugin.mm; path = ../OpenCVAnalyzerPlugin/OpenCVAnalyzerPlugin.mm; sourceTree = "<group>"; };
+		1B61BD071ACF371A0013418D /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetadataTranscoderTestHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -84,6 +91,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B61BD0C1ACF37390013418D /* AVFoundation.framework in Frameworks */,
+				1B61BD0A1ACF37300013418D /* CoreFoundation.framework in Frameworks */,
+				1B61BD0B1ACF37300013418D /* CoreMedia.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,6 +101,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B61BD091ACF37200013418D /* CoreMedia.framework in Frameworks */,
+				1B61BD081ACF371A0013418D /* CoreFoundation.framework in Frameworks */,
+				1B61BD061ACF371A0013418D /* AVFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +123,7 @@
 		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1B61BD071ACF371A0013418D /* CoreFoundation.framework */,
 				1B61BCD91ACB90850013418D /* VideoToolbox.framework */,
 				1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */,
 				1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */,
@@ -149,7 +163,7 @@
 			children = (
 				1B61BCFB1ACF26710013418D /* Supporting Files */,
 				1B61BD001ACF27740013418D /* OpenCVAnalyzerPlugin.h */,
-				1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.m */,
+				1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.mm */,
 			);
 			name = OpenCVAnalyzerPlugin;
 			path = OpenCVAnalyzer;
@@ -345,7 +359,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1B61BD021ACF27740013418D /* OpenCVAnalyzerPlugin.m in Sources */,
+				1B61BD021ACF27740013418D /* OpenCVAnalyzerPlugin.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

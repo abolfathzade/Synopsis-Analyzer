@@ -16,7 +16,6 @@
 @property (readonly) NSString* pluginIdentifier;
 
 @property (readonly) NSArray* pluginAuthors;
-
 @property (readonly) NSString* pluginDescription;
 
 @property (readonly) NSUInteger pluginAPIVersionMajor;
