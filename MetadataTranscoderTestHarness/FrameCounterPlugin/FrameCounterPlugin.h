@@ -8,8 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CoreMedia.h>
+#import "SampleBufferAnalyzerPluginProtocol.h"
 
-@interface FrameCounterPlugin : NSObject
+@interface FrameCounterPlugin : NSObject <SampleBufferAnalyzerPluginProtocol>
 
 @property (readonly) NSString* pluginName;
 @property (readonly) NSString* pluginIdentifier;

@@ -14,18 +14,18 @@
 @required
 
 // Human Readable Plugin Named Also used in UI
-@property (copy) NSString* pluginName;
+@property (readonly) NSString* pluginName;
 
 // Metadata Tag identifying the analyzers metadata section in the aggegated metatada track
 // This should be something like org.metavisial.plugin -
 // all metadata either global or per frame is within a dictionary under this key
-@property (copy) NSString* pluginIdentifier;
+@property (readonly) NSString* pluginIdentifier;
 
 // Authors for Credit - array of NSStrings
-@property (copy) NSArray* pluginAuthors;
+@property (readonly) NSArray* pluginAuthors;
 
 // Human Readable Description
-@property (copy) NSString* pluginDescription;
+@property (readonly) NSString* pluginDescription;
 
 // Expected host API Version
 @property (readonly) NSUInteger pluginAPIVersionMajor;
@@ -37,7 +37,7 @@
 
 // The type of media the plugin analyzes. For now, plugins only work with Video or Audio, we dont pass in two buffers at once.
 // Supported values are currently only AVMediaTypeVideo, or AVMediaTypeAudio. Perhaps Muxed comes in the future.
-@property (copy) NSString* pluginMediaType;
+@property (readonly) NSString* pluginMediaType;
 
 // Initialize any resources required by the plugin for Analysis - called
 - (void) beginMetadataAnalysisSession;
