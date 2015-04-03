@@ -374,10 +374,10 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
                     // Write Metadata
                     
                     // Check that our metadata times are sensible. We need to ensure that each time range is:
-                    // a incremented from the last
-                    // b valid
-                    // c has no zero duration (should be the duration of a frame)
-                    // d - there are probably other issues too.
+                    // a: incremented from the last
+                    // b: valid
+                    // c: has no zero duration (should be the duration of a frame)
+                    // d: there are probably other issues too but this seems to work for now.
                     
                     if(CMTIMERANGE_IS_VALID(currentSampleTimeRange)
                        && CMTIME_COMPARE_INLINE(currentSampleTimeRange.start, >=, lastSampleTimeRange.start)
@@ -411,6 +411,7 @@ NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomethi
                         // Convert to JSON
                         if([NSJSONSerialization isValidJSONObject:aggregatedAndAnalyzedMetadata])
                         {
+                            // TODO: Probably want to mark to NO for shipping code:
                             NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:YES];
                             
                             // Annotation text item
