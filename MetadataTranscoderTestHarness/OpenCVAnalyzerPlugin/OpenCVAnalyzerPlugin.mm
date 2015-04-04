@@ -6,6 +6,9 @@
 //  Copyright (c) 2015 metavisual. All rights reserved.
 //
 
+// Include OpenCV before anything else because FUCK C++
+#import "opencv.hpp"
+
 #import <AVFoundation/AVFoundation.h>
 #import "OpenCVAnalyzerPlugin.h"
 
@@ -46,7 +49,6 @@
         self.pluginVersionMajor = 0;
         self.pluginVersionMinor = 1;
         self.pluginMediaType = AVMediaTypeVideo;
-        
     }
     
     return self;
@@ -60,6 +62,28 @@
 
 - (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer error:(NSError**) error
 {
+    // Step 1, grab a CVImageBuffer from our CMSampleBuffer
+    // This requires our sample buffer to be decoded, not passthrough.
+    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    
+    // Early Bail
+    if(pixelBuffer)
+    {
+        // All pixel buffers are BGRA 
+    }
+    
+    // No pixelbuffer in our sample buffer. Thats bad.
+    else
+    {
+        NSError* noPixelBufferError = [[NSError alloc] initWithDomain:@"Metavisual.noPixelBufferInSampleBuffer" code:-666 userInfo:nil];
+        
+        *error = noPixelBufferError;
+        
+        return nil;
+
+    }
+    
+    
     return nil;
 }
 
