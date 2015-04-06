@@ -37,13 +37,15 @@
 		1B61BD9D1ACF74AE0013418D /* libopencv_video.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD8A1ACF74AE0013418D /* libopencv_video.a */; };
 		1B61BD9E1ACF74AE0013418D /* libopencv_videoio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD8B1ACF74AE0013418D /* libopencv_videoio.a */; };
 		1B61BD9F1ACF74AE0013418D /* libopencv_videostab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD8C1ACF74AE0013418D /* libopencv_videostab.a */; };
+		1BA68C501AD02E97003B3CE9 /* BaseTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */; };
+		1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
 		1BEA4D271ACB2BCD00AB57C1 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
 		1BEA4D3D1ACB2BDD00AB57C1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
-		1BEA4D421ACB2F6F00AB57C1 /* TranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D411ACB2F6F00AB57C1 /* TranscodeOperation.m */; };
+		1BEA4D421ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -303,6 +305,10 @@
 		1B61BFC11AD0262E0013418D /* stabilizer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = stabilizer.hpp; sourceTree = "<group>"; };
 		1B61BFC21AD0262E0013418D /* wobble_suppression.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = wobble_suppression.hpp; sourceTree = "<group>"; };
 		1B61BFC31AD0262E0013418D /* videostab.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = videostab.hpp; sourceTree = "<group>"; };
+		1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseTranscodeOperation.h; sourceTree = "<group>"; };
+		1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseTranscodeOperation.m; sourceTree = "<group>"; };
+		1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetadataWriterTranscodeOperation.h; sourceTree = "<group>"; };
+		1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MetadataWriterTranscodeOperation.m; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetadataTranscoderTestHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -312,8 +318,8 @@
 		1BEA4D261ACB2BCD00AB57C1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
-		1BEA4D401ACB2F6F00AB57C1 /* TranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TranscodeOperation.h; sourceTree = "<group>"; };
-		1BEA4D411ACB2F6F00AB57C1 /* TranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TranscodeOperation.m; sourceTree = "<group>"; };
+		1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnalysisAndTranscodeOperation.h; sourceTree = "<group>"; };
+		1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnalysisAndTranscodeOperation.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -862,8 +868,12 @@
 			children = (
 				1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */,
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
-				1BEA4D401ACB2F6F00AB57C1 /* TranscodeOperation.h */,
-				1BEA4D411ACB2F6F00AB57C1 /* TranscodeOperation.m */,
+				1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */,
+				1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */,
+				1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */,
+				1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */,
+				1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */,
+				1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */,
 				1B61BCDC1ACEFEEE0013418D /* SampleBufferAnalyzerPluginProtocol.h */,
 				1B61BCEF1ACF181C0013418D /* NSDictionary+JSONString.h */,
 				1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */,
@@ -1027,10 +1037,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1BEA4D421ACB2F6F00AB57C1 /* TranscodeOperation.m in Sources */,
+				1BEA4D421ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m in Sources */,
+				1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */,
 				1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */,
 				1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */,
 				1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */,
+				1BA68C501AD02E97003B3CE9 /* BaseTranscodeOperation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

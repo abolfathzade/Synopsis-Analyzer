@@ -11,7 +11,7 @@
 
 #import "SampleBufferAnalyzerPluginProtocol.h"
 
-#import "TranscodeOperation.h"
+#import "AnalysisAndTranscodeOperation.h"
 
 @interface AppDelegate ()
 
@@ -78,8 +78,6 @@
             {
                 NSLog(@"Error Preflighting Plugin : %@ : %@", [pluginsPath lastPathComponent], loadError);
             }
-            
-            //id<SampleBufferAnalyzerPluginProtocol> = [NSBundle ]
         }
     }
     
@@ -99,7 +97,6 @@
             }
         }
     }];
-    
 }
 
 - (void) enqueueFileForTranscode:(NSURL*)fileURL
@@ -112,10 +109,45 @@
     destinationURL = [destinationURL URLByDeletingPathExtension];
     
     destinationURL = [[destinationURL URLByAppendingPathComponent:lastPath] URLByAppendingPathExtension:lastPathExtention];
-                             
-    TranscodeOperation* transcodeOp = [[TranscodeOperation alloc] initWithSourceURL:fileURL destinationURL:destinationURL transcodeOptions:nil availableAnalyzers:self.analyzerPlugins];
     
-    [self.transcodeQueue addOperation:transcodeOp];
+    // Pass 1 is our analysis pass, and our decode pass
+    NSDictionary* transcodeOptions = @{
+                                             // Passthrough Video for now
+                                             kMetavisualVideoTranscodeSettingsKey : [NSNull null],
+                                             // Passthrough Audio for now
+                                             kMetavisualAudioTranscodeSettingsKey : [NSNull null],
+                                             };
+    
+    AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL
+                                                               destinationURL:destinationURL
+                                                             transcodeOptions:transcodeOptions
+                                                           availableAnalyzers:self.analyzerPlugins];
+    
+    // pass2 is depended on pass one being complete, and on pass1's analyzed metadata
+    analysis.completionBlock = (^(void)
+    {
+        // Log our metadata
+        NSLog(@"Video Sample Buffer Metadata : %@", analysis.analyzedVideoSampleBufferMetadata);
+        
+//        NSDictionary* pass2TranscodeOptions = @{
+//                                                kMetavisualVideoTranscodeSettingsKey : [NSNull null],
+//                                                 // Passthrough Audio
+//                                                 kMetavisualAudioTranscodeSettingsKey : [NSNull null],
+//                                                 // Video Metadata
+//                                                 kMetavisualAnalyzedVideoSampleBufferMetadataKey : pass1.analyzedVideoSampleBufferMetadata,
+//                                                 // Audio Metadata
+//                                                 kMetavisualAnalyzedAudioSampleBufferMetadataKey : pass1.analyzedAudioSampleBufferMetadata,
+//                                                 // Global / Summary Metadata
+//                                                 kMetavisualAnalyzedGlobalMetadataKey : pass1.analyzedGlobalMetadata
+//                                                 };
+//
+//        AnalysisAndTranscodeOperation* pass2 = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL destinationURL:destinationURL transcodeOptions:nil availableAnalyzers:self.analyzerPlugins];
+//        
+//        [self.transcodeQueue addOperation:pass2];
+
+    });
+    
+    [self.transcodeQueue addOperation:analysis];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
