@@ -105,6 +105,10 @@
         self.transcodeOptions = transcodeOptions;
         self.availableAnalyzers = analyzers;
         
+        self.inFlightGlobalMetadata = [NSMutableArray new];
+        self.inFlightVideoSampleBufferMetadata = [NSMutableArray new];
+        self.inFlightAudioSampleBufferMetadata = [NSMutableArray new];
+        
         [self setupTranscodeShitSucessfullyOrDontWhatverMan];
     }
     return self;
@@ -292,25 +296,23 @@
             {
                 @autoreleasepool
                 {
+                    CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
+                    if(passthroughVideoSampleBuffer)
                     {
-                        CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
-                        if(passthroughVideoSampleBuffer)
+                        NSLog(@"Got Passthrough Sample Buffer and Enqued it");
+
+                        // Only add to our passthrough buffer queue if we are going to use those buffers on the encoder end.
+                        if(!self.transcoding)
                         {
-                            NSLog(@"Got Passthrough Sample Buffer and Enqued it");
- 
-                            // Only add to our passthrough buffer queue if we are going to use those buffers on the encoder end.
-                            if(!self.transcoding)
-                            {
-                                CMBufferQueueEnqueue(passthroughVideoBufferQueue, passthroughVideoSampleBuffer);
-                            }
-                            
-                            CFRelease(passthroughVideoSampleBuffer);
+                            CMBufferQueueEnqueue(passthroughVideoBufferQueue, passthroughVideoSampleBuffer);
                         }
-                        else
-                        {
-                            // Got NULL - were done
-                            break;
-                        }
+                        
+                        CFRelease(passthroughVideoSampleBuffer);
+                    }
+                    else
+                    {
+                        // Got NULL - were done
+                        break;
                     }
                 }
             }
@@ -362,10 +364,11 @@
                         // c: has no zero duration (should be the duration of a frame)
                         // d: there are probably other issues too but this seems to work for now.
                         
-                        if(CMTIMERANGE_IS_VALID(currentSampleTimeRange)
-                           && CMTIME_COMPARE_INLINE(currentSampleTimeRange.start, >=, lastSampleTimeRange.start)
-                           && CMTIME_COMPARE_INLINE(currentSampleTimeRange.duration, >, kCMTimeZero)
-                           )
+                        // Disable tests for now because why not.
+//                        if(CMTIMERANGE_IS_VALID(currentSampleTimeRange)
+//                           && CMTIME_COMPARE_INLINE(currentSampleTimeRange.start, >=, lastSampleTimeRange.start)
+//                           && CMTIME_COMPARE_INLINE(currentSampleTimeRange.duration, >, kCMTimeZero)
+//                           )
                         {
                             NSLog(@"Sample %i PASSED", sampleCount);
                             
@@ -413,10 +416,10 @@
                                 NSLog(@"Unable To Convert Metadata to JSON Format, invalid!");
                             }
                         }
-                        else
-                        {
-                            NSLog(@"Sample %i FAILED", sampleCount);
-                        }
+//                        else
+//                        {
+//                            NSLog(@"Sample %i FAILED", sampleCount);
+//                        }
                         
                         sampleCount++;
                         lastSampleTimeRange = currentSampleTimeRange;
@@ -518,7 +521,6 @@
         self.analyzedGlobalMetadata = self.inFlightGlobalMetadata;
         self.analyzedVideoSampleBufferMetadata = self.inFlightVideoSampleBufferMetadata;
         self.analyzedAudioSampleBufferMetadata = self.inFlightAudioSampleBufferMetadata;
-        
     }
 }
 
