@@ -309,7 +309,7 @@
                         else
                         {
                             // Got NULL - were done
-                            //break;
+                            break;
                         }
                     }
                 }
@@ -334,102 +334,101 @@
             {
                 @autoreleasepool
                 {
+                    CMSampleBufferRef uncompressedVideoSampleBuffer = [self.transcodeAssetReaderVideo copyNextSampleBuffer];
+                    if(uncompressedVideoSampleBuffer)
                     {
-                        CMSampleBufferRef uncompressedVideoSampleBuffer = [self.transcodeAssetReaderVideo copyNextSampleBuffer];
-                        if(uncompressedVideoSampleBuffer)
+                        NSLog(@"Got Uncompressed Sample Buffer and Enqued it");
+                        
+                        // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
+                        if(self.transcoding)
                         {
-                            NSLog(@"Got Uncompressed Sample Buffer and Enqued it");
-                            
-                            // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
-                            if(self.transcoding)
-                            {
-                                CMBufferQueueEnqueue(uncompressedVideoBufferQueue, uncompressedVideoSampleBuffer);
-                            }
-                            CFRelease(uncompressedVideoSampleBuffer);
+                            CMBufferQueueEnqueue(uncompressedVideoBufferQueue, uncompressedVideoSampleBuffer);
+                        }
 
-//                            CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(uncompressedVideoSampleBuffer);
-//                            CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(uncompressedVideoSampleBuffer);
-//                            CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
-//                            
-//                            NSLog(@"Sample Count %i", sampleCount);
-//                            
-//                            CFStringRef desc = CMTimeRangeCopyDescription(kCFAllocatorDefault, currentSampleTimeRange);
-//                            NSLog(@"Sample Timing Info: %@", desc);
-//                            
-//                            // Write Metadata
-//                            
-//                            // Check that our metadata times are sensible. We need to ensure that each time range is:
-//                            // a: incremented from the last
-//                            // b: valid
-//                            // c: has no zero duration (should be the duration of a frame)
-//                            // d: there are probably other issues too but this seems to work for now.
-//                            
-//                            if(CMTIMERANGE_IS_VALID(currentSampleTimeRange)
-//                               && CMTIME_COMPARE_INLINE(currentSampleTimeRange.start, >=, lastSampleTimeRange.start)
-//                               && CMTIME_COMPARE_INLINE(currentSampleTimeRange.duration, >, kCMTimeZero)
-//                               )
-//                            {
-//                                NSLog(@"Sample %i PASSED", sampleCount);
-//                                
-//                                // For every Analyzer we have:
-//                                // A: analyze
-//                                // B: aggregate the metadata dictionary into a global dictionary with our plugin identifier as the key for that entry
-//                                // C: Once done analysis, convert aggregate metadata to JSON and write out a metadata object and append it.
-//                                
-//                                NSError* analyzerError = nil;
-//                                NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
-//                                
-//                                for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
-//                                {
-//                                    NSString* newMetadataKey = [analyzer pluginIdentifier];
-//                                    NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedVideoSampleBuffer error:&analyzerError];
-//                                    
-//                                    if(analyzerError)
-//                                    {
-//                                        NSLog(@"Error Analyzing Sample buffer - bailing: %@", analyzerError);
-//                                        break;
-//                                    }
-//                                    
-//                                    [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
-//                                }
-//                                
-//                                // Convert to JSON
-//                                if([NSJSONSerialization isValidJSONObject:aggregatedAndAnalyzedMetadata])
-//                                {
-//                                    // TODO: Probably want to mark to NO for shipping code:
-//                                    NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:YES];
-//                                    
-//                                    // Annotation text item
-//                                    AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
-//                                    textItem.identifier = kMetavisualMetadataIdentifier;
-//                                    textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_UTF8;
-//                                    textItem.value = aggregateMetadataAsJSON;
-//                                    
-//                                    AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
-//                                    
-//                                    // Store out running metadata
-//                                    [self.inFlightVideoSampleBufferMetadata addObject:group];
-//                                }
-//                                else
-//                                {
-//                                    NSLog(@"Unable To Convert Metadata to JSON Format, invalid!");
-//                                }
-//                            }
-//                            else
-//                            {
-//                                NSLog(@"Sample %i FAILED", sampleCount);
-//                            }
-//                            
-//                            sampleCount++;
-//                            lastSampleTimeRange = currentSampleTimeRange;
-//
+                        CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(uncompressedVideoSampleBuffer);
+                        CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(uncompressedVideoSampleBuffer);
+                        CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
+                        
+                        NSLog(@"Sample Count %i", sampleCount);
+                        
+                        CFStringRef desc = CMTimeRangeCopyDescription(kCFAllocatorDefault, currentSampleTimeRange);
+                        NSLog(@"Sample Timing Info: %@", desc);
+                        
+                        // Write Metadata
+                        
+                        // Check that our metadata times are sensible. We need to ensure that each time range is:
+                        // a: incremented from the last
+                        // b: valid
+                        // c: has no zero duration (should be the duration of a frame)
+                        // d: there are probably other issues too but this seems to work for now.
+                        
+                        if(CMTIMERANGE_IS_VALID(currentSampleTimeRange)
+                           && CMTIME_COMPARE_INLINE(currentSampleTimeRange.start, >=, lastSampleTimeRange.start)
+                           && CMTIME_COMPARE_INLINE(currentSampleTimeRange.duration, >, kCMTimeZero)
+                           )
+                        {
+                            NSLog(@"Sample %i PASSED", sampleCount);
                             
+                            // For every Analyzer we have:
+                            // A: analyze
+                            // B: aggregate the metadata dictionary into a global dictionary with our plugin identifier as the key for that entry
+                            // C: Once done analysis, convert aggregate metadata to JSON and write out a metadata object and append it.
+                            
+                            NSError* analyzerError = nil;
+                            NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
+                            
+                            for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+                            {
+                                NSString* newMetadataKey = [analyzer pluginIdentifier];
+                                NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedVideoSampleBuffer error:&analyzerError];
+                                
+                                if(analyzerError)
+                                {
+                                    NSLog(@"Error Analyzing Sample buffer - bailing: %@", analyzerError);
+                                    break;
+                                }
+                                
+                                [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+                            }
+                            
+                            // Convert to JSON
+                            if([NSJSONSerialization isValidJSONObject:aggregatedAndAnalyzedMetadata])
+                            {
+                                // TODO: Probably want to mark to NO for shipping code:
+                                NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:YES];
+                                
+                                // Annotation text item
+                                AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
+                                textItem.identifier = kMetavisualMetadataIdentifier;
+                                textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_UTF8;
+                                textItem.value = aggregateMetadataAsJSON;
+                                
+                                AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
+                                
+                                // Store out running metadata
+                                [self.inFlightVideoSampleBufferMetadata addObject:group];
+                            }
+                            else
+                            {
+                                NSLog(@"Unable To Convert Metadata to JSON Format, invalid!");
+                            }
                         }
                         else
                         {
-                            // Got NULL - were done
-                            //break;
+                            NSLog(@"Sample %i FAILED", sampleCount);
                         }
+                        
+                        sampleCount++;
+                        lastSampleTimeRange = currentSampleTimeRange;
+
+                        CFRelease(uncompressedVideoSampleBuffer);
+
+                        
+                    }
+                    else
+                    {
+                        // Got NULL - were done
+                        break;
                     }
                 }
             }
