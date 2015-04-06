@@ -39,6 +39,7 @@
 		1B61BD9F1ACF74AE0013418D /* libopencv_videostab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD8C1ACF74AE0013418D /* libopencv_videostab.a */; };
 		1BA68C501AD02E97003B3CE9 /* BaseTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */; };
 		1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */; };
+		1BA68C571AD26696003B3CE9 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C561AD26696003B3CE9 /* CoreVideo.framework */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -309,6 +310,7 @@
 		1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseTranscodeOperation.m; sourceTree = "<group>"; };
 		1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetadataWriterTranscodeOperation.h; sourceTree = "<group>"; };
 		1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MetadataWriterTranscodeOperation.m; sourceTree = "<group>"; };
+		1BA68C561AD26696003B3CE9 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetadataTranscoderTestHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -337,6 +339,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BA68C571AD26696003B3CE9 /* CoreVideo.framework in Frameworks */,
 				1B61BD921ACF74AE0013418D /* libopencv_flann.a in Frameworks */,
 				1B61BD941ACF74AE0013418D /* libopencv_imgcodecs.a in Frameworks */,
 				1B61BD9A1ACF74AE0013418D /* libopencv_stitching.a in Frameworks */,
@@ -377,6 +380,7 @@
 		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1BA68C561AD26696003B3CE9 /* CoreVideo.framework */,
 				1B61BD071ACF371A0013418D /* CoreFoundation.framework */,
 				1B61BCD91ACB90850013418D /* VideoToolbox.framework */,
 				1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */,
