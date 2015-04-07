@@ -27,9 +27,15 @@
 }
 
 // Prerequisites
-@property (atomic, readwrite, strong) NSDictionary* transcodeOptions;
+@property (atomic, readwrite, strong) NSDictionary* metadataOptions;
 @property (atomic, readwrite, strong) NSURL* sourceURL;
 @property (atomic, readwrite, strong) NSURL* destinationURL;
+
+// Metadata to write
+@property (atomic, readwrite, strong) NSMutableArray* analyzedVideoSampleBufferMetadata;
+@property (atomic, readwrite, strong) NSMutableArray* analyzedAudioSampleBufferMetadata;
+@property (atomic, readwrite, strong) NSMutableArray* analyzedGlobalMetadata;
+
 
 // Reading the original sample Data
 @property (atomic, readwrite, strong) AVURLAsset* transcodeAsset;
@@ -48,18 +54,34 @@
 
 @implementation MetadataWriterTranscodeOperation
 
-- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions availableAnalyzers:(NSArray*)analyzers
+- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL metadataOptions:(NSDictionary*)metadataOptions 
 {
     self = [super init];
     if(self)
     {
+        if(metadataOptions == nil)
+        {
+            return nil;
+        }
+
         self.sourceURL = sourceURL;
         self.destinationURL = destinationURL;
-        self.transcodeOptions = transcodeOptions;
+        self.metadataOptions = metadataOptions;
         
-        // if we dont have transcode options, we use passthrough
-        // Note we still want to do analysis, so we still spool up our decompressors
-        // We just dont need to spool up our encoders
+        if(self.metadataOptions[kMetavisualAnalyzedVideoSampleBufferMetadataKey] != [NSNull null])
+        {
+            self.analyzedVideoSampleBufferMetadata = self.metadataOptions[kMetavisualVideoTranscodeSettingsKey];
+        }
+        
+        if(self.metadataOptions[kMetavisualAudioTranscodeSettingsKey] != [NSNull null])
+        {
+            self.analyzedAudioSampleBufferMetadata = self.metadataOptions[kMetavisualAudioTranscodeSettingsKey];
+        }
+        
+        if(self.metadataOptions[kMetavisualAnalyzedGlobalMetadataKey] != [NSNull null])
+        {
+            self.analyzedGlobalMetadata = self.metadataOptions[kMetavisualAnalyzedGlobalMetadataKey];
+        }
         
         [self setupTranscodeShitSucessfullyOrDontWhatverMan];
     }
@@ -68,7 +90,7 @@
 
 - (NSString*) description
 {
-    return [NSString stringWithFormat:@"Transcode Operation: %p, Source: %@, Destination: %@, options: %@", self, self.sourceURL, self.destinationURL, self.transcodeOptions];
+    return [NSString stringWithFormat:@"Transcode Operation: %p, Source: %@, Destination: %@, options: %@", self, self.sourceURL, self.destinationURL, self.metadataOptions];
 }
 
 - (void) main
@@ -221,29 +243,19 @@
             {
                 @autoreleasepool
                 {
-                    // Only enqueue if we have room
-                    //                    if( CMBufferQueueGetBufferCount(passthroughVideoBufferQueue) < numBuffers )
+                    CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
+                    if(passthroughVideoSampleBuffer)
                     {
-                        CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
-                        if(passthroughVideoSampleBuffer)
-                        {
-                            //                            NSLog(@"Got Sample Buffer and Enqued it");
-                            CMBufferQueueEnqueue(passthroughVideoBufferQueue, passthroughVideoSampleBuffer);
-                            
-                            CFRelease(passthroughVideoSampleBuffer);
-                        }
-                        else
-                        {
-                            // Got NULL - were done
-                            break;
-                        }
+                        //                            NSLog(@"Got Sample Buffer and Enqued it");
+                        CMBufferQueueEnqueue(passthroughVideoBufferQueue, passthroughVideoSampleBuffer);
+                        
+                        CFRelease(passthroughVideoSampleBuffer);
                     }
-                    //                    else
-                    //                    {
-                    //                        // Take a moment to let the reader queue read.
-                    //                        // Could use a semaphor but holy fuck this is getting insane
-                    //                        usleep(10);
-                    //                    }
+                    else
+                    {
+                        // Got NULL - were done
+                        break;
+                    }
                 }
             }
             
@@ -308,12 +320,7 @@
                      {
                          NSLog(@"Sample %i PASSED", sampleCount);
                          
-                         // For every Analyzer we have:
-                         // A: analyze
-                         // B: aggregate the metadata dictionary into a global dictionary with our plugin identifier as the key for that entry
-                         // C: Once done analysis, convert aggregate metadata to JSON and write out a metadata object and append it.
-                         
-                         NSError* analyzerError = nil;
+                        // Weve Analyzed our
                          NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
                          
 //                         for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)

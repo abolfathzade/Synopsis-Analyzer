@@ -10,6 +10,6 @@
 
 @interface MetadataWriterTranscodeOperation : BaseTranscodeOperation
 
-- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions availableAnalyzers:(NSArray*)analyzers NS_DESIGNATED_INITIALIZER;
+- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL metadataOptions:(NSDictionary*)metadataOptions NS_DESIGNATED_INITIALIZER;
 
 @end
