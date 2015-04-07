@@ -82,6 +82,8 @@
         
         // Nil settings provides raw undecoded samples, ie passthrough.
         // Note we still need to decode to send to our analyzers
+
+        self.transcodeOptions = transcodeOptions;
         self.videoTranscodeSettings = nil;
         self.audioTranscodeSettings = nil;
         
@@ -102,7 +104,6 @@
 
         self.sourceURL = sourceURL;
         self.destinationURL = destinationURL;
-        self.transcodeOptions = transcodeOptions;
         self.availableAnalyzers = analyzers;
         
         self.inFlightGlobalMetadata = [NSMutableArray new];
@@ -299,8 +300,6 @@
                     CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
                     if(passthroughVideoSampleBuffer)
                     {
-                        NSLog(@"Got Passthrough Sample Buffer and Enqued it");
-
                         // Only add to our passthrough buffer queue if we are going to use those buffers on the encoder end.
                         if(!self.transcoding)
                         {
@@ -318,7 +317,6 @@
             }
             
             finishedReadingAllPassthroughVideo = YES;
-            NSLog(@"Reading Passthrough Done");
 
             dispatch_group_leave(g);
         });
@@ -330,8 +328,6 @@
 
         dispatch_async(uncompressedVideoDecodeQueue, ^{
             
-            NSLog(@"ENTER UNCOMPRESSED VIDEO DECODE");
-            
             while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
             {
                 @autoreleasepool
@@ -339,8 +335,6 @@
                     CMSampleBufferRef uncompressedVideoSampleBuffer = [self.transcodeAssetReaderVideo copyNextSampleBuffer];
                     if(uncompressedVideoSampleBuffer)
                     {
-                        NSLog(@"Got Uncompressed Sample Buffer and Enqued it");
-                        
                         // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
                         if(self.transcoding)
                         {
@@ -351,10 +345,10 @@
                         CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(uncompressedVideoSampleBuffer);
                         CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
                         
-                        NSLog(@"Sample Count %i", sampleCount);
+//                        NSLog(@"Sample Count %i", sampleCount);
                         
-                        CFStringRef desc = CMTimeRangeCopyDescription(kCFAllocatorDefault, currentSampleTimeRange);
-                        NSLog(@"Sample Timing Info: %@", desc);
+//                        CFStringRef desc = CMTimeRangeCopyDescription(kCFAllocatorDefault, currentSampleTimeRange);
+//                        NSLog(@"Sample Timing Info: %@", desc);
                         
                         // Write Metadata
                         
@@ -370,7 +364,7 @@
 //                           && CMTIME_COMPARE_INLINE(currentSampleTimeRange.duration, >, kCMTimeZero)
 //                           )
                         {
-                            NSLog(@"Sample %i PASSED", sampleCount);
+//                            NSLog(@"Sample %i PASSED", sampleCount);
                             
                             // For every Analyzer we have:
                             // A: analyze
@@ -437,12 +431,9 @@
             }
 
             finishedReadingAllUncompressedVideo = YES;
-            NSLog(@"Reading Uncompressed Done");
+//            NSLog(@"Reading Uncompressed Done");
             
             dispatch_group_leave(g);
-
-            NSLog(@"LEAVE UNCOMPRESSED VIDEO DECODE");
-
         });
                        
 
@@ -492,14 +483,14 @@
                     
                     if(videoSampleBuffer)
                     {
-                        NSLog(@"Writer Appending Sample Buffer");
+//                        NSLog(@"Writer Appending Sample Buffer");
                         [self.transcodeAssetWriterVideo appendSampleBuffer:videoSampleBuffer];
                         
                         CFRelease(videoSampleBuffer);
                     }
                 }
                 
-                NSLog(@"Stopped Requesting Media");
+//                NSLog(@"Stopped Requesting Media");
                 
             }];
         }
