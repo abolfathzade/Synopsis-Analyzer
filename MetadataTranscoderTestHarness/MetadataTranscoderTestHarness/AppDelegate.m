@@ -12,11 +12,13 @@
 #import "SampleBufferAnalyzerPluginProtocol.h"
 
 #import "AnalysisAndTranscodeOperation.h"
+#import "MetadataWriterTranscodeOperation.h"
 
 @interface AppDelegate ()
 
 @property (weak) IBOutlet NSWindow *window;
 @property (atomic, readwrite, strong) NSOperationQueue* transcodeQueue;
+@property (atomic, readwrite, strong) NSOperationQueue* metadataQueue;
 
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPlugins;
 
@@ -32,6 +34,11 @@
         // Serial transcode queue
         self.transcodeQueue = [[NSOperationQueue alloc] init];
         self.transcodeQueue.maxConcurrentOperationCount = 1;
+
+        // Serial metadata / passthrough writing queue
+        self.metadataQueue = [[NSOperationQueue alloc] init];
+        self.metadataQueue.maxConcurrentOperationCount = 1;
+        
         self.analyzerPlugins = [NSMutableArray new];
     }
     return self;
@@ -104,19 +111,20 @@
     NSString* lastPath = [fileURL lastPathComponent];
     NSString* lastPathExtention = [fileURL pathExtension];
     lastPath = [lastPath stringByAppendingString:@"_transcoded"];
+    NSString* lastPath2 = [lastPath stringByAppendingString:@"_analyzed"];
     
     NSURL* destinationURL = [fileURL URLByDeletingLastPathComponent];
     destinationURL = [destinationURL URLByDeletingPathExtension];
-    
     destinationURL = [[destinationURL URLByAppendingPathComponent:lastPath] URLByAppendingPathExtension:lastPathExtention];
     
+    NSURL* destinationURL2 = [fileURL URLByDeletingLastPathComponent];
+    destinationURL2 = [destinationURL2 URLByDeletingPathExtension];
+    destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPath2] URLByAppendingPathExtension:lastPathExtention];
+    
     // Pass 1 is our analysis pass, and our decode pass
-    NSDictionary* transcodeOptions = @{
-                                             // Passthrough Video for now
-                                             kMetavisualVideoTranscodeSettingsKey : [NSNull null],
-                                             // Passthrough Audio for now
-                                             kMetavisualAudioTranscodeSettingsKey : [NSNull null],
-                                             };
+    NSDictionary* transcodeOptions = @{kMetavisualVideoTranscodeSettingsKey : [NSNull null],
+                                       kMetavisualAudioTranscodeSettingsKey : [NSNull null],
+                                       };
     
     AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL
                                                                destinationURL:destinationURL
@@ -126,24 +134,14 @@
     // pass2 is depended on pass one being complete, and on pass1's analyzed metadata
     analysis.completionBlock = (^(void)
     {
-        // Log our metadata
-        NSLog(@"Video Sample Buffer Metadata : %@", analysis.analyzedVideoSampleBufferMetadata);
+        NSDictionary* metadataOptions = @{kMetavisualAnalyzedVideoSampleBufferMetadataKey : analysis.analyzedVideoSampleBufferMetadata,
+                                          kMetavisualAnalyzedAudioSampleBufferMetadataKey : analysis.analyzedAudioSampleBufferMetadata,
+                                          kMetavisualAnalyzedGlobalMetadataKey : analysis.analyzedGlobalMetadata
+                                          };
+
+        MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];
         
-//        NSDictionary* pass2TranscodeOptions = @{
-//                                                kMetavisualVideoTranscodeSettingsKey : [NSNull null],
-//                                                 // Passthrough Audio
-//                                                 kMetavisualAudioTranscodeSettingsKey : [NSNull null],
-//                                                 // Video Metadata
-//                                                 kMetavisualAnalyzedVideoSampleBufferMetadataKey : pass1.analyzedVideoSampleBufferMetadata,
-//                                                 // Audio Metadata
-//                                                 kMetavisualAnalyzedAudioSampleBufferMetadataKey : pass1.analyzedAudioSampleBufferMetadata,
-//                                                 // Global / Summary Metadata
-//                                                 kMetavisualAnalyzedGlobalMetadataKey : pass1.analyzedGlobalMetadata
-//                                                 };
-//
-//        AnalysisAndTranscodeOperation* pass2 = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL destinationURL:destinationURL transcodeOptions:nil availableAnalyzers:self.analyzerPlugins];
-//        
-//        [self.transcodeQueue addOperation:pass2];
+        [self.metadataQueue addOperation:pass2];
 
     });
     
