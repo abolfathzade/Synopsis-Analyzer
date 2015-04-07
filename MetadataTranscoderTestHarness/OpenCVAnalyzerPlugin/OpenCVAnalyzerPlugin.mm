@@ -8,6 +8,8 @@
 
 // Include OpenCV before anything else because FUCK C++
 #import "opencv.hpp"
+#import "types_c.h"
+#import "features2d.hpp"
 
 #import <AVFoundation/AVFoundation.h>
 #import <CoreVideo/CoreVideo.h>
@@ -88,7 +90,8 @@
         // We only need to work on columms from [0, width - 1] regardless.
         
         cv::Mat bgraImage = cv::Mat( (int)height, (int)extendedWidth, CV_8UC4, base );
-        
+
+        // Populate BGRA image with data references from our pixel buffer
         for ( uint32_t y = 0; y < height; y++ )
         {
             for ( uint32_t x = 0; x < width; x++ )
@@ -97,9 +100,15 @@
             }
         }
         
-        cv::Scalar avgPixelIntensity = cv::mean( bgraImage );
+        // Convert to Greyscale
+        cv::Mat greyImage;
+        cv::cvtColor(bgraImage, greyImage, cv::COLOR_BGRA2GRAY);
 
-        NSDictionary* metadata = @{@"Intensity" : @[ @(avgPixelIntensity.val[0]), @(avgPixelIntensity.val[1]), @(avgPixelIntensity.val[2])]
+        cv::Scalar avgPixelIntensity = cv::mean( bgraImage );
+        
+        NSDictionary* metadata = @{@"Intensity" : @[@(avgPixelIntensity.val[0]),
+                                                     @(avgPixelIntensity.val[1]),
+                                                     @(avgPixelIntensity.val[2])]
                                    };
         
         CVPixelBufferUnlockBaseAddress( pixelBuffer, 0 );
