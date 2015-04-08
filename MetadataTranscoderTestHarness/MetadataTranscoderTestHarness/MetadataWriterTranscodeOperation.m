@@ -36,7 +36,6 @@
 @property (atomic, readwrite, strong) NSMutableArray* analyzedAudioSampleBufferMetadata;
 @property (atomic, readwrite, strong) NSMutableArray* analyzedGlobalMetadata;
 
-
 // Reading the original sample Data
 @property (atomic, readwrite, strong) AVURLAsset* transcodeAsset;
 @property (atomic, readwrite, strong) AVAssetReader* transcodeAssetReader;
@@ -68,19 +67,19 @@
         self.destinationURL = destinationURL;
         self.metadataOptions = metadataOptions;
         
-        if(self.metadataOptions[kMetavisualAnalyzedVideoSampleBufferMetadataKey] != [NSNull null])
+        if(self.metadataOptions[kMetavisualAnalyzedVideoSampleBufferMetadataKey])
         {
-            self.analyzedVideoSampleBufferMetadata = self.metadataOptions[kMetavisualVideoTranscodeSettingsKey];
+            self.analyzedVideoSampleBufferMetadata = [self.metadataOptions[kMetavisualAnalyzedVideoSampleBufferMetadataKey] mutableCopy];
         }
         
-        if(self.metadataOptions[kMetavisualAudioTranscodeSettingsKey] != [NSNull null])
+        if(self.metadataOptions[kMetavisualAnalyzedAudioSampleBufferMetadataKey])
         {
-            self.analyzedAudioSampleBufferMetadata = self.metadataOptions[kMetavisualAudioTranscodeSettingsKey];
+            self.analyzedAudioSampleBufferMetadata = [self.metadataOptions[kMetavisualAnalyzedAudioSampleBufferMetadataKey] mutableCopy];
         }
         
-        if(self.metadataOptions[kMetavisualAnalyzedGlobalMetadataKey] != [NSNull null])
+        if(self.metadataOptions[kMetavisualAnalyzedGlobalMetadataKey])
         {
-            self.analyzedGlobalMetadata = self.metadataOptions[kMetavisualAnalyzedGlobalMetadataKey];
+            self.analyzedGlobalMetadata = [self.metadataOptions[kMetavisualAnalyzedGlobalMetadataKey] mutableCopy];
         }
         
         [self setupTranscodeShitSucessfullyOrDontWhatverMan];
@@ -90,7 +89,7 @@
 
 - (NSString*) description
 {
-    return [NSString stringWithFormat:@"Transcode Operation: %p, Source: %@, Destination: %@, options: %@", self, self.sourceURL, self.destinationURL, self.metadataOptions];
+    return [NSString stringWithFormat:@"Transcode Operation: %p, Source: %@, Destination: %@", self, self.sourceURL, self.destinationURL];
 }
 
 - (void) main
@@ -171,6 +170,12 @@
     OSStatus err = CMMetadataFormatDescriptionCreateWithMetadataSpecifications(kCFAllocatorDefault, kCMMetadataFormatType_Boxed, (__bridge CFArrayRef)specs, &metadataFormatDescription);
     self.transcodeAssetWriterMetadata = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeMetadata outputSettings:nil sourceFormatHint:metadataFormatDescription];
     self.transcodeAssetWriterMetadataAdaptor = [AVAssetWriterInputMetadataAdaptor assetWriterInputMetadataAdaptorWithAssetWriterInput:self.transcodeAssetWriterMetadata];
+
+    // Associate metadata to video
+    [self.transcodeAssetWriterMetadata addTrackAssociationWithTrackOfInput:self.transcodeAssetWriterVideoPassthrough type:AVTrackAssociationTypeMetadataReferent];
+    
+    // Is this needed?
+    self.transcodeAssetWriterMetadata.expectsMediaDataInRealTime = YES;
     
     // Assign all our specific inputs to our Writer
     if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideoPassthrough]
@@ -280,7 +285,7 @@
                  if(finishedReadingAllPassthroughVideo )
                  {
 //                      NSLog(@"Finished Reading waiting to empty queue...");
-                     if(CMBufferQueueIsEmpty(passthroughVideoBufferQueue))
+                     if(CMBufferQueueIsEmpty(passthroughVideoBufferQueue) && !self.analyzedVideoSampleBufferMetadata.count)
                      {
                          [self.transcodeAssetWriterVideoPassthrough markAsFinished];
                          [self.transcodeAssetWriterMetadata markAsFinished];
@@ -296,85 +301,32 @@
                  {
                      [self.transcodeAssetWriterVideoPassthrough appendSampleBuffer:passthroughVideoSampleBuffer];
                      
-                     CMTime currentSamplePTS = CMSampleBufferGetPresentationTimeStamp(passthroughVideoSampleBuffer);
-                     CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(passthroughVideoSampleBuffer);
-                     CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
-                     
-                     NSLog(@"Sample Count %i", sampleCount);
-                     
-                     CFStringRef desc = CMTimeRangeCopyDescription(kCFAllocatorDefault, currentSampleTimeRange);
-                     NSLog(@"Sample Timing Info: %@", desc);
-                     
-                     // Write Metadata
-                     
-                     // Check that our metadata times are sensible. We need to ensure that each time range is:
-                     // a: incremented from the last
-                     // b: valid
-                     // c: has no zero duration (should be the duration of a frame)
-                     // d: there are probably other issues too but this seems to work for now.
-                     
-                     if(CMTIMERANGE_IS_VALID(currentSampleTimeRange)
-                        && CMTIME_COMPARE_INLINE(currentSampleTimeRange.start, >=, lastSampleTimeRange.start)
-                        && CMTIME_COMPARE_INLINE(currentSampleTimeRange.duration, >, kCMTimeZero)
-                        )
+                     if(self.analyzedVideoSampleBufferMetadata.count)
                      {
-                         NSLog(@"Sample %i PASSED", sampleCount);
-                         
-                        // Weve Analyzed our
-                         NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
-                         
-//                         for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
-//                         {
-//                             NSString* newMetadataKey = [analyzer pluginIdentifier];
-//                             NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:passthroughVideoSampleBuffer error:&analyzerError];
-//                             
-//                             if(analyzerError)
-//                             {
-//                                 NSLog(@"Error Analyzing Sample buffer - bailing: %@", analyzerError);
-//                                 break;
-//                             }
-//                             
-//                             [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
-//                         }
-                         
-                         // Convert to JSON
-                         if([NSJSONSerialization isValidJSONObject:aggregatedAndAnalyzedMetadata])
+                         AVTimedMetadataGroup *group = self.analyzedVideoSampleBufferMetadata[0];
+                         if([self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group])
                          {
-                             // TODO: Probably want to mark to NO for shipping code:
-                             NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:YES];
-                             
-                             // Annotation text item
-                             AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
-                             textItem.identifier = kMetavisualMetadataIdentifier;
-                             textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_UTF8;
-                             textItem.value = aggregateMetadataAsJSON;
-                             
-                             AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
-                             
-                             [self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group];
+                             // Pop our metadata off...
+                             [self.analyzedVideoSampleBufferMetadata removeObject:group];
                          }
                          else
                          {
-                             NSLog(@"Unable To Convert Metadata to JSON Format, invalid!");
+                             NSLog(@"Unable to append metadata timed group to asset: %@, %@", self.transcodeAssetWriter.error, group);
                          }
-                     }
-                     else
-                     {
-                         NSLog(@"Sample %i FAILED", sampleCount);
-                     }
                      
-                     sampleCount++;
-                     lastSampleTimeRange = currentSampleTimeRange;
                      CFRelease(passthroughVideoSampleBuffer);
+                     }
                  }
              }
              
-             //            NSLog(@"Stopped Requesting Media");
              
          }];
         
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);
+        
+        // Reset our queue to free anything we didnt already use.
+        CMBufferQueueReset(passthroughVideoBufferQueue);
         
         [self.transcodeAssetWriter finishWritingWithCompletionHandler:^{
             //            NSLog(@"DONE WITH SHIT MAYBE");
