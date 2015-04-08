@@ -151,8 +151,6 @@
         AVAssetTrack* firstVideoTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual][0];
         self.transcodeAssetReaderVideo = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
                                                                                     outputSettings:@{ (NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
-//                                                                                                      (NSString*)kCVPixelBufferCGBitmapContextCompatibilityKey : @YES,
-//                                                                                                      (NSString*)kCVPixelBufferCGImageCompatibilityKey: @(YES)
                                                                                                       }];
         self.transcodeAssetReaderVideo.alwaysCopiesSampleData = YES;
 
@@ -392,7 +390,7 @@
                             if([NSJSONSerialization isValidJSONObject:aggregatedAndAnalyzedMetadata])
                             {
                                 // TODO: Probably want to mark to NO for shipping code:
-                                NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:YES];
+                                NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:NO];
                                 
                                 // Annotation text item
                                 AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
@@ -512,6 +510,10 @@
         self.analyzedGlobalMetadata = self.inFlightGlobalMetadata;
         self.analyzedVideoSampleBufferMetadata = self.inFlightVideoSampleBufferMetadata;
         self.analyzedAudioSampleBufferMetadata = self.inFlightAudioSampleBufferMetadata;
+        
+        // reset / empty our buffer queues
+        CMBufferQueueReset(passthroughVideoBufferQueue);
+        CMBufferQueueReset(uncompressedVideoBufferQueue);
     }
 }
 
