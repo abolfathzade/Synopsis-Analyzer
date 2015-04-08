@@ -11,7 +11,10 @@
 #import <CoreMedia/CoreMedia.h>
 
 #import "SampleBufferAnalyzerPluginProtocol.h"
+
 #import "NSDictionary+JSONString.h"
+#import "BSON/BSONSerialization.h"
+#import "GZIP/GZIP.h"
 
 @interface AnalysisAndTranscodeOperation ()
 {
@@ -386,17 +389,23 @@
                                 [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
                             }
                             
-                            // Convert to JSON
+                            // Convert to BSON // JSON
                             if([NSJSONSerialization isValidJSONObject:aggregatedAndAnalyzedMetadata])
+//                            NSData* BSONData = [aggregatedAndAnalyzedMetadata BSONRepresentation];
+//                            NSData* gzipData = [BSONData gzippedData];
+//                            if(gzipData)
                             {
                                 // TODO: Probably want to mark to NO for shipping code:
                                 NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:NO];
+                                NSData* jsonData = [aggregateMetadataAsJSON dataUsingEncoding:NSUTF8StringEncoding];
+                                
+                                NSData* gzipData = [jsonData gzippedData];
                                 
                                 // Annotation text item
                                 AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
                                 textItem.identifier = kMetavisualMetadataIdentifier;
-                                textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_UTF8;
-                                textItem.value = aggregateMetadataAsJSON;
+                                textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_RawData;
+                                textItem.value = gzipData;
                                 
                                 AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
                                 
