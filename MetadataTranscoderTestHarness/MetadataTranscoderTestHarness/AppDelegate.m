@@ -132,11 +132,16 @@
                                                            availableAnalyzers:self.analyzerPlugins];
     
     // pass2 is depended on pass one being complete, and on pass1's analyzed metadata
+    __weak AnalysisAndTranscodeOperation* weakAnalysis = analysis;
+    
     analysis.completionBlock = (^(void)
     {
-        NSDictionary* metadataOptions = @{kMetavisualAnalyzedVideoSampleBufferMetadataKey : analysis.analyzedVideoSampleBufferMetadata,
-                                          kMetavisualAnalyzedAudioSampleBufferMetadataKey : analysis.analyzedAudioSampleBufferMetadata,
-                                          kMetavisualAnalyzedGlobalMetadataKey : analysis.analyzedGlobalMetadata
+        // Retarded weak/strong pattern so we avoid retain loopl
+        __strong AnalysisAndTranscodeOperation* strongAnalysis = weakAnalysis;
+        
+        NSDictionary* metadataOptions = @{kMetavisualAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
+                                          kMetavisualAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
+                                          kMetavisualAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
                                           };
 
         MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];
