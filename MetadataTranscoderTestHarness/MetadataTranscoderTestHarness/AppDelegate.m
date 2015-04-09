@@ -146,10 +146,18 @@
 
         MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];
         
+        pass2.completionBlock = (^(void)
+        {
+            NSLog(@"Finished Transcode and Analysis");
+        });
+        
         [self.metadataQueue addOperation:pass2];
 
     });
     
+    NSLog(@"Begin Transcode and Analysis");
+          
+          
     [self.transcodeQueue addOperation:analysis];
 }
 
