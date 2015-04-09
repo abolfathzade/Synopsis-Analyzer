@@ -30,9 +30,9 @@ const NSString* kMetavisualAnalyzedGlobalMetadataKey = @"kMetavisualAnalyzedGlob
         VTRegisterProfessionalVideoWorkflowVideoDecoders();
         VTRegisterProfessionalVideoWorkflowVideoEncoders();
         
-        CFArrayRef videoEncoders;
-        VTCopyVideoEncoderList(NULL, &videoEncoders);
-        NSLog(@"Available Video Encoders: %@", videoEncoders);
+//        CFArrayRef videoEncoders;
+//        VTCopyVideoEncoderList(NULL, &videoEncoders);
+//        NSLog(@"Available Video Encoders: %@", videoEncoders);
     }
     
     return self;
