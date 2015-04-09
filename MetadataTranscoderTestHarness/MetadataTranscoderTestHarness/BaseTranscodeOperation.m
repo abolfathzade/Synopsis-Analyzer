@@ -14,8 +14,8 @@
 const NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomething";
 
 
-const NSString* kMetavisualVideoTranscodeSettingsKey = @"kMetavisualVideoTranscodeSettings";
-const NSString* kMetavisualAudioTranscodeSettingsKey = @"kMetavisualAudioTranscodeSettings";
+const NSString* kMetavisualTranscodeVideoSettingsKey = @"kMetavisualVideoTranscodeSettings";
+const NSString* kMetavisualTranscodeAudioSettingsKey = @"kMetavisualAudioTranscodeSettings";
 const NSString* kMetavisualAnalyzedVideoSampleBufferMetadataKey = @"kMetavisualAnalyzedVideoSampleBufferMetadata";
 const NSString* kMetavisualAnalyzedAudioSampleBufferMetadataKey = @"kMetavisualAnalyzedAudioSampleBufferMetadata";
 const NSString* kMetavisualAnalyzedGlobalMetadataKey = @"kMetavisualAnalyzedGlobalMetadata";

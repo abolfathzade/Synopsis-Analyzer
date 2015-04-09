@@ -90,14 +90,14 @@
         self.videoTranscodeSettings = nil;
         self.audioTranscodeSettings = nil;
         
-        if(self.transcodeOptions[kMetavisualVideoTranscodeSettingsKey] != [NSNull null])
+        if(self.transcodeOptions[kMetavisualTranscodeVideoSettingsKey] != [NSNull null])
         {
-            self.videoTranscodeSettings = self.transcodeOptions[kMetavisualVideoTranscodeSettingsKey];
+            self.videoTranscodeSettings = self.transcodeOptions[kMetavisualTranscodeVideoSettingsKey];
         }
         
-        if(self.transcodeOptions[kMetavisualAudioTranscodeSettingsKey] != [NSNull null])
+        if(self.transcodeOptions[kMetavisualTranscodeAudioSettingsKey] != [NSNull null])
         {
-            self.audioTranscodeSettings = self.transcodeOptions[kMetavisualAudioTranscodeSettingsKey];
+            self.audioTranscodeSettings = self.transcodeOptions[kMetavisualTranscodeAudioSettingsKey];
         }
         
         if(self.audioTranscodeSettings && self.videoTranscodeSettings)
@@ -426,8 +426,6 @@
                         lastSampleTimeRange = currentSampleTimeRange;
 
                         CFRelease(uncompressedVideoSampleBuffer);
-
-                        
                     }
                     else
                     {

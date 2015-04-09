@@ -122,8 +122,8 @@
     destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPath2] URLByAppendingPathExtension:lastPathExtention];
     
     // Pass 1 is our analysis pass, and our decode pass
-    NSDictionary* transcodeOptions = @{kMetavisualVideoTranscodeSettingsKey : [NSNull null],
-                                       kMetavisualAudioTranscodeSettingsKey : [NSNull null],
+    NSDictionary* transcodeOptions = @{kMetavisualTranscodeVideoSettingsKey : [NSNull null],
+                                       kMetavisualTranscodeAudioSettingsKey : [NSNull null],
                                        };
     
     AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL
