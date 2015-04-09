@@ -125,11 +125,7 @@
 
 - (void) main
 {
-    NSLog(@"%@", self);
-    
     [self transcodeAndAnalyzeAsset];
-
-    NSLog(@"FINISHED");
 
     [super main];
 }
