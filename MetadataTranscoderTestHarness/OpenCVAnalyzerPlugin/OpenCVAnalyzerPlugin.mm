@@ -105,8 +105,10 @@
 {
     if(sampleBuffer == NULL)
     {
-        NSError* noSampleBufferError = [[NSError alloc] initWithDomain:@"Metavisual.noSampleBuffer" code:-6666 userInfo:nil];
-        *error = noSampleBufferError;
+        if (error != NULL)
+        {
+            *error = [[NSError alloc] initWithDomain:@"Metavisual.noSampleBuffer" code:-6666 userInfo:nil];
+        }
         return nil;
     }
     else
@@ -120,9 +122,11 @@
         
         if(currentPixelBuffer == NULL)
         {
-                NSError* noPixelBufferError = [[NSError alloc] initWithDomain:@"Metavisual.noPixelBufferInSampleBuffer" code:-666 userInfo:nil];
-                *error = noPixelBufferError;
-                return nil;
+            if (error != NULL)
+            {
+                *error = [[NSError alloc] initWithDomain:@"Metavisual.noPixelBufferInSampleBuffer" code:-666 userInfo:nil];
+            }
+            return nil;
         }
         else
         {
