@@ -88,16 +88,6 @@
     
     cv::Mat bgraImage = cv::Mat( (int)height, (int)extendedWidth, CV_8UC4, base );
     
-    // Populate BGRA image with data references from our pixel buffer
-    for ( uint32_t y = 0; y < height; y++ )
-    {
-        for ( uint32_t x = 0; x < width; x++ )
-        {
-            // Todo: This is forcing alpha to 0. Do we give a shit about that?
-            bgraImage.at<cv::Vec<uint8_t,4> >(y,x);//[3] = 0;
-        }
-    }
-
     return bgraImage;
 }
 
