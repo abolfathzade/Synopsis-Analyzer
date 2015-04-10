@@ -75,7 +75,7 @@
 - (cv::Mat) cvPixelBufferToCVMat:(CVPixelBufferRef)pixelBuffer
 {
     unsigned char *base = (unsigned char *)CVPixelBufferGetBaseAddress( pixelBuffer );
-    size_t width = CVPixelBufferGetWidth( pixelBuffer );
+//    size_t width = CVPixelBufferGetWidth( pixelBuffer );
     size_t height = CVPixelBufferGetHeight( pixelBuffer );
     size_t stride = CVPixelBufferGetBytesPerRow( pixelBuffer );
     size_t extendedWidth = stride / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits
@@ -122,11 +122,16 @@
         {
             CVPixelBufferLockBaseAddress( currentPixelBuffer, 0 );
             cv::Mat currentBGRAImage = [self cvPixelBufferToCVMat:currentPixelBuffer];
-
-            // Get our average Color
-            cv::Scalar avgPixelIntensity = cv::mean(currentBGRAImage);
             
 #pragma mark - Average Color
+
+            // Half width/height image -
+            // Maybe this becomes part of a quality preference?
+            cv::Mat quarterResBGRA;
+            cv::resize(currentBGRAImage, quarterResBGRA, cv::Size(currentBGRAImage.size().width * 0.5,
+                                                                  currentBGRAImage.size().height * 0.5));
+            
+            cv::Scalar avgPixelIntensity = cv::mean(quarterResBGRA);
 
             // Add to metadata - normalize to float
             metadata[@"AverageColor"] = @[@(avgPixelIntensity.val[2] / 255.0), // R
@@ -134,6 +139,87 @@
                                           @(avgPixelIntensity.val[0] / 255.0), // B
                                           ];
             
+#pragma mark - Dominant Colors / kMeans
+            
+            // We choose k = 5 to match Adobe Kuler because whatever.
+            int k=5;
+            int n = quarterResBGRA.rows * quarterResBGRA.cols;
+
+            std::vector<cv::Mat> imgRGB;
+            cv::split(quarterResBGRA,imgRGB);
+            
+            cv::Mat img3xN(n,3,CV_8U);
+            
+            for(int i = 0; i != 3; ++i)
+            {
+                imgRGB[i].reshape(1,n).copyTo(img3xN.col(i));
+            }
+            
+            img3xN.convertTo(img3xN,CV_32F);
+            
+            cv::Mat bestLables;
+            cv::Mat centers;
+            
+            cv::kmeans(img3xN,
+                       k,
+                       bestLables,
+                       cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 5.0, 1.0),
+                       1,
+                       cv::KMEANS_PP_CENTERS,
+                       centers);
+
+//            bestLables = bestLables.reshape(0, currentBGRAImage.rows);
+//            cv::convertScaleAbs(bestLables, bestLables, int(255/k));
+            
+            NSMutableArray* dominantColors = [NSMutableArray new];
+            
+            for(int i = 0; i < centers.rows; i++)
+            {
+                // 0 1 or 0 - 255 .0 ?
+                cv::Vec3f color = centers.at<cv::Vec3f>(i, 0);
+
+                [dominantColors addObject: @[@(color.val[2] / 255.0), // R
+                                            @(color.val[1] / 255.0), // G
+                                            @(color.val[0] / 255.0), // B
+                                            ]];
+            }
+            
+            metadata[@"DominantColors"] = dominantColors;
+            
+#pragma mark - Feature Detection
+            
+            std::vector<cv::KeyPoint> keypoints;// = new std::vector<cv::KeyPoint>;
+            detector->detect(currentBGRAImage, keypoints, cv::noArray());
+            
+            NSMutableArray* keyPointsArray = [NSMutableArray new];
+            
+            for(std::vector<cv::KeyPoint>::iterator keyPoint = keypoints.begin(); keyPoint != keypoints.end(); ++keyPoint)
+            {
+                NSArray* point = nil;
+                // Ensure our coordinate system is correct
+                if(CVImageBufferIsFlipped(currentPixelBuffer))
+                {
+                    point = @[@(keyPoint->pt.x / currentBGRAImage.size().width),
+                              @(1.0 - (keyPoint->pt.y / currentBGRAImage.size().height))
+                              ];
+                    
+                }
+                else
+                {
+                    point = @[@(keyPoint->pt.x / currentBGRAImage.size().width),
+                              @(keyPoint->pt.y / currentBGRAImage.size().height)
+                              ];
+                }
+                
+                [keyPointsArray addObject:point];
+            }
+            
+            // Add Features to metadata
+            metadata[@"Features"] = keyPointsArray;
+
+            
+#pragma mark - Frame Difference Motion
+
             // Can we do frame differencing - note all these tests should pass because we got it last time when the sample was current
             // otherwise it wouldnt be set as last.
             if(lastSampleBuffer != NULL)
@@ -145,8 +231,6 @@
 
                     CVPixelBufferLockBaseAddress( lastPixelBuffer, 0 );
                     cv::Mat lastBGRAImage = [self cvPixelBufferToCVMat:lastPixelBuffer];
-                    
-#pragma mark - Frame Difference Motion
                     
                     // Convert to greyscale
                     cv::Mat currentGreyImage;
@@ -163,57 +247,8 @@
                     // Normalize to float
                     metadata[@"Motion"] = @(avgMotion.val[0] / 255.0);
                     
-#pragma mark - Feature Detection
-                    
-//                    if(detector == NULL)
-//                    {
-//                    }
-                    
-                    std::vector<cv::KeyPoint> keypoints;// = new std::vector<cv::KeyPoint>;
-                    detector->empty();
-//
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    detector->detect(currentBGRAImage, keypoints, cv::noArray());
-
-//                    std::cout << "Found " << keypoints.size() << " Keypoints " << std::endl;
-                    
-                    NSMutableArray* keyPointsArray = [NSMutableArray new];
-
-                    for(std::vector<cv::KeyPoint>::iterator keyPoint = keypoints.begin(); keyPoint != keypoints.end(); ++keyPoint)
-                    {
-                        // Ensure our coordinate system is correct
-                        if(CVImageBufferIsFlipped(currentPixelBuffer))
-                        {
-                            NSArray* point = @[@(keyPoint->pt.x / currentBGRAImage.size().width),
-                                               @(1.0 - (keyPoint->pt.y / currentBGRAImage.size().height))
-                                               ];
-                            
-                            [keyPointsArray addObject:point];
-                        }
-                        else
-                        {
-                            NSArray* point = @[@(keyPoint->pt.x / currentBGRAImage.size().width),
-                                               @(keyPoint->pt.y / currentBGRAImage.size().height)
-                                               ];
-                            
-                            [keyPointsArray addObject:point];
-                        }
-                    }
-                    
-                    // Add Features to metadata
-                    metadata[@"Features"] = keyPointsArray;
-                    
                     CVPixelBufferUnlockBaseAddress(lastPixelBuffer, 0);
                     CVPixelBufferRelease(lastPixelBuffer);
-
                 }
             }
             
