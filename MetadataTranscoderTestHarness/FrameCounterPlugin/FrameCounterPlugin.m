@@ -62,6 +62,8 @@
     
     self.sampleCount++;
     
+    NSLog(@"Sample Count: %i", self.sampleCount);
+    
     return metadata;
 }
 
