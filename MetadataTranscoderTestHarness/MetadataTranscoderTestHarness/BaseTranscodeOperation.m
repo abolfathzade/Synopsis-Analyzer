@@ -7,9 +7,6 @@
 //
 
 #import "BaseTranscodeOperation.h"
-#import <VideoToolbox/VideoToolbox.h>
-#import <VideoToolbox/VTVideoEncoderList.h>
-#import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 
 const NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomething";
 
@@ -27,12 +24,8 @@ const NSString* kMetavisualAnalyzedGlobalMetadataKey = @"kMetavisualAnalyzedGlob
     self = [super init];
     if(self)
     {
-        VTRegisterProfessionalVideoWorkflowVideoDecoders();
-        VTRegisterProfessionalVideoWorkflowVideoEncoders();
         
-//        CFArrayRef videoEncoders;
-//        VTCopyVideoEncoderList(NULL, &videoEncoders);
-//        NSLog(@"Available Video Encoders: %@", videoEncoders);
+        self.progress = (CGFloat)0.0;
     }
     
     return self;
