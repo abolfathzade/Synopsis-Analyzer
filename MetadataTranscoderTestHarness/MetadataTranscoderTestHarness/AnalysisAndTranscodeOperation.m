@@ -241,6 +241,8 @@
 
 - (void) transcodeAndAnalyzeAsset
 {
+    CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
+    
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading])
     {
         [self.transcodeAssetWriter startSessionAtSourceTime:kCMTimeZero];
@@ -297,6 +299,7 @@
                     CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
                     if(passthroughVideoSampleBuffer)
                     {
+                        
                         // Only add to our passthrough buffer queue if we are going to use those buffers on the encoder end.
                         if(!self.transcoding)
                         {
@@ -341,6 +344,10 @@
                         CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(uncompressedVideoSampleBuffer);
                         CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(uncompressedVideoSampleBuffer);
                         CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
+                        
+                        CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
+                        
+                        self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
                         
 //                        NSLog(@"Sample Count %i", sampleCount);
                         

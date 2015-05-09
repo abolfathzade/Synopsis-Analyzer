@@ -126,7 +126,7 @@
 #pragma mark - Average Color
 
             // Half width/height image -
-            // Maybe this becomes part of a quality preference?
+            // TODO: Maybe this becomes part of a quality preference?
             cv::Mat quarterResBGRA;
             cv::resize(currentBGRAImage, quarterResBGRA, cv::Size(currentBGRAImage.size().width * 0.5,
                                                                   currentBGRAImage.size().height * 0.5));
@@ -142,17 +142,24 @@
 #pragma mark - Dominant Colors / kMeans
             
             // We choose k = 5 to match Adobe Kuler because whatever.
-            int k=5;
+            int k = 5;
             int n = quarterResBGRA.rows * quarterResBGRA.cols;
 
-            std::vector<cv::Mat> imgRGB;
-            cv::split(quarterResBGRA,imgRGB);
+            // Convert img BGRA to CIE_LAB or LCh
+//            cv::Mat quarterResBGR;
+//            cv::Mat quarterResLAB;
+//            
+//            cv::cvtColor(quarterResBGRA, quarterResBGR, cv::COLOR_BGRA2BGR);
+//            cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
+            
+            std::vector<cv::Mat> imgSplit;
+            cv::split(quarterResBGRA,imgSplit);
             
             cv::Mat img3xN(n,3,CV_8U);
             
             for(int i = 0; i != 3; ++i)
             {
-                imgRGB[i].reshape(1,n).copyTo(img3xN.col(i));
+                imgSplit[i].reshape(1,n).copyTo(img3xN.col(i));
             }
             
             img3xN.convertTo(img3xN,CV_32F);
@@ -160,27 +167,30 @@
             cv::Mat bestLables;
             cv::Mat centers;
             
+            // TODO: figure out what the fuck makes sense here.
             cv::kmeans(img3xN,
                        k,
                        bestLables,
+//                       cv::TermCriteria(),
                        cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 5.0, 1.0),
                        1,
                        cv::KMEANS_PP_CENTERS,
                        centers);
-
-//            bestLables = bestLables.reshape(0, currentBGRAImage.rows);
-//            cv::convertScaleAbs(bestLables, bestLables, int(255/k));
             
             NSMutableArray* dominantColors = [NSMutableArray new];
             
+            // LAB to BGR
+//            cv::Mat centersBGR;
+//            cv::cvtColor(centersLAB.reshape(3,1), centersBGR, cv::COLOR_Lab2BGR);
+
             for(int i = 0; i < centers.rows; i++)
             {
                 // 0 1 or 0 - 255 .0 ?
-                cv::Vec3f color = centers.at<cv::Vec3f>(i, 0);
-
-                [dominantColors addObject: @[@(color.val[2] / 255.0), // R
-                                            @(color.val[1] / 255.0), // G
-                                            @(color.val[0] / 255.0), // B
+                cv::Vec3f colorBGR = centers.at<cv::Vec3f>(i, 0);
+                
+                [dominantColors addObject: @[@(colorBGR.val[2] / 255.0), // R
+                                             @(colorBGR.val[1] / 255.0), // G
+                                             @(colorBGR.val[0] / 255.0), // B
                                             ]];
             }
             

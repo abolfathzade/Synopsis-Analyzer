@@ -56,6 +56,8 @@ extern const NSString* kMetavisualAnalyzedGlobalMetadataKey;
 
 @interface BaseTranscodeOperation : NSOperation
 
+@property (atomic, readwrite) CGFloat progress;
+
 - (void) main __attribute__((objc_requires_super));
 
 @end
