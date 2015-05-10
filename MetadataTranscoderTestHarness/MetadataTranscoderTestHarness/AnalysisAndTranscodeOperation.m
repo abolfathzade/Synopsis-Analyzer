@@ -100,7 +100,7 @@
             self.audioTranscodeSettings = self.transcodeOptions[kMetavisualTranscodeAudioSettingsKey];
         }
         
-        if(self.audioTranscodeSettings && self.videoTranscodeSettings)
+        if(self.audioTranscodeSettings || self.videoTranscodeSettings)
         {
             self.transcoding = YES;
         }
@@ -215,7 +215,7 @@
     // Writers
     self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:&error];
     self.transcodeAssetWriterVideo = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:self.videoTranscodeSettings];
-    self.transcodeAssetWriterAudio = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:self.videoTranscodeSettings];
+    self.transcodeAssetWriterAudio = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:self.audioTranscodeSettings];
     
     // Assign all our specific inputs to our Writer
     if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideo]
@@ -284,7 +284,7 @@
 //        dispatch_group_enter(g);
         
 
-        __block BOOL finishedReadingAllPassthroughVideo;
+        __block BOOL finishedReadingAllPassthroughVideo = NO;
         
         // Passthrough Video Read into our Buffer Queue
         dispatch_async(passthroughVideoDecodeQueue, ^{
@@ -324,7 +324,7 @@
         // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
         __block NSUInteger sampleCount = 0;
         __block CMTimeRange lastSampleTimeRange = kCMTimeRangeZero;
-        __block BOOL finishedReadingAllUncompressedVideo;
+        __block BOOL finishedReadingAllUncompressedVideo = NO;
 
         dispatch_async(uncompressedVideoDecodeQueue, ^{
             
@@ -338,6 +338,7 @@
                         // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
                         if(self.transcoding)
                         {
+                            NSLog(@"Enqueue Uncompressed Sample Buffer");
                             CMBufferQueueEnqueue(uncompressedVideoBufferQueue, uncompressedVideoSampleBuffer);
                         }
 
@@ -388,8 +389,9 @@
                                     NSLog(@"Error Analyzing Sample buffer - bailing: %@", analyzerError);
                                     break;
                                 }
-                                
-                                [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+
+                                if(newMetadataValue)
+                                    [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
                             }
                             
                             // Convert to BSON // JSON
@@ -439,7 +441,7 @@
             }
 
             finishedReadingAllUncompressedVideo = YES;
-//            NSLog(@"Reading Uncompressed Done");
+            NSLog(@"Reading Uncompressed Done");
             
             dispatch_group_leave(g);
         });
@@ -448,7 +450,7 @@
         {
             [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:passthroughVideoEncodeQueue usingBlock:^
             {
-    //            NSLog(@"Started Requesting Media");
+                NSLog(@"Started Requesting Media");
                 while([self.transcodeAssetWriterVideo isReadyForMoreMediaData])
                 {
                     // Are we done reading,
@@ -470,7 +472,7 @@
                             }
                         
                             [self.transcodeAssetWriterVideo markAsFinished];
-    //                        NSLog(@"Writing Done");
+                            NSLog(@"Writing Done");
                             
                             dispatch_group_leave(g);
                             break;
@@ -491,9 +493,12 @@
                     
                     if(videoSampleBuffer)
                     {
-//                        NSLog(@"Writer Appending Sample Buffer");
-                        [self.transcodeAssetWriterVideo appendSampleBuffer:videoSampleBuffer];
-                        
+                        NSLog(@"Writer Appending Sample Buffer");
+                        if(![self.transcodeAssetWriterVideo appendSampleBuffer:videoSampleBuffer])
+                        {
+                            NSLog(@"Error appending sampleBuffer: %@", self.transcodeAssetWriter.error);
+                            
+                        }
                         CFRelease(videoSampleBuffer);
                     }
                 }
@@ -524,6 +529,8 @@
         // reset / empty our buffer queues
         CMBufferQueueReset(passthroughVideoBufferQueue);
         CMBufferQueueReset(uncompressedVideoBufferQueue);
+        
+        NSLog(@"Finished Writing Analysis");
     }
 }
 

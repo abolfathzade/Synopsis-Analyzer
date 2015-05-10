@@ -158,16 +158,22 @@ const NSString* value = @"Value";
     
     for(NSDictionary* encoder in videoEncodersArray)
     {
-        [encoderArrayWithTitles addObject:@{title: encoder[@"DisplayName"], value:encoder}];
+        [encoderArrayWithTitles addObject:@{title:encoder[@"DisplayName"], value:encoder}];
     }
+    
+    NSDictionary* animationDictionary = @{ title : @"MPEG4 Video" , value: @{ @"CodecType" : [NSNumber numberWithInt:kCMVideoCodecType_MPEG4Video]}};
+    [encoderArrayWithTitles addObject: animationDictionary];
     
     [self addMenuItemsToMenu:self.prefsVideoCompressor.menu withArray:encoderArrayWithTitles withSelector:@selector(selectVideoEncoder:)];
 
 #pragma mark - Video Prefs Resolution
 
-    NSArray* videoResolutions = @[//@"Native Resolution",
-                                  @{title : @"Half",  value : [NSValue valueWithSize:(NSSize){0.5, 0.5}] },
-                                  @{title : @"Quarter", value : [NSValue valueWithSize:(NSSize){0.25, 0.25}] },
+    NSMenuItem* nativeItem = [[NSMenuItem alloc] initWithTitle:@"Native Resolution" action:@selector(selectVideoResolution:) keyEquivalent:@""];
+    [nativeItem setRepresentedObject:[NSValue valueWithSize:NSZeroSize] ];
+    [self.prefsVideoDimensions.menu addItem:nativeItem];
+    [self.prefsVideoDimensions.menu addItem:[NSMenuItem separatorItem]];
+
+    NSArray* videoResolutions = @[
                                   @{title : @"640 x 480 (NTSC)", value : [NSValue valueWithSize:(NSSize){640.0, 480.0}] },
                                   @{title : @"768 x 576 (PAL)", value : [NSValue valueWithSize:(NSSize){786.0, 576.0}] },
                                   @{title : @"720 x 480 (480p)", value : [NSValue valueWithSize:(NSSize){720.0, 480.0}] },
@@ -182,11 +188,6 @@ const NSString* value = @"Value";
                                   //@"Custom"
                                   ];
     
-    NSMenuItem* nativeItem = [[NSMenuItem alloc] initWithTitle:@"Native Resolution" action:@selector(selectVideoEncoder:) keyEquivalent:@""];
-    [nativeItem setRepresentedObject:[NSValue valueWithSize:(NSSize){1.0, 1.0}] ];
-    [self.prefsVideoDimensions.menu addItem:nativeItem];
-    [self.prefsVideoDimensions.menu addItem:[NSMenuItem separatorItem]];
-
     [self addMenuItemsToMenu:self.prefsVideoDimensions.menu withArray:videoResolutions withSelector:@selector(selectVideoResolution:)];
 
     [self.prefsVideoDimensions.menu addItem:[NSMenuItem separatorItem]];
@@ -196,7 +197,12 @@ const NSString* value = @"Value";
     [self.prefsVideoDimensions.menu addItem:customItem];
     
 #pragma mark - Video Prefs Quality
-    
+
+    NSMenuItem* qualityItem = [[NSMenuItem alloc] initWithTitle:@"Not Applicable" action:@selector(selectVideoQuality:) keyEquivalent:@""];
+    [qualityItem setRepresentedObject:[NSNull null]];
+    [self.prefsVideoQuality.menu addItem:qualityItem];
+    [self.prefsVideoQuality.menu addItem:[NSMenuItem separatorItem]];
+
     NSArray* qualityArray = @[
                               @{title : @"Minimum", value : @0.0} ,
                               @{title : @"Low", value : @0.25},
@@ -216,9 +222,9 @@ const NSString* value = @"Value";
 
     // AVVideoScalingModeKey
     NSArray* aspectArray = @[
-                              @{title : @"Resize", value : AVVideoScalingModeResize},
-                              @{title : @"Aspect Resize", value : AVVideoScalingModeResizeAspect},
                               @{title : @"Aspect Fill", value : AVVideoScalingModeResizeAspectFill},
+                              @{title : @"Aspect Fit", value : AVVideoScalingModeResizeAspect},
+                              @{title : @"Resize", value : AVVideoScalingModeResize},
                               ];
     
     [self addMenuItemsToMenu:self.prefsVideoAspectRatio.menu withArray:aspectArray withSelector:@selector(selectVideoAspectRatio:)];
@@ -323,6 +329,44 @@ const NSString* value = @"Value";
 {
     NSLog(@"selected Video Encoder: %@", [sender representedObject]);
     
+    // If we are on passthrough encoder, then we disable all our options
+    if(self.prefsVideoCompressor.selectedItem.representedObject == [NSNull null])
+    {
+        // disable other ui
+        self.prefsVideoAspectRatio.enabled = NO;
+        [self.prefsVideoAspectRatio selectItemAtIndex:0];
+        
+        self.prefsVideoDimensions.enabled = NO;
+        [self.prefsVideoDimensions selectItemAtIndex:0];
+        
+        self.prefsVideoQuality.enabled = NO;
+        [self.prefsVideoQuality selectItemAtIndex:0];
+        
+        self.prefsVideoDimensionsCustomHeight.enabled = NO;
+        self.prefsVideoDimensionsCustomHeight.stringValue = @"";
+        
+        self.prefsVideoDimensionsCustomWidth.enabled = NO;
+        self.prefsVideoDimensionsCustomWidth.stringValue = @"";
+    }
+    else
+    {
+        self.prefsVideoDimensions.enabled = YES;
+        
+        // If we are on JPEG, enable quality
+        NSDictionary* codedInfo = self.prefsVideoCompressor.selectedItem.representedObject;
+        if( [codedInfo[@"CodecName"] containsString:@"JPEG"])
+        {
+            self.prefsVideoQuality.enabled = YES;
+            [self.prefsVideoQuality selectItemAtIndex:4];
+        }
+        else
+        {
+            self.prefsVideoQuality.enabled = NO;
+            [self.prefsVideoQuality selectItemAtIndex:0];
+        }
+    }
+    
+    
     [self validateVideoPrefsUI];
     [self buildVideoPreferences];
 }
@@ -331,11 +375,25 @@ const NSString* value = @"Value";
 {
     NSLog(@"selected Video Resolution: %@", [sender representedObject]);
     
-    [self validateVideoPrefsUI];
-    [self buildVideoPreferences];
-
-    // Did we get a custom size?
-    if([sender representedObject] == [NSNull null])
+    // If we are on the first (Native) resolution
+    if (self.prefsVideoDimensions.indexOfSelectedItem == 0)
+    {
+        [self.prefsVideoAspectRatio selectItemAtIndex:0];
+        // Enable 'Native'
+        [[self.prefsVideoAspectRatio itemAtIndex:0] setEnabled:YES];
+        self.prefsVideoAspectRatio.enabled = NO;
+    }
+    else
+    {
+        // Disable the native aspect ratio choice, and select aspect fill by default
+        self.prefsVideoAspectRatio.enabled = YES;
+        // Disable 'Native'
+        [[self.prefsVideoAspectRatio itemAtIndex:0] setEnabled:NO];
+        [self.prefsVideoAspectRatio selectItemAtIndex:2];
+    }
+    
+    // if our video resolution is custom
+    if(self.prefsVideoDimensions.selectedItem.representedObject == [NSNull null])
     {
         self.prefsVideoDimensionsCustomWidth.enabled = YES;
         self.prefsVideoDimensionsCustomHeight.enabled = YES;
@@ -343,13 +401,16 @@ const NSString* value = @"Value";
     else
     {
         // Update the custom size UI with the appropriate values
-        NSSize selectedSize = [[sender representedObject] sizeValue];
+        NSSize selectedSize = [self.prefsVideoDimensions.selectedItem.representedObject sizeValue];
         self.prefsVideoDimensionsCustomWidth.floatValue = selectedSize.width;
         self.prefsVideoDimensionsCustomHeight.floatValue = selectedSize.height;
         
         self.prefsVideoDimensionsCustomWidth.enabled = NO;
         self.prefsVideoDimensionsCustomHeight.enabled = NO;
     }
+
+    [self validateVideoPrefsUI];
+    [self buildVideoPreferences];
 }
 
 - (IBAction)selectVideoQuality:(id)sender
@@ -368,43 +429,81 @@ const NSString* value = @"Value";
     [self buildVideoPreferences];
 }
 
+#pragma mark - Prefs Validation
+
 - (void) validateVideoPrefsUI
 {
-    // If we are on passthrough encoder, then we disable all our options
-    if(self.prefsVideoCompressor.selectedItem.representedObject == [NSNull null])
-    {
-        // disable other ui
-        self.prefsVideoAspectRatio.enabled = NO;
-        self.prefsVideoDimensions.enabled = NO;
-        self.prefsVideoQuality.enabled = NO;
-        self.prefsVideoDimensionsCustomHeight.enabled = NO;
-        self.prefsVideoDimensionsCustomWidth.enabled = NO;
-    }
-    // Enable everything, and let the following logic run:
-    else
-    {
-        self.prefsVideoAspectRatio.enabled = YES;
-        self.prefsVideoDimensions.enabled = YES;
-        self.prefsVideoQuality.enabled = YES;
-        self.prefsVideoDimensionsCustomHeight.enabled = YES;
-        self.prefsVideoDimensionsCustomWidth.enabled = YES;
     
-        // If we are on JPEG, enable quality
-        NSDictionary* codedInfo = self.prefsVideoCompressor.selectedItem.representedObject;
-        if( [codedInfo[@"CodecName"] containsString:@"JPEG"])
-        {
-            self.prefsVideoQuality.enabled = YES;
-        }
-        else
-        {
-            self.prefsVideoQuality.enabled = NO;
-        }
-    }
 }
 
 - (void) buildVideoPreferences
 {
+    NSMutableDictionary* videoSettingsDictonary = [NSMutableDictionary new];
     
+    // get our fourcc from our compressor UI represented object and convert it to a string
+    id compressorDict = self.prefsVideoCompressor.selectedItem.representedObject;
+    
+    // If we are passthrough, we set out video prefs to nil and bail early
+    if(compressorDict == [NSNull null])
+    {
+        self.prefsVideoSettings = nil;
+        return;
+    }
+    
+    // Otherwise introspect our codec dictionary
+    if([compressorDict isKindOfClass:[NSDictionary class]])
+    {
+        NSNumber* codecType = compressorDict[@"CodecType"];
+        FourCharCode fourcc = (FourCharCode)[codecType intValue];
+        NSString* fourCCString = NSFileTypeForHFSTypeCode(fourcc);
+
+        // remove ' so "'jpeg'" becomes "jpeg" for example
+        fourCCString = [fourCCString stringByReplacingOccurrencesOfString:@"'" withString:@""];
+        
+        videoSettingsDictonary[AVVideoCodecKey] = fourCCString;
+    }
+    // if we have a dimension, custom or other wise, get it
+    id sizeValue = self.prefsVideoDimensions.selectedItem.representedObject;
+
+    // Custom Size for NULL entry
+    if(sizeValue == [NSNull null])
+    {
+        videoSettingsDictonary[AVVideoWidthKey] =  @(self.prefsVideoDimensionsCustomWidth.floatValue);
+        videoSettingsDictonary[AVVideoHeightKey] =  @(self.prefsVideoDimensionsCustomHeight.floatValue);
+        
+        // If we have a non native size, we need the aspect key
+        videoSettingsDictonary[AVVideoScalingModeKey] = self.prefsVideoAspectRatio.selectedItem.representedObject;
+    }
+    else if([sizeValue isKindOfClass:[NSValue class]])
+    {
+        NSSize videoSize = [self.prefsVideoDimensions.selectedItem.representedObject sizeValue];
+        
+        // Native size for NSZeroSize
+        if(!NSEqualSizes(videoSize, NSZeroSize))
+        {
+            videoSettingsDictonary[AVVideoWidthKey] =  @(videoSize.width);
+            videoSettingsDictonary[AVVideoHeightKey] =  @(videoSize.height);
+            
+            // If we have a non native size, we need the aspect key
+            videoSettingsDictonary[AVVideoScalingModeKey] = self.prefsVideoAspectRatio.selectedItem.representedObject;
+        }
+    }
+    
+    // if we have a quality, get it,
+    id qualityValue = self.prefsVideoQuality.selectedItem.representedObject;
+    
+    if(qualityValue != [NSNull null])
+    {
+        if([qualityValue isKindOfClass:[NSNumber class]])
+        {
+            NSDictionary* videoCompressionOptionsDictionary = @{AVVideoQualityKey : qualityValue};
+            videoSettingsDictonary[AVVideoCompressionPropertiesKey] =  videoCompressionOptionsDictionary;
+        }
+    }
+    
+    self.prefsVideoSettings = [videoSettingsDictonary copy];
+    
+    NSLog(@"Calculated Video Settings : %@", self.prefsVideoSettings);
 }
 
 #pragma mark - Audio Prefs Actions
@@ -468,7 +567,7 @@ const NSString* value = @"Value";
     destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPath2] URLByAppendingPathExtension:lastPathExtention];
     
     // Pass 1 is our analysis pass, and our decode pass
-    NSDictionary* transcodeOptions = @{kMetavisualTranscodeVideoSettingsKey : [NSNull null],
+    NSDictionary* transcodeOptions = @{kMetavisualTranscodeVideoSettingsKey : (self.prefsVideoSettings) ? self.prefsVideoSettings : [NSNull null],
                                        kMetavisualTranscodeAudioSettingsKey : [NSNull null],
                                        };
     
