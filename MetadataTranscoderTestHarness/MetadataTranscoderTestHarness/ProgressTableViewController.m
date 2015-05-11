@@ -7,6 +7,7 @@
 //
 
 #import "ProgressTableViewController.h"
+#import "ProgressTableViewCellController.h"
 
 @interface ProgressTableViewController ()
 @property (weak) IBOutlet NSTableView* tableView;
@@ -18,6 +19,7 @@
 
 - (void) awakeFromNib
 {
+    NSLog(@"AwakeFromNib");
     [self commonSetup];
 }
 
@@ -29,10 +31,14 @@
 // TODO: This is being run more than once from AwakeFrom Nib due to some BS in NSTableView shite
 - (void) commonSetup
 {
-    
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSLog(@"Common Setup");
+        
+        NSNib* progressTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCell" bundle:[NSBundle mainBundle]];
+        
+        [self.tableView registerNib:progressTableViewCell forIdentifier:@"SourceFile"];
+        
         self.transcodeAndAnalysisOperations = [NSMutableArray new];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addTranscodeAndAnalysisOperation:) name:@"MVNewTranscodeOperationAvailable" object:nil];
     });
@@ -58,6 +64,22 @@
 }
 
 #pragma mark - NSTableViewDelegate
+
+- (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+{
+    if([tableColumn.identifier isEqualToString:@"SourceFile"])
+    {
+        ProgressTableViewCellController* controller = [[ProgressTableViewCellController alloc] init];
+        NSView* result = [tableView makeViewWithIdentifier:@"SourceFile" owner:controller];
+        
+        [controller setSourceFileName:@"Some Source File !@#@"];
+        
+        // Return the result
+        return result;
+    }
+    
+    return nil;
+}
 
 #pragma mark - NSTableViewDataSource
 
