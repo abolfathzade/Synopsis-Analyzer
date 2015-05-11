@@ -161,8 +161,8 @@ const NSString* value = @"Value";
         [encoderArrayWithTitles addObject:@{title:encoder[@"DisplayName"], value:encoder}];
     }
     
-    NSDictionary* animationDictionary = @{ title : @"MPEG4 Video" , value: @{ @"CodecType" : [NSNumber numberWithInt:kCMVideoCodecType_MPEG4Video]}};
-    [encoderArrayWithTitles addObject: animationDictionary];
+//    NSDictionary* animationDictionary = @{ title : @"MPEG4 Video" , value: @{ @"CodecType" : [NSNumber numberWithInt:kCMVideoCodecType_MPEG4Video]}};
+//    [encoderArrayWithTitles addObject: animationDictionary];
     
     [self addMenuItemsToMenu:self.prefsVideoCompressor.menu withArray:encoderArrayWithTitles withSelector:@selector(selectVideoEncoder:)];
 
