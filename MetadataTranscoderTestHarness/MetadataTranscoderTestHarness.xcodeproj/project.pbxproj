@@ -291,6 +291,7 @@
 		1B61BFC11AD0262E0013418D /* stabilizer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = stabilizer.hpp; sourceTree = "<group>"; };
 		1B61BFC21AD0262E0013418D /* wobble_suppression.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = wobble_suppression.hpp; sourceTree = "<group>"; };
 		1B61BFC31AD0262E0013418D /* videostab.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = videostab.hpp; sourceTree = "<group>"; };
+		1B95DF091AFFFA9F004FEE2D /* VideoToolboxPrivateHeaders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoToolboxPrivateHeaders.h; sourceTree = "<group>"; };
 		1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseTranscodeOperation.h; sourceTree = "<group>"; };
 		1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseTranscodeOperation.m; sourceTree = "<group>"; };
 		1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetadataWriterTranscodeOperation.h; sourceTree = "<group>"; };
@@ -916,6 +917,7 @@
 				1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */,
 				1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */,
 				1BEA4D1C1ACB2BCC00AB57C1 /* Supporting Files */,
+				1B95DF091AFFFA9F004FEE2D /* VideoToolboxPrivateHeaders.h */,
 			);
 			path = MetadataTranscoderTestHarness;
 			sourceTree = "<group>";

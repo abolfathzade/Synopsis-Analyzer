@@ -22,7 +22,6 @@ extern const NSString* kMetavisualMetadataIdentifier;
 // With the appropriate metadata tracks written from pass 1.
 
 
-
 // Key whose value is a dictionary appropriate for use with AVAssetWriterInput output settings. See AVVideoSettings.h
 // If this key is [NSNull null] it implies passthrough video encoding - sample buffers will not be re-encoded;
 // Required
