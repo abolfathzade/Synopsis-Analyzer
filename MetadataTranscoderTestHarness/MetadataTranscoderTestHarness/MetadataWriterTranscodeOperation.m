@@ -192,6 +192,8 @@
 
 - (void) transcodeAndAnalyzeAsset
 {
+    CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
+
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading])
     {
         [self.transcodeAssetWriter startSessionAtSourceTime:kCMTimeZero];
@@ -293,6 +295,15 @@
                  CMSampleBufferRef passthroughVideoSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(passthroughVideoBufferQueue);
                  if(passthroughVideoSampleBuffer)
                  {
+                     CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
+                     CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(passthroughVideoSampleBuffer);
+                     CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
+                     
+                     CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
+                     
+                     self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
+
+                     
                      [self.transcodeAssetWriterVideoPassthrough appendSampleBuffer:passthroughVideoSampleBuffer];
                      
                      if(self.analyzedVideoSampleBufferMetadata.count)
