@@ -19,6 +19,7 @@
 		1B61BD0A1ACF37300013418D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
 		1B61BD0B1ACF37300013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
 		1B61BD0C1ACF37390013418D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
+		1B805E2C1B0114D0005D7354 /* ProgressTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */; };
 		1BA68C501AD02E97003B3CE9 /* BaseTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */; };
 		1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */; };
 		1BA68C571AD26696003B3CE9 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C561AD26696003B3CE9 /* CoreVideo.framework */; };
@@ -291,6 +292,8 @@
 		1B61BFC11AD0262E0013418D /* stabilizer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = stabilizer.hpp; sourceTree = "<group>"; };
 		1B61BFC21AD0262E0013418D /* wobble_suppression.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = wobble_suppression.hpp; sourceTree = "<group>"; };
 		1B61BFC31AD0262E0013418D /* videostab.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = videostab.hpp; sourceTree = "<group>"; };
+		1B805E2A1B0114D0005D7354 /* ProgressTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTableViewController.h; sourceTree = "<group>"; };
+		1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTableViewController.m; sourceTree = "<group>"; };
 		1B95DF091AFFFA9F004FEE2D /* VideoToolboxPrivateHeaders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoToolboxPrivateHeaders.h; sourceTree = "<group>"; };
 		1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseTranscodeOperation.h; sourceTree = "<group>"; };
 		1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseTranscodeOperation.m; sourceTree = "<group>"; };
@@ -859,6 +862,20 @@
 			path = videostab;
 			sourceTree = "<group>";
 		};
+		1B805E2D1B0114DD005D7354 /* Transcode & Analysis */ = {
+			isa = PBXGroup;
+			children = (
+				1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */,
+				1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */,
+				1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */,
+				1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */,
+				1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */,
+				1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */,
+				1B61BCDC1ACEFEEE0013418D /* SampleBufferAnalyzerPluginProtocol.h */,
+			);
+			name = "Transcode & Analysis";
+			sourceTree = "<group>";
+		};
 		1BA68C5D1AD5D2A1003B3CE9 /* BSON */ = {
 			isa = PBXGroup;
 			children = (
@@ -903,13 +920,9 @@
 			children = (
 				1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */,
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
-				1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */,
-				1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */,
-				1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */,
-				1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */,
-				1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */,
-				1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */,
-				1B61BCDC1ACEFEEE0013418D /* SampleBufferAnalyzerPluginProtocol.h */,
+				1B805E2A1B0114D0005D7354 /* ProgressTableViewController.h */,
+				1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */,
+				1B805E2D1B0114DD005D7354 /* Transcode & Analysis */,
 				1B61BCEF1ACF181C0013418D /* NSDictionary+JSONString.h */,
 				1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */,
 				1BA68C5D1AD5D2A1003B3CE9 /* BSON */,
@@ -1079,6 +1092,7 @@
 				1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */,
 				1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */,
 				1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */,
+				1B805E2C1B0114D0005D7354 /* ProgressTableViewController.m in Sources */,
 				1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */,
 				1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */,
 				1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */,

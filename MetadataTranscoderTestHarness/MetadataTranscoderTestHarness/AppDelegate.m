@@ -596,13 +596,25 @@ const NSString* value = @"Value";
             NSLog(@"Finished Transcode and Analysis");
         });
         
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter]  postNotificationName:@"MVNewTranscodeOperationAvailable" object:pass2];
+            NSLog(@"POST NOTIFICATION %@", pass2);
+
+        });
+        
         [self.metadataQueue addOperation:pass2];
 
     });
     
     NSLog(@"Begin Transcode and Analysis");
           
-          
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter]  postNotificationName:@"MVNewTranscodeOperationAvailable" object:analysis];
+        NSLog(@"POST NOTIFICATION %@", analysis);
+    });
+
+    
     [self.transcodeQueue addOperation:analysis];
 }
 

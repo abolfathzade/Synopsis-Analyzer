@@ -39,6 +39,7 @@ const NSString* kMetavisualAnalyzedGlobalMetadataKey = @"kMetavisualAnalyzedGlob
         {
             self.completionBlock();
 
+            NSLog(@"COMPLETION BLOCK RUN");
             // Clear so we dont run twice, fucko
             self.completionBlock = nil;
         }
