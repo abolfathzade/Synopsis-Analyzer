@@ -232,7 +232,7 @@
         //        dispatch_group_enter(g);
         
         
-        __block BOOL finishedReadingAllPassthroughVideo;
+        __block BOOL finishedReadingAllPassthroughVideo = NO;
         
         // Passthrough Video Read into our Buffer Queue
         dispatch_async(videoPassthroughDecodeQueue, ^{
