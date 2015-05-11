@@ -4,7 +4,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="7702"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="ProgressTableViewCellController">
+        <customObject id="-2" userLabel="File's Owner" customClass="ProgressTableViewCellSourceController">
             <connections>
                 <outlet property="sourceFileLabel" destination="oef-Yn-Cmo" id="Hal-AG-iL0"/>
                 <outlet property="view" destination="c22-O7-iKe" id="Tlp-x6-klp"/>

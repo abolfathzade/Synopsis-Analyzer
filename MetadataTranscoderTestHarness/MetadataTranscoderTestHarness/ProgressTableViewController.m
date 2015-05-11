@@ -7,7 +7,7 @@
 //
 
 #import "ProgressTableViewController.h"
-#import "ProgressTableViewCellController.h"
+#import "ProgressTableViewCellSourceController.h"
 
 @interface ProgressTableViewController ()
 @property (weak) IBOutlet NSTableView* tableView;
@@ -33,11 +33,13 @@
 {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        
         NSLog(@"Common Setup");
         
-        NSNib* progressTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCell" bundle:[NSBundle mainBundle]];
+        NSNib* sourceTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellSource" bundle:[NSBundle mainBundle]];
+        [self.tableView registerNib:sourceTableViewCell forIdentifier:@"SourceFile"];
         
-        [self.tableView registerNib:progressTableViewCell forIdentifier:@"SourceFile"];
+        
         
         self.transcodeAndAnalysisOperations = [NSMutableArray new];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addTranscodeAndAnalysisOperation:) name:@"MVNewTranscodeOperationAvailable" object:nil];
@@ -69,7 +71,7 @@
 {
     if([tableColumn.identifier isEqualToString:@"SourceFile"])
     {
-        ProgressTableViewCellController* controller = [[ProgressTableViewCellController alloc] init];
+        ProgressTableViewCellSourceController* controller = [[ProgressTableViewCellSourceController alloc] init];
         NSView* result = [tableView makeViewWithIdentifier:@"SourceFile" owner:controller];
         
         [controller setSourceFileName:@"Some Source File !@#@"];

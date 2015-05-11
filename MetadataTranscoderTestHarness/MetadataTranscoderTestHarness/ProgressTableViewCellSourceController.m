@@ -6,13 +6,13 @@
 //  Copyright (c) 2015 metavisual. All rights reserved.
 //
 
-#import "ProgressTableViewCellController.h"
+#import "ProgressTableViewCellSourceController.h"
 
-@interface ProgressTableViewCellController ()
+@interface ProgressTableViewCellSourceController ()
 @property (weak) IBOutlet NSTextField* sourceFileLabel;
 @end
 
-@implementation ProgressTableViewCellController
+@implementation ProgressTableViewCellSourceController
 
 - (void)viewDidLoad {
     [super viewDidLoad];

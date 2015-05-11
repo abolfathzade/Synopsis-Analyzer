@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface ProgressTableViewCellController : NSViewController
+@interface ProgressTableViewCellSourceController : NSViewController
 
 - (void) setSourceFileName:(NSString*)name;
 
