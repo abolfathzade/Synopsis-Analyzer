@@ -28,8 +28,6 @@
 
 // Prerequisites
 @property (atomic, readwrite, strong) NSDictionary* metadataOptions;
-@property (atomic, readwrite, strong) NSURL* sourceURL;
-@property (atomic, readwrite, strong) NSURL* destinationURL;
 
 // Metadata to write
 @property (atomic, readwrite, strong) NSMutableArray* analyzedVideoSampleBufferMetadata;

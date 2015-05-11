@@ -19,12 +19,13 @@ const NSString* kMetavisualAnalyzedGlobalMetadataKey = @"kMetavisualAnalyzedGlob
 
 @implementation BaseTranscodeOperation
 
+@synthesize progress = _progress;
+
 - (id) init
 {
     self = [super init];
     if(self)
     {
-        
         self.progress = (CGFloat)0.0;
     }
     
@@ -43,6 +44,27 @@ const NSString* kMetavisualAnalyzedGlobalMetadataKey = @"kMetavisualAnalyzedGlob
             // Clear so we dont run twice, fucko
             self.completionBlock = nil;
         }
+    }
+}
+
+- (CGFloat) progress
+{
+    @synchronized(self)
+    {
+        return _progress;
+    }
+}
+
+- (void) setProgress:(CGFloat)progress
+{
+    @synchronized(self)
+    {
+        _progress = progress;
+    }
+    
+    if(self.progressBlock)
+    {
+        self.progressBlock(progress);
     }
 }
 

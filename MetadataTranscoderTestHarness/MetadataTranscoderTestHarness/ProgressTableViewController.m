@@ -7,7 +7,9 @@
 //
 
 #import "ProgressTableViewController.h"
+#import "BaseTranscodeOperation.h"
 #import "ProgressTableViewCellSourceController.h"
+#import "ProgressTableViewCellProgressController.h"
 
 @interface ProgressTableViewController ()
 @property (weak) IBOutlet NSTableView* tableView;
@@ -39,7 +41,8 @@
         NSNib* sourceTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellSource" bundle:[NSBundle mainBundle]];
         [self.tableView registerNib:sourceTableViewCell forIdentifier:@"SourceFile"];
         
-        
+        NSNib* progressTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellProgress" bundle:[NSBundle mainBundle]];
+        [self.tableView registerNib:progressTableViewCell forIdentifier:@"Progress"];
         
         self.transcodeAndAnalysisOperations = [NSMutableArray new];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addTranscodeAndAnalysisOperation:) name:@"MVNewTranscodeOperationAvailable" object:nil];
@@ -69,16 +72,38 @@
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
+    BaseTranscodeOperation* operationForRow = [self.transcodeAndAnalysisOperations objectAtIndex:row];
+    
     if([tableColumn.identifier isEqualToString:@"SourceFile"])
     {
         ProgressTableViewCellSourceController* controller = [[ProgressTableViewCellSourceController alloc] init];
         NSView* result = [tableView makeViewWithIdentifier:@"SourceFile" owner:controller];
         
-        [controller setSourceFileName:@"Some Source File !@#@"];
+        NSURL* sourceURL = operationForRow.sourceURL;
+        
+        [controller setSourceFileName:[sourceURL lastPathComponent]];
         
         // Return the result
         return result;
     }
+   
+    else  if([tableColumn.identifier isEqualToString:@"Progress"])
+    {
+        ProgressTableViewCellProgressController* controller = [[ProgressTableViewCellProgressController alloc] init];
+        NSView* result = [tableView makeViewWithIdentifier:@"Progress" owner:controller];
+        
+        // set up our callback
+        operationForRow.progressBlock = ^void(CGFloat progress)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [controller setProgress:progress];
+            });
+        };
+        
+        // Return the result
+        return result;
+    }
+
     
     return nil;
 }

@@ -53,9 +53,15 @@ extern const NSString* kMetavisualAnalyzedGlobalMetadataKey;
 // Otherwise, you have a race condition.
 // And thats fucking stupid.
 
-@interface BaseTranscodeOperation : NSOperation
+// Progress Block
 
+
+@interface BaseTranscodeOperation : NSOperation
+@property (atomic, readwrite, strong) NSURL* sourceURL;
+@property (atomic, readwrite, strong) NSURL* destinationURL;
 @property (atomic, readwrite) CGFloat progress;
+
+@property (copy) void (^progressBlock)(CGFloat progress);
 
 - (void) main __attribute__((objc_requires_super));
 

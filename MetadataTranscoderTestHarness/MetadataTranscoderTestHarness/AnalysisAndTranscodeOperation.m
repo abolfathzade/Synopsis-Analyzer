@@ -22,8 +22,6 @@
 
 // Prerequisites
 @property (atomic, readwrite, strong) NSDictionary* transcodeOptions;
-@property (atomic, readwrite, strong) NSURL* sourceURL;
-@property (atomic, readwrite, strong) NSURL* destinationURL;
 @property (atomic, readwrite, strong) NSArray* availableAnalyzers;
 
 
