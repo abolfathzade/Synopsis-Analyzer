@@ -16,7 +16,8 @@
 @interface ProgressTableViewController ()
 @property (weak) IBOutlet NSTableView* tableView;
 
-@property (atomic, readwrite, strong) NSMutableArray* transcodeAndAnalysisOperations;
+// We dont want to hold on to our NSOperationQueues because we want to dealloc all the heavy media bullshit each one retains internally
+@property (atomic, readwrite, strong) NSPointerArray* transcodeAndAnalysisOperationsWeak;
 @property (atomic, readwrite, strong) NSMutableArray* sourceControllerArray;
 @property (atomic, readwrite, strong) NSMutableArray* progressControllerArray;
 @property (atomic, readwrite, strong) NSMutableArray* revealControllerArray;
@@ -52,8 +53,9 @@
         NSNib* revealTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellReveal" bundle:[NSBundle mainBundle]];
         [self.tableView registerNib:revealTableViewCell forIdentifier:@"Reveal"];
 
-        // Data source and controller arrays we hold on to
-        self.transcodeAndAnalysisOperations = [NSMutableArray new];
+        // We dont want to hold on to our NSOperationQueues because we want to dealloc all the heavy media bullshit each one retains internally
+        self.transcodeAndAnalysisOperationsWeak = [[NSPointerArray alloc] initWithOptions:NSPointerFunctionsWeakMemory];
+
         self.sourceControllerArray = [NSMutableArray new];
         self.progressControllerArray = [NSMutableArray new];
         self.revealControllerArray = [NSMutableArray new];
@@ -67,9 +69,9 @@
 {
     NSLog(@"Recieve NOTIFICATION %@", notification);
     
-    @synchronized(_transcodeAndAnalysisOperations)
+    @synchronized(_transcodeAndAnalysisOperationsWeak)
     {
-        [self.transcodeAndAnalysisOperations addObject:notification.object];
+        [self.transcodeAndAnalysisOperationsWeak addPointer:(__bridge void *)(notification.object)];
     }
     
     [self.tableView beginUpdates];
@@ -85,7 +87,7 @@
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    BaseTranscodeOperation* operationForRow = [self.transcodeAndAnalysisOperations objectAtIndex:row];
+    BaseTranscodeOperation* operationForRow = [self.transcodeAndAnalysisOperationsWeak pointerAtIndex:row];
     
     if([tableColumn.identifier isEqualToString:@"SourceFile"])
     {
@@ -106,9 +108,12 @@
         
         NSView* result = [tableView makeViewWithIdentifier:@"SourceFile" owner:controller];
         
-        NSURL* sourceURL = operationForRow.sourceURL;
+        if(operationForRow)
+        {
+            NSURL* sourceURL = operationForRow.sourceURL;
+            [controller setSourceFileName:[sourceURL lastPathComponent]];
+        }
         
-        [controller setSourceFileName:[sourceURL lastPathComponent]];
         
         // Return the result
         return result;
@@ -133,13 +138,16 @@
 
         NSView* result = [tableView makeViewWithIdentifier:@"Progress" owner:controller];
         
-        // set up our callback
-        operationForRow.progressBlock = ^void(CGFloat progress)
+        if(operationForRow)
         {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [controller setProgress:progress];
-            });
-        };
+            // set up our callback
+            operationForRow.progressBlock = ^void(CGFloat progress)
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [controller setProgress:progress];
+                });
+            };
+        }
         
         // Return the result
         return result;
@@ -163,15 +171,15 @@
 
         NSView* result = [tableView makeViewWithIdentifier:@"Reveal" owner:controller];
         
-        NSURL* destinationURL = operationForRow.destinationURL;
-        
-        controller.destinationURL = destinationURL;
-        
+        if(operationForRow)
+        {
+            NSURL* destinationURL = operationForRow.destinationURL;
+            controller.destinationURL = destinationURL;
+        }
         // Return the result
         return result;
     }
 
-    
     return nil;
 }
 
@@ -180,9 +188,9 @@
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
 {
     NSUInteger count = 0;
-    @synchronized(_transcodeAndAnalysisOperations)
+    @synchronized(_transcodeAndAnalysisOperationsWeak)
     {
-        count = self.transcodeAndAnalysisOperations.count;
+        count = self.transcodeAndAnalysisOperationsWeak.count;
     }
     
     return count;

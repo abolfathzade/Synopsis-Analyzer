@@ -7,6 +7,7 @@
 //
 
 #import "BaseTranscodeOperation.h"
+#import "LogController.h"
 
 const NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomething";
 
@@ -32,8 +33,16 @@ const NSString* kMetavisualAnalyzedGlobalMetadataKey = @"kMetavisualAnalyzedGlob
     return self;
 }
 
+- (void) dealloc
+{
+    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Dealloc NSOperation %p", self, nil]];
+}
+
 - (void) main
 {
+
+    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Run Main NSOperation %p", self, nil]];
+   
     @synchronized(self)
     {
         if(self.completionBlock)

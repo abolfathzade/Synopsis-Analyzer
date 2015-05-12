@@ -12,6 +12,7 @@
 #import <VideoToolbox/VTVideoEncoderList.h>
 #import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 
+#import "LogController.h"
 #import "SampleBufferAnalyzerPluginProtocol.h"
 
 #import "AnalysisAndTranscodeOperation.h"
@@ -52,6 +53,10 @@ const NSString* value = @"Value";
 @end
 
 @implementation AppDelegate
+
+
+//fix our giant memory leak which happened because we are probably holding on to Operations unecessarily now and not letting them go in our TableView's array of cached objects or some shit.
+
 
 - (id) init
 {
@@ -100,17 +105,17 @@ const NSString* value = @"Value";
                     {
                         [self.analyzerPlugins addObject:classString];
                         
-                        NSLog(@"Loaded Plugin: %@", classString);
+                        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Loaded Plugin: %@", classString, nil]];
                     }
                 }
                 else
                 {
-                    NSLog(@"Error Loading Plugin : %@ : %@", [pluginsPath lastPathComponent], loadError);
+                    [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Loading Plugin : %@ : %@", [pluginsPath lastPathComponent], loadError, nil]];
                 }
             }
             else
             {
-                NSLog(@"Error Preflighting Plugin : %@ : %@", [pluginsPath lastPathComponent], loadError);
+                [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Preflighting Plugin : %@ : %@", [pluginsPath lastPathComponent], loadError, nil]];
             }
         }
     }

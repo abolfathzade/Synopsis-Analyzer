@@ -33,6 +33,12 @@
             </connections>
         </customObject>
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
+        <customObject id="Qmp-sv-tyW" customClass="LogController">
+            <connections>
+                <outlet property="logTextField" destination="chf-96-iDp" id="foO-nB-DW1"/>
+                <outlet property="view" destination="chf-96-iDp" id="KWF-EI-LNw"/>
+            </connections>
+        </customObject>
         <menu title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
             <items>
                 <menuItem title="MetadataTranscoderTestHarness" id="1Xt-HY-uBw">
@@ -649,24 +655,31 @@
                 </menuItem>
                 <menuItem title="Window" id="aUF-d1-5bR">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" title="Window" systemMenu="window" id="Td7-aD-5lo">
+                    <menu key="submenu" title="Window" systemMenu="window" id="cCN-Cj-e0P">
                         <items>
-                            <menuItem title="Minimize" keyEquivalent="m" id="OY7-WF-poV">
+                            <menuItem title="Minimize" keyEquivalent="m" id="Kr0-de-UNJ">
                                 <connections>
-                                    <action selector="performMiniaturize:" target="-1" id="VwT-WD-YPe"/>
+                                    <action selector="performMiniaturize:" target="-1" id="0uS-k3-vt9"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Zoom" id="R4o-n2-Eq4">
+                            <menuItem title="Zoom" id="cmu-sh-sK7">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="performZoom:" target="-1" id="DIl-cC-cCs"/>
+                                    <action selector="performZoom:" target="-1" id="2Lt-DE-xWE"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="eu3-7i-yIM"/>
-                            <menuItem title="Bring All to Front" id="LE2-aR-0XJ">
+                            <menuItem isSeparatorItem="YES" id="FgF-ls-Ktl"/>
+                            <menuItem title="Log" id="fLw-aJ-CCB">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="arrangeInFront:" target="-1" id="DRN-fu-gQh"/>
+                                    <action selector="makeKeyAndOrderFront:" target="3EF-QC-5lQ" id="3dP-4q-4sk"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="Kcc-7s-Ajs"/>
+                            <menuItem title="Bring All to Front" id="6ZB-fG-53A">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="arrangeInFront:" target="-1" id="ZU4-8a-4bh"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -1102,7 +1115,54 @@
                     </box>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="489" y="889"/>
+            <point key="canvasLocation" x="504" y="633"/>
+        </window>
+        <window title="Log" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" animationBehavior="default" id="3EF-QC-5lQ">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+            <rect key="contentRect" x="196" y="240" width="480" height="270"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1177"/>
+            <view key="contentView" id="WqD-GT-0tP">
+                <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <scrollView autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3ao-qj-m8B">
+                        <rect key="frame" x="-1" y="-1" width="482" height="272"/>
+                        <clipView key="contentView" copiesOnScroll="NO" id="HJn-Ac-fXb">
+                            <rect key="frame" x="1" y="1" width="223" height="133"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <textView importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="chf-96-iDp">
+                                    <rect key="frame" x="0.0" y="0.0" width="223" height="133"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <size key="minSize" width="480" height="270"/>
+                                    <size key="maxSize" width="480" height="10000000"/>
+                                    <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <size key="minSize" width="480" height="270"/>
+                                    <size key="maxSize" width="480" height="10000000"/>
+                                </textView>
+                            </subviews>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </clipView>
+                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="buj-XD-BYc">
+                            <rect key="frame" x="-100" y="-100" width="87" height="18"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="XPg-2G-KYE">
+                            <rect key="frame" x="224" y="1" width="15" height="133"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                    </scrollView>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="3ao-qj-m8B" secondAttribute="trailing" constant="-1" id="JJ2-p5-jcw"/>
+                    <constraint firstItem="3ao-qj-m8B" firstAttribute="top" secondItem="WqD-GT-0tP" secondAttribute="top" constant="-1" id="NKb-K4-Zl8"/>
+                    <constraint firstAttribute="bottom" secondItem="3ao-qj-m8B" secondAttribute="bottom" constant="-1" id="cSc-zL-bzr"/>
+                    <constraint firstItem="3ao-qj-m8B" firstAttribute="leading" secondItem="WqD-GT-0tP" secondAttribute="leading" constant="-1" id="gt0-kp-UkU"/>
+                </constraints>
+            </view>
+            <point key="canvasLocation" x="-47" y="572"/>
         </window>
     </objects>
 </document>

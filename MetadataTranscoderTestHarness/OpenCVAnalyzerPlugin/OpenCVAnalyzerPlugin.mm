@@ -93,7 +93,7 @@
 
 - (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer error:(NSError**) error
 {
-//    return nil;ct
+    return nil;
     
     if(sampleBuffer == NULL)
     {
