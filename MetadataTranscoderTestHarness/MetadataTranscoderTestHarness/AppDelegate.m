@@ -60,11 +60,11 @@ const NSString* value = @"Value";
     {
         // Serial transcode queue
         self.transcodeQueue = [[NSOperationQueue alloc] init];
-        self.transcodeQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount; //1;
+        self.transcodeQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
 
         // Serial metadata / passthrough writing queue
         self.metadataQueue = [[NSOperationQueue alloc] init];
-        self.metadataQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount; //;
+        self.metadataQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
         
         self.analyzerPlugins = [NSMutableArray new];
     }
@@ -91,16 +91,16 @@ const NSString* value = @"Value";
             {
                 if([pluginBundle loadAndReturnError:&loadError])
                 {
-                    // Weve sucessfully loaded our bundle, time to make a plugin instance
+                    // Weve sucessfully loaded our bundle, time to cache our class name so we can initialize a plugin per operation
+                    // See (AnalysisAndTranscodeOperation
                     Class pluginClass = pluginBundle.principalClass;
+                    NSString* classString = NSStringFromClass(pluginClass);
                     
-                    id<SampleBufferAnalyzerPluginProtocol> pluginInstance = [[pluginClass alloc] init];
-                
-                    if(pluginInstance)
+                    if(classString)
                     {
-                        [self.analyzerPlugins addObject:pluginInstance];
+                        [self.analyzerPlugins addObject:classString];
                         
-                        NSLog(@"Loaded Plugin: %@", pluginInstance.pluginName);
+                        NSLog(@"Loaded Plugin: %@", classString);
                     }
                 }
                 else

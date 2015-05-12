@@ -105,7 +105,18 @@
 
         self.sourceURL = sourceURL;
         self.destinationURL = destinationURL;
-        self.availableAnalyzers = analyzers;
+        
+        // Initialize an array of available analyzers from our analyzer class names
+        NSMutableArray* initializedAnalyzers = [NSMutableArray new];
+        for(NSString* analyzerClassNameString in analyzers)
+        {
+            Class pluginClass = NSClassFromString(analyzerClassNameString);
+            id<SampleBufferAnalyzerPluginProtocol> pluginInstance = [[pluginClass alloc] init];
+
+            [initializedAnalyzers addObject:pluginInstance];
+        }
+        
+        self.availableAnalyzers = initializedAnalyzers;
         
         self.inFlightGlobalMetadata = [NSMutableArray new];
         self.inFlightVideoSampleBufferMetadata = [NSMutableArray new];
