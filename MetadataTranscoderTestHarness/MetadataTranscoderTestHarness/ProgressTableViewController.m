@@ -8,13 +8,18 @@
 
 #import "ProgressTableViewController.h"
 #import "BaseTranscodeOperation.h"
+
 #import "ProgressTableViewCellSourceController.h"
 #import "ProgressTableViewCellProgressController.h"
+#import "ProgressTableViewCellRevealController.h"
 
 @interface ProgressTableViewController ()
 @property (weak) IBOutlet NSTableView* tableView;
 
 @property (atomic, readwrite, strong) NSMutableArray* transcodeAndAnalysisOperations;
+@property (atomic, readwrite, strong) NSMutableArray* sourceControllerArray;
+@property (atomic, readwrite, strong) NSMutableArray* progressControllerArray;
+@property (atomic, readwrite, strong) NSMutableArray* revealControllerArray;
 @end
 
 @implementation ProgressTableViewController
@@ -43,8 +48,16 @@
         
         NSNib* progressTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellProgress" bundle:[NSBundle mainBundle]];
         [self.tableView registerNib:progressTableViewCell forIdentifier:@"Progress"];
-        
+
+        NSNib* revealTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellReveal" bundle:[NSBundle mainBundle]];
+        [self.tableView registerNib:revealTableViewCell forIdentifier:@"Reveal"];
+
+        // Data source and controller arrays we hold on to
         self.transcodeAndAnalysisOperations = [NSMutableArray new];
+        self.sourceControllerArray = [NSMutableArray new];
+        self.progressControllerArray = [NSMutableArray new];
+        self.revealControllerArray = [NSMutableArray new];
+        
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addTranscodeAndAnalysisOperation:) name:@"MVNewTranscodeOperationAvailable" object:nil];
     });
     
@@ -76,7 +89,21 @@
     
     if([tableColumn.identifier isEqualToString:@"SourceFile"])
     {
-        ProgressTableViewCellSourceController* controller = [[ProgressTableViewCellSourceController alloc] init];
+        ProgressTableViewCellSourceController* controller = nil;
+
+        // find our cached controller if we have one
+        if(self.sourceControllerArray.count > row)
+        {
+            controller = self.sourceControllerArray[row];
+        }
+        
+        if(!controller)
+        {
+            // cache if we dont have...
+            controller = [[ProgressTableViewCellSourceController alloc] init];
+            self.sourceControllerArray[row] = controller;
+        }
+        
         NSView* result = [tableView makeViewWithIdentifier:@"SourceFile" owner:controller];
         
         NSURL* sourceURL = operationForRow.sourceURL;
@@ -89,7 +116,21 @@
    
     else  if([tableColumn.identifier isEqualToString:@"Progress"])
     {
-        ProgressTableViewCellProgressController* controller = [[ProgressTableViewCellProgressController alloc] init];
+        // find our cached controller if we have one
+        ProgressTableViewCellProgressController* controller = nil;
+        
+        if(self.progressControllerArray.count > row)
+        {
+            controller = self.progressControllerArray[row];
+        }
+        
+        if(!controller)
+        {
+            // cache if we dont have...
+            controller = [[ProgressTableViewCellProgressController alloc] init];
+            self.progressControllerArray[row] = controller;
+        }
+
         NSView* result = [tableView makeViewWithIdentifier:@"Progress" owner:controller];
         
         // set up our callback
@@ -99,6 +140,32 @@
                 [controller setProgress:progress];
             });
         };
+        
+        // Return the result
+        return result;
+    }
+
+    else  if([tableColumn.identifier isEqualToString:@"Reveal"])
+    {
+        // find our cached controller if we have one
+        ProgressTableViewCellRevealController* controller = nil;
+        if(self.revealControllerArray.count > row)
+        {
+            controller = self.revealControllerArray[row];
+        }
+        
+        if(!controller)
+        {
+            // cache if we dont have...
+            controller = [[ProgressTableViewCellRevealController alloc] init];
+            self.revealControllerArray[row] = controller;
+        }
+
+        NSView* result = [tableView makeViewWithIdentifier:@"Reveal" owner:controller];
+        
+        NSURL* destinationURL = operationForRow.destinationURL;
+        
+        controller.destinationURL = destinationURL;
         
         // Return the result
         return result;

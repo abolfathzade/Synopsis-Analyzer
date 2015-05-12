@@ -60,11 +60,11 @@ const NSString* value = @"Value";
     {
         // Serial transcode queue
         self.transcodeQueue = [[NSOperationQueue alloc] init];
-        self.transcodeQueue.maxConcurrentOperationCount = 1;
+        self.transcodeQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount; //1;
 
         // Serial metadata / passthrough writing queue
         self.metadataQueue = [[NSOperationQueue alloc] init];
-        self.metadataQueue.maxConcurrentOperationCount = 1;
+        self.metadataQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount; //;
         
         self.analyzerPlugins = [NSMutableArray new];
     }
