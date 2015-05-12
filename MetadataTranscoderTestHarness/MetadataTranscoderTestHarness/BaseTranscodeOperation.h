@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "LogController.h"
 
 
 extern const NSString* kMetavisualMetadataIdentifier;
@@ -63,6 +64,7 @@ extern const NSString* kMetavisualAnalyzedGlobalMetadataKey;
 
 @property (copy) void (^progressBlock)(CGFloat progress);
 
+- (void) start __attribute__((objc_requires_super));
 - (void) main __attribute__((objc_requires_super));
 
 @end

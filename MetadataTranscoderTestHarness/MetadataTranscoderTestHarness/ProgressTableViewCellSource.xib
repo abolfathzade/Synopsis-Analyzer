@@ -18,7 +18,7 @@
             <subviews>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oef-Yn-Cmo">
                     <rect key="frame" x="18" y="0.0" width="194" height="14"/>
-                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label" id="Rkk-Hc-JCn">
+                    <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Label" id="Rkk-Hc-JCn">
                         <font key="font" metaFont="smallSystem"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -29,9 +29,9 @@
                 <constraint firstAttribute="bottom" secondItem="oef-Yn-Cmo" secondAttribute="bottom" id="1Fh-P8-pon"/>
                 <constraint firstItem="oef-Yn-Cmo" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="QXX-V0-F2m"/>
                 <constraint firstItem="oef-Yn-Cmo" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="iN8-G7-t7S"/>
-                <constraint firstAttribute="trailing" relation="lessThanOrEqual" secondItem="oef-Yn-Cmo" secondAttribute="trailing" constant="20" id="xz5-hT-KGd"/>
+                <constraint firstAttribute="trailing" secondItem="oef-Yn-Cmo" secondAttribute="trailing" constant="20" id="xz5-hT-KGd"/>
             </constraints>
-            <point key="canvasLocation" x="522" y="226.5"/>
+            <point key="canvasLocation" x="522" y="226"/>
         </customView>
     </objects>
 </document>

@@ -347,7 +347,8 @@
                         // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
                         if(self.transcoding)
                         {
-                            NSLog(@"Enqueue Uncompressed Sample Buffer");
+                            [[LogController sharedLogController] appendVerboseLog:@"Enqueue Uncompressed Sample Buffer"];
+
                             CMBufferQueueEnqueue(uncompressedVideoBufferQueue, uncompressedVideoSampleBuffer);
                         }
 
@@ -395,7 +396,8 @@
                                 
                                 if(analyzerError)
                                 {
-                                    NSLog(@"Error Analyzing Sample buffer - bailing: %@", analyzerError);
+                                    NSString* errorString = [@"Error Analyzing Sample buffer - bailing: " stringByAppendingString:[analyzerError description]];
+                                    [[LogController sharedLogController] appendErrorLog:errorString];
                                     break;
                                 }
 
@@ -428,7 +430,7 @@
                             }
                             else
                             {
-                                NSLog(@"Unable To Convert Metadata to JSON Format, invalid!");
+                                [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
                             }
                         }
 //                        else
@@ -450,7 +452,8 @@
             }
 
             finishedReadingAllUncompressedVideo = YES;
-            NSLog(@"Reading Uncompressed Done");
+
+            [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Video Buffers"];
             
             dispatch_group_leave(g);
         });
@@ -459,7 +462,8 @@
         {
             [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:passthroughVideoEncodeQueue usingBlock:^
             {
-                NSLog(@"Started Requesting Media");
+                [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Video"];
+
                 while([self.transcodeAssetWriterVideo isReadyForMoreMediaData])
                 {
                     // Are we done reading,
@@ -475,14 +479,17 @@
                                 [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
                                 if(analyzerError)
                                 {
-                                    NSLog(@"Error Finalizing Analysis - bailing: %@", analyzerError);
+                                    NSString* errorString = [@"Error Finalizing Analysis - bailing: " stringByAppendingString:[analyzerError description]];
+                                    [[LogController sharedLogController] appendErrorLog:errorString];
+
                                     break;
                                 }
                             }
                         
                             [self.transcodeAssetWriterVideo markAsFinished];
-                            NSLog(@"Writing Done");
                             
+                            [[LogController sharedLogController] appendSuccessLog:@"Finished Writing Video"];
+
                             dispatch_group_leave(g);
                             break;
                         }
@@ -502,11 +509,11 @@
                     
                     if(videoSampleBuffer)
                     {
-                        NSLog(@"Writer Appending Sample Buffer");
+                        //[[LogController sharedLogController] appendVerboseLog:@"Dequeueing and Writing Uncompressed Sample Buffer"];
                         if(![self.transcodeAssetWriterVideo appendSampleBuffer:videoSampleBuffer])
                         {
-                            NSLog(@"Error appending sampleBuffer: %@", self.transcodeAssetWriter.error);
-                            
+                            NSString* errorString = [@"Unable to append sampleBuffer: " stringByAppendingString:[self.transcodeAssetWriter.error description]];
+                            [[LogController sharedLogController] appendErrorLog:errorString];
                         }
                         CFRelease(videoSampleBuffer);
                     }
@@ -539,7 +546,7 @@
         CMBufferQueueReset(passthroughVideoBufferQueue);
         CMBufferQueueReset(uncompressedVideoBufferQueue);
         
-        NSLog(@"Finished Writing Analysis");
+        [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis Operation"];
     }
 }
 

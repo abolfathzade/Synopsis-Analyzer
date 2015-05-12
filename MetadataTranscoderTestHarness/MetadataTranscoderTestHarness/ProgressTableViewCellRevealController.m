@@ -19,14 +19,9 @@
     // Do view setup here.
 }
 
-- (void) dealloc
-{
-    NSLog(@"DEALLOCED");
-}
 
 - (IBAction)revealDestinationURL:(id)sender
 {
-    NSLog(@"Reveal");
     if(self.destinationURL)
         [[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[self.destinationURL]];
 }

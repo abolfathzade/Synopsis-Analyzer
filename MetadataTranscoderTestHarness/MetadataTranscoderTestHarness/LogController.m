@@ -15,6 +15,12 @@
 @property (atomic, readwrite, strong) NSDictionary* warningStyle;
 @property (atomic, readwrite, strong) NSDictionary* errorStyle;
 @property (atomic, readwrite, strong) NSDictionary* successStyle;
+
+@property (atomic, readwrite, strong) NSAttributedString* staticVerboseString;
+@property (atomic, readwrite, strong) NSAttributedString* staticWarningString;
+@property (atomic, readwrite, strong) NSAttributedString* staticErrorString;
+@property (atomic, readwrite, strong) NSAttributedString* staticSuccessString;
+
 @end
 
 @implementation LogController
@@ -55,10 +61,15 @@
         self.errorStyle = @{ NSForegroundColorAttributeName : [NSColor redColor]};
         self.successStyle = @{ NSForegroundColorAttributeName : [NSColor colorWithRed:0 green:0.66 blue:0 alpha:1]};
         
+        self.staticVerboseString = [[NSAttributedString alloc] initWithString:@" [LOG] " attributes:self.verboseStyle];
+        self.staticWarningString = [[NSAttributedString alloc] initWithString:@" [WARNING] " attributes:self.warningStyle];
+        self.staticErrorString = [[NSAttributedString alloc] initWithString:@" [ERROR] " attributes:self.errorStyle];
+        self.staticSuccessString = [[NSAttributedString alloc] initWithString:@" [SUCCESS] " attributes:self.successStyle];
+        
         self.dateFormatter = [[NSDateFormatter alloc] init] ;
         
         //Set the required date format
-        [self.dateFormatter setDateFormat:@"yyyy-MM-dd HH:MM:SS"];
+        [self.dateFormatter setDateFormat:@"yyyy-MM-dd HH:MM:SS: "];
 
     }
     return self;
@@ -74,30 +85,38 @@
     return self;
 }
 
-- (NSString*) logStringWithDate
+- (NSMutableAttributedString*) logStringWithDate
 {    
     //Get the string date
-    return [self.dateFormatter stringFromDate:[NSDate date]];
+    return [[NSMutableAttributedString alloc] initWithString:[self.dateFormatter stringFromDate:[NSDate date] ] attributes:self.verboseStyle];
 }
 
-- (NSString*) verboseString
+- (NSMutableAttributedString*) verboseString
 {
-    return [[self logStringWithDate] stringByAppendingString:@" [LOG] "];
+    NSMutableAttributedString* string = [self logStringWithDate];
+    [string appendAttributedString:self.staticVerboseString];
+    return string;
 }
 
-- (NSString*) warningString
+- (NSMutableAttributedString*) warningString
 {
-    return [[self logStringWithDate] stringByAppendingString:@" [WARNING] "];
+    NSMutableAttributedString* string = [self logStringWithDate];
+    [string appendAttributedString:self.staticWarningString];
+    return string;
 }
 
-- (NSString*) errorString
+- (NSMutableAttributedString*) errorString
 {
-    return [[self logStringWithDate] stringByAppendingString:@" [ERROR] "];
+    NSMutableAttributedString* string = [self logStringWithDate];
+    [string appendAttributedString:self.staticErrorString];
+    return string;
 }
 
-- (NSString*) successString
+- (NSMutableAttributedString*) successString
 {
-    return [[self logStringWithDate] stringByAppendingString:@" [SUCCESS] "];
+    NSMutableAttributedString* string = [self logStringWithDate];
+    [string appendAttributedString:self.staticSuccessString];
+    return string;
 }
 
 - (NSString*)appendLine:(NSString*)string
@@ -108,24 +127,26 @@
 
 - (void) appendVerboseLog:(NSString*)log
 {
+    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
+    NSMutableAttributedString* verboseString = [self verboseString];
+    [verboseString appendAttributedString:logString];
+
     dispatch_async(dispatch_get_main_queue(), ^ {
-        NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
-        NSMutableAttributedString* verboseString = [[NSMutableAttributedString alloc] initWithString:[self verboseString] attributes:self.verboseStyle];
-        
-        [verboseString appendAttributedString:logString];
-        
         [self.logTextField.textStorage appendAttributedString:verboseString];
     });
 }
 
 - (void) appendWarningLog:(NSString*)log
 {
+    // Always Log Warnings
+    NSLog(@" [WARNING] %@", log);
+
+    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
+    
+    NSMutableAttributedString* warningString = [self warningString];
+    [warningString appendAttributedString:logString];
+    
     dispatch_async(dispatch_get_main_queue(), ^{
-       
-        NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
-        NSMutableAttributedString* warningString = [[NSMutableAttributedString alloc] initWithString:[self warningString] attributes:self.warningStyle];
-        [warningString appendAttributedString:logString];
-        
         [self.logTextField.textStorage appendAttributedString:warningString];
     });
 
@@ -133,12 +154,15 @@
 
 - (void) appendErrorLog:(NSString*)log
 {
+    // Always Log Errors
+    NSLog(@" [ERROR] %@", log);
+    
+    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
+   
+    NSMutableAttributedString* errorString = [self errorString];
+    [errorString appendAttributedString:logString];
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        
-        NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
-        NSMutableAttributedString* errorString = [[NSMutableAttributedString alloc] initWithString:[self errorString] attributes:self.errorStyle];
-        [errorString appendAttributedString:logString];
-        
         [self.logTextField.textStorage appendAttributedString:errorString];
     });
   
@@ -146,11 +170,12 @@
 
 - (void) appendSuccessLog:(NSString*)log
 {
+    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
+    
+    NSMutableAttributedString* successString = [self successString];
+    [successString appendAttributedString:logString];
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
-        NSMutableAttributedString* successString = [[NSMutableAttributedString alloc] initWithString:[self successString] attributes:self.successStyle];
-        
-        [successString appendAttributedString:logString];
         
         [self.logTextField.textStorage appendAttributedString:successString];
     });

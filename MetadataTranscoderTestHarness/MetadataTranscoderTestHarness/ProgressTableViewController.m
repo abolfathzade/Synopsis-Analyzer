@@ -27,7 +27,6 @@
 
 - (void) awakeFromNib
 {
-    NSLog(@"AwakeFromNib");
     [self commonSetup];
 }
 
@@ -41,8 +40,6 @@
 {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        
-        NSLog(@"Common Setup");
         
         NSNib* sourceTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellSource" bundle:[NSBundle mainBundle]];
         [self.tableView registerNib:sourceTableViewCell forIdentifier:@"SourceFile"];
@@ -66,9 +63,7 @@
 }
 
 - (void)addTranscodeAndAnalysisOperation:(NSNotification*)notification
-{
-    NSLog(@"Recieve NOTIFICATION %@", notification);
-    
+{    
     @synchronized(_transcodeAndAnalysisOperationsWeak)
     {
         [self.transcodeAndAnalysisOperationsWeak addPointer:(__bridge void *)(notification.object)];

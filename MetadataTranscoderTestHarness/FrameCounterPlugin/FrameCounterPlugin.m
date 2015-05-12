@@ -61,9 +61,7 @@
     NSDictionary* metadata =  @{@"Sample Count" : @(self.sampleCount)};
     
     self.sampleCount++;
-    
-    NSLog(@"Sample Count: %i", self.sampleCount);
-    
+        
     return metadata;
 }
 

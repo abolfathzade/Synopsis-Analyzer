@@ -7,7 +7,6 @@
 //
 
 #import "BaseTranscodeOperation.h"
-#import "LogController.h"
 
 const NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomething";
 
@@ -38,10 +37,15 @@ const NSString* kMetavisualAnalyzedGlobalMetadataKey = @"kMetavisualAnalyzedGlob
     [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Dealloc NSOperation %p", self, nil]];
 }
 
+- (void) start
+{
+    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Start Main NSOperation %p", self, nil]];
+    
+    [super start];
+}
+
 - (void) main
 {
-
-    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Run Main NSOperation %p", self, nil]];
    
     @synchronized(self)
     {
@@ -49,11 +53,12 @@ const NSString* kMetavisualAnalyzedGlobalMetadataKey = @"kMetavisualAnalyzedGlob
         {
             self.completionBlock();
 
-            NSLog(@"COMPLETION BLOCK RUN");
             // Clear so we dont run twice, fucko
             self.completionBlock = nil;
         }
     }
+
+    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Finish Main NSOperation %p", self, nil]];
 }
 
 - (CGFloat) progress

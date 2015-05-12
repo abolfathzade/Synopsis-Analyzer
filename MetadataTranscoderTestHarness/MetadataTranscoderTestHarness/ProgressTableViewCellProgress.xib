@@ -16,10 +16,16 @@
             <rect key="frame" x="0.0" y="0.0" width="230" height="17"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <progressIndicator fixedFrame="YES" maxValue="1" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="Fta-bl-eOX">
+                <progressIndicator maxValue="1" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="Fta-bl-eOX">
                     <rect key="frame" x="20" y="-2" width="190" height="20"/>
                 </progressIndicator>
             </subviews>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="Fta-bl-eOX" secondAttribute="bottom" constant="-1" id="0Gw-0q-pzX"/>
+                <constraint firstItem="Fta-bl-eOX" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="EOn-Xf-i99"/>
+                <constraint firstAttribute="trailing" secondItem="Fta-bl-eOX" secondAttribute="trailing" constant="20" id="JyC-Gr-fWg"/>
+                <constraint firstItem="Fta-bl-eOX" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="TyG-ok-EtN"/>
+            </constraints>
             <point key="canvasLocation" x="467" y="409.5"/>
         </customView>
     </objects>
