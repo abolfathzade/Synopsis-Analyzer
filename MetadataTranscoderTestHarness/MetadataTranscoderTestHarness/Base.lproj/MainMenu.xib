@@ -40,11 +40,11 @@
         </customObject>
         <menu title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
             <items>
-                <menuItem title="MetadataTranscoderTestHarness" id="1Xt-HY-uBw">
+                <menuItem title="Synopsis" id="1Xt-HY-uBw">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" title="MetadataTranscoderTestHarness" systemMenu="apple" id="uQy-DD-JDr">
+                    <menu key="submenu" title="Synopsis" systemMenu="apple" id="uQy-DD-JDr">
                         <items>
-                            <menuItem title="About MetadataTranscoderTestHarness" id="5kV-Vb-QxS">
+                            <menuItem title="About Synopsis" id="5kV-Vb-QxS">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="orderFrontStandardAboutPanel:" target="-1" id="Exp-CZ-Vem"/>
@@ -62,7 +62,7 @@
                                 <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                            <menuItem title="Hide MetadataTranscoderTestHarness" keyEquivalent="h" id="Olw-nP-bQN">
+                            <menuItem title="Hide Synopsis" keyEquivalent="h" id="Olw-nP-bQN">
                                 <connections>
                                     <action selector="hide:" target="-1" id="PnN-Uc-m68"/>
                                 </connections>
@@ -80,7 +80,7 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                            <menuItem title="Quit MetadataTranscoderTestHarness" keyEquivalent="q" id="4sb-4s-VLi">
+                            <menuItem title="Quit Synopsis" keyEquivalent="q" id="4sb-4s-VLi">
                                 <connections>
                                     <action selector="terminate:" target="-1" id="Te7-pn-YzF"/>
                                 </connections>
@@ -698,7 +698,7 @@
                 </menuItem>
             </items>
         </menu>
-        <window title="MetadataTranscoderTestHarness" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
+        <window title="Synopsis" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" miniaturizable="YES" resizable="YES" unifiedTitleAndToolbar="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="335" y="390" width="623" height="478"/>
@@ -711,24 +711,24 @@
                         <rect key="frame" x="0.0" y="0.0" width="623" height="478"/>
                         <subviews>
                             <customView fixedFrame="YES" id="UrI-I2-Ixg" customClass="DropFilesView">
-                                <rect key="frame" x="0.0" y="0.0" width="623" height="238.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="623" height="239"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             </customView>
                             <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="20" horizontalPageScroll="10" verticalLineScroll="20" verticalPageScroll="10" hasHorizontalScroller="NO" id="VN5-ui-0hD">
-                                <rect key="frame" x="0.0" y="239.5" width="623" height="238.5"/>
+                                <rect key="frame" x="0.0" y="240" width="623" height="238"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="M1f-rb-1gT">
                                     <rect key="frame" x="1" y="17" width="238" height="117"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnReordering="NO" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="18" rowSizeStyle="automatic" headerView="jXf-cj-VVW" viewBased="YES" id="ivs-Jx-fnR">
-                                            <rect key="frame" x="0.0" y="0.0" width="622" height="0.0"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="577" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.0" colorSpace="calibratedRGB"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn identifier="SourceFile" editable="NO" width="350" minWidth="200" maxWidth="1000" id="yMF-Iw-0cA">
+                                                <tableColumn identifier="SourceFile" editable="NO" width="372" minWidth="200" maxWidth="1000" id="yMF-Iw-0cA">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="File">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -760,7 +760,7 @@
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>
-                                                <tableColumn identifier="Progress" editable="NO" width="200" minWidth="40" maxWidth="1000" id="MqT-x5-jr4">
+                                                <tableColumn identifier="Progress" editable="NO" width="222" minWidth="40" maxWidth="1000" id="MqT-x5-jr4">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Progress">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
