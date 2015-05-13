@@ -11,23 +11,9 @@
 @implementation DropFilesView
 
 - (void)drawRect:(NSRect)rect {
-    //[super drawRect:dirtyRect];
-    
-    // Drawing code here.
-//    NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(self.bounds, 10, 10) xRadius:10 yRadius:10];
-//    
-//    CGFloat lineDash[6];
-//    lineDash[0] = 20;
-//    lineDash[1] = 10.0;
-//
-//    [path setLineWidth:2];
-//    [path setLineCapStyle:NSRoundLineCapStyle];
-//    [path setLineDash:lineDash count:2 phase:0.0];
-//    
-//    [[NSColor darkGrayColor] set];
-//
-//    [path stroke];
 
+    // Following code courtesey of ImageOptim - thanks!
+    
     BOOL highlight = NO;
     
     [[NSColor windowBackgroundColor] setFill];
