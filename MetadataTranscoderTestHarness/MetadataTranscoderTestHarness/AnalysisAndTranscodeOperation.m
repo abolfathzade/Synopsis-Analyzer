@@ -269,19 +269,22 @@
         CMBufferQueueRef passthroughVideoBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &passthroughVideoBufferQueue);
 
-        dispatch_queue_t passthroughVideoDecodeQueue = dispatch_queue_create("passthroughVideoDecodeQueue", 0);
-        dispatch_group_enter(g);
-        
-        dispatch_queue_t passthroughVideoEncodeQueue = dispatch_queue_create("passthroughVideoEncodeQueue", 0);
-        dispatch_group_enter(g);
-
         CMBufferQueueRef uncompressedVideoBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &uncompressedVideoBufferQueue);
-        
-        // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t uncompressedVideoDecodeQueue = dispatch_queue_create("uncompressedVideoDecodeQueue", 0);
+
+        dispatch_queue_t passthroughVideoDecodeQueue = dispatch_queue_create("passthroughVideoDecodeQueue", DISPATCH_QUEUE_SERIAL);
         dispatch_group_enter(g);
         
+        dispatch_queue_t passthroughVideoEncodeQueue = dispatch_queue_create("passthroughVideoEncodeQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_group_enter(g);
+        
+        // We always need to decode uncompressed frames to send to our analysis plugins
+        dispatch_queue_t uncompressedVideoDecodeQueue = dispatch_queue_create("uncompressedVideoDecodeQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_group_enter(g);
+        
+        // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
+//        dispatch_semaphore_t videoReadSemaphore = dispatch_semaphore_create(0);
+        dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
 //        CMBufferQueueRef passthroughAudioBufferQueue;
 //        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &passthroughAudioBufferQueue);
@@ -308,11 +311,12 @@
                     CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
                     if(passthroughVideoSampleBuffer)
                     {
-                        
                         // Only add to our passthrough buffer queue if we are going to use those buffers on the encoder end.
                         if(!self.transcoding)
                         {
                             CMBufferQueueEnqueue(passthroughVideoBufferQueue, passthroughVideoSampleBuffer);
+                            NSLog(@"Go Passthrough");
+                            dispatch_semaphore_signal(videoDequeueSemaphore);
                         }
                         
                         CFRelease(passthroughVideoSampleBuffer);
@@ -320,12 +324,21 @@
                     else
                     {
                         // Got NULL - were done
+                    
                         break;
                     }
                 }
             }
             
             finishedReadingAllPassthroughVideo = YES;
+
+            [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
+
+//            if(!self.transcoding)
+//            {
+                NSLog(@"Go Passthtough Final");
+                dispatch_semaphore_signal(videoDequeueSemaphore);
+//            }
 
             dispatch_group_leave(g);
         });
@@ -347,9 +360,9 @@
                         // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
                         if(self.transcoding)
                         {
-                            [[LogController sharedLogController] appendVerboseLog:@"Enqueue Uncompressed Sample Buffer"];
-
                             CMBufferQueueEnqueue(uncompressedVideoBufferQueue, uncompressedVideoSampleBuffer);
+                            NSLog(@"Go Uncompressed");
+                            dispatch_semaphore_signal(videoDequeueSemaphore);
                         }
 
                         CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(uncompressedVideoSampleBuffer);
@@ -448,6 +461,7 @@
                         // Got NULL - were done
                         break;
                     }
+                    
                 }
             }
 
@@ -455,6 +469,12 @@
 
             [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Video Buffers"];
             
+//            if(self.transcoding)
+//            {
+                NSLog(@"Go Uncompressed Final");
+                dispatch_semaphore_signal(videoDequeueSemaphore);
+//            }
+
             dispatch_group_leave(g);
         });
                        
@@ -469,6 +489,9 @@
                     // Are we done reading,
                     if(finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo)
                     {
+                        NSLog(@"Go finished / spooling Final");
+                        dispatch_semaphore_signal(videoDequeueSemaphore);
+
     //                    NSLog(@"Finished Reading waiting to empty queue...");
                         if(CMBufferQueueIsEmpty(passthroughVideoBufferQueue) && CMBufferQueueIsEmpty(uncompressedVideoBufferQueue))
                         {
@@ -496,7 +519,11 @@
                     }
                     
                     CMSampleBufferRef videoSampleBuffer = NULL;
-                    
+
+                    // wait to dequeue until we have a enqueued buffer
+                    NSLog(@"Wait");
+                    dispatch_semaphore_wait(videoDequeueSemaphore, DISPATCH_TIME_FOREVER);
+
                     // Pull from an appropriate source - passthrough or decompressed
                     if(self.transcoding)
                     {
@@ -517,6 +544,7 @@
                         }
                         CFRelease(videoSampleBuffer);
                     }
+                    
                 }
                 
 //                NSLog(@"Stopped Requesting Media");

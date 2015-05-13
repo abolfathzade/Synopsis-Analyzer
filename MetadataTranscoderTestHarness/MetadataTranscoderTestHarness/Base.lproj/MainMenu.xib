@@ -688,7 +688,7 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                         <items>
-                            <menuItem title="MetadataTranscoderTestHarness Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                            <menuItem title="Synopsis Help" keyEquivalent="?" id="FKE-Sm-Kum">
                                 <connections>
                                     <action selector="showHelp:" target="-1" id="y7X-2Q-9no"/>
                                 </connections>
@@ -877,7 +877,7 @@
                         <tabViewItems>
                             <tabViewItem label="General" identifier="" id="abg-ex-ZTG">
                                 <view key="view" id="qFb-P7-7VK">
-                                    <rect key="frame" x="10" y="33" width="203" height="0.0"/>
+                                    <rect key="frame" x="10" y="33" width="474" height="405"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 </view>
                             </tabViewItem>
