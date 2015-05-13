@@ -65,6 +65,10 @@
     return self;
 }
 
+- (void) dealloc
+{
+    detector.release();
+}
 
 - (void) beginMetadataAnalysisSession
 {

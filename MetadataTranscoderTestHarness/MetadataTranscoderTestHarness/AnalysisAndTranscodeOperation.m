@@ -324,7 +324,6 @@
                     else
                     {
                         // Got NULL - were done
-                    
                         break;
                     }
                 }
@@ -334,11 +333,8 @@
 
             [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
 
-//            if(!self.transcoding)
-//            {
-                NSLog(@"Go Passthtough Final");
-                dispatch_semaphore_signal(videoDequeueSemaphore);
-//            }
+            // Fire final semaphore signal to hit finalization
+            dispatch_semaphore_signal(videoDequeueSemaphore);
 
             dispatch_group_leave(g);
         });
@@ -361,7 +357,6 @@
                         if(self.transcoding)
                         {
                             CMBufferQueueEnqueue(uncompressedVideoBufferQueue, uncompressedVideoSampleBuffer);
-                            NSLog(@"Go Uncompressed");
                             dispatch_semaphore_signal(videoDequeueSemaphore);
                         }
 
@@ -469,11 +464,8 @@
 
             [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Video Buffers"];
             
-//            if(self.transcoding)
-//            {
-                NSLog(@"Go Uncompressed Final");
-                dispatch_semaphore_signal(videoDequeueSemaphore);
-//            }
+            // Fire final semaphore signal to hit finalization
+            dispatch_semaphore_signal(videoDequeueSemaphore);
 
             dispatch_group_leave(g);
         });
@@ -489,10 +481,9 @@
                     // Are we done reading,
                     if(finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo)
                     {
-                        NSLog(@"Go finished / spooling Final");
+                        NSLog(@"Finished Reading waiting to empty queue...");
                         dispatch_semaphore_signal(videoDequeueSemaphore);
 
-    //                    NSLog(@"Finished Reading waiting to empty queue...");
                         if(CMBufferQueueIsEmpty(passthroughVideoBufferQueue) && CMBufferQueueIsEmpty(uncompressedVideoBufferQueue))
                         {
                             // TODO: AGGREGATE METADATA THAT ISNT PER FRAME
@@ -521,7 +512,6 @@
                     CMSampleBufferRef videoSampleBuffer = NULL;
 
                     // wait to dequeue until we have a enqueued buffer
-                    NSLog(@"Wait");
                     dispatch_semaphore_wait(videoDequeueSemaphore, DISPATCH_TIME_FOREVER);
 
                     // Pull from an appropriate source - passthrough or decompressed
