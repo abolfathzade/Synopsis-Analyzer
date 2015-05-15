@@ -45,15 +45,11 @@
 
 - (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
 {
-    
-    NSLog(@"%@", sender.draggingPasteboard);
     return YES;
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
-    NSLog(@"%@", NSStringFromSelector(_cmd));
-
     return YES;
 }
 
@@ -64,27 +60,31 @@
 
 - (NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender
 {
-    NSLog(@"%@", NSStringFromSelector(_cmd));
-
-
-    self.highLight = YES;
-    [self setNeedsDisplay:YES];
     
     if ((NSDragOperationGeneric & [sender draggingSourceOperationMask]) == NSDragOperationGeneric)
     {
 
-//        NSDictionary* searchOptions = @{NSPasteboardURLReadingFileURLsOnlyKey : @YES,
-//                                        NSPasteboardURLReadingContentsConformToTypesKey : [AVMovie movieTypes]};
-//        
-//        [sender enumerateDraggingItemsWithOptions:NSDraggingItemEnumerationClearNonenumeratedImages
-//                                          forView:self
-//                                          classes:@[[NSURL class]]
-//                                    searchOptions:searchOptions
-//                                       usingBlock:^(NSDraggingItem *draggingItem, NSInteger idx, BOOL *stop) {
-//
-//                                       }];
-//
+        // This thins out irrelevant items in our drag operation
+        NSDictionary* searchOptions = @{NSPasteboardURLReadingFileURLsOnlyKey : @YES,
+                                        NSPasteboardURLReadingContentsConformToTypesKey : [AVMovie movieTypes]};
+        
+        __block NSUInteger countOfValidItems = 0;
+        [sender enumerateDraggingItemsWithOptions:NSDraggingItemEnumerationClearNonenumeratedImages
+                                          forView:self
+                                          classes:@[[NSURL class]]
+                                    searchOptions:searchOptions
+                                       usingBlock:^(NSDraggingItem *draggingItem, NSInteger idx, BOOL *stop) {
+                                           countOfValidItems++;
+                                       }];
 
+
+        sender.numberOfValidItemsForDrop = countOfValidItems;
+        
+        if(countOfValidItems)
+        {
+            self.highLight = YES;
+            [self setNeedsDisplay:YES];
+        }
         
         return NSDragOperationGeneric;
     }
@@ -100,14 +100,10 @@
 {
     self.highLight = NO;
     [self setNeedsDisplay:YES];
-    
-    NSLog(@"%@", NSStringFromSelector(_cmd));
-
 }
 
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender
 {
-
     NSArray* classArray = @[[NSURL class]];
     NSDictionary* searchOptions = @{NSPasteboardURLReadingFileURLsOnlyKey : @YES,
                                     NSPasteboardURLReadingContentsConformToTypesKey : [AVMovie movieTypes]};
@@ -115,8 +111,6 @@
     NSArray* urls = [[sender draggingPasteboard] readObjectsForClasses:classArray options:searchOptions];
     NSURL* fileURL=[NSURL URLFromPasteboard: [sender draggingPasteboard]];
 
-    NSLog(@"%@", fileURL);
-    
     if(self.dragDelegate)
     {
         if([self.dragDelegate respondsToSelector:@selector(handleDropedFiles:)])
