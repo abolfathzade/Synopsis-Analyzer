@@ -12,6 +12,7 @@
 #import <VideoToolbox/VTVideoEncoderList.h>
 #import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 
+#import "DropFilesView.h"
 #import "LogController.h"
 #import "SampleBufferAnalyzerPluginProtocol.h"
 
@@ -26,6 +27,8 @@ const NSString* value = @"Value";
 @interface AppDelegate ()
 
 @property (weak) IBOutlet NSWindow *window;
+@property (weak) IBOutlet DropFilesView* dropFilesView;
+
 @property (atomic, readwrite, strong) NSOperationQueue* transcodeQueue;
 @property (atomic, readwrite, strong) NSOperationQueue* metadataQueue;
 
@@ -77,6 +80,10 @@ const NSString* value = @"Value";
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    
+    [[self window] makeFirstResponder:self.dropFilesView];
+
+    self.dropFilesView.dragDelegate = self;
     
     // Load our plugins
     NSString* pluginsPath = [[NSBundle mainBundle] builtInPlugInsPath];
@@ -543,7 +550,10 @@ const NSString* value = @"Value";
     NSOpenPanel* openPanel = [NSOpenPanel openPanel];
     
     [openPanel setAllowsMultipleSelection:YES];
-    [openPanel setAllowedFileTypes:@[@"mov", @"mp4", @"m4v"]];
+    
+    // TODO
+    [openPanel setAllowedFileTypes:[AVMovie movieTypes]];
+//    [openPanel setAllowedFileTypes:@[@"mov", @"mp4", @"m4v"]];
     
     [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)
      {
@@ -619,8 +629,20 @@ const NSString* value = @"Value";
     [self.transcodeQueue addOperation:analysis];
 }
 
+
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
 }
+
+#pragma mark - Drop File Helper
+
+- (void) handleDropedFiles:(NSArray *)fileURLArray
+{
+    for(NSURL* url in fileURLArray)
+    {
+        [self enqueueFileForTranscode:url];
+    }
+}
+
 
 @end

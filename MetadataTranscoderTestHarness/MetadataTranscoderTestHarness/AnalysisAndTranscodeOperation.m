@@ -283,7 +283,6 @@
         dispatch_group_enter(g);
         
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
-//        dispatch_semaphore_t videoReadSemaphore = dispatch_semaphore_create(0);
         dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
 //        CMBufferQueueRef passthroughAudioBufferQueue;
@@ -315,7 +314,7 @@
                         if(!self.transcoding)
                         {
                             CMBufferQueueEnqueue(passthroughVideoBufferQueue, passthroughVideoSampleBuffer);
-                            NSLog(@"Go Passthrough");
+                            // Free to dequeue on other thread
                             dispatch_semaphore_signal(videoDequeueSemaphore);
                         }
                         
@@ -357,6 +356,7 @@
                         if(self.transcoding)
                         {
                             CMBufferQueueEnqueue(uncompressedVideoBufferQueue, uncompressedVideoSampleBuffer);
+                            // Free to dequeue on other thread
                             dispatch_semaphore_signal(videoDequeueSemaphore);
                         }
 
@@ -511,7 +511,7 @@
                     
                     CMSampleBufferRef videoSampleBuffer = NULL;
 
-                    // wait to dequeue until we have a enqueued buffer
+                    // wait to dequeue until we have a enqueued buffer signal from our enqueue thread.
                     dispatch_semaphore_wait(videoDequeueSemaphore, DISPATCH_TIME_FOREVER);
 
                     // Pull from an appropriate source - passthrough or decompressed

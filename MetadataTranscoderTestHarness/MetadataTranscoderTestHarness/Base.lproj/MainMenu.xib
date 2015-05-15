@@ -13,6 +13,7 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
             <connections>
+                <outlet property="dropFilesView" destination="UrI-I2-Ixg" id="TTP-KS-ntk"/>
                 <outlet property="prefsAudioBitrate" destination="833-vb-xto" id="7Yf-em-5TC"/>
                 <outlet property="prefsAudioFormat" destination="D5T-az-6ef" id="D4J-br-fyY"/>
                 <outlet property="prefsAudioQuality" destination="qiP-Mi-o6G" id="5Pl-Rd-RZi"/>
@@ -722,7 +723,7 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnReordering="NO" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="18" rowSizeStyle="automatic" headerView="jXf-cj-VVW" viewBased="YES" id="ivs-Jx-fnR">
-                                            <rect key="frame" x="0.0" y="0.0" width="577" height="0.0"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="621" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.0" colorSpace="calibratedRGB"/>
@@ -875,9 +876,9 @@
                         <rect key="frame" x="12" y="10" width="494" height="451"/>
                         <font key="font" metaFont="system"/>
                         <tabViewItems>
-                            <tabViewItem label="General" identifier="" id="abg-ex-ZTG">
-                                <view key="view" id="qFb-P7-7VK">
-                                    <rect key="frame" x="10" y="33" width="474" height="405"/>
+                            <tabViewItem label="Analysis" identifier="2" id="RQt-D1-uEV">
+                                <view key="view" id="XOx-57-V1Z">
+                                    <rect key="frame" x="10" y="33" width="201" height="0.0"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 </view>
                             </tabViewItem>
@@ -1135,8 +1136,8 @@
                                     </subviews>
                                 </view>
                             </tabViewItem>
-                            <tabViewItem label="Analysis" identifier="2" id="RQt-D1-uEV">
-                                <view key="view" id="XOx-57-V1Z">
+                            <tabViewItem label="Advanced" identifier="" id="abg-ex-ZTG">
+                                <view key="view" id="qFb-P7-7VK">
                                     <rect key="frame" x="10" y="33" width="474" height="405"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 </view>
@@ -1145,7 +1146,7 @@
                     </tabView>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="165.5" y="1032.5"/>
+            <point key="canvasLocation" x="77.5" y="959.5"/>
         </window>
         <window title="Log" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" animationBehavior="default" id="3EF-QC-5lQ">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>

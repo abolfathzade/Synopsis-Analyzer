@@ -7,8 +7,11 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "DropFilesView.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, DropFileHelper>
 
+// Drop File Helper Protocol
+- (void) handleDropedFiles:(NSArray *)fileURLArray;
 @end
 
