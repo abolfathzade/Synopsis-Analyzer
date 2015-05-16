@@ -81,6 +81,10 @@ const NSString* value = @"Value";
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     
+    [self.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
+//    [self.window.contentView setMaterial:NSVisualEffectMaterialDark];
+//    self.window.contentView
+
     [[self window] makeFirstResponder:self.dropFilesView];
 
     self.dropFilesView.dragDelegate = self;

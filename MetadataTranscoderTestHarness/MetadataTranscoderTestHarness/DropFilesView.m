@@ -135,9 +135,11 @@
     [[NSColor windowBackgroundColor] setFill];
     NSRectFill(rect);
     
-    NSColor *gray = [NSColor colorWithDeviceWhite:0 alpha:(self.highLight ? 1.0/4.0 : 1.0/8.0)];
-    [gray set];
-    [gray setFill];
+    NSColor *drawColor = [NSColor colorWithDeviceWhite:1 alpha:(self.highLight ? 1.0 : 0.5)];
+//    NSColor* gray = [NSColor colorForControlTint:[NSColor currentControlTint]];
+//    NSColor* drawColor = (self.highLight) ? [NSColor controlLightHighlightColor] : [NSColor controlHighlightColor];
+    [drawColor set];
+    [drawColor setFill];
     
     NSRect bounds = [self bounds];
     CGFloat size = MIN(bounds.size.width/2.0, bounds.size.height/1.5);
