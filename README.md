@@ -1,4 +1,3 @@
-# MetadataTranscoderTestHarness
 
 #Synopsis Analyzer/Transcoder
 
