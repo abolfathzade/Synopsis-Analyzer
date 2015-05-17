@@ -32,7 +32,7 @@
 
 - (void) dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"MVNewTranscodeOperationAvailable" object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:kSynopsisNewTranscodeOperationAvailable object:nil];
 }
 
 // TODO: This is being run more than once from AwakeFrom Nib due to some BS in NSTableView shite
@@ -57,7 +57,7 @@
         self.progressControllerArray = [NSMutableArray new];
         self.revealControllerArray = [NSMutableArray new];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addTranscodeAndAnalysisOperation:) name:@"MVNewTranscodeOperationAvailable" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addTranscodeAndAnalysisOperation:) name:kSynopsisNewTranscodeOperationAvailable object:nil];
     });
     
 }

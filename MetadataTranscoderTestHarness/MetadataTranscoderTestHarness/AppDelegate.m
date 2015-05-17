@@ -613,7 +613,7 @@ const NSString* value = @"Value";
         });
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter]  postNotificationName:@"MVNewTranscodeOperationAvailable" object:pass2];
+            [[NSNotificationCenter defaultCenter]  postNotificationName:kSynopsisNewTranscodeOperationAvailable object:pass2];
         });
         
         [self.metadataQueue addOperation:pass2];
@@ -623,7 +623,7 @@ const NSString* value = @"Value";
     [[LogController sharedLogController] appendVerboseLog:@"Begin Transcode and Analysis"];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter]  postNotificationName:@"MVNewTranscodeOperationAvailable" object:analysis];
+        [[NSNotificationCenter defaultCenter]  postNotificationName:kSynopsisNewTranscodeOperationAvailable object:analysis];
     });
 
     

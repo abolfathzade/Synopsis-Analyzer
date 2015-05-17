@@ -8,6 +8,8 @@
 
 #import "BaseTranscodeOperation.h"
 
+const NSString* kSynopsisNewTranscodeOperationAvailable = @"kSynopsisNewTranscodeOperationAvailable";
+
 const NSString* kSynopsislMetadataIdentifier = @"mdta/org.v002.synopsis.metadata";
 
 const NSString* kSynopsisTranscodeVideoSettingsKey = @"kSynopsisVideoTranscodeSettings";

@@ -9,6 +9,9 @@
 #import <Foundation/Foundation.h>
 #import "LogController.h"
 
+// Self explanatory, used when our enqueing fires off a new operation
+
+extern const NSString* kSynopsisNewTranscodeOperationAvailable;
 
 extern const NSString* kSynopsislMetadataIdentifier;
 
@@ -54,14 +57,13 @@ extern const NSString* kSynopsisAnalyzedGlobalMetadataKey;
 // Otherwise, you have a race condition.
 // And thats fucking stupid.
 
-// Progress Block
-
 
 @interface BaseTranscodeOperation : NSOperation
 @property (atomic, readwrite, strong) NSURL* sourceURL;
 @property (atomic, readwrite, strong) NSURL* destinationURL;
 @property (atomic, readwrite) CGFloat progress;
 
+// Every progress update tick this block is fired - update your ui on the main queue here.
 @property (copy) void (^progressBlock)(CGFloat progress);
 
 - (void) start __attribute__((objc_requires_super));
