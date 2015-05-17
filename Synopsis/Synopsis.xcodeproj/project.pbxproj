@@ -345,7 +345,7 @@
 		1BA68C871AD6EAFB003B3CE9 /* libopencv_video.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_video.a; sourceTree = "<group>"; };
 		1BA68C881AD6EAFB003B3CE9 /* libopencv_videoio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_videoio.a; sourceTree = "<group>"; };
 		1BA68C891AD6EAFB003B3CE9 /* libopencv_videostab.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_videostab.a; sourceTree = "<group>"; };
-		1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = MetadataTranscoderTestHarness.app; path = Synopsis.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Synopsis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -947,7 +947,7 @@
 		1BEA4D1A1ACB2BCC00AB57C1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */,
+				1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */,
 				1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */,
 				1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */,
 			);
@@ -1040,7 +1040,7 @@
 			);
 			name = Synopsis;
 			productName = MetadataTranscoderTestHarness;
-			productReference = 1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */;
+			productReference = 1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1326,7 +1326,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = MetadataTranscoderTestHarness/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1337,7 +1337,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = MetadataTranscoderTestHarness/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
