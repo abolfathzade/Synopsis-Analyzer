@@ -345,7 +345,7 @@
 		1BA68C871AD6EAFB003B3CE9 /* libopencv_video.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_video.a; sourceTree = "<group>"; };
 		1BA68C881AD6EAFB003B3CE9 /* libopencv_videoio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_videoio.a; sourceTree = "<group>"; };
 		1BA68C891AD6EAFB003B3CE9 /* libopencv_videostab.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_videostab.a; sourceTree = "<group>"; };
-		1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetadataTranscoderTestHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BEA4D191ACB2BCC00AB57C1 /* MetadataTranscoderTestHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = MetadataTranscoderTestHarness.app; path = Synopsis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -974,8 +974,7 @@
 				1BEA4D1C1ACB2BCC00AB57C1 /* Supporting Files */,
 				1B95DF091AFFFA9F004FEE2D /* VideoToolboxPrivateHeaders.h */,
 			);
-			name = Synopsis;
-			path = MetadataTranscoderTestHarness;
+			path = Synopsis;
 			sourceTree = "<group>";
 		};
 		1BEA4D1C1ACB2BCC00AB57C1 /* Supporting Files */ = {
