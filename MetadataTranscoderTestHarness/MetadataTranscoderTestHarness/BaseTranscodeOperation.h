@@ -3,14 +3,14 @@
 //  MetadataTranscoderTestHarness
 //
 //  Created by vade on 4/4/15.
-//  Copyright (c) 2015 metavisual. All rights reserved.
+//  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import "LogController.h"
 
 
-extern const NSString* kMetavisualMetadataIdentifier;
+extern const NSString* kSynopsislMetadataIdentifier;
 
 // We have a 2 pass analysis and decode (and possibly encode) system:
 
@@ -26,28 +26,28 @@ extern const NSString* kMetavisualMetadataIdentifier;
 // Key whose value is a dictionary appropriate for use with AVAssetWriterInput output settings. See AVVideoSettings.h
 // If this key is [NSNull null] it implies passthrough video encoding - sample buffers will not be re-encoded;
 // Required
-extern const NSString* kMetavisualTranscodeVideoSettingsKey;
+extern const NSString* kSynopsisTranscodeVideoSettingsKey;
 
 // Key whose value is a dictionary appropriate for use with AVAssetWriterInput output settings. See AVAudioSettings.h
 // If this key is [NSNull null] it implies passthrough video encoding - sample buffers will not be re-encoded;
 // Required
-extern const NSString* kMetavisualTranscodeAudioSettingsKey;
+extern const NSString* kSynopsisTranscodeAudioSettingsKey;
 
 // Key whose value is an NSArray of metadata dictionaries (format TBD, we need to include time, maybe CMTimeRangeValues ?)
 // The existence of this key implies we will write a metadata track associated with our video track
 // Optional
-extern const NSString* kMetavisualAnalyzedVideoSampleBufferMetadataKey;
+extern const NSString* kSynopsisAnalyzedVideoSampleBufferMetadataKey;
 
 // TODO: Implement this and think about audio metadata.
 // Key whose value is an NSArray of metadata dictionaries (format TBD, we need to include time, maybe CMTimeRangeValues ?)
 // The existence of this key implies we will write a metadata track associated with our video track.
 // Optional
-extern const NSString* kMetavisualAnalyzedAudioSampleBufferMetadataKey;
+extern const NSString* kSynopsisAnalyzedAudioSampleBufferMetadataKey;
 
 // Key whose value is a dictionary containing aggregate overall metadata used to write a summary metadata entry.
 // The existence of this key implies we will write a metadata track with no association
 // Optional
-extern const NSString* kMetavisualAnalyzedGlobalMetadataKey;
+extern const NSString* kSynopsisAnalyzedGlobalMetadataKey;
 
 // Base Transcode Operation ensures that its completion block runs WITHIN MAIN
 // So that you know that depended operations have the previous compltion block called.

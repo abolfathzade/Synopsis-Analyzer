@@ -3,19 +3,18 @@
 //  MetadataTranscoderTestHarness
 //
 //  Created by vade on 4/4/15.
-//  Copyright (c) 2015 metavisual. All rights reserved.
+//  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
 #import "BaseTranscodeOperation.h"
 
-const NSString* kMetavisualMetadataIdentifier = @"mdta/org.metavisual.somethingsomething";
+const NSString* kSynopsislMetadataIdentifier = @"mdta/org.v002.synopsis.metadata";
 
-
-const NSString* kMetavisualTranscodeVideoSettingsKey = @"kMetavisualVideoTranscodeSettings";
-const NSString* kMetavisualTranscodeAudioSettingsKey = @"kMetavisualAudioTranscodeSettings";
-const NSString* kMetavisualAnalyzedVideoSampleBufferMetadataKey = @"kMetavisualAnalyzedVideoSampleBufferMetadata";
-const NSString* kMetavisualAnalyzedAudioSampleBufferMetadataKey = @"kMetavisualAnalyzedAudioSampleBufferMetadata";
-const NSString* kMetavisualAnalyzedGlobalMetadataKey = @"kMetavisualAnalyzedGlobalMetadata";
+const NSString* kSynopsisTranscodeVideoSettingsKey = @"kSynopsisVideoTranscodeSettings";
+const NSString* kSynopsisTranscodeAudioSettingsKey = @"kSynopsisAudioTranscodeSettings";
+const NSString* kSynopsisAnalyzedVideoSampleBufferMetadataKey = @"kSynopsisAnalyzedVideoSampleBufferMetadata";
+const NSString* kSynopsisAnalyzedAudioSampleBufferMetadataKey = @"kSynopsisAnalyzedAudioSampleBufferMetadata";
+const NSString* kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalMetadata";
 
 @implementation BaseTranscodeOperation
 

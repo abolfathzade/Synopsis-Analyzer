@@ -3,7 +3,7 @@
 //  MetadataTranscoderTestHarness
 //
 //  Created by vade on 4/3/15.
-//  Copyright (c) 2015 metavisual. All rights reserved.
+//  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
 // Include OpenCV before anything else because FUCK C++
@@ -49,7 +49,7 @@
     if(self)
     {
         self.pluginName = @"OpenCV Analyzer";
-        self.pluginIdentifier = @"org.metavisual.OpenCVAnalyzer";
+        self.pluginIdentifier = @"info.v002.Synopsis.OpenCVAnalyzer";
         self.pluginAuthors = @[@"Anton Marini"];
         self.pluginDescription = @"OpenCV analyzer";
         self.pluginAPIVersionMajor = 0;
@@ -103,7 +103,7 @@
     {
         if (error != NULL)
         {
-            *error = [[NSError alloc] initWithDomain:@"Metavisual.noSampleBuffer" code:-6666 userInfo:nil];
+            *error = [[NSError alloc] initWithDomain:@"Synopsis.noSampleBuffer" code:-6666 userInfo:nil];
         }
         return nil;
     }
@@ -120,7 +120,7 @@
         {
             if (error != NULL)
             {
-                *error = [[NSError alloc] initWithDomain:@"Metavisual.noPixelBufferInSampleBuffer" code:-666 userInfo:nil];
+                *error = [[NSError alloc] initWithDomain:@"Synopsis.noPixelBufferInSampleBuffer" code:-666 userInfo:nil];
             }
             return nil;
         }

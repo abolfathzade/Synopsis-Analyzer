@@ -3,7 +3,7 @@
 //  MetadataTranscoderTestHarness
 //
 //  Created by vade on 3/31/15.
-//  Copyright (c) 2015 metavisual. All rights reserved.
+//  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
 #import "BaseTranscodeOperation.h"

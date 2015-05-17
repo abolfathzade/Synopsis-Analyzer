@@ -3,7 +3,7 @@
 //  MetadataTranscoderTestHarness
 //
 //  Created by vade on 3/31/15.
-//  Copyright (c) 2015 metavisual. All rights reserved.
+//  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
 #import "AppDelegate.h"
@@ -42,7 +42,7 @@ const NSString* value = @"Value";
 @property (weak) IBOutlet NSTextField* prefsVideoDimensionsCustomHeight;
 @property (weak) IBOutlet NSPopUpButton* prefsVideoAspectRatio;
 
-// sent to kMetavisualTranscodeVideoSettingsKey
+// sent to kSynopsisTranscodeVideoSettingsKey
 @property (atomic, readwrite, strong) NSDictionary* prefsVideoSettings;
 
 @property (weak) IBOutlet NSPopUpButton* prefsAudioFormat;
@@ -50,7 +50,7 @@ const NSString* value = @"Value";
 @property (weak) IBOutlet NSPopUpButton* prefsAudioQuality;
 @property (weak) IBOutlet NSPopUpButton* prefsAudioBitrate;
 
-// sent to kMetavisualTranscodeAudioSettingsKey
+// sent to kSynopsisTranscodeAudioSettingsKey
 @property (atomic, readwrite, strong) NSDictionary* prefsAudioSettings;
 
 @end
@@ -84,9 +84,6 @@ const NSString* value = @"Value";
     [self.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
 //    [self.window.contentView setMaterial:NSVisualEffectMaterialDark];
 //    self.window.contentView
-
-    [[self window] makeFirstResponder:self.dropFilesView];
-
     self.dropFilesView.dragDelegate = self;
     
     // Load our plugins
@@ -586,8 +583,8 @@ const NSString* value = @"Value";
     destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPath2] URLByAppendingPathExtension:lastPathExtention];
     
     // Pass 1 is our analysis pass, and our decode pass
-    NSDictionary* transcodeOptions = @{kMetavisualTranscodeVideoSettingsKey : (self.prefsVideoSettings) ? self.prefsVideoSettings : [NSNull null],
-                                       kMetavisualTranscodeAudioSettingsKey : [NSNull null],
+    NSDictionary* transcodeOptions = @{kSynopsisTranscodeVideoSettingsKey : (self.prefsVideoSettings) ? self.prefsVideoSettings : [NSNull null],
+                                       kSynopsisTranscodeAudioSettingsKey : [NSNull null],
                                        };
     
     AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL
@@ -603,9 +600,9 @@ const NSString* value = @"Value";
         // Retarded weak/strong pattern so we avoid retain loopl
         __strong AnalysisAndTranscodeOperation* strongAnalysis = weakAnalysis;
         
-        NSDictionary* metadataOptions = @{kMetavisualAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
-                                          kMetavisualAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
-                                          kMetavisualAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
+        NSDictionary* metadataOptions = @{kSynopsisAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
+                                          kSynopsisAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
+                                          kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
                                           };
 
         MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];

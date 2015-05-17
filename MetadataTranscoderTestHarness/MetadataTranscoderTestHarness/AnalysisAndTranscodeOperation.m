@@ -3,7 +3,7 @@
 //  MetadataTranscoderTestHarness
 //
 //  Created by vade on 3/31/15.
-//  Copyright (c) 2015 metavisual. All rights reserved.
+//  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
 #import "AnalysisAndTranscodeOperation.h"
@@ -88,14 +88,14 @@
         self.videoTranscodeSettings = nil;
         self.audioTranscodeSettings = nil;
         
-        if(self.transcodeOptions[kMetavisualTranscodeVideoSettingsKey] != [NSNull null])
+        if(self.transcodeOptions[kSynopsisTranscodeVideoSettingsKey] != [NSNull null])
         {
-            self.videoTranscodeSettings = self.transcodeOptions[kMetavisualTranscodeVideoSettingsKey];
+            self.videoTranscodeSettings = self.transcodeOptions[kSynopsisTranscodeVideoSettingsKey];
         }
         
-        if(self.transcodeOptions[kMetavisualTranscodeAudioSettingsKey] != [NSNull null])
+        if(self.transcodeOptions[kSynopsisTranscodeAudioSettingsKey] != [NSNull null])
         {
-            self.audioTranscodeSettings = self.transcodeOptions[kMetavisualTranscodeAudioSettingsKey];
+            self.audioTranscodeSettings = self.transcodeOptions[kSynopsisTranscodeAudioSettingsKey];
         }
         
         if(self.audioTranscodeSettings || self.videoTranscodeSettings)
@@ -427,7 +427,7 @@
                                 
                                 // Annotation text item
                                 AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
-                                textItem.identifier = kMetavisualMetadataIdentifier;
+                                textItem.identifier = kSynopsislMetadataIdentifier;
                                 textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_RawData;
                                 textItem.value = gzipData;
                                 

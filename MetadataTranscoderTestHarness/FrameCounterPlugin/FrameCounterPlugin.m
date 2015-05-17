@@ -3,7 +3,7 @@
 //  MetadataTranscoderTestHarness
 //
 //  Created by vade on 4/3/15.
-//  Copyright (c) 2015 metavisual. All rights reserved.
+//  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
 #import "FrameCounterPlugin.h"
@@ -35,7 +35,7 @@
     if(self)
     {
         self.pluginName = @"Frame Counter";
-        self.pluginIdentifier = @"org.metavisual.framecounter";
+        self.pluginIdentifier = @"info.v002.Synopsis.FrameCounter";
         self.pluginAuthors = @[@"Anton Marini"];
         self.pluginDescription = @"Simple Frame Counter and Plugin API Demonstrator";
         self.pluginAPIVersionMajor = 0;

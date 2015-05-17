@@ -3,7 +3,7 @@
 //  MetadataTranscoderTestHarness
 //
 //  Created by vade on 4/4/15.
-//  Copyright (c) 2015 metavisual. All rights reserved.
+//  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
 #import "MetadataWriterTranscodeOperation.h"
@@ -19,7 +19,7 @@
 //  MetadataTranscoderTestHarness
 //
 //  Created by vade on 3/31/15.
-//  Copyright (c) 2015 metavisual. All rights reserved.
+//  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
 @interface MetadataWriterTranscodeOperation ()
@@ -65,19 +65,19 @@
         self.destinationURL = destinationURL;
         self.metadataOptions = metadataOptions;
         
-        if(self.metadataOptions[kMetavisualAnalyzedVideoSampleBufferMetadataKey])
+        if(self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey])
         {
-            self.analyzedVideoSampleBufferMetadata = [self.metadataOptions[kMetavisualAnalyzedVideoSampleBufferMetadataKey] mutableCopy];
+            self.analyzedVideoSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey] mutableCopy];
         }
         
-        if(self.metadataOptions[kMetavisualAnalyzedAudioSampleBufferMetadataKey])
+        if(self.metadataOptions[kSynopsisAnalyzedAudioSampleBufferMetadataKey])
         {
-            self.analyzedAudioSampleBufferMetadata = [self.metadataOptions[kMetavisualAnalyzedAudioSampleBufferMetadataKey] mutableCopy];
+            self.analyzedAudioSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedAudioSampleBufferMetadataKey] mutableCopy];
         }
         
-        if(self.metadataOptions[kMetavisualAnalyzedGlobalMetadataKey])
+        if(self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey])
         {
-            self.analyzedGlobalMetadata = [self.metadataOptions[kMetavisualAnalyzedGlobalMetadataKey] mutableCopy];
+            self.analyzedGlobalMetadata = [self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey] mutableCopy];
         }
         
         [self setupTranscodeShitSucessfullyOrDontWhatverMan];
@@ -158,7 +158,7 @@
     
     // Metadata
     CMFormatDescriptionRef metadataFormatDescription = NULL;
-    NSArray *specs = @[@{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : kMetavisualMetadataIdentifier,
+    NSArray *specs = @[@{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : kSynopsislMetadataIdentifier,
                          (__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType : (__bridge NSString *)kCMMetadataBaseDataType_RawData}];
     
     OSStatus err = CMMetadataFormatDescriptionCreateWithMetadataSpecifications(kCFAllocatorDefault, kCMMetadataFormatType_Boxed, (__bridge CFArrayRef)specs, &metadataFormatDescription);
