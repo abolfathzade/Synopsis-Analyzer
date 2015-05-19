@@ -41,6 +41,16 @@
     [self unregisterDraggedTypes];
 }
 
+- (BOOL) isOpaque
+{
+    return NO;
+}
+
+- (BOOL) allowsVibrancy
+{
+    return YES;
+}
+
 #pragma mark - Drag
 
 - (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
@@ -109,7 +119,6 @@
                                     NSPasteboardURLReadingContentsConformToTypesKey : [AVMovie movieTypes]};
 
     NSArray* urls = [[sender draggingPasteboard] readObjectsForClasses:classArray options:searchOptions];
-    NSURL* fileURL=[NSURL URLFromPasteboard: [sender draggingPasteboard]];
 
     if(self.dragDelegate)
     {
@@ -132,10 +141,10 @@
     
     // Following code courtesey of ImageOptim - thanks!
     
-    [[NSColor windowBackgroundColor] setFill];
+    [[NSColor colorWithWhite:0.0 alpha:0.5] setFill];
     NSRectFill(rect);
     
-    NSColor *drawColor = [NSColor colorWithDeviceWhite:1 alpha:(self.highLight ? 1.0 : 0.5)];
+    NSColor *drawColor = [NSColor colorWithDeviceWhite:0.5 alpha:(self.highLight ? 0.5 : 0.25)];
 //    NSColor* gray = [NSColor colorForControlTint:[NSColor currentControlTint]];
 //    NSColor* drawColor = (self.highLight) ? [NSColor controlLightHighlightColor] : [NSColor controlHighlightColor];
     [drawColor set];

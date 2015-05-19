@@ -9,7 +9,7 @@
 #import "ProgressTableViewCellRevealController.h"
 
 @interface ProgressTableViewCellRevealController ()
-@property (weak) IBOutlet NSButton* revealButton;
+@property (weak) IBOutlet NSImageView* revealButton;
 @end
 
 @implementation ProgressTableViewCellRevealController

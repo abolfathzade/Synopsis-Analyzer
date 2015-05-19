@@ -6,7 +6,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="ProgressTableViewCellRevealController">
             <connections>
-                <outlet property="revealButton" destination="XuU-w9-f8c" id="34a-jm-pIG"/>
+                <outlet property="revealButton" destination="KYI-nH-upJ" id="pu4-o5-EfZ"/>
                 <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
             </connections>
         </customObject>
@@ -16,16 +16,13 @@
             <rect key="frame" x="0.0" y="-5" width="18" height="18"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XuU-w9-f8c">
+                <imageView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KYI-nH-upJ">
                     <rect key="frame" x="0.0" y="0.0" width="18" height="18"/>
-                    <buttonCell key="cell" type="inline" bezelStyle="inline" image="NSRevealFreestandingTemplate" imagePosition="above" alignment="left" imageScaling="proportionallyDown" id="748-iN-Yzj">
-                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="smallSystemBold"/>
-                    </buttonCell>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageAlignment="bottom" imageScaling="proportionallyDown" image="NSRevealFreestandingTemplate" id="2AQ-Yk-ZmT"/>
                     <connections>
-                        <action selector="revealDestinationURL:" target="-2" id="3Q1-zE-isx"/>
+                        <action selector="revealDestinationURL:" target="-2" id="7NP-d5-Hgl"/>
                     </connections>
-                </button>
+                </imageView>
             </subviews>
             <point key="canvasLocation" x="236" y="283"/>
         </customView>

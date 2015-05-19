@@ -28,11 +28,14 @@ const NSString* value = @"Value";
 
 @property (weak) IBOutlet NSWindow *window;
 @property (weak) IBOutlet DropFilesView* dropFilesView;
+@property (weak) IBOutlet NSVisualEffectView* effectView;
 
 @property (atomic, readwrite, strong) NSOperationQueue* transcodeQueue;
 @property (atomic, readwrite, strong) NSOperationQueue* metadataQueue;
 
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPlugins;
+@property (atomic, readwrite, strong) NSMutableArray* analyzerPluginsInitializedForPrefs;
+@property (weak) IBOutlet NSArrayController* prefsAnalyzerArrayController;
 
 // Preferences
 @property (weak) IBOutlet NSPopUpButton* prefsVideoCompressor;
@@ -69,24 +72,34 @@ const NSString* value = @"Value";
         // Serial transcode queue
         self.transcodeQueue = [[NSOperationQueue alloc] init];
         self.transcodeQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
-
+        
         // Serial metadata / passthrough writing queue
         self.metadataQueue = [[NSOperationQueue alloc] init];
         self.metadataQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
         
         self.analyzerPlugins = [NSMutableArray new];
+        self.analyzerPluginsInitializedForPrefs = [NSMutableArray new];
     }
     return self;
 }
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-    
+- (void) awakeFromNib
+{
+    [self.effectView setState:NSVisualEffectStateActive];
+
     [self.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
-//    [self.window.contentView setMaterial:NSVisualEffectMaterialDark];
-//    self.window.contentView
+    //    [self.effectView setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
+    [self.effectView setMaterial:NSVisualEffectMaterialDark];
+    //    self.effectView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+    
     self.dropFilesView.dragDelegate = self;
     
-    // Load our plugins
+    self.prefsAnalyzerArrayController.content = self.analyzerPluginsInitializedForPrefs;
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    
+       // Load our plugins
     NSString* pluginsPath = [[NSBundle mainBundle] builtInPlugInsPath];
     
     NSError* error = nil;
@@ -114,6 +127,9 @@ const NSString* value = @"Value";
                         [self.analyzerPlugins addObject:classString];
                         
                         [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Loaded Plugin: %@", classString, nil]];
+                        
+                        [self.prefsAnalyzerArrayController addObject:[[pluginClass alloc] init]];
+                        
                     }
                 }
                 else
@@ -147,7 +163,7 @@ const NSString* value = @"Value";
     [self.prefsVideoAspectRatio removeAllItems];
     
 #pragma mark - Video Prefs Encoders
-
+    
     VTRegisterProfessionalVideoWorkflowVideoDecoders();
     VTRegisterProfessionalVideoWorkflowVideoEncoders();
     
@@ -158,10 +174,10 @@ const NSString* value = @"Value";
     [self.prefsVideoCompressor.menu addItem:[NSMenuItem separatorItem]];
     
     // TODO: HAP / Hardware Accelerated HAP encoding
-//    [self.prefsVideoCompressor addItemWithTitle:@"HAP"];
-//    [self.prefsVideoCompressor addItemWithTitle:@"HAP Alpha"];
-//    [self.prefsVideoCompressor addItemWithTitle:@"HAP Q"];
-
+    //    [self.prefsVideoCompressor addItemWithTitle:@"HAP"];
+    //    [self.prefsVideoCompressor addItemWithTitle:@"HAP Alpha"];
+    //    [self.prefsVideoCompressor addItemWithTitle:@"HAP Q"];
+    
     // TODO:CMVideoCodecType / check what works as a value for AVVideoCodecKey
     CFArrayRef videoEncoders;
     VTCopyVideoEncoderList(NULL, &videoEncoders);
@@ -174,18 +190,18 @@ const NSString* value = @"Value";
         [encoderArrayWithTitles addObject:@{title:encoder[@"DisplayName"], value:encoder}];
     }
     
-//    NSDictionary* animationDictionary = @{ title : @"MPEG4 Video" , value: @{ @"CodecType" : [NSNumber numberWithInt:kCMVideoCodecType_MPEG4Video]}};
-//    [encoderArrayWithTitles addObject: animationDictionary];
+    //    NSDictionary* animationDictionary = @{ title : @"MPEG4 Video" , value: @{ @"CodecType" : [NSNumber numberWithInt:kCMVideoCodecType_MPEG4Video]}};
+    //    [encoderArrayWithTitles addObject: animationDictionary];
     
     [self addMenuItemsToMenu:self.prefsVideoCompressor.menu withArray:encoderArrayWithTitles withSelector:@selector(selectVideoEncoder:)];
-
+    
 #pragma mark - Video Prefs Resolution
-
+    
     NSMenuItem* nativeItem = [[NSMenuItem alloc] initWithTitle:@"Native Resolution" action:@selector(selectVideoResolution:) keyEquivalent:@""];
     [nativeItem setRepresentedObject:[NSValue valueWithSize:NSZeroSize] ];
     [self.prefsVideoDimensions.menu addItem:nativeItem];
     [self.prefsVideoDimensions.menu addItem:[NSMenuItem separatorItem]];
-
+    
     NSArray* videoResolutions = @[
                                   @{title : @"640 x 480 (NTSC)", value : [NSValue valueWithSize:(NSSize){640.0, 480.0}] },
                                   @{title : @"768 x 576 (PAL)", value : [NSValue valueWithSize:(NSSize){786.0, 576.0}] },
@@ -202,7 +218,7 @@ const NSString* value = @"Value";
                                   ];
     
     [self addMenuItemsToMenu:self.prefsVideoDimensions.menu withArray:videoResolutions withSelector:@selector(selectVideoResolution:)];
-
+    
     [self.prefsVideoDimensions.menu addItem:[NSMenuItem separatorItem]];
     
     NSMenuItem* customItem = [[NSMenuItem alloc] initWithTitle:@"Custom" action:@selector(selectVideoEncoder:) keyEquivalent:@""];
@@ -210,12 +226,12 @@ const NSString* value = @"Value";
     [self.prefsVideoDimensions.menu addItem:customItem];
     
 #pragma mark - Video Prefs Quality
-
+    
     NSMenuItem* qualityItem = [[NSMenuItem alloc] initWithTitle:@"Not Applicable" action:@selector(selectVideoQuality:) keyEquivalent:@""];
     [qualityItem setRepresentedObject:[NSNull null]];
     [self.prefsVideoQuality.menu addItem:qualityItem];
     [self.prefsVideoQuality.menu addItem:[NSMenuItem separatorItem]];
-
+    
     NSArray* qualityArray = @[
                               @{title : @"Minimum", value : @0.0} ,
                               @{title : @"Low", value : @0.25},
@@ -223,22 +239,22 @@ const NSString* value = @"Value";
                               @{title : @"High", value : @0.75},
                               @{title : @"Maximum", value : @1.0}
                               ];
-
+    
     [self addMenuItemsToMenu:self.prefsVideoQuality.menu withArray:qualityArray withSelector:@selector(selectVideoQuality:)];
-
+    
 #pragma mark - Video Prefs Aspect Ratio
     
     NSMenuItem* aspectItem = [[NSMenuItem alloc] initWithTitle:@"Native" action:@selector(selectVideoAspectRatio:) keyEquivalent:@""];
     [aspectItem setRepresentedObject:[NSNull null]];
     [self.prefsVideoAspectRatio.menu addItem:aspectItem];
     [self.prefsVideoAspectRatio.menu addItem:[NSMenuItem separatorItem]];
-
+    
     // AVVideoScalingModeKey
     NSArray* aspectArray = @[
-                              @{title : @"Aspect Fill", value : AVVideoScalingModeResizeAspectFill},
-                              @{title : @"Aspect Fit", value : AVVideoScalingModeResizeAspect},
-                              @{title : @"Resize", value : AVVideoScalingModeResize},
-                              ];
+                             @{title : @"Aspect Fill", value : AVVideoScalingModeResizeAspectFill},
+                             @{title : @"Aspect Fit", value : AVVideoScalingModeResizeAspect},
+                             @{title : @"Resize", value : AVVideoScalingModeResize},
+                             ];
     
     [self addMenuItemsToMenu:self.prefsVideoAspectRatio.menu withArray:aspectArray withSelector:@selector(selectVideoAspectRatio:)];
     
@@ -254,35 +270,35 @@ const NSString* value = @"Value";
     [self.prefsAudioBitrate removeAllItems];
     
 #pragma mark - Audio Prefs Format
-
+    
     NSArray* formatArray = @[
-                           @{title : @"LinearPCM", value : @(kAudioFormatLinearPCM)} ,
-                           @{title : @"Apple Lossless", value : @(kAudioFormatAppleLossless)},
-                           @{title : @"AAC", value : @(kAudioFormatMPEG4AAC)},
-                           @{title : @"MP3", value : @(kAudioFormatMPEGLayer3)},
-                           ];
+                             @{title : @"LinearPCM", value : @(kAudioFormatLinearPCM)} ,
+                             @{title : @"Apple Lossless", value : @(kAudioFormatAppleLossless)},
+                             @{title : @"AAC", value : @(kAudioFormatMPEG4AAC)},
+                             @{title : @"MP3", value : @(kAudioFormatMPEGLayer3)},
+                             ];
     
     [self addMenuItemsToMenu:self.prefsAudioFormat.menu withArray:formatArray withSelector:@selector(selectAudioFormat:)];
-
+    
 #pragma mark - Audio Prefs Rate
     
     NSMenuItem* recommendedItem = [[NSMenuItem alloc] initWithTitle:@"Recommended" action:@selector(selectAudioSamplerate:) keyEquivalent:@""];
     [recommendedItem setRepresentedObject:[NSNull null]];
     [self.prefsAudioRate.menu addItem:recommendedItem];
     [self.prefsAudioRate.menu addItem:[NSMenuItem separatorItem]];
-
+    
     NSArray* rateArray = @[
-//                              @{title : @"Recommended", value : [NSNull null]} ,
-                              @{title : @"16.000 Khz", value : @16.000},
-                              @{title : @"22.050 Khz", value : @22.050},
-                              @{title : @"24.000 Khz", value : @24.000},
-                              @{title : @"32.000 Khz", value : @32.000},
-                              @{title : @"44.100 Khz", value : @44.100},
-                              @{title : @"48.000 Khz", value : @48.000},
-                              @{title : @"88.200 Khz", value : @88.200},
-                              @{title : @"96.000 Khz", value : @96.0000},
-                              ];
-
+                           //                              @{title : @"Recommended", value : [NSNull null]} ,
+                           @{title : @"16.000 Khz", value : @16.000},
+                           @{title : @"22.050 Khz", value : @22.050},
+                           @{title : @"24.000 Khz", value : @24.000},
+                           @{title : @"32.000 Khz", value : @32.000},
+                           @{title : @"44.100 Khz", value : @44.100},
+                           @{title : @"48.000 Khz", value : @48.000},
+                           @{title : @"88.200 Khz", value : @88.200},
+                           @{title : @"96.000 Khz", value : @96.0000},
+                           ];
+    
     [self addMenuItemsToMenu:self.prefsAudioRate.menu withArray:rateArray withSelector:@selector(selectAudioSamplerate:)];
     
 #pragma mark - Audio Prefs Quality
@@ -294,32 +310,32 @@ const NSString* value = @"Value";
                               @{title : @"High", value : @0.75},
                               @{title : @"Maximum", value : @1.0}
                               ];
-
+    
     [self addMenuItemsToMenu:self.prefsAudioQuality.menu withArray:qualityArray withSelector:@selector(selectAudioQuality:)];
-
+    
 #pragma mark - Audio Prefs Bitrate
-
+    
     NSMenuItem* recommendedItem2 = [[NSMenuItem alloc] initWithTitle:@"Recommended" action:@selector(selectAudioBitrate:) keyEquivalent:@""];
     [recommendedItem2 setRepresentedObject:[NSNull null]];
     [self.prefsAudioBitrate.menu addItem:recommendedItem2];
     [self.prefsAudioBitrate.menu addItem:[NSMenuItem separatorItem]];
-
+    
     NSArray* bitRateArray = @[
-                           //@{title : @"Recommended", value : [NSNull null]} ,
-                           @{title : @"24 Kbps", value : @24.0},
-                           @{title : @"32 Kbps", value : @32},
-                           @{title : @"48 Kbps", value : @38},
-                           @{title : @"64 Kbps", value : @64},
-                           @{title : @"80 Kbps", value : @80},
-                           @{title : @"96 Kbps", value : @96},
-                           @{title : @"112 Kbps", value : @112},
-                           @{title : @"128 Kbps", value : @128},
-                           @{title : @"160 Kbps", value : @160},
-                           @{title : @"192 Kbps", value : @192},
-                           @{title : @"224 Kbps", value : @224},
-                           @{title : @"256 Kbps", value : @256},
-                           @{title : @"320 Kbps", value : @320},
-                           ];
+                              //@{title : @"Recommended", value : [NSNull null]} ,
+                              @{title : @"24 Kbps", value : @24.0},
+                              @{title : @"32 Kbps", value : @32},
+                              @{title : @"48 Kbps", value : @38},
+                              @{title : @"64 Kbps", value : @64},
+                              @{title : @"80 Kbps", value : @80},
+                              @{title : @"96 Kbps", value : @96},
+                              @{title : @"112 Kbps", value : @112},
+                              @{title : @"128 Kbps", value : @128},
+                              @{title : @"160 Kbps", value : @160},
+                              @{title : @"192 Kbps", value : @192},
+                              @{title : @"224 Kbps", value : @224},
+                              @{title : @"256 Kbps", value : @256},
+                              @{title : @"320 Kbps", value : @320},
+                              ];
     
     [self addMenuItemsToMenu:self.prefsAudioBitrate.menu withArray:bitRateArray withSelector:@selector(selectAudioBitrate:)];
 }
@@ -421,7 +437,7 @@ const NSString* value = @"Value";
         self.prefsVideoDimensionsCustomWidth.enabled = NO;
         self.prefsVideoDimensionsCustomHeight.enabled = NO;
     }
-
+    
     [self validateVideoPrefsUI];
     [self buildVideoPreferences];
 }
@@ -429,7 +445,7 @@ const NSString* value = @"Value";
 - (IBAction)selectVideoQuality:(id)sender
 {
     NSLog(@"selected Video Quality: %@", [sender representedObject]);
-
+    
     [self validateVideoPrefsUI];
     [self buildVideoPreferences];
 }
@@ -437,12 +453,12 @@ const NSString* value = @"Value";
 - (IBAction)selectVideoAspectRatio:(id)sender
 {
     NSLog(@"selected Video Quality: %@", [sender representedObject]);
-
+    
     [self validateVideoPrefsUI];
     [self buildVideoPreferences];
 }
 
-#pragma mark - Prefs Validation
+#pragma mark - Video Prefs Validation
 
 - (void) validateVideoPrefsUI
 {
@@ -469,7 +485,7 @@ const NSString* value = @"Value";
         NSNumber* codecType = compressorDict[@"CodecType"];
         FourCharCode fourcc = (FourCharCode)[codecType intValue];
         NSString* fourCCString = NSFileTypeForHFSTypeCode(fourcc);
-
+        
         // remove ' so "'jpeg'" becomes "jpeg" for example
         fourCCString = [fourCCString stringByReplacingOccurrencesOfString:@"'" withString:@""];
         
@@ -477,7 +493,7 @@ const NSString* value = @"Value";
     }
     // if we have a dimension, custom or other wise, get it
     id sizeValue = self.prefsVideoDimensions.selectedItem.representedObject;
-
+    
     // Custom Size for NULL entry
     if(sizeValue == [NSNull null])
     {
@@ -542,6 +558,17 @@ const NSString* value = @"Value";
     NSLog(@"selected Audio Bitrate: %@", [sender representedObject]);
 }
 
+#pragma mark - Analyzer Prefs
+
+- (void) buildAnalyzerPrefUI
+{
+    //    // Init an analyzer plugin and build a UI for it.
+    //    for(id analyzer in self.analyzerPluginsInitializedForPrefs)
+    //    {
+    //
+    //    }
+}
+
 
 #pragma mark -
 
@@ -554,7 +581,7 @@ const NSString* value = @"Value";
     
     // TODO
     [openPanel setAllowedFileTypes:[AVMovie movieTypes]];
-//    [openPanel setAllowedFileTypes:@[@"mov", @"mp4", @"m4v"]];
+    //    [openPanel setAllowedFileTypes:@[@"mov", @"mp4", @"m4v"]];
     
     [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)
      {
@@ -588,44 +615,44 @@ const NSString* value = @"Value";
                                        };
     
     AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL
-                                                               destinationURL:destinationURL
-                                                             transcodeOptions:transcodeOptions
-                                                           availableAnalyzers:self.analyzerPlugins];
+                                                                                        destinationURL:destinationURL
+                                                                                      transcodeOptions:transcodeOptions
+                                                                                    availableAnalyzers:self.analyzerPlugins];
     
     // pass2 is depended on pass one being complete, and on pass1's analyzed metadata
     __weak AnalysisAndTranscodeOperation* weakAnalysis = analysis;
     
     analysis.completionBlock = (^(void)
-    {
-        // Retarded weak/strong pattern so we avoid retain loopl
-        __strong AnalysisAndTranscodeOperation* strongAnalysis = weakAnalysis;
-        
-        NSDictionary* metadataOptions = @{kSynopsisAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
-                                          kSynopsisAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
-                                          kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
-                                          };
-
-        MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];
-        
-        pass2.completionBlock = (^(void)
-        {
-            [[LogController sharedLogController] appendSuccessLog:@"Finished Transcode and Analysis"];
-        });
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter]  postNotificationName:kSynopsisNewTranscodeOperationAvailable object:pass2];
-        });
-        
-        [self.metadataQueue addOperation:pass2];
-
-    });
+                                {
+                                    // Retarded weak/strong pattern so we avoid retain loopl
+                                    __strong AnalysisAndTranscodeOperation* strongAnalysis = weakAnalysis;
+                                    
+                                    NSDictionary* metadataOptions = @{kSynopsisAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
+                                                                      kSynopsisAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
+                                                                      kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
+                                                                      };
+                                    
+                                    MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];
+                                    
+                                    pass2.completionBlock = (^(void)
+                                                             {
+                                                                 [[LogController sharedLogController] appendSuccessLog:@"Finished Transcode and Analysis"];
+                                                             });
+                                    
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                        [[NSNotificationCenter defaultCenter]  postNotificationName:kSynopsisNewTranscodeOperationAvailable object:pass2];
+                                    });
+                                    
+                                    [self.metadataQueue addOperation:pass2];
+                                    
+                                });
     
     [[LogController sharedLogController] appendVerboseLog:@"Begin Transcode and Analysis"];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter]  postNotificationName:kSynopsisNewTranscodeOperationAvailable object:analysis];
     });
-
+    
     
     [self.transcodeQueue addOperation:analysis];
 }
