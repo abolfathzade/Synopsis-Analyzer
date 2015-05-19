@@ -241,7 +241,7 @@
     // For every Analyzer, begin an new Analysis Session
     for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
     {
-        [analyzer beginMetadataAnalysisSession];
+        [analyzer beginMetadataAnalysisSessionWithQuality:SynopsisAnalysisQualityHintHigh andEnabledModules:nil];
     }
     
     return error;

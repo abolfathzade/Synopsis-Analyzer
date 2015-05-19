@@ -39,6 +39,9 @@
 
 @property (atomic, readwrite, strong) NSString* pluginMediaType;
 
+@property (atomic, readwrite, strong) NSArray* pluginModuleNames;
+
+
 @end
 
 @implementation OpenCVAnalyzerPlugin
@@ -51,12 +54,18 @@
         self.pluginName = @"OpenCV Analyzer";
         self.pluginIdentifier = @"info.v002.Synopsis.OpenCVAnalyzer";
         self.pluginAuthors = @[@"Anton Marini"];
-        self.pluginDescription = @"OpenCV analyzer";
+        self.pluginDescription = @"OpenCV analysis for color, motion, features and more.";
         self.pluginAPIVersionMajor = 0;
         self.pluginAPIVersionMinor = 1;
         self.pluginVersionMajor = 0;
         self.pluginVersionMinor = 1;
         self.pluginMediaType = AVMediaTypeVideo;
+        
+        self.pluginModuleNames  = @[@"Average Color",
+                                    @"Dominant Colors",
+                                    @"Features To Track",
+                                    @"Motion",
+                                    ];
         
         detector = cv::ORB::create();
 
@@ -70,7 +79,7 @@
     detector.release();
 }
 
-- (void) beginMetadataAnalysisSession
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint andEnabledModules:(NSDictionary*)enabledModuleKeys
 {
     
 }

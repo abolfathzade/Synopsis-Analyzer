@@ -29,7 +29,7 @@
 
 @property (readonly) NSString* pluginMediaType;
 
-- (void) beginMetadataAnalysisSession;
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint andEnabledModules:(NSDictionary*)enabledModuleKeys;
 
 - (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer error:(NSError**) error;
 

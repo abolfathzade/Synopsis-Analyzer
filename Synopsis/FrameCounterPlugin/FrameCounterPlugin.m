@@ -50,7 +50,7 @@
     return self;
 }
 
-- (void) beginMetadataAnalysisSession
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint andEnabledModules:(NSDictionary*)enabledModuleKeys
 {
     // Reset
     self.sampleCount = 0;
