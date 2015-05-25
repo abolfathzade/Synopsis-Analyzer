@@ -135,18 +135,16 @@
 
 #pragma mark -
 
+
 - (void)drawRect:(NSRect)rect {
 
     [super drawRect:rect];
     
     // Following code courtesey of ImageOptim - thanks!
-    
     [[NSColor colorWithWhite:0.0 alpha:0.5] setFill];
     NSRectFill(rect);
     
     NSColor *drawColor = [NSColor colorWithDeviceWhite:0.5 alpha:(self.highLight ? 0.5 : 0.25)];
-//    NSColor* gray = [NSColor colorForControlTint:[NSColor currentControlTint]];
-//    NSColor* drawColor = (self.highLight) ? [NSColor controlLightHighlightColor] : [NSColor controlHighlightColor];
     [drawColor set];
     [drawColor setFill];
     

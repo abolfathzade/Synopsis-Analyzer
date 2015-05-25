@@ -86,11 +86,8 @@ const NSString* value = @"Value";
 - (void) awakeFromNib
 {
     [self.effectView setState:NSVisualEffectStateActive];
-
     [self.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
-    //    [self.effectView setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
     [self.effectView setMaterial:NSVisualEffectMaterialDark];
-    //    self.effectView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
     
     self.dropFilesView.dragDelegate = self;
     
@@ -99,7 +96,7 @@ const NSString* value = @"Value";
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     
-       // Load our plugins
+    // Load our plugins
     NSString* pluginsPath = [[NSBundle mainBundle] builtInPlugInsPath];
     
     NSError* error = nil;

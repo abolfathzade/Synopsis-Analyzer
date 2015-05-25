@@ -12,7 +12,8 @@
 
 #import "SampleBufferAnalyzerPluginProtocol.h"
 #import "NSDictionary+JSONString.h"
-
+#import "BSON/BSONSerialization.h"
+#import "GZIP/GZIP.h"
 
 //
 //  TranscodeOperation.m
@@ -96,7 +97,6 @@
     
     [super main];
 }
-
 
 - (NSError*) setupTranscodeShitSucessfullyOrDontWhatverMan
 {
@@ -194,6 +194,38 @@
 {
     CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
 
+    
+    // Convert our global metadata to a valid top level AVMetadata item
+    if(self.analyzedGlobalMetadata)
+    {
+        if([NSJSONSerialization isValidJSONObject:self.analyzedGlobalMetadata])
+        {
+            // TODO: Probably want to mark to NO for shipping code:
+            NSString* aggregateMetadataAsJSON = [self.analyzedGlobalMetadata jsonStringWithPrettyPrint:NO];
+            NSData* jsonData = [aggregateMetadataAsJSON dataUsingEncoding:NSUTF8StringEncoding];
+            
+            NSData* gzipData = [jsonData gzippedData];
+            
+            // Annotation text item
+            AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
+            textItem.identifier = kSynopsislMetadataIdentifier;
+            textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_RawData;
+            textItem.value = gzipData;
+            
+            self.transcodeAssetWriter.metadata = @[textItem];
+
+        }
+        else
+        {
+            NSString* warning = @"Unable To Convert Global Metadata to JSON Format, invalid object";
+            [[LogController sharedLogController] appendErrorLog:warning];
+        }
+
+    }
+    
+    
+    
+    
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading])
     {
         [self.transcodeAssetWriter startSessionAtSourceTime:kCMTimeZero];

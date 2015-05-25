@@ -11,3 +11,8 @@
 @interface NSDictionary (JSONString)
 -(NSString*) jsonStringWithPrettyPrint:(BOOL) prettyPrint;
 @end
+
+
+@interface NSArray (JSONString)
+-(NSString*) jsonStringWithPrettyPrint:(BOOL) prettyPrint;
+@end

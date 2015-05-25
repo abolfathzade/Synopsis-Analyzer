@@ -27,3 +27,24 @@
     }
 }
 @end
+
+
+@implementation NSArray (JSONString)
+-(NSString*) jsonStringWithPrettyPrint:(BOOL) prettyPrint
+{
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:self
+                                                       options:(NSJSONWritingOptions) (prettyPrint ? NSJSONWritingPrettyPrinted : kNilOptions)
+                                                         error:&error];
+    
+    if (!jsonData)
+    {
+        NSLog(@"jsonStringWithPrettyPrint: error: %@", error.localizedDescription);
+        return @"{}";
+    }
+    else
+    {
+        return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    }
+}
+@end

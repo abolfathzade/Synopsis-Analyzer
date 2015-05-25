@@ -20,7 +20,6 @@
 @property (atomic, readwrite, strong) NSAttributedString* staticWarningString;
 @property (atomic, readwrite, strong) NSAttributedString* staticErrorString;
 @property (atomic, readwrite, strong) NSAttributedString* staticSuccessString;
-
 @end
 
 @implementation LogController

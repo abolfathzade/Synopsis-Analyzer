@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
 		1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BCD91ACB90850013418D /* VideoToolbox.framework */; };
 		1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */; };
@@ -93,6 +94,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1B006DE51B0AE1E900B7A99C /* CustomVisualEffectView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomVisualEffectView.h; sourceTree = "<group>"; };
+		1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomVisualEffectView.m; sourceTree = "<group>"; };
 		1B578C3F1B02F37E00D76F62 /* DropFilesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropFilesView.h; sourceTree = "<group>"; };
 		1B578C401B02F37E00D76F62 /* DropFilesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropFilesView.m; sourceTree = "<group>"; };
 		1B61BCD91ACB90850013418D /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
@@ -965,6 +968,8 @@
 				1B805E3F1B028BB6005D7354 /* LogController.m */,
 				1B578C3F1B02F37E00D76F62 /* DropFilesView.h */,
 				1B578C401B02F37E00D76F62 /* DropFilesView.m */,
+				1B006DE51B0AE1E900B7A99C /* CustomVisualEffectView.h */,
+				1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */,
 				1B61BCEF1ACF181C0013418D /* NSDictionary+JSONString.h */,
 				1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */,
 				1BA68C5D1AD5D2A1003B3CE9 /* BSON */,
@@ -1140,6 +1145,7 @@
 				1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */,
 				1B805E371B012ADF005D7354 /* ProgressTableViewCellProgressController.m in Sources */,
 				1B805E2C1B0114D0005D7354 /* ProgressTableViewController.m in Sources */,
+				1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */,
 				1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */,
 				1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */,
 				1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */,

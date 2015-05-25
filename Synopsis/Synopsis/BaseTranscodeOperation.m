@@ -47,7 +47,6 @@ const NSString* kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalMe
 
 - (void) main
 {
-   
     @synchronized(self)
     {
         if(self.completionBlock)

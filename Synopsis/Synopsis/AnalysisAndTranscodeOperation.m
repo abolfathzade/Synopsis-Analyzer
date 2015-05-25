@@ -490,13 +490,24 @@
                             NSError* analyzerError = nil;
                             for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
-                                [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
+                                NSDictionary* finalizedMetadata = [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
                                 if(analyzerError)
                                 {
                                     NSString* errorString = [@"Error Finalizing Analysis - bailing: " stringByAppendingString:[analyzerError description]];
                                     [[LogController sharedLogController] appendErrorLog:errorString];
 
                                     break;
+                                }
+                                
+                                // set our global metadata for the analyzer
+                                if(finalizedMetadata)
+                                {
+                                    [self.inFlightGlobalMetadata addObject:@{ analyzer.pluginIdentifier : finalizedMetadata }];
+                                }
+                                else
+                                {
+                                    NSString* warning = [@"No Global Analysis Data for Analyzer %@ " stringByAppendingString:analyzer.pluginIdentifier];
+                                    [[LogController sharedLogController] appendWarningLog:warning];
                                 }
                             }
                         
