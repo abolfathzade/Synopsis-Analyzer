@@ -193,7 +193,6 @@
 - (void) transcodeAndAnalyzeAsset
 {
     CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
-
     
     // Convert our global metadata to a valid top level AVMetadata item
     if(self.analyzedGlobalMetadata)
