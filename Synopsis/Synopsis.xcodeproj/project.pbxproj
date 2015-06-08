@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
+		1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */; };
 		1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BCD91ACB90850013418D /* VideoToolbox.framework */; };
 		1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */; };
 		1B61BCEE1ACF0E210013418D /* FrameCounterPlugin.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -98,6 +99,8 @@
 		1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomVisualEffectView.m; sourceTree = "<group>"; };
 		1B578C3F1B02F37E00D76F62 /* DropFilesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropFilesView.h; sourceTree = "<group>"; };
 		1B578C401B02F37E00D76F62 /* DropFilesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropFilesView.m; sourceTree = "<group>"; };
+		1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MedianCut.cpp; sourceTree = "<group>"; };
+		1B5FE5091B25F44F00EED2A1 /* MedianCut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MedianCut.h; sourceTree = "<group>"; };
 		1B61BCD91ACB90850013418D /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		1B61BCDC1ACEFEEE0013418D /* SampleBufferAnalyzerPluginProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleBufferAnalyzerPluginProtocol.h; sourceTree = "<group>"; };
 		1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FrameCounterPlugin.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -461,6 +464,8 @@
 				1B61BCFB1ACF26710013418D /* Supporting Files */,
 				1B61BD001ACF27740013418D /* OpenCVAnalyzerPlugin.h */,
 				1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.mm */,
+				1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */,
+				1B5FE5091B25F44F00EED2A1 /* MedianCut.h */,
 				1B61BD691ACF74AE0013418D /* OpenCV */,
 			);
 			path = OpenCVAnalyzerPlugin;
@@ -1131,6 +1136,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1B61BD021ACF27740013418D /* OpenCVAnalyzerPlugin.mm in Sources */,
+				1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

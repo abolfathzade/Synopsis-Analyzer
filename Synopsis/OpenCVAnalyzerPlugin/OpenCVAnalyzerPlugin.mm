@@ -16,6 +16,8 @@
 
 #import "OpenCVAnalyzerPlugin.h"
 
+#import "MedianCut.h"
+
 @interface OpenCVAnalyzerPlugin ()
 {
     CMSampleBufferRef lastSampleBuffer;
@@ -67,7 +69,7 @@
                                     @"Motion",
                                     ];
         
-        detector = cv::ORB::create();
+        detector = cv::ORB::create(100);
 
     }
     
@@ -143,8 +145,12 @@
             // Half width/height image -
             // TODO: Maybe this becomes part of a quality preference?
             cv::Mat quarterResBGRA;
-            cv::resize(currentBGRAImage, quarterResBGRA, cv::Size(currentBGRAImage.size().width * 0.5,
-                                                                  currentBGRAImage.size().height * 0.5));
+            cv::resize(currentBGRAImage,
+                       quarterResBGRA,
+                       cv::Size(240, 180),//cv::Size(currentBGRAImage.size().width * 0.5, currentBGRAImage.size().height * 0.5),
+                       0,
+                       0,
+                       cv::INTER_LINEAR); // INTER_AREA resize gives cleaner downsample results.
             
             cv::Scalar avgPixelIntensity = cv::mean(quarterResBGRA);
 
@@ -154,62 +160,121 @@
                                           @(avgPixelIntensity.val[0] / 255.0), // B
                                           ];
             
-#pragma mark - Dominant Colors / kMeans
             
-            // We choose k = 5 to match Adobe Kuler because whatever.
-            int k = 5;
-            int n = quarterResBGRA.rows * quarterResBGRA.cols;
+#pragma mark - Dominant Colors / Median Cut Method
 
-            // Convert img BGRA to CIE_LAB or LCh
-//            cv::Mat quarterResBGR;
-//            cv::Mat quarterResLAB;
-//            
-//            cv::cvtColor(quarterResBGRA, quarterResBGR, cv::COLOR_BGRA2BGR);
-//            cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
+            // This needs to be refactored - ideally we can median cut straight from a cv::Mat
+            // But whatever, Kmeans is so goddamned slow anyway
             
-            std::vector<cv::Mat> imgSplit;
-            cv::split(quarterResBGRA,imgSplit);
+            // Also this code is heavilly borrowed so yea.
             
-            cv::Mat img3xN(n,3,CV_8U);
+            int k = 5;
+            int numPixels = quarterResBGRA.rows * quarterResBGRA.cols;
+
+            // Walk through the pixels and store colours.
+            // Let's be fancy and make a smart pointer. Unfortunately shared_ptr doesn't automatically know how to delete a C++ array, so we have to write a [] lambda (aka 'block' in Obj-C) to clean up the object.
+            std::shared_ptr<MedianCut::Point> points(new MedianCut::Point[numPixels],
+                                                              []( MedianCut::Point* p ) { delete[] p; } );
             
-            for(int i = 0; i != 3; ++i)
+            int sourceColorCount = 0;
+
+            // Populate Median Cut Points by color values;
+            for(int i = 0;  i < quarterResBGRA.rows; i++)
             {
-                imgSplit[i].reshape(1,n).copyTo(img3xN.col(i));
+                for(int j = 0; j < quarterResBGRA.cols; j++)
+                {
+                    // You can now access the pixel value with cv::Vec3b
+//                    std::cout << img.at<cv::Vec3b>(i,j)[0] << " " << img.at<cv::Vec3b>(i,j)[1] << " " << img.at<cv::Vec3b>(i,j)[2] << std::endl;
+                    cv::Vec3b at = quarterResBGRA.at<cv::Vec3b>(i,j);
+                    points.get()[sourceColorCount].x[0] =
+                    points.get()[sourceColorCount].x[1] = quarterResBGRA.at<cv::Vec3b>(i,j)[1];
+                    points.get()[sourceColorCount].x[2] = quarterResBGRA.at<cv::Vec3b>(i,j)[2];
+                    sourceColorCount++;
+                }
             }
-            
-            img3xN.convertTo(img3xN,CV_32F);
-            
-            cv::Mat bestLables;
-            cv::Mat centers;
-            
-            // TODO: figure out what the fuck makes sense here.
-            cv::kmeans(img3xN,
-                       k,
-                       bestLables,
-//                       cv::TermCriteria(),
-                       cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 5.0, 1.0),
-                       1,
-                       cv::KMEANS_PP_CENTERS,
-                       centers);
+
+            auto palette = MedianCut::medianCut(points.get(), numPixels, k);
             
             NSMutableArray* dominantColors = [NSMutableArray new];
-            
-            // LAB to BGR
-//            cv::Mat centersBGR;
-//            cv::cvtColor(centersLAB.reshape(3,1), centersBGR, cv::COLOR_Lab2BGR);
 
-            for(int i = 0; i < centers.rows; i++)
+            for ( auto colorCountPair: palette )
             {
-                // 0 1 or 0 - 255 .0 ?
-                cv::Vec3f colorBGR = centers.at<cv::Vec3f>(i, 0);
+                const MedianCut::Point& colorRaw = colorCountPair.first;
                 
-                [dominantColors addObject: @[@(colorBGR.val[2] / 255.0), // R
-                                             @(colorBGR.val[1] / 255.0), // G
-                                             @(colorBGR.val[0] / 255.0), // B
-                                            ]];
+                [dominantColors addObject: @[@(colorRaw.x[2] / 255.0), // R
+                                             @(colorRaw.x[1] / 255.0), // G
+                                             @(colorRaw.x[0] / 255.0), // B
+                                             ]];
+
+//                UIColor *uiColor = [UIColor colorWithRed:(float)(colorRaw.x[0])/255.0f
+//                                                   green:(float)(colorRaw.x[1])/255.0f
+//                                                    blue:(float)(colorRaw.x[2])/255.0f
+//                                                   alpha:1.0f];
+//                unsigned int count = colorCountPair.second;
+//                // store pair of (color,count)
+//                NEMedianCutColor* result = [NEMedianCutColor medianCutColorWithColor:uiColor count:count];
+//                [paletteAsUIColors addObject:result];
             }
-            
+
             metadata[@"DominantColors"] = dominantColors;
+
+            
+#pragma mark - Dominant Colors / kMeans
+            
+//            // We choose k = 5 to match Adobe Kuler because whatever.
+//            int k = 5;
+//            int n = quarterResBGRA.rows * quarterResBGRA.cols;
+//
+//            // Convert img BGRA to CIE_LAB or LCh
+////            cv::Mat quarterResBGR;
+////            cv::Mat quarterResLAB;
+////            
+////            cv::cvtColor(quarterResBGRA, quarterResBGR, cv::COLOR_BGRA2BGR);
+////            cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
+//            
+//            std::vector<cv::Mat> imgSplit;
+//            cv::split(quarterResBGRA,imgSplit);
+//            
+//            cv::Mat img3xN(n,3,CV_8U);
+//            
+//            for(int i = 0; i != 3; ++i)
+//            {
+//                imgSplit[i].reshape(1,n).copyTo(img3xN.col(i));
+//            }
+//            
+//            img3xN.convertTo(img3xN,CV_32F);
+//            
+//            cv::Mat bestLables;
+//            cv::Mat centers;
+//            
+//            // TODO: figure out what the fuck makes sense here.
+//            cv::kmeans(img3xN,
+//                       k,
+//                       bestLables,
+//                       cv::TermCriteria(),
+////                       cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 5.0, 1.0),
+//                       1,
+//                       cv::KMEANS_PP_CENTERS,
+//                       centers);
+//            
+//            NSMutableArray* dominantColors = [NSMutableArray new];
+//            
+//            // LAB to BGR
+////            cv::Mat centersBGR;
+////            cv::cvtColor(centersLAB.reshape(3,1), centersBGR, cv::COLOR_Lab2BGR);
+//
+//            for(int i = 0; i < centers.rows; i++)
+//            {
+//                // 0 1 or 0 - 255 .0 ?
+//                cv::Vec3f colorBGR = centers.at<cv::Vec3f>(i, 0);
+//                
+//                [dominantColors addObject: @[@(colorBGR.val[2] / 255.0), // R
+//                                             @(colorBGR.val[1] / 255.0), // G
+//                                             @(colorBGR.val[0] / 255.0), // B
+//                                            ]];
+//            }
+//            
+//            metadata[@"DominantColors"] = dominantColors;
             
 #pragma mark - Feature Detection
             
