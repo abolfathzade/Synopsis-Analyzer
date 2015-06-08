@@ -147,10 +147,10 @@
             cv::Mat quarterResBGRA;
             cv::resize(currentBGRAImage,
                        quarterResBGRA,
-                       cv::Size(240, 180),//cv::Size(currentBGRAImage.size().width * 0.5, currentBGRAImage.size().height * 0.5),
+                       cv::Size(currentBGRAImage.size().width * 0.5, currentBGRAImage.size().height * 0.5), //cv::Size(240, 180),//
                        0,
                        0,
-                       cv::INTER_LINEAR); // INTER_AREA resize gives cleaner downsample results.
+                       cv::INTER_AREA); // INTER_AREA resize gives cleaner downsample results vs INTER_LINEAR.
             
             cv::Scalar avgPixelIntensity = cv::mean(quarterResBGRA);
 
@@ -185,10 +185,10 @@
                 {
                     // You can now access the pixel value with cv::Vec3b
 //                    std::cout << img.at<cv::Vec3b>(i,j)[0] << " " << img.at<cv::Vec3b>(i,j)[1] << " " << img.at<cv::Vec3b>(i,j)[2] << std::endl;
-                    cv::Vec3b at = quarterResBGRA.at<cv::Vec3b>(i,j);
-                    points.get()[sourceColorCount].x[0] =
-                    points.get()[sourceColorCount].x[1] = quarterResBGRA.at<cv::Vec3b>(i,j)[1];
-                    points.get()[sourceColorCount].x[2] = quarterResBGRA.at<cv::Vec3b>(i,j)[2];
+//                    cv::Vec3b at = quarterResBGRA.at<cv::Vec3b>(i,j);
+                    points.get()[sourceColorCount].x[0] = quarterResBGRA.at<cv::Vec4b>(i,j)[0]; // B
+                    points.get()[sourceColorCount].x[1] = quarterResBGRA.at<cv::Vec4b>(i,j)[1]; // G
+                    points.get()[sourceColorCount].x[2] = quarterResBGRA.at<cv::Vec4b>(i,j)[2]; // R
                     sourceColorCount++;
                 }
             }
@@ -206,14 +206,6 @@
                                              @(colorRaw.x[0] / 255.0), // B
                                              ]];
 
-//                UIColor *uiColor = [UIColor colorWithRed:(float)(colorRaw.x[0])/255.0f
-//                                                   green:(float)(colorRaw.x[1])/255.0f
-//                                                    blue:(float)(colorRaw.x[2])/255.0f
-//                                                   alpha:1.0f];
-//                unsigned int count = colorCountPair.second;
-//                // store pair of (color,count)
-//                NEMedianCutColor* result = [NEMedianCutColor medianCutColorWithColor:uiColor count:count];
-//                [paletteAsUIColors addObject:result];
             }
 
             metadata[@"DominantColors"] = dominantColors;
