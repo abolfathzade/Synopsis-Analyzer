@@ -11,9 +11,9 @@
 
 // Self explanatory, used when our enqueing fires off a new operation
 
-extern const NSString* kSynopsisNewTranscodeOperationAvailable;
+extern NSString* const kSynopsisNewTranscodeOperationAvailable;
 
-extern const NSString* kSynopsislMetadataIdentifier;
+extern NSString* const kSynopsislMetadataIdentifier;
 
 // We have a 2 pass analysis and decode (and possibly encode) system:
 
@@ -29,28 +29,28 @@ extern const NSString* kSynopsislMetadataIdentifier;
 // Key whose value is a dictionary appropriate for use with AVAssetWriterInput output settings. See AVVideoSettings.h
 // If this key is [NSNull null] it implies passthrough video encoding - sample buffers will not be re-encoded;
 // Required
-extern const NSString* kSynopsisTranscodeVideoSettingsKey;
+extern NSString* const kSynopsisTranscodeVideoSettingsKey;
 
 // Key whose value is a dictionary appropriate for use with AVAssetWriterInput output settings. See AVAudioSettings.h
 // If this key is [NSNull null] it implies passthrough video encoding - sample buffers will not be re-encoded;
 // Required
-extern const NSString* kSynopsisTranscodeAudioSettingsKey;
+extern NSString* const kSynopsisTranscodeAudioSettingsKey;
 
 // Key whose value is an NSArray of metadata dictionaries (format TBD, we need to include time, maybe CMTimeRangeValues ?)
 // The existence of this key implies we will write a metadata track associated with our video track
 // Optional
-extern const NSString* kSynopsisAnalyzedVideoSampleBufferMetadataKey;
+extern NSString* const kSynopsisAnalyzedVideoSampleBufferMetadataKey;
 
 // TODO: Implement this and think about audio metadata.
 // Key whose value is an NSArray of metadata dictionaries (format TBD, we need to include time, maybe CMTimeRangeValues ?)
 // The existence of this key implies we will write a metadata track associated with our video track.
 // Optional
-extern const NSString* kSynopsisAnalyzedAudioSampleBufferMetadataKey;
+extern NSString* const kSynopsisAnalyzedAudioSampleBufferMetadataKey;
 
 // Key whose value is a dictionary containing aggregate overall metadata used to write a summary metadata entry.
 // The existence of this key implies we will write a metadata track with no association
 // Optional
-extern const NSString* kSynopsisAnalyzedGlobalMetadataKey;
+extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
 
 // Base Transcode Operation ensures that its completion block runs WITHIN MAIN
 // So that you know that depended operations have the previous compltion block called.

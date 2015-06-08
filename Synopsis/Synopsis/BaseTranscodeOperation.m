@@ -8,15 +8,15 @@
 
 #import "BaseTranscodeOperation.h"
 
-const NSString* kSynopsisNewTranscodeOperationAvailable = @"kSynopsisNewTranscodeOperationAvailable";
+NSString * const kSynopsisNewTranscodeOperationAvailable = @"kSynopsisNewTranscodeOperationAvailable";
 
-const NSString* kSynopsislMetadataIdentifier = @"mdta/info.v002.synopsis.metadata";
+NSString * const kSynopsislMetadataIdentifier = @"mdta/info.v002.synopsis.metadata";
 
-const NSString* kSynopsisTranscodeVideoSettingsKey = @"kSynopsisVideoTranscodeSettings";
-const NSString* kSynopsisTranscodeAudioSettingsKey = @"kSynopsisAudioTranscodeSettings";
-const NSString* kSynopsisAnalyzedVideoSampleBufferMetadataKey = @"kSynopsisAnalyzedVideoSampleBufferMetadata";
-const NSString* kSynopsisAnalyzedAudioSampleBufferMetadataKey = @"kSynopsisAnalyzedAudioSampleBufferMetadata";
-const NSString* kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalMetadata";
+NSString * const kSynopsisTranscodeVideoSettingsKey = @"kSynopsisVideoTranscodeSettings";
+NSString * const kSynopsisTranscodeAudioSettingsKey = @"kSynopsisAudioTranscodeSettings";
+NSString * const kSynopsisAnalyzedVideoSampleBufferMetadataKey = @"kSynopsisAnalyzedVideoSampleBufferMetadata";
+NSString * const kSynopsisAnalyzedAudioSampleBufferMetadataKey = @"kSynopsisAnalyzedAudioSampleBufferMetadata";
+NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalMetadata";
 
 @implementation BaseTranscodeOperation
 
