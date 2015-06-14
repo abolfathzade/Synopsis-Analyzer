@@ -144,10 +144,13 @@
 
             // Half width/height image -
             // TODO: Maybe this becomes part of a quality preference?
-            cv::Mat quarterResBGRA;
+            cv::Size quaterSize(currentBGRAImage.size().width * 0.5, currentBGRAImage.size().height * 0.5);
+            
+            cv::Mat quarterResBGRA(quaterSize, CV_8UC4);
+            
             cv::resize(currentBGRAImage,
                        quarterResBGRA,
-                       cv::Size(currentBGRAImage.size().width * 0.5, currentBGRAImage.size().height * 0.5), //cv::Size(240, 180),//
+                       quaterSize,
                        0,
                        0,
                        cv::INTER_AREA); // INTER_AREA resize gives cleaner downsample results vs INTER_LINEAR.
@@ -160,16 +163,32 @@
                                           @(avgPixelIntensity.val[0] / 255.0), // B
                                           ];
             
-            
 #pragma mark - Dominant Colors / Median Cut Method
 
             // This needs to be refactored - ideally we can median cut straight from a cv::Mat
             // But whatever, Kmeans is so goddamned slow anyway
             
-            // Also this code is heavilly borrowed so yea.
+            // Convert img BGRA to CIE_LAB or LCh - Float 32 for color calulation fidelity
+            // Note floating point assumtions:
+            // http://docs.opencv.org/2.4.11/modules/imgproc/doc/miscellaneous_transformations.html
+            // The conventional ranges for R, G, and B channel values are:
+            // 0 to 255 for CV_8U images
+            // 0 to 65535 for CV_16U images
+            // 0 to 1 for CV_32F images
+
+            // Convert to Float for maximum color fidelity
+            cv::Mat quarterResBGRAFloat;
+            quarterResBGRA.convertTo(quarterResBGRAFloat, CV_32FC4);
+
+//            cv::Mat quarterResBGR(quarterResBGRAFloat.size(), CV_32FC3);
+//            cv::Mat quarterResLAB(quarterResBGRAFloat.size(), CV_32FC3);
+//            
+//            cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
+//            cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
             
-            int k = 5;
-            int numPixels = quarterResBGRA.rows * quarterResBGRA.cols;
+            // Also this code is heavilly borrowed so yea.
+            int k = 9;
+            int numPixels = quarterResBGRAFloat.rows * quarterResBGRAFloat.cols;
 
             // Walk through the pixels and store colours.
             // Let's be fancy and make a smart pointer. Unfortunately shared_ptr doesn't automatically know how to delete a C++ array, so we have to write a [] lambda (aka 'block' in Obj-C) to clean up the object.
@@ -179,16 +198,17 @@
             int sourceColorCount = 0;
 
             // Populate Median Cut Points by color values;
-            for(int i = 0;  i < quarterResBGRA.rows; i++)
+            for(int i = 0;  i < quarterResBGRAFloat.rows; i++)
             {
-                for(int j = 0; j < quarterResBGRA.cols; j++)
+                for(int j = 0; j < quarterResBGRAFloat.cols; j++)
                 {
-                    // You can now access the pixel value with cv::Vec3b
-//                    std::cout << img.at<cv::Vec3b>(i,j)[0] << " " << img.at<cv::Vec3b>(i,j)[1] << " " << img.at<cv::Vec3b>(i,j)[2] << std::endl;
-//                    cv::Vec3b at = quarterResBGRA.at<cv::Vec3b>(i,j);
-                    points.get()[sourceColorCount].x[0] = quarterResBGRA.at<cv::Vec4b>(i,j)[0]; // B
-                    points.get()[sourceColorCount].x[1] = quarterResBGRA.at<cv::Vec4b>(i,j)[1]; // G
-                    points.get()[sourceColorCount].x[2] = quarterResBGRA.at<cv::Vec4b>(i,j)[2]; // R
+                    // You can now access the pixel value with cv::Vec3 (or 4 for if BGRA)
+                    cv::Vec4f labColor = quarterResBGRAFloat.at<cv::Vec4f>(i, j);
+                    
+                    points.get()[sourceColorCount].x[0] = labColor[0]; // B L
+                    points.get()[sourceColorCount].x[1] = labColor[1]; // G A
+                    points.get()[sourceColorCount].x[2] = labColor[2]; // R B
+                    
                     sourceColorCount++;
                 }
             }
@@ -199,17 +219,24 @@
 
             for ( auto colorCountPair: palette )
             {
-                const MedianCut::Point& colorRaw = colorCountPair.first;
-                
-                [dominantColors addObject: @[@(colorRaw.x[2] / 255.0), // R
-                                             @(colorRaw.x[1] / 255.0), // G
-                                             @(colorRaw.x[0] / 255.0), // B
+                // convert from LAB to BGR
+                const MedianCut::Point& bgrColor = colorCountPair.first;
+
+//                cv::Mat lab(1,1, CV_32FC3, cv::Vec3f(labColor.x[0], labColor.x[1], labColor.x[2]));
+//                cv::Mat bgr(1,1, CV_32FC3);
+//                
+//                cv::cvtColor(lab, bgr, cv::COLOR_Lab2BGR);
+//                
+//                cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
+
+                [dominantColors addObject: @[@(bgrColor.x[2] / 255.0), // R
+                                             @(bgrColor.x[1] / 255.0), // G
+                                             @(bgrColor.x[0] / 255.0), // B
                                              ]];
 
             }
 
             metadata[@"DominantColors"] = dominantColors;
-
             
 #pragma mark - Dominant Colors / kMeans
             

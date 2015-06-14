@@ -42,8 +42,8 @@ namespace MedianCut {
 		this->pointsLength = _pointsLength;
 		for(int i=0; i < NUM_DIMENSIONS; i++)
 		{
-			minCorner.x[i] = std::numeric_limits<unsigned char>::min();
-			maxCorner.x[i] = std::numeric_limits<unsigned char>::max();
+			minCorner.x[i] = std::numeric_limits<float>::min();
+			maxCorner.x[i] = std::numeric_limits<float>::max();
 		}
 	}
 	Point * Block::getPoints()
@@ -149,7 +149,7 @@ namespace MedianCut {
 			//int volume = block.volume();
 			//cout<<"block "<<result.size()<<": volume "<<volume<<" longest side "<<block.longestSideLength()<<" count "<<block.numPoints()<<endl;
 			
-			int sum[NUM_DIMENSIONS] = {0};
+			float sum[NUM_DIMENSIONS] = {0};
 			for(int i=0; i < block.numPoints(); i++)
 			{
 				for(int j=0; j < NUM_DIMENSIONS; j++)
@@ -161,7 +161,7 @@ namespace MedianCut {
 			MedianCut::Point averagePoint;
 			for(int j=0; j < NUM_DIMENSIONS; j++)
 			{
-				averagePoint.x[j] = (unsigned char)(sum[j] / block.numPoints());
+				averagePoint.x[j] = (float)(sum[j] / block.numPoints());
 			}
 			
 			result.push_back(make_pair(averagePoint,block.numPoints()));

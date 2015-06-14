@@ -38,7 +38,7 @@ namespace MedianCut {
 	
 	struct Point
 	{
-		unsigned char x[NUM_DIMENSIONS];
+		float x[NUM_DIMENSIONS];
 	};
 	
 	class Block
