@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>E3B79F1E-EEED-49CF-93F9-B6B1BE8205A0</string>
 	<key>IDESourceControlProjectName</key>
-	<string>project</string>
+	<string>Synopsis</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>696275204D6ACFB4CED91D2B4AC4227F459209A0</key>
 		<string>https://github.com/Synopsis/Synopsis.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>Synopsis/Synopsis.xcodeproj/project.xcworkspace</string>
+	<string>Synopsis/Synopsis.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>696275204D6ACFB4CED91D2B4AC4227F459209A0</key>

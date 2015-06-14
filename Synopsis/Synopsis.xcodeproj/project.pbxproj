@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */; };
+		1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B4FA1061B2DECCB004DBD63 /* libpython.dylib */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
 		1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */; };
 		1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BCD91ACB90850013418D /* VideoToolbox.framework */; };
@@ -97,6 +98,7 @@
 /* Begin PBXFileReference section */
 		1B006DE51B0AE1E900B7A99C /* CustomVisualEffectView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomVisualEffectView.h; sourceTree = "<group>"; };
 		1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomVisualEffectView.m; sourceTree = "<group>"; };
+		1B4FA1061B2DECCB004DBD63 /* libpython.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpython.dylib; path = usr/lib/libpython.dylib; sourceTree = SDKROOT; };
 		1B578C3F1B02F37E00D76F62 /* DropFilesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropFilesView.h; sourceTree = "<group>"; };
 		1B578C401B02F37E00D76F62 /* DropFilesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropFilesView.m; sourceTree = "<group>"; };
 		1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MedianCut.cpp; sourceTree = "<group>"; };
@@ -379,6 +381,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */,
 				1BA68C901AD6EAFB003B3CE9 /* libopencv_imgcodecs.a in Frameworks */,
 				1BA68C931AD6EAFB003B3CE9 /* libopencv_objdetect.a in Frameworks */,
 				1BA68C9B1AD6EAFB003B3CE9 /* libopencv_videostab.a in Frameworks */,
@@ -421,6 +424,7 @@
 		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1B4FA1061B2DECCB004DBD63 /* libpython.dylib */,
 				1BA68C6F1AD5D924003B3CE9 /* libz.dylib */,
 				1BA68C561AD26696003B3CE9 /* CoreVideo.framework */,
 				1B61BD071ACF371A0013418D /* CoreFoundation.framework */,
