@@ -178,17 +178,19 @@
 
             // Convert to Float for maximum color fidelity
             cv::Mat quarterResBGRAFloat;
-            quarterResBGRA.convertTo(quarterResBGRAFloat, CV_32FC4);
+            quarterResBGRA.convertTo(quarterResBGRAFloat, CV_32FC4, 1.0/255.0);
 
-//            cv::Mat quarterResBGR(quarterResBGRAFloat.size(), CV_32FC3);
-//            cv::Mat quarterResLAB(quarterResBGRAFloat.size(), CV_32FC3);
-//            
-//            cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
-//            cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
+            
+            cv::Mat quarterResBGR(quarterResBGRAFloat.size(), CV_32FC3);
+            cv::Mat quarterResLAB(quarterResBGRAFloat.size(), CV_32FC3);
+            
+            cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
+            cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
+
             
             // Also this code is heavilly borrowed so yea.
-            int k = 9;
-            int numPixels = quarterResBGRAFloat.rows * quarterResBGRAFloat.cols;
+            int k = 5;
+            int numPixels = quarterResLAB.rows * quarterResLAB.cols;
 
             // Walk through the pixels and store colours.
             // Let's be fancy and make a smart pointer. Unfortunately shared_ptr doesn't automatically know how to delete a C++ array, so we have to write a [] lambda (aka 'block' in Obj-C) to clean up the object.
@@ -198,12 +200,14 @@
             int sourceColorCount = 0;
 
             // Populate Median Cut Points by color values;
-            for(int i = 0;  i < quarterResBGRAFloat.rows; i++)
+            for(int i = 0;  i < quarterResLAB.rows; i++)
             {
-                for(int j = 0; j < quarterResBGRAFloat.cols; j++)
+                for(int j = 0; j < quarterResLAB.cols; j++)
                 {
                     // You can now access the pixel value with cv::Vec3 (or 4 for if BGRA)
-                    cv::Vec4f labColor = quarterResBGRAFloat.at<cv::Vec4f>(i, j);
+                    cv::Vec3f labColor = quarterResLAB.at<cv::Vec3f>(i, j);
+                    
+//                    NSLog(@"Color: %f %f %f", labColor[0], labColor[1], labColor[2]);
                     
                     points.get()[sourceColorCount].x[0] = labColor[0]; // B L
                     points.get()[sourceColorCount].x[1] = labColor[1]; // G A
@@ -220,20 +224,20 @@
             for ( auto colorCountPair: palette )
             {
                 // convert from LAB to BGR
-                const MedianCut::Point& bgrColor = colorCountPair.first;
+                const MedianCut::Point& labColor = colorCountPair.first;
 
-//                cv::Mat lab(1,1, CV_32FC3, cv::Vec3f(labColor.x[0], labColor.x[1], labColor.x[2]));
-//                cv::Mat bgr(1,1, CV_32FC3);
-//                
-//                cv::cvtColor(lab, bgr, cv::COLOR_Lab2BGR);
-//                
-//                cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
+                cv::Mat lab(1,1, CV_32FC3, cv::Vec3f(labColor.x[0], labColor.x[1], labColor.x[2]));
+                
+                cv::Mat bgr(1,1, CV_32FC3);
+                
+                cv::cvtColor(lab, bgr, cv::COLOR_Lab2BGR);
+                
+                cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
 
-                [dominantColors addObject: @[@(bgrColor.x[2] / 255.0), // R
-                                             @(bgrColor.x[1] / 255.0), // G
-                                             @(bgrColor.x[0] / 255.0), // B
+                [dominantColors addObject: @[@(bgrColor[2]), // / 255.0), // R
+                                             @(bgrColor[1]), // / 255.0), // G
+                                             @(bgrColor[0]), // / 255.0), // B
                                              ]];
-
             }
 
             metadata[@"DominantColors"] = dominantColors;

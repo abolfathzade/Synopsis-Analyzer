@@ -121,7 +121,6 @@ namespace MedianCut {
 		{
 			Block longestBlock = blockQueue.top();
 			
-			
 			blockQueue.pop();
 			MedianCut::Point * begin  = longestBlock.getPoints();
 			MedianCut::Point * median = longestBlock.getPoints() + (longestBlock.numPoints()+1)/2;
