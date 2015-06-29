@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */; };
+		1B105A391B41F18300997345 /* cv2.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA68C781AD6EAFB003B3CE9 /* cv2.so */; };
 		1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B4FA1061B2DECCB004DBD63 /* libpython.dylib */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
 		1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */; };
@@ -82,6 +83,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1B105A381B41F16F00997345 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1B105A391B41F18300997345 /* cv2.so in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1B61BCED1ACF0E0E0013418D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1027,6 +1038,8 @@
 				1B61BCF51ACF26710013418D /* Sources */,
 				1B61BCF61ACF26710013418D /* Frameworks */,
 				1B61BCF71ACF26710013418D /* Resources */,
+				1B105A381B41F16F00997345 /* CopyFiles */,
+				1B105A371B41EDED00997345 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -1126,6 +1139,22 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		1B105A371B41EDED00997345 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "install_name_tool -change \"/Users/vade/Downloads/opencv-3.0.0/StaticLibs/lib/cv2.so\" @loader_path/../Frameworks/cv2.so \"$TARGET_BUILD_DIR/$PRODUCT_NAME.bundle/Contents/MacOS/$PRODUCT_NAME\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		1B61BCDD1ACF06A70013418D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -1196,6 +1225,7 @@
 		1B61BCE61ACF06A70013418D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -1212,6 +1242,7 @@
 		1B61BCE71ACF06A70013418D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = FrameCounterPlugin/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
@@ -1225,6 +1256,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -1247,6 +1279,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = OpenCVAnalyzerPlugin/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
@@ -1341,6 +1374,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -1352,6 +1386,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
