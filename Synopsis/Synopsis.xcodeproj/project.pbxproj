@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */; };
 		1B105A391B41F18300997345 /* cv2.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA68C781AD6EAFB003B3CE9 /* cv2.so */; };
+		1B105A3B1B41FAA900997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
 		1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B4FA1061B2DECCB004DBD63 /* libpython.dylib */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
 		1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */; };
@@ -59,7 +60,6 @@
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
-		1BEA4D271ACB2BCD00AB57C1 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
 		1BEA4D3D1ACB2BDD00AB57C1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
 		1BEA4D421ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */; };
@@ -1133,7 +1133,7 @@
 				1B805E341B012AA0005D7354 /* ProgressTableViewCellProgress.xib in Resources */,
 				1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */,
 				1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */,
-				1BEA4D271ACB2BCD00AB57C1 /* MainMenu.xib in Resources */,
+				1B105A3B1B41FAA900997345 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1378,6 +1378,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1390,6 +1391,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
