@@ -15,6 +15,9 @@
 #import "BSON/BSONSerialization.h"
 #import "GZIP/GZIP.h"
 
+#include <sys/xattr.h>
+
+
 //
 //  TranscodeOperation.m
 //  MetadataTranscoderTestHarness
@@ -169,7 +172,7 @@
     [self.transcodeAssetWriterMetadata addTrackAssociationWithTrackOfInput:self.transcodeAssetWriterVideoPassthrough type:AVTrackAssociationTypeMetadataReferent];
     
     // Is this needed?
-    self.transcodeAssetWriterMetadata.expectsMediaDataInRealTime = YES;
+    self.transcodeAssetWriterMetadata.expectsMediaDataInRealTime = NO;
     
     // Assign all our specific inputs to our Writer
     if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideoPassthrough]
@@ -365,10 +368,173 @@
         CMBufferQueueReset(passthroughVideoBufferQueue);
         
         [self.transcodeAssetWriter finishWritingWithCompletionHandler:^{
-            //            NSLog(@"DONE WITH SHIT MAYBE");
+            // Lets get our global 'summary' metadata
+            // And write out some of it to our XATTR's so our spotlight importer can work
+            // Make sure we have our standard keys and what not
+            
+//            // get our standard metadata
+//            NSDictionary* standardMetadata = self.analyzedGlobalMetadata[@"info.v002.Synopsis.OpenCVAnalyzer"];
+//
+//            if(self.analyzedGlobalMetadata[@"info.v002.Synopsis.OpenCVAnalyzer"])
+//            {
+//                
+//                
+//                // dominant colors is assumed to be "info_v002_synopsis_dominant_color_values"
+//                
+//                // find the closest name for our dominant colors
+//                // names match the build in NSColor color names.
+//                
+//                NSMutableArray* namedColors = [NSMutableArray new];
+//            }
+//            
+//
+            
+            NSArray* fakeDominantColors = @[[NSColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:1.0],
+                                            [NSColor redColor],
+                                            [NSColor magentaColor]
+                                            ];
+            
+            NSMutableArray* matchedNamedColors = [NSMutableArray arrayWithCapacity:fakeDominantColors.count];
+            
+            for(NSColor* color in fakeDominantColors)
+            {
+                NSString* namedColor = [self closestNamedColorForColor:color];
+                NSLog(@"Found Color %@", namedColor);
+                if(namedColor)
+                    [matchedNamedColors addObject:namedColor];
+            }
+            
+            // write out our XATTR's
+            
+            if(matchedNamedColors.count)
+            {
+                // make PList out of our array
+                
+                NSError* error = nil;
+                NSData* plistData = [NSPropertyListSerialization dataWithPropertyList:matchedNamedColors
+                                                                               format:NSPropertyListBinaryFormat_v1_0
+                                                                              options:0
+                                                                                error:&error];
+                if(!error && plistData)
+                {
+                    NSString* destinationPath = [self.destinationURL path];
+                    
+                    const char *pathUTF8 = [destinationPath fileSystemRepresentation];
+                    const char *keyUTF8 = [@"com.apple.metadata:info_v002_synopsis_dominant_color_name" fileSystemRepresentation];
+                    
+                    
+                    long returnVal = setxattr(pathUTF8, keyUTF8, [plistData bytes], [plistData length], 0, XATTR_NOFOLLOW);
+
+                }
+            }
+            
+        
         }];
     }
 }
 
+- (NSString*) closestNamedColorForColor:(NSColor*)color
+{
+    NSColor* matchedColor = nil;
+
+    // White, Grey, Black all are 'calibrated' white color spaces so you cant fetch color components from them
+    // because no one at apple has seen a fucking prism.
+    NSArray* knownColors = @[ [NSColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:1.0], // White
+                              [NSColor colorWithRed:0.0 green:0.0 blue:0 alpha:1.0], // Black
+                              [NSColor colorWithRed:0.5 green:0.5 blue:0.5 alpha:1.0], // Gray
+                              [NSColor redColor],
+                              [NSColor greenColor],
+                              [NSColor blueColor],
+                              [NSColor magentaColor],
+                              [NSColor orangeColor],
+                              [NSColor yellowColor],
+                              [NSColor cyanColor],
+                              [NSColor brownColor],
+                              ];
+
+
+//    NSUInteger numberMatches = 0;
+    
+    // Longest distance from any float color component
+    CGFloat distance = sqrt(1.0 + 1.0 + 1.0);
+    
+    for(NSColor* namedColor in knownColors)
+    {
+        CGFloat namedRed = [namedColor redComponent];
+        CGFloat namedGreen = [namedColor greenComponent];
+        CGFloat namedBlue = [namedColor blueComponent];
+        
+        CGFloat red = [color redComponent];
+        CGFloat green = [color greenComponent];
+        CGFloat blue = [color blueComponent];
+        
+        // Early bail
+        if( red == namedRed && green == namedGreen && blue == namedBlue)
+        {
+            matchedColor = namedColor;
+            break;
+        }
+
+        
+        CGFloat newDistance = sqrt( pow(namedRed - red, 2.0) + pow(namedGreen - green, 2.0) + pow(namedBlue - blue, 2.0));
+        
+        if(newDistance < distance)
+        {
+            matchedColor = namedColor;
+        }
+    }
+    
+    return [self stringForKnownColor:matchedColor];
+}
+
+- (NSString*) stringForKnownColor:(NSColor*)knownColor
+{
+    if([knownColor isEqual:[NSColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:1.0]])
+    {
+        return @"White";
+    }
+    else if ([knownColor isEqual:[NSColor colorWithRed:0.0 green:0.0 blue:0 alpha:1.0]])
+    {
+        return @"Black";
+    }
+    else if ([knownColor isEqual:[NSColor colorWithRed:0.5 green:0.5 blue:0.5 alpha:1.0]])
+    {
+        return @"Gray";
+    }
+    else if ([knownColor isEqual:[NSColor redColor]])
+    {
+        return @"Red";
+    }
+    else if ([knownColor isEqual:[NSColor greenColor]])
+    {
+        return @"Green";
+    }
+    else if ([knownColor isEqual:[NSColor blueColor]])
+    {
+        return @"Blue";
+    }
+    else if ([knownColor isEqual:[NSColor magentaColor]])
+    {
+        return @"Magenta";
+    }
+    else if ([knownColor isEqual:[NSColor orangeColor]])
+    {
+        return @"Organge";
+    }
+    else if ([knownColor isEqual:[NSColor yellowColor]])
+    {
+        return @"Yellow";
+    }
+    else if ([knownColor isEqual:[NSColor cyanColor]])
+    {
+        return @"Cyan";
+    }
+    else if ([knownColor isEqual:[NSColor brownColor]])
+    {
+        return @"Brown";
+    }
+    
+    return nil;
+}
 
 @end
