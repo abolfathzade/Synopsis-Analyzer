@@ -96,6 +96,12 @@ const NSString* value = @"Value";
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     
+    // Touch a ".synopsis" file to trick out embedded spotlight importer that there is a .synopsis file
+    // We mirror OpenMeta's approach to allowing generic spotlight support via xattr's
+    // But Yea
+    [self initSpotlight];
+    
+    
     // Load our plugins
     NSString* pluginsPath = [[NSBundle mainBundle] builtInPlugInsPath];
     
@@ -145,6 +151,47 @@ const NSString* value = @"Value";
 }
 
 #pragma mark - Prefs
+
+- (void) initSpotlight
+{
+    NSURL* spotlightFileURL = nil;
+    NSURL* resourceURL = [[NSBundle mainBundle] resourceURL];
+    
+    spotlightFileURL = [resourceURL URLByAppendingPathComponent:@"spotlight.synopsis"];
+    
+//    if([[NSFileManager defaultManager] fileExistsAtPath:[spotlightFileURL path]])
+//    {
+//        // touch the file, just to make sure
+//        NSError* error = nil;
+//        if(![[NSFileManager defaultManager] setAttributes:@{NSFileModificationDate:[NSDate date]} ofItemAtPath:[spotlightFileURL path] error:&error])
+//        {
+//            NSLog(@"Error Initting Spotlight : %@", error);
+//        }
+//    }
+    
+    // Make a new file at that location
+//    else
+    {
+        // See OpenMeta for details
+        // Our spotlight trickery file will contain a set of keys we use
+
+        // info_v002_synopsis_dominant_color_values = rgba
+        NSDictionary* exampleValues = @{ @"info_v002_synopsis_dominant_color_values" : @[@0.0, @0.0, @0.0, @1.0], // Solid Black
+                                         @"info_v002_synopsis_dominant_color_name" : @"Black",
+                                         
+                                         @"info_v002_synopsis_motion_vector_name" : @"Left",
+                                         @"info_v002_synopsis_motion_vector_values" : @[@-1.0, @0.0]
+                                        };
+        
+        [exampleValues writeToFile:[spotlightFileURL path] atomically:YES];
+        
+//        NSString *content = @"Spotlight Trickery";
+//        NSData *fileContents = [content dataUsingEncoding:NSUTF8StringEncoding];
+//        [[NSFileManager defaultManager] createFileAtPath:[spotlightFileURL path]
+//                                                contents:fileContents
+//                                              attributes:nil];
+    }
+}
 
 - (void) initPrefs
 {

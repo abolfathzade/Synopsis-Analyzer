@@ -8,8 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */; };
+		1B007EC51B4D7D0900DE6E98 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 1B007EC41B4D7D0900DE6E98 /* main.c */; };
+		1B007EC71B4D7D0900DE6E98 /* GetMetadataForFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B007EC61B4D7D0900DE6E98 /* GetMetadataForFile.m */; };
+		1B007ED61B4EBAC700DE6E98 /* schema.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1B007ED81B4EBAC700DE6E98 /* schema.strings */; };
+		1B007ED91B4EBAD500DE6E98 /* schema.xml in Resources */ = {isa = PBXBuildFile; fileRef = 1B007EDB1B4EBAD500DE6E98 /* schema.xml */; };
+		1B007EDD1B4EC6E900DE6E98 /* SynopsisImporter.mdimporter in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B105A391B41F18300997345 /* cv2.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA68C781AD6EAFB003B3CE9 /* cv2.so */; };
-		1B105A3B1B41FAA900997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
+		1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
 		1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B4FA1061B2DECCB004DBD63 /* libpython.dylib */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
 		1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */; };
@@ -66,6 +71,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1B007ECC1B4D7D0900DE6E98 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1BEA4D111ACB2BCC00AB57C1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1B007EBF1B4D7D0900DE6E98;
+			remoteInfo = SpotlightImporter;
+		};
 		1B61BCEB1ACF0DFC0013418D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1BEA4D111ACB2BCC00AB57C1 /* Project object */;
@@ -83,6 +95,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1B007EDC1B4EC6AB00DE6E98 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = ../Library/Spotlight;
+			dstSubfolderSpec = 7;
+			files = (
+				1B007EDD1B4EC6E900DE6E98 /* SynopsisImporter.mdimporter in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1B105A381B41F16F00997345 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -109,6 +131,13 @@
 /* Begin PBXFileReference section */
 		1B006DE51B0AE1E900B7A99C /* CustomVisualEffectView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomVisualEffectView.h; sourceTree = "<group>"; };
 		1B006DE61B0AE1E900B7A99C /* CustomVisualEffectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomVisualEffectView.m; sourceTree = "<group>"; };
+		1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */ = {isa = PBXFileReference; explicitFileType = "wrapper.spotlight-importer"; includeInIndex = 0; path = SynopsisImporter.mdimporter; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B007EC31B4D7D0900DE6E98 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1B007EC41B4D7D0900DE6E98 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		1B007EC61B4D7D0900DE6E98 /* GetMetadataForFile.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GetMetadataForFile.m; sourceTree = "<group>"; };
+		1B007ECB1B4D7D0900DE6E98 /* Importer Read Me.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Importer Read Me.txt"; sourceTree = "<group>"; };
+		1B007ED71B4EBAC700DE6E98 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/schema.strings; sourceTree = "<group>"; };
+		1B007EDA1B4EBAD500DE6E98 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = en; path = en.lproj/schema.xml; sourceTree = "<group>"; };
 		1B4FA1061B2DECCB004DBD63 /* libpython.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpython.dylib; path = usr/lib/libpython.dylib; sourceTree = SDKROOT; };
 		1B578C3F1B02F37E00D76F62 /* DropFilesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropFilesView.h; sourceTree = "<group>"; };
 		1B578C401B02F37E00D76F62 /* DropFilesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropFilesView.m; sourceTree = "<group>"; };
@@ -334,7 +363,6 @@
 		1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProgressTableViewCellReveal.xib; sourceTree = "<group>"; };
 		1B805E3E1B028BB6005D7354 /* LogController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogController.h; sourceTree = "<group>"; };
 		1B805E3F1B028BB6005D7354 /* LogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogController.m; sourceTree = "<group>"; };
-		1B95DF091AFFFA9F004FEE2D /* VideoToolboxPrivateHeaders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoToolboxPrivateHeaders.h; sourceTree = "<group>"; };
 		1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseTranscodeOperation.h; sourceTree = "<group>"; };
 		1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseTranscodeOperation.m; sourceTree = "<group>"; };
 		1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetadataWriterTranscodeOperation.h; sourceTree = "<group>"; };
@@ -378,6 +406,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1B007EBD1B4D7D0900DE6E98 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1B61BCDE1ACF06A70013418D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -432,6 +467,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1B007EC11B4D7D0900DE6E98 /* SpotlightImporter */ = {
+			isa = PBXGroup;
+			children = (
+				1B007EC61B4D7D0900DE6E98 /* GetMetadataForFile.m */,
+				1B007ECB1B4D7D0900DE6E98 /* Importer Read Me.txt */,
+				1B007EC21B4D7D0900DE6E98 /* Supporting Files */,
+			);
+			path = SpotlightImporter;
+			sourceTree = "<group>";
+		};
+		1B007EC21B4D7D0900DE6E98 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1B007ED81B4EBAC700DE6E98 /* schema.strings */,
+				1B007EDB1B4EBAD500DE6E98 /* schema.xml */,
+				1B007EC31B4D7D0900DE6E98 /* Info.plist */,
+				1B007EC41B4D7D0900DE6E98 /* main.c */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -961,6 +1017,7 @@
 			isa = PBXGroup;
 			children = (
 				1BEA4D1B1ACB2BCC00AB57C1 /* Synopsis */,
+				1B007EC11B4D7D0900DE6E98 /* SpotlightImporter */,
 				1B61BCF41ACF26590013418D /* Plugins */,
 				1B61BCDB1ACC70D50013418D /* Frameworks */,
 				1BEA4D1A1ACB2BCC00AB57C1 /* Products */,
@@ -973,6 +1030,7 @@
 				1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */,
 				1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */,
 				1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */,
+				1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -997,7 +1055,6 @@
 				1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */,
 				1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */,
 				1BEA4D1C1ACB2BCC00AB57C1 /* Supporting Files */,
-				1B95DF091AFFFA9F004FEE2D /* VideoToolboxPrivateHeaders.h */,
 			);
 			path = Synopsis;
 			sourceTree = "<group>";
@@ -1014,6 +1071,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1B007EBF1B4D7D0900DE6E98 /* SynopsisImporter */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B007ED11B4D7D0900DE6E98 /* Build configuration list for PBXNativeTarget "SynopsisImporter" */;
+			buildPhases = (
+				1B007EBC1B4D7D0900DE6E98 /* Sources */,
+				1B007EBD1B4D7D0900DE6E98 /* Frameworks */,
+				1B007EBE1B4D7D0900DE6E98 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SynopsisImporter;
+			productName = SpotlightImporter;
+			productReference = 1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */;
+			productType = "com.apple.product-type.spotlight-importer";
+		};
 		1B61BCE01ACF06A70013418D /* FrameCounterPlugin */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1B61BCE51ACF06A70013418D /* Build configuration list for PBXNativeTarget "FrameCounterPlugin" */;
@@ -1058,12 +1132,14 @@
 				1BEA4D161ACB2BCC00AB57C1 /* Frameworks */,
 				1BEA4D171ACB2BCC00AB57C1 /* Resources */,
 				1B61BCED1ACF0E0E0013418D /* CopyFiles */,
+				1B007EDC1B4EC6AB00DE6E98 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				1B61BD041ACF28660013418D /* PBXTargetDependency */,
 				1B61BCEC1ACF0DFC0013418D /* PBXTargetDependency */,
+				1B007ECD1B4D7D0900DE6E98 /* PBXTargetDependency */,
 			);
 			name = Synopsis;
 			productName = MetadataTranscoderTestHarness;
@@ -1079,6 +1155,9 @@
 				LastUpgradeCheck = 0620;
 				ORGANIZATIONNAME = metavisual;
 				TargetAttributes = {
+					1B007EBF1B4D7D0900DE6E98 = {
+						CreatedOnToolsVersion = 6.3.2;
+					};
 					1B61BCE01ACF06A70013418D = {
 						CreatedOnToolsVersion = 6.2;
 					};
@@ -1106,11 +1185,21 @@
 				1BEA4D181ACB2BCC00AB57C1 /* Synopsis */,
 				1B61BCE01ACF06A70013418D /* FrameCounterPlugin */,
 				1B61BCF81ACF26710013418D /* OpenCVAnalyzerPlugin */,
+				1B007EBF1B4D7D0900DE6E98 /* SynopsisImporter */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1B007EBE1B4D7D0900DE6E98 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1B007ED91B4EBAD500DE6E98 /* schema.xml in Resources */,
+				1B007ED61B4EBAC700DE6E98 /* schema.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1B61BCDF1ACF06A70013418D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1130,10 +1219,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				1B805E2F1B012309005D7354 /* ProgressTableViewCellSource.xib in Resources */,
+				1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */,
 				1B805E341B012AA0005D7354 /* ProgressTableViewCellProgress.xib in Resources */,
 				1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */,
 				1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */,
-				1B105A3B1B41FAA900997345 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1156,6 +1245,15 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1B007EBC1B4D7D0900DE6E98 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1B007EC51B4D7D0900DE6E98 /* main.c in Sources */,
+				1B007EC71B4D7D0900DE6E98 /* GetMetadataForFile.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1B61BCDD1ACF06A70013418D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1198,6 +1296,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1B007ECD1B4D7D0900DE6E98 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1B007EBF1B4D7D0900DE6E98 /* SynopsisImporter */;
+			targetProxy = 1B007ECC1B4D7D0900DE6E98 /* PBXContainerItemProxy */;
+		};
 		1B61BCEC1ACF0DFC0013418D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1B61BCE01ACF06A70013418D /* FrameCounterPlugin */;
@@ -1211,6 +1314,22 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		1B007ED81B4EBAC700DE6E98 /* schema.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1B007ED71B4EBAC700DE6E98 /* en */,
+			);
+			name = schema.strings;
+			sourceTree = "<group>";
+		};
+		1B007EDB1B4EBAD500DE6E98 /* schema.xml */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1B007EDA1B4EBAD500DE6E98 /* en */,
+			);
+			name = schema.xml;
+			sourceTree = "<group>";
+		};
 		1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1222,6 +1341,41 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		1B007ECF1B4D7D0900DE6E98 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = SpotlightImporter/Info.plist;
+				INSTALL_PATH = "@executable_path/../Contents/Library/Spotlight";
+				LIBRARY_STYLE = BUNDLE;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = mdimporter;
+			};
+			name = Debug;
+		};
+		1B007ED01B4D7D0900DE6E98 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = SpotlightImporter/Info.plist;
+				INSTALL_PATH = "@executable_path/../Contents/Library/Spotlight";
+				LIBRARY_STYLE = BUNDLE;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = mdimporter;
+			};
+			name = Release;
+		};
 		1B61BCE61ACF06A70013418D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1399,6 +1553,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1B007ED11B4D7D0900DE6E98 /* Build configuration list for PBXNativeTarget "SynopsisImporter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1B007ECF1B4D7D0900DE6E98 /* Debug */,
+				1B007ED01B4D7D0900DE6E98 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		1B61BCE51ACF06A70013418D /* Build configuration list for PBXNativeTarget "FrameCounterPlugin" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

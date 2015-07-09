@@ -66,7 +66,7 @@ extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
 // Every progress update tick this block is fired - update your ui on the main queue here.
 @property (copy) void (^progressBlock)(CGFloat progress);
 
-- (void) start __attribute__((objc_requires_super));
-- (void) main __attribute__((objc_requires_super));
+- (void) start NS_REQUIRES_SUPER;
+- (void) main NS_REQUIRES_SUPER;
 
 @end
