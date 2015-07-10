@@ -23,6 +23,6 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2015 Synopsis / Anton Marin / vade. All rights reserved.</string>
 	<key>NSPrincipalClass</key>
-	<string>OpenCVAnalyzerPlugin</string>
+	<string>StandardAnalyzerPlugin</string>
 </dict>
 </plist>

@@ -15,7 +15,7 @@
 // Only available on completion / main being returned
 @property (copy) NSMutableArray* analyzedVideoSampleBufferMetadata;
 @property (copy) NSMutableArray* analyzedAudioSampleBufferMetadata;
-@property (copy) NSMutableArray* analyzedGlobalMetadata;
+@property (copy) NSDictionary* analyzedGlobalMetadata;
 
 - (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions availableAnalyzers:(NSArray*)analyzers NS_DESIGNATED_INITIALIZER;
 

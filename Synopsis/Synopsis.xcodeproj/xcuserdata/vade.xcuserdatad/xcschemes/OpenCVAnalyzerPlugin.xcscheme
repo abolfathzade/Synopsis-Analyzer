@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1B61BCF81ACF26710013418D"
-               BuildableName = "OpenCVAnalyzerPlugin.bundle"
-               BlueprintName = "OpenCVAnalyzerPlugin"
+               BuildableName = "StandardAnalyzer.bundle"
+               BlueprintName = "StandardAnalyzer"
                ReferencedContainer = "container:Synopsis.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -43,8 +43,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1B61BCF81ACF26710013418D"
-            BuildableName = "OpenCVAnalyzerPlugin.bundle"
-            BlueprintName = "OpenCVAnalyzerPlugin"
+            BuildableName = "StandardAnalyzer.bundle"
+            BlueprintName = "StandardAnalyzer"
             ReferencedContainer = "container:Synopsis.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -61,8 +61,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1B61BCF81ACF26710013418D"
-            BuildableName = "OpenCVAnalyzerPlugin.bundle"
-            BlueprintName = "OpenCVAnalyzerPlugin"
+            BuildableName = "StandardAnalyzer.bundle"
+            BlueprintName = "StandardAnalyzer"
             ReferencedContainer = "container:Synopsis.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

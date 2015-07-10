@@ -36,7 +36,7 @@
 // Metadata to write
 @property (atomic, readwrite, strong) NSMutableArray* analyzedVideoSampleBufferMetadata;
 @property (atomic, readwrite, strong) NSMutableArray* analyzedAudioSampleBufferMetadata;
-@property (atomic, readwrite, strong) NSMutableArray* analyzedGlobalMetadata;
+@property (atomic, readwrite, strong) NSMutableDictionary* analyzedGlobalMetadata;
 
 // Reading the original sample Data
 @property (atomic, readwrite, strong) AVURLAsset* transcodeAsset;
@@ -357,8 +357,6 @@
                      }
                  }
              }
-             
-             
          }];
         
         // Wait until every queue is finished processing
@@ -367,70 +365,102 @@
         // Reset our queue to free anything we didnt already use.
         CMBufferQueueReset(passthroughVideoBufferQueue);
         
+        dispatch_semaphore_t waitForWriting = dispatch_semaphore_create(0);
+        
         [self.transcodeAssetWriter finishWritingWithCompletionHandler:^{
-            // Lets get our global 'summary' metadata
-            // And write out some of it to our XATTR's so our spotlight importer can work
-            // Make sure we have our standard keys and what not
+
+            // Lets get our global 'summary' metadata - we get this from our standard analyzer
+            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[@"info.v002.Synopsis.OpenCVAnalyzer"];
             
-//            // get our standard metadata
-//            NSDictionary* standardMetadata = self.analyzedGlobalMetadata[@"info.v002.Synopsis.OpenCVAnalyzer"];
-//
-//            if(self.analyzedGlobalMetadata[@"info.v002.Synopsis.OpenCVAnalyzer"])
-//            {
-//                
-//                
-//                // dominant colors is assumed to be "info_v002_synopsis_dominant_color_values"
-//                
-//                // find the closest name for our dominant colors
-//                // names match the build in NSColor color names.
-//                
-//                NSMutableArray* namedColors = [NSMutableArray new];
-//            }
-//            
-//
-            
-            NSArray* fakeDominantColors = @[[NSColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:1.0],
-                                            [NSColor redColor],
-                                            [NSColor magentaColor]
-                                            ];
-            
-            NSMutableArray* matchedNamedColors = [NSMutableArray arrayWithCapacity:fakeDominantColors.count];
-            
-            for(NSColor* color in fakeDominantColors)
-            {
-                NSString* namedColor = [self closestNamedColorForColor:color];
-                NSLog(@"Found Color %@", namedColor);
-                if(namedColor)
-                    [matchedNamedColors addObject:namedColor];
-            }
-            
+            NSArray* dominantColors = standardAnalyzerOutputs[@"DominantColors"];
+            NSArray* matchedNamedColors = [self matchColorNamesToColors:dominantColors];
+
             // write out our XATTR's
-            
             if(matchedNamedColors.count)
             {
                 // make PList out of our array
-                
-                NSError* error = nil;
-                NSData* plistData = [NSPropertyListSerialization dataWithPropertyList:matchedNamedColors
-                                                                               format:NSPropertyListBinaryFormat_v1_0
-                                                                              options:0
-                                                                                error:&error];
-                if(!error && plistData)
-                {
-                    NSString* destinationPath = [self.destinationURL path];
-                    
-                    const char *pathUTF8 = [destinationPath fileSystemRepresentation];
-                    const char *keyUTF8 = [@"com.apple.metadata:info_v002_synopsis_dominant_color_name" fileSystemRepresentation];
-                    
-                    
-                    long returnVal = setxattr(pathUTF8, keyUTF8, [plistData bytes], [plistData length], 0, XATTR_NOFOLLOW);
-
-                }
+                [self xattrsetPlist:matchedNamedColors forKey:@"info_v002_synopsis_dominant_color_name"];
             }
             
-        
+            if(dominantColors.count)
+            {
+                [self xattrsetPlist:dominantColors forKey:@"info_v002_synopsis_dominant_color_values"];
+            }
+            
+            dispatch_semaphore_signal(waitForWriting);
         }];
+        
+        // Wait till our finish writing completion block is done to return
+        dispatch_semaphore_wait(waitForWriting, DISPATCH_TIME_FOREVER);
     }
+}
+
+#pragma mark - XAttr helpers
+
+- (NSString*) xAttrStringFromString:(NSString*)string
+{
+   return [@"com.apple.metadata:" stringByAppendingString:string];
+}
+
+- (BOOL)xattrsetPlist:(id)plist forKey:(NSString*)key
+{
+//    if(![plist isKindOfClass:[NSArray class]] || ![plist isKindOfClass:[NSDictionary class]])
+//    {
+//        return NO;
+//    }
+//    
+    NSError* error = nil;
+    NSData* plistData = [NSPropertyListSerialization dataWithPropertyList:plist
+                                                                   format:NSPropertyListBinaryFormat_v1_0
+                                                                  options:0
+                                                                    error:&error];
+    if(!error && plistData)
+    {
+        NSString* destinationPath = [self.destinationURL path];
+        
+        const char *pathUTF8 = [destinationPath fileSystemRepresentation];
+        const char *keyUTF8 = [[self xAttrStringFromString:key] fileSystemRepresentation];
+        
+        long returnVal = setxattr(pathUTF8, keyUTF8, [plistData bytes], [plistData length], 0, XATTR_NOFOLLOW);
+        
+        return YES;
+    }
+
+    return NO;
+}
+
+#pragma mark - Color Helpers
+
+-(NSArray*) matchColorNamesToColors:(NSArray*)colorArray
+{
+    
+    NSMutableArray* dominantNSColors = [NSMutableArray arrayWithCapacity:colorArray.count];
+
+    for(NSArray* color in colorArray)
+    {
+        CGFloat alpha = 1.0;
+        if(color.count > 3)
+            alpha = [color[3] floatValue];
+        
+        NSColor* domColor = [NSColor colorWithRed:[color[0] floatValue]
+                                            green:[color[1] floatValue]
+                                             blue:[color[2] floatValue]
+                                            alpha:alpha];
+        
+        [dominantNSColors addObject:domColor];
+    }
+    
+    NSMutableArray* matchedNamedColors = [NSMutableArray arrayWithCapacity:dominantNSColors.count];
+    
+    for(NSColor* color in dominantNSColors)
+    {
+        NSString* namedColor = [self closestNamedColorForColor:color];
+        NSLog(@"Found Color %@", namedColor);
+        if(namedColor)
+            [matchedNamedColors addObject:namedColor];
+    }
+
+    return matchedNamedColors;
 }
 
 - (NSString*) closestNamedColorForColor:(NSColor*)color
@@ -460,13 +490,13 @@
     
     for(NSColor* namedColor in knownColors)
     {
-        CGFloat namedRed = [namedColor redComponent];
-        CGFloat namedGreen = [namedColor greenComponent];
-        CGFloat namedBlue = [namedColor blueComponent];
+        CGFloat namedRed = [namedColor hueComponent];
+        CGFloat namedGreen = [namedColor saturationComponent];
+        CGFloat namedBlue = [namedColor brightnessComponent];
         
-        CGFloat red = [color redComponent];
-        CGFloat green = [color greenComponent];
-        CGFloat blue = [color blueComponent];
+        CGFloat red = [color hueComponent];
+        CGFloat green = [color saturationComponent];
+        CGFloat blue = [color brightnessComponent];
         
         // Early bail
         if( red == namedRed && green == namedGreen && blue == namedBlue)
@@ -474,12 +504,12 @@
             matchedColor = namedColor;
             break;
         }
-
         
         CGFloat newDistance = sqrt( pow(namedRed - red, 2.0) + pow(namedGreen - green, 2.0) + pow(namedBlue - blue, 2.0));
         
         if(newDistance < distance)
         {
+            distance = newDistance;
             matchedColor = namedColor;
         }
     }

@@ -159,18 +159,18 @@ const NSString* value = @"Value";
     
     spotlightFileURL = [resourceURL URLByAppendingPathComponent:@"spotlight.synopsis"];
     
-//    if([[NSFileManager defaultManager] fileExistsAtPath:[spotlightFileURL path]])
-//    {
+    if([[NSFileManager defaultManager] fileExistsAtPath:[spotlightFileURL path]])
+    {
+        [[NSFileManager defaultManager] removeItemAtPath:[spotlightFileURL path] error:nil];
+        
 //        // touch the file, just to make sure
 //        NSError* error = nil;
 //        if(![[NSFileManager defaultManager] setAttributes:@{NSFileModificationDate:[NSDate date]} ofItemAtPath:[spotlightFileURL path] error:&error])
 //        {
 //            NSLog(@"Error Initting Spotlight : %@", error);
 //        }
-//    }
+    }
     
-    // Make a new file at that location
-//    else
     {
         // See OpenMeta for details
         // Our spotlight trickery file will contain a set of keys we use
@@ -184,12 +184,6 @@ const NSString* value = @"Value";
                                         };
         
         [exampleValues writeToFile:[spotlightFileURL path] atomically:YES];
-        
-//        NSString *content = @"Spotlight Trickery";
-//        NSData *fileContents = [content dataUsingEncoding:NSUTF8StringEncoding];
-//        [[NSFileManager defaultManager] createFileAtPath:[spotlightFileURL path]
-//                                                contents:fileContents
-//                                              attributes:nil];
     }
 }
 

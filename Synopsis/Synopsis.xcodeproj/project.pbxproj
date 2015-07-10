@@ -15,6 +15,7 @@
 		1B007EDD1B4EC6E900DE6E98 /* SynopsisImporter.mdimporter in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B105A391B41F18300997345 /* cv2.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA68C781AD6EAFB003B3CE9 /* cv2.so */; };
 		1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
+		1B49BD9C1B502B850043EBA0 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1B61BCFC1ACF26710013418D /* Info.plist */; };
 		1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B4FA1061B2DECCB004DBD63 /* libpython.dylib */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
 		1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */; };
@@ -22,8 +23,8 @@
 		1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */; };
 		1B61BCEE1ACF0E210013418D /* FrameCounterPlugin.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */; };
-		1B61BD021ACF27740013418D /* OpenCVAnalyzerPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.mm */; };
-		1B61BD051ACF28710013418D /* OpenCVAnalyzerPlugin.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1B61BD021ACF27740013418D /* Info.plist in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BD011ACF27740013418D /* Info.plist */; };
+		1B61BD051ACF28710013418D /* StandardAnalyzer.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* StandardAnalyzer.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B61BD061ACF371A0013418D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1B61BD081ACF371A0013418D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
 		1B61BD091ACF37200013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
@@ -121,7 +122,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				1B61BD051ACF28710013418D /* OpenCVAnalyzerPlugin.bundle in CopyFiles */,
+				1B61BD051ACF28710013418D /* StandardAnalyzer.bundle in CopyFiles */,
 				1B61BCEE1ACF0E210013418D /* FrameCounterPlugin.bundle in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -151,10 +152,10 @@
 		1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FrameCounterPlugin.m; sourceTree = "<group>"; };
 		1B61BCEF1ACF181C0013418D /* NSDictionary+JSONString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+JSONString.h"; sourceTree = "<group>"; };
 		1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+JSONString.m"; sourceTree = "<group>"; };
-		1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenCVAnalyzerPlugin.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
-		1B61BCFC1ACF26710013418D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../OpenCVAnalyzerPlugin/Info.plist; sourceTree = "<group>"; };
-		1B61BD001ACF27740013418D /* OpenCVAnalyzerPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenCVAnalyzerPlugin.h; path = ../OpenCVAnalyzerPlugin/OpenCVAnalyzerPlugin.h; sourceTree = "<group>"; };
-		1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = OpenCVAnalyzerPlugin.mm; path = ../OpenCVAnalyzerPlugin/OpenCVAnalyzerPlugin.mm; sourceTree = "<group>"; };
+		1B61BCF91ACF26710013418D /* StandardAnalyzer.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StandardAnalyzer.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B61BCFC1ACF26710013418D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1B61BD001ACF27740013418D /* StandardAnalyzerPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StandardAnalyzerPlugin.h; sourceTree = "<group>"; };
+		1B61BD011ACF27740013418D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1B61BD071ACF371A0013418D /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		1B61BEED1AD0262E0013418D /* cv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cv.h; sourceTree = "<group>"; };
 		1B61BEEE1AD0262E0013418D /* cv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cv.hpp; sourceTree = "<group>"; };
@@ -523,23 +524,23 @@
 		1B61BCF41ACF26590013418D /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
-				1B61BCFA1ACF26710013418D /* OpenCVAnalyzerPlugin */,
+				1B61BCFA1ACF26710013418D /* StandardAnalyzer */,
 				1B61BCE21ACF06A70013418D /* FrameCounterPlugin */,
 			);
 			name = Plugins;
 			sourceTree = "<group>";
 		};
-		1B61BCFA1ACF26710013418D /* OpenCVAnalyzerPlugin */ = {
+		1B61BCFA1ACF26710013418D /* StandardAnalyzer */ = {
 			isa = PBXGroup;
 			children = (
 				1B61BCFB1ACF26710013418D /* Supporting Files */,
-				1B61BD001ACF27740013418D /* OpenCVAnalyzerPlugin.h */,
-				1B61BD011ACF27740013418D /* OpenCVAnalyzerPlugin.mm */,
+				1B61BD001ACF27740013418D /* StandardAnalyzerPlugin.h */,
+				1B61BD011ACF27740013418D /* Info.plist */,
 				1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */,
 				1B5FE5091B25F44F00EED2A1 /* MedianCut.h */,
 				1B61BD691ACF74AE0013418D /* OpenCV */,
 			);
-			path = OpenCVAnalyzerPlugin;
+			path = StandardAnalyzer;
 			sourceTree = "<group>";
 		};
 		1B61BCFB1ACF26710013418D /* Supporting Files */ = {
@@ -557,7 +558,7 @@
 				1B61BD7A1ACF74AE0013418D /* lib */,
 			);
 			name = OpenCV;
-			path = OpenCVAnalyzerPlugin/OpenCV;
+			path = StandardAnalyzer/OpenCV;
 			sourceTree = SOURCE_ROOT;
 		};
 		1B61BD7A1ACF74AE0013418D /* lib */ = {
@@ -1029,7 +1030,7 @@
 			children = (
 				1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */,
 				1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */,
-				1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */,
+				1B61BCF91ACF26710013418D /* StandardAnalyzer.bundle */,
 				1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */,
 			);
 			name = Products;
@@ -1105,9 +1106,9 @@
 			productReference = 1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
-		1B61BCF81ACF26710013418D /* OpenCVAnalyzerPlugin */ = {
+		1B61BCF81ACF26710013418D /* StandardAnalyzer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1B61BCFD1ACF26710013418D /* Build configuration list for PBXNativeTarget "OpenCVAnalyzerPlugin" */;
+			buildConfigurationList = 1B61BCFD1ACF26710013418D /* Build configuration list for PBXNativeTarget "StandardAnalyzer" */;
 			buildPhases = (
 				1B61BCF51ACF26710013418D /* Sources */,
 				1B61BCF61ACF26710013418D /* Frameworks */,
@@ -1119,9 +1120,9 @@
 			);
 			dependencies = (
 			);
-			name = OpenCVAnalyzerPlugin;
+			name = StandardAnalyzer;
 			productName = OpenCVAnalyzer;
-			productReference = 1B61BCF91ACF26710013418D /* OpenCVAnalyzerPlugin.bundle */;
+			productReference = 1B61BCF91ACF26710013418D /* StandardAnalyzer.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 		1BEA4D181ACB2BCC00AB57C1 /* Synopsis */ = {
@@ -1184,7 +1185,7 @@
 			targets = (
 				1BEA4D181ACB2BCC00AB57C1 /* Synopsis */,
 				1B61BCE01ACF06A70013418D /* FrameCounterPlugin */,
-				1B61BCF81ACF26710013418D /* OpenCVAnalyzerPlugin */,
+				1B61BCF81ACF26710013418D /* StandardAnalyzer */,
 				1B007EBF1B4D7D0900DE6E98 /* SynopsisImporter */,
 			);
 		};
@@ -1211,6 +1212,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B49BD9C1B502B850043EBA0 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1266,7 +1268,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1B61BD021ACF27740013418D /* OpenCVAnalyzerPlugin.mm in Sources */,
+				1B61BD021ACF27740013418D /* Info.plist in Sources */,
 				1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1308,7 +1310,7 @@
 		};
 		1B61BD041ACF28660013418D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 1B61BCF81ACF26710013418D /* OpenCVAnalyzerPlugin */;
+			target = 1B61BCF81ACF26710013418D /* StandardAnalyzer */;
 			targetProxy = 1B61BD031ACF28660013418D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1416,15 +1418,15 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = OpenCVAnalyzerPlugin/Info.plist;
+				INFOPLIST_FILE = StandardAnalyzer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/OpenCVAnalyzerPlugin/OpenCV/lib",
+					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/OpenCVAnalyzerPlugin/OpenCV/include/**";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Debug;
@@ -1435,15 +1437,15 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = OpenCVAnalyzerPlugin/Info.plist;
+				INFOPLIST_FILE = StandardAnalyzer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/OpenCVAnalyzerPlugin/OpenCV/lib",
+					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/OpenCVAnalyzerPlugin/OpenCV/include/**";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Release;
@@ -1560,6 +1562,7 @@
 				1B007ED01B4D7D0900DE6E98 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1B61BCE51ACF06A70013418D /* Build configuration list for PBXNativeTarget "FrameCounterPlugin" */ = {
 			isa = XCConfigurationList;
@@ -1570,7 +1573,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1B61BCFD1ACF26710013418D /* Build configuration list for PBXNativeTarget "OpenCVAnalyzerPlugin" */ = {
+		1B61BCFD1ACF26710013418D /* Build configuration list for PBXNativeTarget "StandardAnalyzer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1B61BCFE1ACF26710013418D /* Debug */,

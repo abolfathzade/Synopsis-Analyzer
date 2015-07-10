@@ -15,11 +15,11 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreVideo/CoreVideo.h>
 
-#import "OpenCVAnalyzerPlugin.h"
+#import "StandardAnalyzerPlugin.h"
 
 #import "MedianCut.h"
 
-@interface OpenCVAnalyzerPlugin ()
+@interface StandardAnalyzerPlugin ()
 {
     CMSampleBufferRef lastSampleBuffer;
     cv::Ptr<cv::ORB> detector;
@@ -44,9 +44,11 @@
 
 @property (atomic, readwrite, strong) NSArray* pluginModuleNames;
 
+@property (atomic, readwrite, strong) NSMutableArray* everyDominantColor;
+
 @end
 
-@implementation OpenCVAnalyzerPlugin
+@implementation StandardAnalyzerPlugin
 
 - (id) init
 {
@@ -72,6 +74,8 @@
         detector = cv::ORB::create(100);
         
         cv::namedWindow("OpenCV Debug");
+        
+        self.everyDominantColor = [NSMutableArray new];
 
     }
     
@@ -234,12 +238,18 @@
                 
                 cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
 
-                [dominantColors addObject: @[@(bgrColor[2]), // / 255.0), // R
-                                             @(bgrColor[1]), // / 255.0), // G
-                                             @(bgrColor[0]), // / 255.0), // B
-                                             ]];
+                NSArray* color = @[@(bgrColor[2]), // / 255.0), // R
+                                   @(bgrColor[1]), // / 255.0), // G
+                                   @(bgrColor[0]), // / 255.0), // B
+                                   ];
+                
+                [dominantColors addObject:color];
+
+                // We will process this in finalize
+                [self.everyDominantColor addObject:color];
             }
 
+            
             metadata[@"DominantColors"] = dominantColors;
             
 #pragma mark - Dominant Colors / kMeans
@@ -407,7 +417,6 @@
             // Add Features to metadata
             metadata[@"Features"] = keyPointsArray;
 
-            
 #pragma mark - Frame Difference Motion
 
             // Can we do frame differencing - note all these tests should pass because we got it last time when the sample was current
@@ -464,6 +473,48 @@
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
 {
+    // analyzed
+    
+    // Also this code is heavilly borrowed so yea.
+    int k = 5;
+    int numPixels = self.everyDominantColor.count;
+    
+    // Walk through the pixels and store colours.
+    // Let's be fancy and make a smart pointer. Unfortunately shared_ptr doesn't automatically know how to delete a C++ array, so we have to write a [] lambda (aka 'block' in Obj-C) to clean up the object.
+    std::shared_ptr<MedianCut::Point> points(new MedianCut::Point[numPixels],
+                                             []( MedianCut::Point* p ) { delete[] p; } );
+    
+    int sourceColorCount = 0;
+    
+    // Populate Median Cut Points by color values;
+    for(NSArray* dominantColorsArray in self.everyDominantColor)
+    {
+            points.get()[sourceColorCount].x[0] = [dominantColorsArray[0] floatValue];
+            points.get()[sourceColorCount].x[1] = [dominantColorsArray[1] floatValue];
+            points.get()[sourceColorCount].x[2] = [dominantColorsArray[2] floatValue];
+            
+            sourceColorCount++;
+    }
+    
+    auto palette = MedianCut::medianCut(points.get(), numPixels, k);
+    
+    NSMutableArray* dominantColors = [NSMutableArray new];
+    
+    for ( auto colorCountPair: palette )
+    {
+        // convert from LAB to BGR
+        const MedianCut::Point& labColor = colorCountPair.first;
+        
+        cv::Mat rgb(1,1, CV_32FC3, cv::Vec3f(labColor.x[0], labColor.x[1], labColor.x[2]));
+        
+        cv::Vec3f rgbColor = rgb.at<cv::Vec3f>(0,0);
+        
+        [dominantColors addObject: @[@(rgbColor[0]),
+                                     @(rgbColor[1]),
+                                     @(rgbColor[2]),
+                                     ]];
+    }
+    
     // If we have our old last sample buffer, free it
     if(lastSampleBuffer != NULL)
     {
@@ -471,7 +522,7 @@
         lastSampleBuffer = NULL;
     }
     
-    return nil;
+    return  @{@"DominantColors" : dominantColors};
 }
 
 @end

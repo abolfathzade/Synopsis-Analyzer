@@ -10,7 +10,7 @@
 #import <CoreMedia/CoreMedia.h>
 #import "SampleBufferAnalyzerPluginProtocol.h"
 
-@interface OpenCVAnalyzerPlugin : NSObject <SampleBufferAnalyzerPluginProtocol>
+@interface StandardAnalyzerPlugin : NSObject <SampleBufferAnalyzerPluginProtocol>
 
 @property (readonly) NSString* pluginName;
 @property (readonly) NSString* pluginIdentifier;

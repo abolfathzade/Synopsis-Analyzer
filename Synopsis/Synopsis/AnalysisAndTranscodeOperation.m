@@ -47,7 +47,7 @@
 // Eventually becomes our analyzed metadata - this stuff is mutated during reading of frames
 @property (atomic, readwrite, strong) NSMutableArray* inFlightVideoSampleBufferMetadata;
 @property (atomic, readwrite, strong) NSMutableArray* inFlightAudioSampleBufferMetadata;
-@property (atomic, readwrite, strong) NSMutableArray* inFlightGlobalMetadata;
+@property (atomic, readwrite, strong) NSMutableDictionary* inFlightGlobalMetadata;
 
 // Reading the original sample Data
 @property (atomic, readwrite, strong) AVURLAsset* transcodeAsset;
@@ -118,7 +118,7 @@
         
         self.availableAnalyzers = initializedAnalyzers;
         
-        self.inFlightGlobalMetadata = [NSMutableArray new];
+        self.inFlightGlobalMetadata = [NSMutableDictionary new];
         self.inFlightVideoSampleBufferMetadata = [NSMutableArray new];
         self.inFlightAudioSampleBufferMetadata = [NSMutableArray new];
         
@@ -502,7 +502,7 @@
                                 // set our global metadata for the analyzer
                                 if(finalizedMetadata)
                                 {
-                                    [self.inFlightGlobalMetadata addObject:@{ analyzer.pluginIdentifier : finalizedMetadata }];
+                                    self.inFlightGlobalMetadata[analyzer.pluginIdentifier] = finalizedMetadata;
                                 }
                                 else
                                 {
