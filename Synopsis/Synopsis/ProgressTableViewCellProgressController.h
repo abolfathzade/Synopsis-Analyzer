@@ -10,4 +10,5 @@
 
 @interface ProgressTableViewCellProgressController : NSViewController
 - (void) setProgress:(CGFloat)progress;
+- (void) setTimeRemainingSeconds:(NSTimeInterval)timeRemaining;
 @end

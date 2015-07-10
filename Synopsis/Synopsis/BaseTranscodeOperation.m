@@ -18,6 +18,13 @@ NSString * const kSynopsisAnalyzedVideoSampleBufferMetadataKey = @"kSynopsisAnal
 NSString * const kSynopsisAnalyzedAudioSampleBufferMetadataKey = @"kSynopsisAnalyzedAudioSampleBufferMetadata";
 NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalMetadata";
 
+@interface BaseTranscodeOperation ()
+@property (atomic, readwrite, strong) NSDate* startDate;
+@property (atomic, readwrite, assign) NSTimeInterval elapsedTime;
+@property (atomic, readwrite, assign) NSTimeInterval remainingTime;
+
+@end
+
 @implementation BaseTranscodeOperation
 
 @synthesize progress = _progress;
@@ -41,7 +48,11 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
 - (void) start
 {
     [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Start Main NSOperation %p", self, nil]];
-    
+
+    self.startDate = [NSDate date];
+    self.elapsedTime = 0;
+    self.remainingTime = DBL_MIN;
+
     [super start];
 }
 
@@ -76,10 +87,21 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
         _progress = progress;
     }
     
+    [self calculateEta];
+        
     if(self.progressBlock)
     {
         self.progressBlock(progress);
     }
+}
+
+- (void) calculateEta
+{
+    self.elapsedTime = [[NSDate date] timeIntervalSinceReferenceDate] - [self.startDate timeIntervalSinceReferenceDate];
+    double itemsPerSecond = self.progress / self.elapsedTime;
+    double secondsRemaining = (1.0 - self.progress) / itemsPerSecond;
+    
+    self.remainingTime = secondsRemaining;
 }
 
 @end

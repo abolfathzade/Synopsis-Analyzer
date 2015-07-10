@@ -9,6 +9,22 @@
 #import <Cocoa/Cocoa.h>
 #import <AVFoundation/AVFoundation.h>
 
+
+#pragma mark - Standard Analyzer and Spotlight Keys
+
+// These keys are used within out Spotlight plugin, and our Standard Analyzer plugin to ensure spotlight and our analyzer agree on key names.
+// These particular keys allow for a spotlight UI to be created, certain keys to be visible in the ui (and others to not be)
+// This lets users easily find specific information in the Finder and in the UI.
+
+// To be clear, if a plugin writes out custom summary metadata, that metada will be included in the HFS extended attributes
+// under the com.apple.metadata: key allowing programmatic spotlight searches to work (along with command line searches).
+// The only limitation is that a custom UI wont be made (as the spotlight schema wont match).
+
+// Note, these strings need to match our scheme.xml file exactly.
+
+
+#pragma mark - Plugin Particulars
+
 // Rough amount of overhead a particular plugin or module has
 // For example very very taxing
 typedef enum : NSUInteger {
@@ -61,8 +77,7 @@ typedef enum : NSUInteger {
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint andEnabledModules:(NSDictionary*)enabledModuleKeys;
 
 // Note that the sample buffer's internal data type might differ from whats expected
-- (
-) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer error:(NSError**)error;
+- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer error:(NSError**)error;
 
 // Finalize any calculations required to return global metadata
 // Global Metadata is metadata that describes the entire file, not the individual frames or samples

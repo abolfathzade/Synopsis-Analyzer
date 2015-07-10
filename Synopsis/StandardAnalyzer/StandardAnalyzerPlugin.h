@@ -10,7 +10,7 @@
 #import <CoreMedia/CoreMedia.h>
 #import "AnalyzerPluginProtocol.h"
 
-@interface StandardAnalyzerPlugin : NSObject <SampleBufferAnalyzerPluginProtocol>
+@interface StandardAnalyzerPlugin : NSObject <AnalyzerPluginProtocol>
 
 @property (readonly) NSString* pluginName;
 @property (readonly) NSString* pluginIdentifier;

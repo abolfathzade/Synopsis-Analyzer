@@ -12,7 +12,6 @@
 #import "ProgressTableViewCellSourceController.h"
 #import "ProgressTableViewCellProgressController.h"
 #import "ProgressTableViewCellRevealController.h"
-
 @interface ProgressTableViewController ()
 @property (weak) IBOutlet NSTableView* tableView;
 
@@ -43,6 +42,9 @@
         
         NSNib* sourceTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellSource" bundle:[NSBundle mainBundle]];
         [self.tableView registerNib:sourceTableViewCell forIdentifier:@"SourceFile"];
+
+        NSNib* timeRemainingTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellTimeRemaining" bundle:[NSBundle mainBundle]];
+        [self.tableView registerNib:timeRemainingTableViewCell forIdentifier:@"TimeRemaining"];
         
         NSNib* progressTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellProgress" bundle:[NSBundle mainBundle]];
         [self.tableView registerNib:progressTableViewCell forIdentifier:@"Progress"];
@@ -53,6 +55,7 @@
         // We dont want to hold on to our NSOperationQueues because we want to dealloc all the heavy media bullshit each one retains internally
         self.transcodeAndAnalysisOperationsWeak = [[NSPointerArray alloc] initWithOptions:NSPointerFunctionsWeakMemory];
 
+        // Keep tabs on our controllers
         self.sourceControllerArray = [NSMutableArray new];
         self.progressControllerArray = [NSMutableArray new];
         self.revealControllerArray = [NSMutableArray new];
@@ -83,6 +86,7 @@
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     BaseTranscodeOperation* operationForRow = [self.transcodeAndAnalysisOperationsWeak pointerAtIndex:row];
+    NSView* result = nil;
     
     if([tableColumn.identifier isEqualToString:@"SourceFile"])
     {
@@ -101,19 +105,16 @@
             self.sourceControllerArray[row] = controller;
         }
         
-        NSView* result = [tableView makeViewWithIdentifier:@"SourceFile" owner:controller];
+        result = [tableView makeViewWithIdentifier:@"SourceFile" owner:controller];
         
         if(operationForRow)
         {
             NSURL* sourceURL = operationForRow.sourceURL;
             [controller setSourceFileName:[sourceURL lastPathComponent]];
         }
-        
-        
-        // Return the result
-        return result;
     }
-   
+
+    
     else  if([tableColumn.identifier isEqualToString:@"Progress"])
     {
         // find our cached controller if we have one
@@ -131,21 +132,7 @@
             self.progressControllerArray[row] = controller;
         }
 
-        NSView* result = [tableView makeViewWithIdentifier:@"Progress" owner:controller];
-        
-        if(operationForRow)
-        {
-            // set up our callback
-            operationForRow.progressBlock = ^void(CGFloat progress)
-            {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [controller setProgress:progress];
-                });
-            };
-        }
-        
-        // Return the result
-        return result;
+         result = [tableView makeViewWithIdentifier:@"Progress" owner:controller];
     }
 
     else  if([tableColumn.identifier isEqualToString:@"Reveal"])
@@ -164,18 +151,35 @@
             self.revealControllerArray[row] = controller;
         }
 
-        NSView* result = [tableView makeViewWithIdentifier:@"Reveal" owner:controller];
+        result = [tableView makeViewWithIdentifier:@"Reveal" owner:controller];
         
         if(operationForRow)
         {
             NSURL* destinationURL = operationForRow.destinationURL;
             controller.destinationURL = destinationURL;
         }
-        // Return the result
-        return result;
     }
 
-    return nil;
+    // Set up our callbacks if we need to.
+    if(operationForRow)
+    {
+        // set up our callback
+        operationForRow.progressBlock = ^void(CGFloat progress)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                ProgressTableViewCellProgressController* progressController = self.progressControllerArray[row];
+                
+                if(progressController)
+                {
+                    [progressController setProgress:progress];
+                    [progressController setTimeRemainingSeconds:operationForRow.remainingTime];
+                }
+            });
+        };
+    }
+
+    
+    return result;
 }
 
 #pragma mark - NSTableViewDataSource

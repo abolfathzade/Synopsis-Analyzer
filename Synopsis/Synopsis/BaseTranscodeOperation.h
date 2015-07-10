@@ -62,6 +62,8 @@ extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
 @property (atomic, readwrite, strong) NSURL* sourceURL;
 @property (atomic, readwrite, strong) NSURL* destinationURL;
 @property (atomic, readwrite) CGFloat progress;
+@property (atomic, readonly) NSTimeInterval elapsedTime;
+@property (atomic, readonly) NSTimeInterval remainingTime;
 
 // Every progress update tick this block is fired - update your ui on the main queue here.
 @property (copy) void (^progressBlock)(CGFloat progress);

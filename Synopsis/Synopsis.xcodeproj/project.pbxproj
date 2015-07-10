@@ -15,6 +15,7 @@
 		1B007EDD1B4EC6E900DE6E98 /* SynopsisImporter.mdimporter in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B105A391B41F18300997345 /* cv2.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA68C781AD6EAFB003B3CE9 /* cv2.so */; };
 		1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
+		1B49BD9E1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */; };
 		1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B4FA1061B2DECCB004DBD63 /* libpython.dylib */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
 		1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */; };
@@ -137,6 +138,7 @@
 		1B007ECB1B4D7D0900DE6E98 /* Importer Read Me.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Importer Read Me.txt"; sourceTree = "<group>"; };
 		1B007ED71B4EBAC700DE6E98 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/schema.strings; sourceTree = "<group>"; };
 		1B007EDA1B4EBAD500DE6E98 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = en; path = en.lproj/schema.xml; sourceTree = "<group>"; };
+		1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = StandardAnalyzerPlugin.mm; sourceTree = "<group>"; };
 		1B4FA1061B2DECCB004DBD63 /* libpython.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpython.dylib; path = usr/lib/libpython.dylib; sourceTree = SDKROOT; };
 		1B578C3F1B02F37E00D76F62 /* DropFilesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropFilesView.h; sourceTree = "<group>"; };
 		1B578C401B02F37E00D76F62 /* DropFilesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropFilesView.m; sourceTree = "<group>"; };
@@ -531,11 +533,12 @@
 		1B61BCFA1ACF26710013418D /* StandardAnalyzer */ = {
 			isa = PBXGroup;
 			children = (
-				1B61BCFB1ACF26710013418D /* Supporting Files */,
 				1B61BD001ACF27740013418D /* StandardAnalyzerPlugin.h */,
+				1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */,
 				1B61BD011ACF27740013418D /* Info.plist */,
 				1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */,
 				1B5FE5091B25F44F00EED2A1 /* MedianCut.h */,
+				1B61BCFB1ACF26710013418D /* Supporting Files */,
 				1B61BD691ACF74AE0013418D /* OpenCV */,
 			);
 			path = StandardAnalyzer;
@@ -970,7 +973,6 @@
 				1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */,
 				1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */,
 				1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */,
-				1B61BCDC1ACEFEEE0013418D /* AnalyzerPluginProtocol.h */,
 			);
 			name = "Transcode & Analysis";
 			sourceTree = "<group>";
@@ -1039,6 +1041,7 @@
 			children = (
 				1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */,
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
+				1B61BCDC1ACEFEEE0013418D /* AnalyzerPluginProtocol.h */,
 				1B805E381B012B5E005D7354 /* TableView & Cells */,
 				1B805E2D1B0114DD005D7354 /* Transcode & Analysis */,
 				1B805E3E1B028BB6005D7354 /* LogController.h */,
@@ -1266,6 +1269,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */,
+				1B49BD9E1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
