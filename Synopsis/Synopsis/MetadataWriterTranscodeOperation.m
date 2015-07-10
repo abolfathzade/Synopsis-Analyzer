@@ -10,7 +10,8 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 
-#import "SampleBufferAnalyzerPluginProtocol.h"
+#import "AnalyzerPluginProtocol.h"
+
 #import "NSDictionary+JSONString.h"
 #import "BSON/BSONSerialization.h"
 #import "GZIP/GZIP.h"

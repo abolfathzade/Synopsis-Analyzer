@@ -26,7 +26,7 @@ typedef enum : NSUInteger {
     SynopsisAnalysisQualityHintHigh,
 } SynopsisAnalysisQualityHint;
 
-@protocol SampleBufferAnalyzerPluginProtocol <NSObject>
+@protocol AnalyzerPluginProtocol <NSObject>
 
 @required
 

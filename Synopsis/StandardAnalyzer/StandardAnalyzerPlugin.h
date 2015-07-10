@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CoreMedia.h>
-#import "SampleBufferAnalyzerPluginProtocol.h"
+#import "AnalyzerPluginProtocol.h"
 
 @interface StandardAnalyzerPlugin : NSObject <SampleBufferAnalyzerPluginProtocol>
 

@@ -14,7 +14,7 @@
 
 #import "DropFilesView.h"
 #import "LogController.h"
-#import "SampleBufferAnalyzerPluginProtocol.h"
+#import "AnalyzerPluginProtocol.h"
 
 #import "AnalysisAndTranscodeOperation.h"
 #import "MetadataWriterTranscodeOperation.h"

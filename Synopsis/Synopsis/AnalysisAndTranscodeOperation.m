@@ -10,7 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 
-#import "SampleBufferAnalyzerPluginProtocol.h"
+#import "AnalyzerPluginProtocol.h"
 
 #import "NSDictionary+JSONString.h"
 #import "BSON/BSONSerialization.h"
@@ -111,7 +111,7 @@
         for(NSString* analyzerClassNameString in analyzers)
         {
             Class pluginClass = NSClassFromString(analyzerClassNameString);
-            id<SampleBufferAnalyzerPluginProtocol> pluginInstance = [[pluginClass alloc] init];
+            id<AnalyzerPluginProtocol> pluginInstance = [[pluginClass alloc] init];
 
             [initializedAnalyzers addObject:pluginInstance];
         }
@@ -239,7 +239,7 @@
     }
 
     // For every Analyzer, begin an new Analysis Session
-    for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+    for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
     {
         [analyzer beginMetadataAnalysisSessionWithQuality:SynopsisAnalysisQualityHintHigh andEnabledModules:nil];
     }
@@ -397,7 +397,7 @@
                             NSError* analyzerError = nil;
                             NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
                             
-                            for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+                            for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
                                 NSString* newMetadataKey = [analyzer pluginIdentifier];
                                 NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedVideoSampleBuffer error:&analyzerError];
@@ -488,7 +488,7 @@
                         {
                             // TODO: AGGREGATE METADATA THAT ISNT PER FRAME
                             NSError* analyzerError = nil;
-                            for(id<SampleBufferAnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+                            for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
                                 NSDictionary* finalizedMetadata = [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
                                 if(analyzerError)

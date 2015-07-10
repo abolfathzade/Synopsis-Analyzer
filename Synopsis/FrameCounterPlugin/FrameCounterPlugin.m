@@ -7,7 +7,6 @@
 //
 
 #import "FrameCounterPlugin.h"
-#import "SampleBufferAnalyzerPluginProtocol.h"
 
 @interface FrameCounterPlugin ()
 
