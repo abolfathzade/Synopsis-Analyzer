@@ -142,6 +142,8 @@
 
 - (NSError*) setupTranscodeShitSucessfullyOrDontWhatverMan
 {
+    CGAffineTransform prefferedTrackTransform = CGAffineTransformIdentity;
+    
     self.transcodeAsset = [AVURLAsset URLAssetWithURL:self.sourceURL options:@{AVURLAssetPreferPreciseDurationAndTimingKey : @TRUE}];
     
     self.transcodeAssetHasVideo = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual].count ? YES : NO;
@@ -157,11 +159,13 @@
     if(self.transcodeAssetHasVideo)
     {
         AVAssetTrack* firstVideoTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual][0];
+        
         self.transcodeAssetReaderVideo = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
                                                                                     outputSettings:@{ (NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
                                                                                                       }];
         self.transcodeAssetReaderVideo.alwaysCopiesSampleData = YES;
-
+        prefferedTrackTransform = firstVideoTrack.preferredTransform;
+        
         // Do we use passthrough?
         if(!self.transcoding)
         {
@@ -227,6 +231,8 @@
     self.transcodeAssetWriterAudio = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:self.audioTranscodeSettings];
     
     self.transcodeAssetWriterVideo.expectsMediaDataInRealTime = NO;
+    self.transcodeAssetWriterVideo.transform = prefferedTrackTransform;
+    
     self.transcodeAssetWriterAudio.expectsMediaDataInRealTime = NO;
     
     // Assign all our specific inputs to our Writer

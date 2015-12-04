@@ -115,6 +115,8 @@
     // Readers
     self.transcodeAssetReader = [AVAssetReader assetReaderWithAsset:self.transcodeAsset error:&error];
     
+    CGAffineTransform preferredTransform = CGAffineTransformIdentity;
+    
     // Video Reader -
     if(hasVideo)
     {
@@ -123,6 +125,7 @@
         self.transcodeAssetReaderVideoPassthrough = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
                                                                                                outputSettings:nil];
         self.transcodeAssetReaderVideoPassthrough.alwaysCopiesSampleData = YES;
+        preferredTransform = firstVideoTrack.preferredTransform;
     }
     
     // Audio Reader -
@@ -184,6 +187,7 @@
     // Is this needed?
     self.transcodeAssetWriterMetadata.expectsMediaDataInRealTime = NO;
     self.transcodeAssetWriterVideoPassthrough.expectsMediaDataInRealTime = NO;
+    self.transcodeAssetWriterVideoPassthrough.transform = preferredTransform;
     self.transcodeAssetWriterAudioPassthrough.expectsMediaDataInRealTime = NO;
     
     // Assign all our specific inputs to our Writer
