@@ -205,26 +205,29 @@
         }
     }
 
-    if(self.transcodeAssetHasAudio)
-    {
-        if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudio])
-        {
-            [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudio];
-        }
-
-        if(!self.transcoding)
-        {
-            if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudioPassthrough])
-            {
-                [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudioPassthrough];
-            }
-        }
-    }
+//    if(self.transcodeAssetHasAudio)
+//    {
+//        if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudio])
+//        {
+//            [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudio];
+//        }
+//
+//        if(!self.transcoding)
+//        {
+//            if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudioPassthrough])
+//            {
+//                [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudioPassthrough];
+//            }
+//        }
+//    }
     
     // Writers
     self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:&error];
     self.transcodeAssetWriterVideo = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:self.videoTranscodeSettings];
     self.transcodeAssetWriterAudio = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:self.audioTranscodeSettings];
+    
+    self.transcodeAssetWriterVideo.expectsMediaDataInRealTime = NO;
+    self.transcodeAssetWriterAudio.expectsMediaDataInRealTime = NO;
     
     // Assign all our specific inputs to our Writer
     if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideo]
@@ -234,8 +237,8 @@
         if(self.transcodeAssetHasVideo)
             [self.transcodeAssetWriter addInput:self.transcodeAssetWriterVideo];
         
-        if(self.transcodeAssetHasAudio)
-            [self.transcodeAssetWriter addInput:self.transcodeAssetWriterAudio];
+//        if(self.transcodeAssetHasAudio)
+//            [self.transcodeAssetWriter addInput:self.transcodeAssetWriterAudio];
     }
 
     // For every Analyzer, begin an new Analysis Session
@@ -267,7 +270,7 @@
         
         // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
         CMBufferQueueRef passthroughVideoBufferQueue;
-        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &passthroughVideoBufferQueue);
+        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &passthroughVideoBufferQueue);
 
         CMBufferQueueRef uncompressedVideoBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &uncompressedVideoBufferQueue);
@@ -302,6 +305,8 @@
             
             // read sample buffers from our video reader - and append them to the queue.
             // only read while we have samples, and while our buffer queue isnt full
+            
+            [[LogController sharedLogController] appendVerboseLog:@"Begun Passthrough Video"];
             
             while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
             {
@@ -344,6 +349,8 @@
         __block BOOL finishedReadingAllUncompressedVideo = NO;
 
         dispatch_async(uncompressedVideoDecodeQueue, ^{
+            
+            [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
             
             while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
             {
@@ -454,6 +461,7 @@
                     else
                     {
                         // Got NULL - were done
+                        // Todo: Move Analysis Finalization here
                         break;
                     }
                     
@@ -475,7 +483,7 @@
             [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:passthroughVideoEncodeQueue usingBlock:^
             {
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Video"];
-
+                
                 while([self.transcodeAssetWriterVideo isReadyForMoreMediaData])
                 {
                     // Are we done reading,
@@ -495,6 +503,8 @@
                                 {
                                     NSString* errorString = [@"Error Finalizing Analysis - bailing: " stringByAppendingString:[analyzerError description]];
                                     [[LogController sharedLogController] appendErrorLog:errorString];
+
+                                    dispatch_group_leave(g);
 
                                     break;
                                 }
@@ -545,11 +555,26 @@
                         }
                         CFRelease(videoSampleBuffer);
                     }
-                    
                 }
                 
-//                NSLog(@"Stopped Requesting Media");
-                
+                // some debug code to see 
+                if(finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo)
+                {
+                    if(!CMBufferQueueIsEmpty(passthroughVideoBufferQueue) || !CMBufferQueueIsEmpty(uncompressedVideoBufferQueue))
+                    {
+                        [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Video but did not empty Source Queues"];
+                    }
+                }
+                else
+                {
+                    [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Video but did not finish reading Source Video"];
+                    
+                    if(!CMBufferQueueIsEmpty(passthroughVideoBufferQueue) || !CMBufferQueueIsEmpty(uncompressedVideoBufferQueue))
+                    {
+                        [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Video but did not empty Source Queues"];
+                    }
+                }
+            
             }];
         }
         // Wait until every queue is finished processing
