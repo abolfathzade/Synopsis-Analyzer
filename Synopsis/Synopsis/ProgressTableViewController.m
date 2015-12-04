@@ -43,8 +43,8 @@
         NSNib* sourceTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellSource" bundle:[NSBundle mainBundle]];
         [self.tableView registerNib:sourceTableViewCell forIdentifier:@"SourceFile"];
 
-        NSNib* timeRemainingTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellTimeRemaining" bundle:[NSBundle mainBundle]];
-        [self.tableView registerNib:timeRemainingTableViewCell forIdentifier:@"TimeRemaining"];
+//        NSNib* timeRemainingTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellTimeRemaining" bundle:[NSBundle mainBundle]];
+//        [self.tableView registerNib:timeRemainingTableViewCell forIdentifier:@"TimeRemaining"];
         
         NSNib* progressTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellProgress" bundle:[NSBundle mainBundle]];
         [self.tableView registerNib:progressTableViewCell forIdentifier:@"Progress"];

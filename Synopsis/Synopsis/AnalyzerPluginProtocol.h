@@ -22,6 +22,13 @@
 
 // Note, these strings need to match our scheme.xml file exactly.
 
+// A multivalue (NSArray) that holds the actual RGB (or RGBA) values (another NSArray) for a color.
+// Note, this is an Array of colors. Or an Array of Arrays.
+// Not exposed to the UI
+extern NSString * const kStandardAnalyzerKey_DominantColorValues;
+// A multivalue (NSArray) of of NSStrings for readable color names.
+// values can be Black, White, Gray, Red, Green, Blue, Cyan, Magenta, Yellow, Orange, Brown
+extern NSString * const kStandardAnalyzerKey_DominantColorName;
 
 #pragma mark - Plugin Particulars
 
