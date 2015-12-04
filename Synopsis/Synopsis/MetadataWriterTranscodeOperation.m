@@ -143,6 +143,11 @@
         {
             [self.transcodeAssetReader addOutput:self.transcodeAssetReaderVideoPassthrough];
         }
+        else
+        {
+            [[LogController sharedLogController] appendErrorLog:[@"Unable to add video output track to asset reader: " stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+        }
+
     }
     
     if(hasAudio)
@@ -150,6 +155,10 @@
         if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudioPassthrough])
         {
             [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudioPassthrough];
+        }
+        else
+        {
+            [[LogController sharedLogController] appendErrorLog:[@"Unable to add audio output track to asset reader: " stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
         }
     }
     
@@ -174,20 +183,46 @@
     
     // Is this needed?
     self.transcodeAssetWriterMetadata.expectsMediaDataInRealTime = NO;
+    self.transcodeAssetWriterVideoPassthrough.expectsMediaDataInRealTime = NO;
+    self.transcodeAssetWriterAudioPassthrough.expectsMediaDataInRealTime = NO;
     
     // Assign all our specific inputs to our Writer
-    if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideoPassthrough]
-       && [self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterAudioPassthrough]
-       && [self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterMetadata]
-       )
+    if(hasVideo)
     {
-        [self.transcodeAssetWriter addInput:self.transcodeAssetWriterMetadata];
-        
-        if(hasVideo)
+        if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideoPassthrough])
+        {
             [self.transcodeAssetWriter addInput:self.transcodeAssetWriterVideoPassthrough];
+        }
+        else
+        {
+            [[LogController sharedLogController] appendErrorLog:[@"Unable to add video output track to asset writer: " stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
+        }
         
-        if(hasAudio)
+        if(self.analyzedVideoSampleBufferMetadata)
+        {
+            if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterMetadata])
+            {
+                [self.transcodeAssetWriter addInput:self.transcodeAssetWriterMetadata];
+            }
+            else
+            {
+                [[LogController sharedLogController] appendErrorLog:[@"Unable to add metadata output track to asset writer: " stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
+            }
+        }
+    }
+    if(hasAudio)
+    {
+        if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterAudioPassthrough])
+        {
             [self.transcodeAssetWriter addInput:self.transcodeAssetWriterAudioPassthrough];
+        }
+        else
+        {
+            [[LogController sharedLogController] appendErrorLog:[@"Unable to add audio output track to asset writer: " stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
+        }
+        
+        // Todo : Audio metadata here?
+        // or do we move all metadata to audio if we have an audio track for higher sampling rates?
     }
     
     return error;
@@ -226,9 +261,6 @@
 
     }
     
-    
-    
-    
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading])
     {
         [self.transcodeAssetWriter startSessionAtSourceTime:kCMTimeZero];
@@ -249,7 +281,8 @@
         // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
         
         CMBufferQueueRef passthroughVideoBufferQueue;
-        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &passthroughVideoBufferQueue);
+        // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
+        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &passthroughVideoBufferQueue);
         
         dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthroughDecodeQueue", 0);
         dispatch_group_enter(g);
@@ -313,10 +346,10 @@
                    && [self.transcodeAssetWriterMetadata isReadyForMoreMediaData])
              {
                  // Are we done reading,
-                 if(finishedReadingAllPassthroughVideo )
+                 if(finishedReadingAllPassthroughVideo)
                  {
-//                      NSLog(@"Finished Reading waiting to empty queue...");
-                     if(CMBufferQueueIsEmpty(passthroughVideoBufferQueue) && !self.analyzedVideoSampleBufferMetadata.count)
+                     // if our video is done, were done. We dont care if we missed a single piece of metadata or not.
+                     if(CMBufferQueueIsEmpty(passthroughVideoBufferQueue) )//&& !self.analyzedVideoSampleBufferMetadata.count)
                      {
                          [self.transcodeAssetWriterVideoPassthrough markAsFinished];
                          [self.transcodeAssetWriterMetadata markAsFinished];
@@ -337,25 +370,85 @@
                      CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
                      
                      self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
-
                      
-                     [self.transcodeAssetWriterVideoPassthrough appendSampleBuffer:passthroughVideoSampleBuffer];
+                     if(![self.transcodeAssetWriterVideoPassthrough appendSampleBuffer:passthroughVideoSampleBuffer])
+                     {
+                         [[LogController sharedLogController] appendErrorLog:[@"Unable to append video sample to asset at time: " stringByAppendingString:CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, currentSamplePTS))]];
+                     }
                      
                      if(self.analyzedVideoSampleBufferMetadata.count)
                      {
-                         AVTimedMetadataGroup *group = self.analyzedVideoSampleBufferMetadata[0];
-                         if([self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group])
+                         unsigned int index = 0;
+                         AVTimedMetadataGroup *group = self.analyzedVideoSampleBufferMetadata[index];
+                         
+                         // So this is tricky
+                         // Our video is passthrough - which means for some video codecs we get samples in decode not presentation order
+                         // since our metadata was analyzed by decoding (by definition), its in presentation timestamp order.
+                         // So we need to search every passthrough sample for a metadata sample of the nearest timestamp
+                         // If we find a match, we remove it from the dictionary to at least try to speed shit up...
+                         // Theoretically DTS and PTS should be at least 'near' one another, so we dont need to iterate the entire dictionary.
+                         
+                         CMTime currentSamplePTS = CMSampleBufferGetPresentationTimeStamp(passthroughVideoSampleBuffer);
+                         CMTime currentSampleOPTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
+                         CMTime currentSampleDTS = CMSampleBufferGetDecodeTimeStamp(passthroughVideoSampleBuffer);
+                         CMTime currentSampleODTS = CMSampleBufferGetOutputDecodeTimeStamp(passthroughVideoSampleBuffer);
+                         
+                         int32_t compareResult =  CMTimeCompare(currentSampleDTS, group.timeRange.start);
+                         
+                         if(compareResult < 0 )
                          {
-                             // Pop our metadata off...
-                             [self.analyzedVideoSampleBufferMetadata removeObject:group];
+                             while(CMTIME_COMPARE_INLINE(currentSampleDTS, <, group.timeRange.start))
+                             {
+                                 index++;
+                                 
+                                 if(index < self.analyzedVideoSampleBufferMetadata.count)
+                                     group = self.analyzedVideoSampleBufferMetadata[index];
+                                 else
+                                 {
+                                     group = nil;
+                                     break;
+                                 }
+                             }
+
+                         }
+                         else if(compareResult > 0)
+                         {
+                             while(CMTIME_COMPARE_INLINE(currentSampleDTS, >, group.timeRange.start))
+                             {
+                                 index++;
+                                 
+                                 if(index < self.analyzedVideoSampleBufferMetadata.count)
+                                     group = self.analyzedVideoSampleBufferMetadata[index];
+                                 else
+                                 {
+                                     group = nil;
+                                     break;
+                                 }
+                             }
+                         }
+                         
+                         if(group)
+                         {
+                             if([self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group])
+                             {
+                                 // Pop our metadata off...
+                                 [self.analyzedVideoSampleBufferMetadata removeObject:group];
+                             }
+                             else
+                             {
+                                 // Pop our metadata off...
+                                 [self.analyzedVideoSampleBufferMetadata removeObject:group];
+
+                                 [[LogController sharedLogController] appendErrorLog:[@"Unable to append metadata timed group to asset: " stringByAppendingString:self.transcodeAssetWriter.error.localizedDescription]];
+                             }
                          }
                          else
                          {
-                             NSLog(@"Unable to append metadata timed group to asset: %@, %@", self.transcodeAssetWriter.error, group);
+                             [[LogController sharedLogController] appendErrorLog:@"No Metadata Sample Buffer for Video Sample"];
                          }
-                     
-                     CFRelease(passthroughVideoSampleBuffer);
                      }
+
+                     CFRelease(passthroughVideoSampleBuffer);
                  }
              }
          }];
