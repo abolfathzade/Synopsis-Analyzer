@@ -63,6 +63,11 @@
 		1BA68C9A1AD6EAFB003B3CE9 /* libopencv_videoio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C881AD6EAFB003B3CE9 /* libopencv_videoio.a */; };
 		1BA68C9B1AD6EAFB003B3CE9 /* libopencv_videostab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C891AD6EAFB003B3CE9 /* libopencv_videostab.a */; };
 		1BA8F8361C125DC20066BDDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */; };
+		1BA8F8451C138C250066BDDB /* DeepBeliefAnalyzer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA8F8441C138C250066BDDB /* DeepBeliefAnalyzer.m */; };
+		1BA8F8491C138D440066BDDB /* DeepBelief.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8481C138D440066BDDB /* DeepBelief.framework */; };
+		1BA8F84B1C138FDD0066BDDB /* jetpac.ntwk in Resources */ = {isa = PBXBuildFile; fileRef = 1BA8F84A1C138FDD0066BDDB /* jetpac.ntwk */; };
+		1BA8F84C1C1395F10066BDDB /* DeepBeliefAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA8F83B1C138B330066BDDB /* DeepBeliefAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1BA8F84F1C13968E0066BDDB /* DeepBelief.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA8F8481C138D440066BDDB /* DeepBelief.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -93,6 +98,13 @@
 			remoteGlobalIDString = 1B61BCF81ACF26710013418D;
 			remoteInfo = OpenCVAnalyzerPlugin;
 		};
+		1BA8F8461C138D2C0066BDDB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1BEA4D111ACB2BCC00AB57C1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1BA8F83A1C138B330066BDDB;
+			remoteInfo = DeepBeliefAnalyzer;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -122,8 +134,19 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				1BA8F84C1C1395F10066BDDB /* DeepBeliefAnalyzer.plugin in CopyFiles */,
 				1B61BD051ACF28710013418D /* StandardAnalyzer.plugin in CopyFiles */,
 				1B61BCEE1ACF0E210013418D /* FrameCounterAnalyzer.plugin in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1BA8F84E1C1396860066BDDB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1BA8F84F1C13968E0066BDDB /* DeepBelief.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,6 +421,10 @@
 		1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		1BA8F83B1C138B330066BDDB /* DeepBeliefAnalyzer.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeepBeliefAnalyzer.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BA8F83E1C138B330066BDDB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1BA8F8431C138C250066BDDB /* DeepBeliefAnalyzer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DeepBeliefAnalyzer.h; path = DeepBeliefAnalyzer/DeepBeliefAnalyzer.h; sourceTree = "<group>"; };
+		1BA8F8441C138C250066BDDB /* DeepBeliefAnalyzer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeepBeliefAnalyzer.m; path = DeepBeliefAnalyzer/DeepBeliefAnalyzer.m; sourceTree = "<group>"; };
+		1BA8F8481C138D440066BDDB /* DeepBelief.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeepBelief.framework; path = DeepBeliefAnalyzer/DeepBelief.framework; sourceTree = "<group>"; };
+		1BA8F84A1C138FDD0066BDDB /* jetpac.ntwk */ = {isa = PBXFileReference; lastKnownFileType = file; path = jetpac.ntwk; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Synopsis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -464,6 +491,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BA8F8491C138D440066BDDB /* DeepBelief.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1031,25 +1059,23 @@
 			path = GZIP;
 			sourceTree = "<group>";
 		};
-		1BA8F83C1C138B330066BDDB /* DeepBeliefAnalyzer */ = {
-			isa = PBXGroup;
-			children = (
-				1BA8F83D1C138B330066BDDB /* Supporting Files */,
-			);
-			path = DeepBeliefAnalyzer;
-			sourceTree = "<group>";
-		};
 		1BA8F83D1C138B330066BDDB /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				1BA8F84A1C138FDD0066BDDB /* jetpac.ntwk */,
 				1BA8F83E1C138B330066BDDB /* Info.plist */,
 			);
 			name = "Supporting Files";
+			path = DeepBeliefAnalyzer;
 			sourceTree = "<group>";
 		};
 		1BA8F8421C138B8C0066BDDB /* DeepBeliefAnalyzer */ = {
 			isa = PBXGroup;
 			children = (
+				1BA8F8431C138C250066BDDB /* DeepBeliefAnalyzer.h */,
+				1BA8F8441C138C250066BDDB /* DeepBeliefAnalyzer.m */,
+				1BA8F8481C138D440066BDDB /* DeepBelief.framework */,
+				1BA8F83D1C138B330066BDDB /* Supporting Files */,
 			);
 			name = DeepBeliefAnalyzer;
 			sourceTree = "<group>";
@@ -1060,7 +1086,6 @@
 				1BEA4D1B1ACB2BCC00AB57C1 /* Synopsis */,
 				1B007EC11B4D7D0900DE6E98 /* SpotlightImporter */,
 				1B61BCF41ACF26590013418D /* Plugins */,
-				1BA8F83C1C138B330066BDDB /* DeepBeliefAnalyzer */,
 				1B61BCDB1ACC70D50013418D /* Frameworks */,
 				1BEA4D1A1ACB2BCC00AB57C1 /* Products */,
 			);
@@ -1174,7 +1199,9 @@
 			buildPhases = (
 				1BA8F8371C138B330066BDDB /* Sources */,
 				1BA8F8381C138B330066BDDB /* Frameworks */,
+				1BA8F84E1C1396860066BDDB /* CopyFiles */,
 				1BA8F8391C138B330066BDDB /* Resources */,
+				1BA8F84D1C1396320066BDDB /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -1198,6 +1225,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				1BA8F8471C138D2C0066BDDB /* PBXTargetDependency */,
 				1B61BD041ACF28660013418D /* PBXTargetDependency */,
 				1B61BCEC1ACF0DFC0013418D /* PBXTargetDependency */,
 				1B007ECD1B4D7D0900DE6E98 /* PBXTargetDependency */,
@@ -1283,6 +1311,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BA8F84B1C138FDD0066BDDB /* jetpac.ntwk in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1312,7 +1341,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "install_name_tool -change \"/Users/vade/Downloads/opencv-3.0.0/StaticLibs/lib/cv2.so\" @loader_path/../Frameworks/cv2.so \"$TARGET_BUILD_DIR/$PRODUCT_NAME.bundle/Contents/MacOS/$PRODUCT_NAME\"\n";
+			shellScript = "install_name_tool -change \"/Users/vade/Downloads/opencv-3.0.0/StaticLibs/lib/cv2.so\" @loader_path/../Frameworks/cv2.so \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/MacOS/$PRODUCT_NAME\"\n";
+		};
+		1BA8F84D1C1396320066BDDB /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "install_name_tool -change \"@executable_path/../Frameworks/DeepBelief.framework/Versions/A/DeepBelief\" \"@loader_path/../Frameworks/DeepBelief.framework/Versions/A/DeepBelief\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/MacOS/$PRODUCT_NAME\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1347,6 +1389,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BA8F8451C138C250066BDDB /* DeepBeliefAnalyzer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1389,6 +1432,11 @@
 			isa = PBXTargetDependency;
 			target = 1B61BCF81ACF26710013418D /* StandardAnalyzer */;
 			targetProxy = 1B61BD031ACF28660013418D /* PBXContainerItemProxy */;
+		};
+		1BA8F8471C138D2C0066BDDB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1BA8F83A1C138B330066BDDB /* DeepBeliefAnalyzer */;
+			targetProxy = 1BA8F8461C138D2C0066BDDB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1532,6 +1580,10 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DeepBeliefAnalyzer/",
+				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -1549,6 +1601,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DeepBeliefAnalyzer/",
+				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";

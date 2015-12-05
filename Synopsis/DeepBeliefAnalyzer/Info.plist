@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>info.Synopsis.$(PRODUCT_NAME:rfc1034identifier)</string>
+	<string>info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -23,6 +23,6 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2015 metavisual. All rights reserved.</string>
 	<key>NSPrincipalClass</key>
-	<string></string>
+	<string>DeepBeliefAnalyzer</string>
 </dict>
 </plist>
