@@ -413,7 +413,7 @@
                             for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
                                 NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedVideoSampleBuffer error:&analyzerError];
+                                NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedVideoSampleBuffer transform:self.transcodeAssetWriterVideo.transform error:&analyzerError];
                                 
                                 if(analyzerError)
                                 {

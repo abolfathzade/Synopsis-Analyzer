@@ -55,7 +55,7 @@
     self.sampleCount = 0;
 }
 
-- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer error:(NSError**) error
+- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer transform:(CGAffineTransform)transform error:(NSError**) error
 {
     NSDictionary* metadata =  @{@"Sample Count" : @(self.sampleCount)};
     

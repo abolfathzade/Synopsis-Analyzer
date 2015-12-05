@@ -84,7 +84,7 @@ typedef enum : NSUInteger {
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint andEnabledModules:(NSDictionary*)enabledModuleKeys;
 
 // Note that the sample buffer's internal data type might differ from whats expected
-- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer error:(NSError**)error;
+- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer transform:(CGAffineTransform)transform error:(NSError**)error;
 
 // Finalize any calculations required to return global metadata
 // Global Metadata is metadata that describes the entire file, not the individual frames or samples

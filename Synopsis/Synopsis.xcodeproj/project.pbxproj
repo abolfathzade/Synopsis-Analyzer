@@ -62,6 +62,7 @@
 		1BA68C991AD6EAFB003B3CE9 /* libopencv_video.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C871AD6EAFB003B3CE9 /* libopencv_video.a */; };
 		1BA68C9A1AD6EAFB003B3CE9 /* libopencv_videoio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C881AD6EAFB003B3CE9 /* libopencv_videoio.a */; };
 		1BA68C9B1AD6EAFB003B3CE9 /* libopencv_videostab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C891AD6EAFB003B3CE9 /* libopencv_videostab.a */; };
+		1BA8F8361C125DC20066BDDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -393,6 +394,8 @@
 		1BA68C871AD6EAFB003B3CE9 /* libopencv_video.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_video.a; sourceTree = "<group>"; };
 		1BA68C881AD6EAFB003B3CE9 /* libopencv_videoio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_videoio.a; sourceTree = "<group>"; };
 		1BA68C891AD6EAFB003B3CE9 /* libopencv_videostab.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_videostab.a; sourceTree = "<group>"; };
+		1BA8F8331C125DAA0066BDDB /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
+		1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Synopsis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -428,6 +431,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BA8F8361C125DC20066BDDB /* CoreGraphics.framework in Frameworks */,
 				1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */,
 				1BA68C901AD6EAFB003B3CE9 /* libopencv_imgcodecs.a in Frameworks */,
 				1BA68C931AD6EAFB003B3CE9 /* libopencv_objdetect.a in Frameworks */,
@@ -492,6 +496,8 @@
 		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */,
+				1BA8F8331C125DAA0066BDDB /* Quartz.framework */,
 				1B4FA1061B2DECCB004DBD63 /* libpython.dylib */,
 				1BA68C6F1AD5D924003B3CE9 /* libz.dylib */,
 				1BA68C561AD26696003B3CE9 /* CoreVideo.framework */,

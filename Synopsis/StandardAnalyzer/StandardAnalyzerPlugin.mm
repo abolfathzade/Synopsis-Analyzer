@@ -14,6 +14,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import <CoreVideo/CoreVideo.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 #import "StandardAnalyzerPlugin.h"
 
@@ -112,7 +113,7 @@
     return bgraImage;
 }
 
-- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer error:(NSError**) error
+- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer transform:(CGAffineTransform)transform error:(NSError**) error
 {
 //    return nil;
     
@@ -395,23 +396,30 @@
             
             for(std::vector<cv::KeyPoint>::iterator keyPoint = keypoints.begin(); keyPoint != keypoints.end(); ++keyPoint)
             {
-                NSArray* point = nil;
+//                NSArray* point = nil;
+                CGPoint point = CGPointZero;
                 // Ensure our coordinate system is correct
                 if(CVImageBufferIsFlipped(currentPixelBuffer))
                 {
-                    point = @[@(keyPoint->pt.x / currentBGRAImage.size().width),
-                              @(1.0 - (keyPoint->pt.y / currentBGRAImage.size().height))
-                              ];
-                    
+                    point = CGPointMake((float)keyPoint->pt.x / (float)currentBGRAImage.size().width,
+                                        1.0f - (float)(keyPoint->pt.y / (float)currentBGRAImage.size().height));
                 }
                 else
                 {
-                    point = @[@(keyPoint->pt.x / currentBGRAImage.size().width),
-                              @(keyPoint->pt.y / currentBGRAImage.size().height)
-                              ];
+                    point = CGPointMake((float)keyPoint->pt.x / (float)currentBGRAImage.size().width,
+                                        (float)keyPoint->pt.y / (float)currentBGRAImage.size().height);
                 }
                 
-                [keyPointsArray addObject:point];
+//                // Normalize tx and ty from our transform since they are pixel sized transforms
+//                if(transform.tx)
+//                    transform.tx = (float)transform.tx/(float)currentBGRAImage.size().width;
+//                if(transform.ty)
+//                    transform.ty = (float)transform.ty/(float)currentBGRAImage.size().height;
+//                
+////                point = CGPointApplyAffineTransform(point, CGAffineTransformMakeScale(1.0/currentBGRAImage.size().width, 1.0/currentBGRAImage.size().height));
+//                point = CGPointApplyAffineTransform(point, transform);
+                
+                [keyPointsArray addObject:@[ @(point.x), @(point.y)]];
             }
             
             // Add Features to metadata
