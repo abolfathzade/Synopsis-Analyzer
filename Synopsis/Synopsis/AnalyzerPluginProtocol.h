@@ -12,7 +12,7 @@
 
 #pragma mark - Standard Analyzer and Spotlight Keys
 
-// These keys are used within out Spotlight plugin, and our Standard Analyzer plugin to ensure spotlight and our analyzer agree on key names.
+// These keys are used within our Spotlight plugin, and our Standard Analyzer plugin to ensure spotlight and our analyzer agree on key names.
 // These particular keys allow for a spotlight UI to be created, certain keys to be visible in the ui (and others to not be)
 // This lets users easily find specific information in the Finder and in the UI.
 
@@ -20,7 +20,7 @@
 // under the com.apple.metadata: key allowing programmatic spotlight searches to work (along with command line searches).
 // The only limitation is that a custom UI wont be made (as the spotlight schema wont match).
 
-// Note, these strings need to match our scheme.xml file exactly.
+// Note, these strings need to match our schema.xml file exactly.
 
 // A multivalue (NSArray) that holds the actual RGB (or RGBA) values (another NSArray) for a color.
 // Note, this is an Array of colors. Or an Array of Arrays.

@@ -21,9 +21,9 @@
 		1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */; };
 		1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BCD91ACB90850013418D /* VideoToolbox.framework */; };
 		1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */; };
-		1B61BCEE1ACF0E210013418D /* FrameCounterPlugin.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1B61BCEE1ACF0E210013418D /* FrameCounterAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCE11ACF06A70013418D /* FrameCounterAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */; };
-		1B61BD051ACF28710013418D /* StandardAnalyzer.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* StandardAnalyzer.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1B61BD051ACF28710013418D /* StandardAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B61BD061ACF371A0013418D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1B61BD081ACF371A0013418D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
 		1B61BD091ACF37200013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
@@ -122,8 +122,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				1B61BD051ACF28710013418D /* StandardAnalyzer.bundle in CopyFiles */,
-				1B61BCEE1ACF0E210013418D /* FrameCounterPlugin.bundle in CopyFiles */,
+				1B61BD051ACF28710013418D /* StandardAnalyzer.plugin in CopyFiles */,
+				1B61BCEE1ACF0E210013418D /* FrameCounterAnalyzer.plugin in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,13 +147,13 @@
 		1B5FE5091B25F44F00EED2A1 /* MedianCut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MedianCut.h; sourceTree = "<group>"; };
 		1B61BCD91ACB90850013418D /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		1B61BCDC1ACEFEEE0013418D /* AnalyzerPluginProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnalyzerPluginProtocol.h; sourceTree = "<group>"; };
-		1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FrameCounterPlugin.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B61BCE11ACF06A70013418D /* FrameCounterAnalyzer.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FrameCounterAnalyzer.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B61BCE41ACF06A70013418D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1B61BCE81ACF090E0013418D /* FrameCounterPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameCounterPlugin.h; sourceTree = "<group>"; };
 		1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FrameCounterPlugin.m; sourceTree = "<group>"; };
 		1B61BCEF1ACF181C0013418D /* NSDictionary+JSONString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+JSONString.h"; sourceTree = "<group>"; };
 		1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+JSONString.m"; sourceTree = "<group>"; };
-		1B61BCF91ACF26710013418D /* StandardAnalyzer.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StandardAnalyzer.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StandardAnalyzer.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B61BCFC1ACF26710013418D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1B61BD001ACF27740013418D /* StandardAnalyzerPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StandardAnalyzerPlugin.h; sourceTree = "<group>"; };
 		1B61BD011ACF27740013418D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -396,6 +396,8 @@
 		1BA68C891AD6EAFB003B3CE9 /* libopencv_videostab.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_videostab.a; sourceTree = "<group>"; };
 		1BA8F8331C125DAA0066BDDB /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		1BA8F83B1C138B330066BDDB /* DeepBeliefAnalyzer.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeepBeliefAnalyzer.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BA8F83E1C138B330066BDDB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Synopsis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -458,6 +460,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1BA8F8381C138B330066BDDB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1BEA4D161ACB2BCC00AB57C1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -509,13 +518,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		1B61BCE21ACF06A70013418D /* FrameCounterPlugin */ = {
+		1B61BCE21ACF06A70013418D /* FrameCounterAnalyzer */ = {
 			isa = PBXGroup;
 			children = (
 				1B61BCE81ACF090E0013418D /* FrameCounterPlugin.h */,
 				1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */,
 				1B61BCE31ACF06A70013418D /* Supporting Files */,
 			);
+			name = FrameCounterAnalyzer;
 			path = FrameCounterPlugin;
 			sourceTree = "<group>";
 		};
@@ -530,8 +540,9 @@
 		1B61BCF41ACF26590013418D /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
+				1BA8F8421C138B8C0066BDDB /* DeepBeliefAnalyzer */,
 				1B61BCFA1ACF26710013418D /* StandardAnalyzer */,
-				1B61BCE21ACF06A70013418D /* FrameCounterPlugin */,
+				1B61BCE21ACF06A70013418D /* FrameCounterAnalyzer */,
 			);
 			name = Plugins;
 			sourceTree = "<group>";
@@ -1020,12 +1031,36 @@
 			path = GZIP;
 			sourceTree = "<group>";
 		};
+		1BA8F83C1C138B330066BDDB /* DeepBeliefAnalyzer */ = {
+			isa = PBXGroup;
+			children = (
+				1BA8F83D1C138B330066BDDB /* Supporting Files */,
+			);
+			path = DeepBeliefAnalyzer;
+			sourceTree = "<group>";
+		};
+		1BA8F83D1C138B330066BDDB /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1BA8F83E1C138B330066BDDB /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1BA8F8421C138B8C0066BDDB /* DeepBeliefAnalyzer */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = DeepBeliefAnalyzer;
+			sourceTree = "<group>";
+		};
 		1BEA4D101ACB2BCC00AB57C1 = {
 			isa = PBXGroup;
 			children = (
 				1BEA4D1B1ACB2BCC00AB57C1 /* Synopsis */,
 				1B007EC11B4D7D0900DE6E98 /* SpotlightImporter */,
 				1B61BCF41ACF26590013418D /* Plugins */,
+				1BA8F83C1C138B330066BDDB /* DeepBeliefAnalyzer */,
 				1B61BCDB1ACC70D50013418D /* Frameworks */,
 				1BEA4D1A1ACB2BCC00AB57C1 /* Products */,
 			);
@@ -1035,9 +1070,10 @@
 			isa = PBXGroup;
 			children = (
 				1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */,
-				1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */,
-				1B61BCF91ACF26710013418D /* StandardAnalyzer.bundle */,
+				1B61BCE11ACF06A70013418D /* FrameCounterAnalyzer.plugin */,
+				1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */,
 				1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */,
+				1BA8F83B1C138B330066BDDB /* DeepBeliefAnalyzer.plugin */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1096,9 +1132,9 @@
 			productReference = 1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */;
 			productType = "com.apple.product-type.spotlight-importer";
 		};
-		1B61BCE01ACF06A70013418D /* FrameCounterPlugin */ = {
+		1B61BCE01ACF06A70013418D /* FrameCounterAnalyzer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1B61BCE51ACF06A70013418D /* Build configuration list for PBXNativeTarget "FrameCounterPlugin" */;
+			buildConfigurationList = 1B61BCE51ACF06A70013418D /* Build configuration list for PBXNativeTarget "FrameCounterAnalyzer" */;
 			buildPhases = (
 				1B61BCDD1ACF06A70013418D /* Sources */,
 				1B61BCDE1ACF06A70013418D /* Frameworks */,
@@ -1108,9 +1144,9 @@
 			);
 			dependencies = (
 			);
-			name = FrameCounterPlugin;
+			name = FrameCounterAnalyzer;
 			productName = FrameCounterPlugin;
-			productReference = 1B61BCE11ACF06A70013418D /* FrameCounterPlugin.bundle */;
+			productReference = 1B61BCE11ACF06A70013418D /* FrameCounterAnalyzer.plugin */;
 			productType = "com.apple.product-type.bundle";
 		};
 		1B61BCF81ACF26710013418D /* StandardAnalyzer */ = {
@@ -1129,7 +1165,24 @@
 			);
 			name = StandardAnalyzer;
 			productName = OpenCVAnalyzer;
-			productReference = 1B61BCF91ACF26710013418D /* StandardAnalyzer.bundle */;
+			productReference = 1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */;
+			productType = "com.apple.product-type.bundle";
+		};
+		1BA8F83A1C138B330066BDDB /* DeepBeliefAnalyzer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1BA8F83F1C138B330066BDDB /* Build configuration list for PBXNativeTarget "DeepBeliefAnalyzer" */;
+			buildPhases = (
+				1BA8F8371C138B330066BDDB /* Sources */,
+				1BA8F8381C138B330066BDDB /* Frameworks */,
+				1BA8F8391C138B330066BDDB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DeepBeliefAnalyzer;
+			productName = DeepBeliefAnalyzer;
+			productReference = 1BA8F83B1C138B330066BDDB /* DeepBeliefAnalyzer.plugin */;
 			productType = "com.apple.product-type.bundle";
 		};
 		1BEA4D181ACB2BCC00AB57C1 /* Synopsis */ = {
@@ -1172,6 +1225,9 @@
 					1B61BCF81ACF26710013418D = {
 						CreatedOnToolsVersion = 6.2;
 					};
+					1BA8F83A1C138B330066BDDB = {
+						CreatedOnToolsVersion = 6.4;
+					};
 					1BEA4D181ACB2BCC00AB57C1 = {
 						CreatedOnToolsVersion = 6.2;
 					};
@@ -1191,9 +1247,10 @@
 			projectRoot = "";
 			targets = (
 				1BEA4D181ACB2BCC00AB57C1 /* Synopsis */,
-				1B61BCE01ACF06A70013418D /* FrameCounterPlugin */,
+				1B61BCE01ACF06A70013418D /* FrameCounterAnalyzer */,
 				1B61BCF81ACF26710013418D /* StandardAnalyzer */,
 				1B007EBF1B4D7D0900DE6E98 /* SynopsisImporter */,
+				1BA8F83A1C138B330066BDDB /* DeepBeliefAnalyzer */,
 			);
 		};
 /* End PBXProject section */
@@ -1216,6 +1273,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		1B61BCF71ACF26710013418D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1BA8F8391C138B330066BDDB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1279,6 +1343,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1BA8F8371C138B330066BDDB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1BEA4D151ACB2BCC00AB57C1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1311,7 +1382,7 @@
 		};
 		1B61BCEC1ACF0DFC0013418D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 1B61BCE01ACF06A70013418D /* FrameCounterPlugin */;
+			target = 1B61BCE01ACF06A70013418D /* FrameCounterAnalyzer */;
 			targetProxy = 1B61BCEB1ACF0DFC0013418D /* PBXContainerItemProxy */;
 		};
 		1B61BD041ACF28660013418D /* PBXTargetDependency */ = {
@@ -1397,7 +1468,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				WRAPPER_EXTENSION = bundle;
+				WRAPPER_EXTENSION = plugin;
 			};
 			name = Debug;
 		};
@@ -1410,7 +1481,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				WRAPPER_EXTENSION = bundle;
+				WRAPPER_EXTENSION = plugin;
 			};
 			name = Release;
 		};
@@ -1433,7 +1504,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
-				WRAPPER_EXTENSION = bundle;
+				WRAPPER_EXTENSION = plugin;
 			};
 			name = Debug;
 		};
@@ -1452,7 +1523,38 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
-				WRAPPER_EXTENSION = bundle;
+				WRAPPER_EXTENSION = plugin;
+			};
+			name = Release;
+		};
+		1BA8F8401C138B330066BDDB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = plugin;
+			};
+			name = Debug;
+		};
+		1BA8F8411C138B330066BDDB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = plugin;
 			};
 			name = Release;
 		};
@@ -1570,7 +1672,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1B61BCE51ACF06A70013418D /* Build configuration list for PBXNativeTarget "FrameCounterPlugin" */ = {
+		1B61BCE51ACF06A70013418D /* Build configuration list for PBXNativeTarget "FrameCounterAnalyzer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1B61BCE61ACF06A70013418D /* Debug */,
@@ -1587,6 +1689,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		1BA8F83F1C138B330066BDDB /* Build configuration list for PBXNativeTarget "DeepBeliefAnalyzer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1BA8F8401C138B330066BDDB /* Debug */,
+				1BA8F8411C138B330066BDDB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 		1BEA4D141ACB2BCC00AB57C1 /* Build configuration list for PBXProject "Synopsis" */ = {
 			isa = XCConfigurationList;
