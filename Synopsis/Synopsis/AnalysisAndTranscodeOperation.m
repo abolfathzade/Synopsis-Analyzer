@@ -294,6 +294,8 @@
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
+        dispatch_queue_t concurrentAnalysisQueue = dispatch_queue_create("concurrentAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
+        
 //        CMBufferQueueRef passthroughAudioBufferQueue;
 //        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &passthroughAudioBufferQueue);
 //
@@ -407,23 +409,49 @@
                             // B: aggregate the metadata dictionary into a global dictionary with our plugin identifier as the key for that entry
                             // C: Once done analysis, convert aggregate metadata to JSON and write out a metadata object and append it.
                             
-                            NSError* analyzerError = nil;
+                            __block NSError* analyzerError = nil;
+
+                            NSLock* dictionaryLock = [[NSLock alloc] init];
+                            
                             NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
+                            
+                            dispatch_group_t analysisGroup = dispatch_group_create();
                             
                             for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
-                                NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedVideoSampleBuffer transform:self.transcodeAssetWriterVideo.transform error:&analyzerError];
+                                // enter our group.
+                                dispatch_group_enter(analysisGroup);
                                 
-                                if(analyzerError)
-                                {
-                                    NSString* errorString = [@"Error Analyzing Sample buffer - bailing: " stringByAppendingString:[analyzerError description]];
-                                    [[LogController sharedLogController] appendErrorLog:errorString];
-                                    break;
-                                }
+                                // Run an analysis pass on each
+                                dispatch_async(concurrentAnalysisQueue, ^{
+                                    
 
-                                if(newMetadataValue)
-                                    [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+                                    NSString* newMetadataKey = [analyzer pluginIdentifier];
+                                    NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedVideoSampleBuffer transform:self.transcodeAssetWriterVideo.transform error:&analyzerError];
+                                    
+                                    if(analyzerError)
+                                    {
+                                        NSString* errorString = [@"Error Analyzing Sample buffer - bailing: " stringByAppendingString:[analyzerError description]];
+                                        [[LogController sharedLogController] appendErrorLog:errorString];
+                                    }
+                                    
+                                    if(newMetadataValue)
+                                    {
+                                        // provide some thread safety to our now async fetches.
+                                        [dictionaryLock lock];
+                                        [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+                                        [dictionaryLock unlock];
+                                    }
+
+                                    dispatch_group_leave(analysisGroup);
+
+                                });
+                                
+                                dispatch_group_wait(analysisGroup, DISPATCH_TIME_FOREVER);
+                                
+                                // if we had an analyzer error, bail.
+                                if(analyzerError)
+                                    break;
                             }
                             
                             // Convert to BSON // JSON
