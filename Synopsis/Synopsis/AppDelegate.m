@@ -367,6 +367,7 @@ const NSString* value = @"Value";
     
     NSArray* bitRateArray = @[
                               //@{title : @"Recommended", value : [NSNull null]} ,
+                              @{title : @"16 Kbps", value : @(16000)},
                               @{title : @"24 Kbps", value : @(24000)},
                               @{title : @"32 Kbps", value : @(32000)},
                               @{title : @"48 Kbps", value : @(38000)},
@@ -616,9 +617,7 @@ const NSString* value = @"Value";
             self.prefsAudioQuality.enabled = YES;
             self.prefsAudioRate.enabled = YES;
         }
-        
     }
-    
     
     [self validateAudioPrefsUI];
     [self buildAudioPreferences];
