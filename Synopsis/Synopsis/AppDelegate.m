@@ -309,7 +309,7 @@ const NSString* value = @"Value";
     
 #pragma mark - Audio Prefs Format
     
-    NSMenuItem* passthroughItem = [[NSMenuItem alloc] initWithTitle:@"Passthrough" action:@selector(selectVideoEncoder:) keyEquivalent:@""];
+    NSMenuItem* passthroughItem = [[NSMenuItem alloc] initWithTitle:@"Passthrough" action:@selector(selectAudioFormat:) keyEquivalent:@""];
     [passthroughItem setRepresentedObject:[NSNull null]];
     [self.prefsAudioFormat.menu addItem:passthroughItem];
     [self.prefsAudioFormat.menu addItem:[NSMenuItem separatorItem]];
@@ -425,8 +425,8 @@ const NSString* value = @"Value";
         self.prefsVideoDimensions.enabled = YES;
         
         // If we are on JPEG, enable quality
-        NSDictionary* codedInfo = self.prefsVideoCompressor.selectedItem.representedObject;
-        if( [codedInfo[@"CodecName"] containsString:@"JPEG"])
+        NSDictionary* codecInfo = self.prefsVideoCompressor.selectedItem.representedObject;
+        if( [codecInfo[@"CodecName"] containsString:@"JPEG"])
         {
             self.prefsVideoQuality.enabled = YES;
             [self.prefsVideoQuality selectItemAtIndex:4];
@@ -584,34 +584,116 @@ const NSString* value = @"Value";
 - (IBAction)selectAudioFormat:(id)sender
 {
     NSLog(@"selected Audio Format: %@", [sender representedObject]);
+    
+    // If we are on passthrough encoder, then we disable all our options
+    if(self.prefsAudioFormat.selectedItem.representedObject == [NSNull null])
+    {
+        // disable other ui
+        self.prefsAudioBitrate.enabled = NO;
+        [self.prefsAudioBitrate selectItemAtIndex:0];
+        
+        self.prefsAudioQuality.enabled = NO;
+        [self.prefsAudioQuality selectItemAtIndex:0];
+        
+        self.prefsAudioRate.enabled = NO;
+        [self.prefsAudioRate selectItemAtIndex:0];
+    }
+    else
+    {
+        // if we have linear linear PCM (uncompressed) we dont enable bitrate / quality
+        
+        if([self.prefsAudioFormat.selectedItem.representedObject isEqual: @(kAudioFormatLinearPCM)])
+        {
+            self.prefsAudioBitrate.enabled = NO;
+            self.prefsAudioQuality.enabled = NO;
+            self.prefsAudioRate.enabled = YES;
+        }
+        else
+        {
+            self.prefsAudioBitrate.enabled = YES;
+            self.prefsAudioQuality.enabled = YES;
+            self.prefsAudioRate.enabled = YES;
+        }
+        
+    }
+    
+    
+    [self validateAudioPrefsUI];
+    [self buildAudioPreferences];
 }
 
 - (IBAction)selectAudioSamplerate:(id)sender
 {
     NSLog(@"selected Audio Sampleate: %@", [sender representedObject]);
+    [self validateAudioPrefsUI];
+    [self buildAudioPreferences];
 }
 
 - (IBAction)selectAudioQuality:(id)sender
 {
     NSLog(@"selected Audio Quality: %@", [sender representedObject]);
+    [self validateAudioPrefsUI];
+    [self buildAudioPreferences];
 }
 
 - (IBAction)selectAudioBitrate:(id)sender
 {
     NSLog(@"selected Audio Bitrate: %@", [sender representedObject]);
+    [self validateAudioPrefsUI];
+    [self buildAudioPreferences];
 }
 
 #pragma mark - Analyzer Prefs
 
-- (void) buildAnalyzerPrefUI
+- (void) validateAudioPrefsUI
 {
-    //    // Init an analyzer plugin and build a UI for it.
-    //    for(id analyzer in self.analyzerPluginsInitializedForPrefs)
-    //    {
-    //
-    //    }
 }
 
+
+// Todo: Number of channels?
+- (void) buildAudioPreferences
+{
+    NSMutableDictionary* audioSettingsDictonary = [NSMutableDictionary new];
+    
+    // get our fourcc from our compressor UI represented object and convert it to a string
+    id audioFormat = self.prefsAudioFormat.selectedItem.representedObject;
+    
+    // If we are passthrough, we set out video prefs to nil and bail early
+    if(audioFormat == [NSNull null])
+    {
+        self.prefsAudioSettings = nil;
+        return;
+    }
+    
+    // audio fourcc
+    FourCharCode fourcc = (FourCharCode)audioFormat;
+    NSString* fourCCString = NSFileTypeForHFSTypeCode(fourcc);
+    
+    // remove ' so "'jpeg'" becomes "jpeg" for example
+    fourCCString = [fourCCString stringByReplacingOccurrencesOfString:@"'" withString:@""];
+    
+    audioSettingsDictonary[AVFormatIDKey] = fourCCString;
+    
+    // our sample rate may be NULL
+    audioSettingsDictonary[AVSampleRateKey] = self.prefsAudioRate.selectedItem.representedObject;
+    
+    
+    // for now, we let our encoder match source
+    audioSettingsDictonary[AVNumberOfChannelsKey] = [NSNull null];
+    
+    
+    // if we arent uncompressed, include bitrate and shit.
+    if(![audioFormat isEqual:@(kAudioFormatLinearPCM)])
+    {
+        audioSettingsDictonary[AVEncoderAudioQualityKey] = self.prefsAudioQuality.selectedItem.representedObject;
+        audioSettingsDictonary[AVEncoderBitRateKey] = self.prefsAudioBitrate.selectedItem.representedObject;
+    }
+    
+    self.prefsAudioSettings = [audioSettingsDictonary copy];
+    
+    NSLog(@"Calculated Audio Settings : %@", self.prefsAudioSettings);
+
+}
 
 #pragma mark -
 
