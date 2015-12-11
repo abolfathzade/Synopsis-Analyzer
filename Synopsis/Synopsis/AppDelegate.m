@@ -309,6 +309,11 @@ const NSString* value = @"Value";
     
 #pragma mark - Audio Prefs Format
     
+    NSMenuItem* passthroughItem = [[NSMenuItem alloc] initWithTitle:@"Passthrough" action:@selector(selectVideoEncoder:) keyEquivalent:@""];
+    [passthroughItem setRepresentedObject:[NSNull null]];
+    [self.prefsAudioFormat.menu addItem:passthroughItem];
+    [self.prefsAudioFormat.menu addItem:[NSMenuItem separatorItem]];
+    
     NSArray* formatArray = @[
                              @{title : @"LinearPCM", value : @(kAudioFormatLinearPCM)} ,
                              @{title : @"Apple Lossless", value : @(kAudioFormatAppleLossless)},
