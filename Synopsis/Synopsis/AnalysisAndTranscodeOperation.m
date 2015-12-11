@@ -35,7 +35,8 @@
 // and make new metadata writers
 
 // If we dont, we simply create our video sample buffer readers and writers for pass 2
-@property (atomic, readwrite, assign) BOOL transcoding;
+@property (atomic, readwrite, assign) BOOL transcodingVideo;
+@property (atomic, readwrite, assign) BOOL transcodingAudio;
 @property (atomic, readwrite, assign) BOOL transcodeAssetHasVideo;
 @property (atomic, readwrite, assign) BOOL transcodeAssetHasAudio;
 
@@ -86,20 +87,21 @@
         self.videoTranscodeSettings = nil;
         self.audioTranscodeSettings = nil;
         
+        self.transcodingVideo = NO;
+        self.transcodingAudio = NO;
+        
         if(self.transcodeOptions[kSynopsisTranscodeVideoSettingsKey] != [NSNull null])
         {
             self.videoTranscodeSettings = self.transcodeOptions[kSynopsisTranscodeVideoSettingsKey];
+            self.transcodingVideo = YES;
         }
         
         if(self.transcodeOptions[kSynopsisTranscodeAudioSettingsKey] != [NSNull null])
         {
             self.audioTranscodeSettings = self.transcodeOptions[kSynopsisTranscodeAudioSettingsKey];
+            self.transcodingAudio = YES;
         }
         
-        if(self.audioTranscodeSettings || self.videoTranscodeSettings)
-        {
-            self.transcoding = YES;
-        }
 
         self.sourceURL = sourceURL;
         self.destinationURL = destinationURL;
@@ -165,7 +167,7 @@
         prefferedTrackTransform = firstVideoTrack.preferredTransform;
         
         // Do we use passthrough?
-        if(!self.transcoding)
+        if(!self.transcodingVideo)
         {
             self.transcodeAssetReaderVideoPassthrough = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack outputSettings:nil];
             self.transcodeAssetReaderVideoPassthrough.alwaysCopiesSampleData = YES;
@@ -203,7 +205,7 @@
                                                                                 outputSettings:@{(NSString*) AVFormatIDKey : @(kAudioFormatLinearPCM)}];
         self.transcodeAssetReaderAudio.alwaysCopiesSampleData = YES;
         
-        if(!self.transcoding)
+        if(!self.transcodingAudio)
         {
             self.transcodeAssetReaderAudioPassthrough = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstAudioTrack outputSettings:nil];
             self.transcodeAssetReaderAudioPassthrough.alwaysCopiesSampleData = YES;
@@ -220,7 +222,7 @@
             [self.transcodeAssetReader addOutput:self.transcodeAssetReaderVideo];
         }
         
-        if(!self.transcoding)
+        if(!self.transcodingVideo)
         {
             if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderVideoPassthrough])
             {
@@ -237,7 +239,7 @@
             [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudio];
         }
 
-        if(!self.transcoding)
+        if(!self.transcodingAudio)
         {
             if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudioPassthrough])
             {
@@ -371,7 +373,7 @@
                         if(passthroughVideoSampleBuffer)
                         {
                             // Only add to our passthrough buffer queue if we are going to use those buffers on the encoder end.
-                            if(!self.transcoding)
+                            if(!self.transcodingVideo)
                             {
                                 CMBufferQueueEnqueue(videoPassthroughBufferQueue, passthroughVideoSampleBuffer);
                                 // Free to dequeue on other thread
@@ -421,7 +423,7 @@
                         if(passthroughAudioSampleBuffer)
                         {
                             // Only add to our passthrough buffer queue if we are going to use those buffers on the encoder end.
-                            if(!self.transcoding)
+                            if(!self.transcodingAudio)
                             {
                                 CMBufferQueueEnqueue(audioPassthroughBufferQueue, passthroughAudioSampleBuffer);
                                 // Free to dequeue on other threao
@@ -468,7 +470,7 @@
                         if(uncompressedVideoSampleBuffer)
                         {
                             // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
-                            if(self.transcoding)
+                            if(self.transcodingVideo)
                             {
                                 CMBufferQueueEnqueue(videoUncompressedBufferQueue, uncompressedVideoSampleBuffer);
                                 // Free to dequeue on other thread
@@ -580,7 +582,7 @@
                     if(uncompressedAudioSampleBuffer)
                     {
                         // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
-                        if(self.transcoding)
+                        if(self.transcodingAudio)
                         {
                             CMBufferQueueEnqueue(audioUncompressedBufferQueue, uncompressedAudioSampleBuffer);
                             // Free to dequeue on other thread
@@ -734,7 +736,7 @@
                     dispatch_semaphore_wait(videoDequeueSemaphore, DISPATCH_TIME_FOREVER);
 
                     // Pull from an appropriate source - passthrough or decompressed
-                    if(self.transcoding)
+                    if(self.transcodingVideo)
                     {
                         videoSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(videoUncompressedBufferQueue);
                     }
@@ -836,7 +838,7 @@
                      dispatch_semaphore_wait(audioDequeueSemaphore, DISPATCH_TIME_FOREVER);
                      
                      // Pull from an appropriate source - passthrough or decompressed
-                     if(self.transcoding)
+                     if(self.transcodingAudio)
                      {
                          audioSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(audioUncompressedBufferQueue);
                      }
