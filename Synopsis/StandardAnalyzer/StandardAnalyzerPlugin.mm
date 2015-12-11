@@ -410,14 +410,14 @@
                                         (float)keyPoint->pt.y / (float)currentBGRAImage.size().height);
                 }
                 
-//                // Normalize tx and ty from our transform since they are pixel sized transforms
-//                if(transform.tx)
-//                    transform.tx = (float)transform.tx/(float)currentBGRAImage.size().width;
-//                if(transform.ty)
-//                    transform.ty = (float)transform.ty/(float)currentBGRAImage.size().height;
-//                
+                // Normalize tx and ty from our transform since they are pixel sized transforms
+                if(transform.tx)
+                    transform.tx = (float)transform.tx/(float)currentBGRAImage.size().width;
+                if(transform.ty)
+                    transform.ty = (float)transform.ty/(float)currentBGRAImage.size().height;
+
 ////                point = CGPointApplyAffineTransform(point, CGAffineTransformMakeScale(1.0/currentBGRAImage.size().width, 1.0/currentBGRAImage.size().height));
-//                point = CGPointApplyAffineTransform(point, transform);
+                point = CGPointApplyAffineTransform(point, transform);
                 
                 [keyPointsArray addObject:@[ @(point.x), @(point.y)]];
             }

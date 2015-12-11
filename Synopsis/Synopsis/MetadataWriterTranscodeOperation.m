@@ -232,7 +232,6 @@
     return error;
 }
 
-
 - (void) transcodeAndAnalyzeAsset
 {
     CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
