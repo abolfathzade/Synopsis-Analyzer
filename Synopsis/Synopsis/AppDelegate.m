@@ -28,7 +28,6 @@ const NSString* value = @"Value";
 
 @property (weak) IBOutlet NSWindow *window;
 @property (weak) IBOutlet DropFilesView* dropFilesView;
-@property (weak) IBOutlet NSVisualEffectView* effectView;
 
 @property (atomic, readwrite, strong) NSOperationQueue* transcodeQueue;
 @property (atomic, readwrite, strong) NSOperationQueue* metadataQueue;
@@ -85,16 +84,15 @@ const NSString* value = @"Value";
 
 - (void) awakeFromNib
 {
-//    [self.effectView setState:NSVisualEffectStateActive];
-//    [self.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
-//    [self.effectView setMaterial:NSVisualEffectMaterialDark];
-    
     self.dropFilesView.dragDelegate = self;
     
     self.prefsAnalyzerArrayController.content = self.analyzerPluginsInitializedForPrefs;
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    
+    // REVEAL THYSELF
+    [[self window] makeKeyAndOrderFront:nil];
     
     // Touch a ".synopsis" file to trick out embedded spotlight importer that there is a .synopsis file
     // We mirror OpenMeta's approach to allowing generic spotlight support via xattr's
@@ -322,7 +320,7 @@ const NSString* value = @"Value";
                              @{title : @"LinearPCM", value : @(kAudioFormatLinearPCM)} ,
                              @{title : @"Apple Lossless", value : @(kAudioFormatAppleLossless)},
                              @{title : @"AAC", value : @(kAudioFormatMPEG4AAC)},
-                             @{title : @"MP3", value : @(kAudioFormatMPEGLayer3)},
+//                             @{title : @"MP3", value : @(kAudioFormatMPEGLayer3)},
                              ];
     
     [self addMenuItemsToMenu:self.prefsAudioFormat.menu withArray:formatArray withSelector:@selector(selectAudioFormat:)];
@@ -351,11 +349,11 @@ const NSString* value = @"Value";
 #pragma mark - Audio Prefs Quality
     
     NSArray* qualityArray = @[
-                              @{title : @"Minimum", value : @(0.0)} ,
-                              @{title : @"Low", value : @(0.25)},
-                              @{title : @"Normal", value : @(0.5)},
-                              @{title : @"High", value : @(0.75)},
-                              @{title : @"Maximum", value : @(1.0)}
+                              @{title : @"Minimum", value : @(AVAudioQualityMin)} ,
+                              @{title : @"Low", value : @(AVAudioQualityLow)},
+                              @{title : @"Normal", value : @(AVAudioQualityMedium)},
+                              @{title : @"High", value : @(AVAudioQualityHigh)},
+                              @{title : @"Maximum", value : @(AVAudioQualityMax)}
                               ];
     
     [self addMenuItemsToMenu:self.prefsAudioQuality.menu withArray:qualityArray withSelector:@selector(selectAudioQuality:)];
@@ -369,19 +367,19 @@ const NSString* value = @"Value";
     
     NSArray* bitRateArray = @[
                               //@{title : @"Recommended", value : [NSNull null]} ,
-                              @{title : @"24 Kbps", value : @(24.0)},
-                              @{title : @"32 Kbps", value : @(32)},
-                              @{title : @"48 Kbps", value : @(38)},
-                              @{title : @"64 Kbps", value : @(64)},
-                              @{title : @"80 Kbps", value : @(80)},
-                              @{title : @"96 Kbps", value : @(96)},
-                              @{title : @"112 Kbps", value : @(112)},
-                              @{title : @"128 Kbps", value : @(128)},
-                              @{title : @"160 Kbps", value : @(160)},
-                              @{title : @"192 Kbps", value : @(192)},
-                              @{title : @"224 Kbps", value : @(224)},
-                              @{title : @"256 Kbps", value : @(256)},
-                              @{title : @"320 Kbps", value : @(320)},
+                              @{title : @"24 Kbps", value : @(24000)},
+                              @{title : @"32 Kbps", value : @(32000)},
+                              @{title : @"48 Kbps", value : @(38000)},
+                              @{title : @"64 Kbps", value : @(64000)},
+                              @{title : @"80 Kbps", value : @(80000)},
+                              @{title : @"96 Kbps", value : @(96000)},
+                              @{title : @"112 Kbps", value : @(112000)},
+                              @{title : @"128 Kbps", value : @(128000)},
+                              @{title : @"160 Kbps", value : @(160000)},
+                              @{title : @"192 Kbps", value : @(192000)},
+                              @{title : @"224 Kbps", value : @(224000)},
+                              @{title : @"256 Kbps", value : @(256000)},
+                              @{title : @"320 Kbps", value : @(320000)},
                               ];
     
     [self addMenuItemsToMenu:self.prefsAudioBitrate.menu withArray:bitRateArray withSelector:@selector(selectAudioBitrate:)];
@@ -668,37 +666,37 @@ const NSString* value = @"Value";
         self.prefsAudioSettings = nil;
         return;
     }
-    
-    // audio fourcc
-//    FourCharCode fourcc = (FourCharCode)audioFormat;
-//    NSString* fourCCString = NSFileTypeForHFSTypeCode(fourcc);
-//    
-//    // remove ' so "'jpeg'" becomes "jpeg" for example
-//    fourCCString = [fourCCString stringByReplacingOccurrencesOfString:@"'" withString:@""];
-    
+
+    // Standard keys
     audioSettingsDictonary[AVFormatIDKey] = audioFormat;
-    
-    // our sample rate may be NULL
     audioSettingsDictonary[AVSampleRateKey] = self.prefsAudioRate.selectedItem.representedObject;
-    
-    
-    // for now, we let our encoder match source
+
+    // for now, we let our encoder match source - this is handled in our transcoder
     audioSettingsDictonary[AVNumberOfChannelsKey] = [NSNull null];
     
-    
-    // if we arent uncompressed, include bitrate and shit.
-    if(![audioFormat isEqual:@(kAudioFormatLinearPCM)])
+    switch ([audioFormat intValue])
     {
-        audioSettingsDictonary[AVEncoderAudioQualityKey] = self.prefsAudioQuality.selectedItem.representedObject;
-        audioSettingsDictonary[AVEncoderBitRateKey] = self.prefsAudioBitrate.selectedItem.representedObject;
-    }
-    else
-    {
-        // Add LinearPCM required keys
-        audioSettingsDictonary[AVLinearPCMBitDepthKey] = @(16);
-        audioSettingsDictonary[AVLinearPCMIsBigEndianKey] = @(NO);
-        audioSettingsDictonary[AVLinearPCMIsFloatKey] = @(NO);
-        audioSettingsDictonary[AVLinearPCMIsNonInterleavedKey] = @(NO);
+        case kAudioFormatLinearPCM:
+        {
+            // Add LinearPCM required keys
+            audioSettingsDictonary[AVLinearPCMBitDepthKey] = @(16);
+            audioSettingsDictonary[AVLinearPCMIsBigEndianKey] = @(NO);
+            audioSettingsDictonary[AVLinearPCMIsFloatKey] = @(NO);
+            audioSettingsDictonary[AVLinearPCMIsNonInterleavedKey] = @(NO);
+
+            break;
+        }
+        case kAudioFormatAppleLossless:
+        case kAudioFormatMPEG4AAC:
+        {
+//            audioSettingsDictonary[AVEncoderAudioQualityKey] = self.prefsAudioQuality.selectedItem.representedObject;
+            audioSettingsDictonary[AVEncoderBitRateKey] = self.prefsAudioBitrate.selectedItem.representedObject;
+            audioSettingsDictonary[AVSampleRateConverterAlgorithmKey] = AVSampleRateConverterAlgorithm_Normal;
+            audioSettingsDictonary[AVEncoderBitRateStrategyKey] = AVAudioBitRateStrategy_Constant;
+
+        }
+        default:
+            break;
     }
     
     self.prefsAudioSettings = [audioSettingsDictonary copy];
