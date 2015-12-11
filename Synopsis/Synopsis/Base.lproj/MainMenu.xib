@@ -14,7 +14,6 @@
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
             <connections>
                 <outlet property="dropFilesView" destination="UrI-I2-Ixg" id="TTP-KS-ntk"/>
-                <outlet property="effectView" destination="EiT-Mj-1SZ" id="MpJ-Bx-ojD"/>
                 <outlet property="prefsAnalyzerArrayController" destination="7s5-x7-dF6" id="6g4-d4-Hh9"/>
                 <outlet property="prefsAudioBitrate" destination="833-vb-xto" id="7Yf-em-5TC"/>
                 <outlet property="prefsAudioFormat" destination="D5T-az-6ef" id="D4J-br-fyY"/>
@@ -1181,7 +1180,7 @@
             <point key="canvasLocation" x="77.5" y="959.5"/>
         </window>
         <window title="Log" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" animationBehavior="default" id="3EF-QC-5lQ">
-            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES" unifiedTitleAndToolbar="YES"/>
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES" unifiedTitleAndToolbar="YES" fullSizeContentView="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="196" y="240" width="480" height="270"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1177"/>
