@@ -17,6 +17,10 @@
 
 - (void) awakeFromNib
 {
+    [self setState:NSVisualEffectStateActive];
+    [self.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
+    [self setMaterial:NSVisualEffectMaterialDark];
+
     // set our mask image'
 //    self.maskImage = [NSImage imageNamed:NSImageNameActionTemplate];
 //    self.maskImage = [NSImage imageWithSize:self.bounds.size flipped:NO drawingHandler:^BOOL(NSRect bounds)

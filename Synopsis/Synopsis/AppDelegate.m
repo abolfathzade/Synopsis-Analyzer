@@ -85,9 +85,9 @@ const NSString* value = @"Value";
 
 - (void) awakeFromNib
 {
-    [self.effectView setState:NSVisualEffectStateActive];
-    [self.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
-    [self.effectView setMaterial:NSVisualEffectMaterialDark];
+//    [self.effectView setState:NSVisualEffectStateActive];
+//    [self.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
+//    [self.effectView setMaterial:NSVisualEffectMaterialDark];
     
     self.dropFilesView.dragDelegate = self;
     

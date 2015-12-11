@@ -1180,25 +1180,25 @@
             </view>
             <point key="canvasLocation" x="77.5" y="959.5"/>
         </window>
-        <window title="Log" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="3EF-QC-5lQ">
-            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+        <window title="Log" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" animationBehavior="default" id="3EF-QC-5lQ">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES" unifiedTitleAndToolbar="YES" fullSizeContentView="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="196" y="240" width="480" height="270"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1177"/>
-            <view key="contentView" id="WqD-GT-0tP">
+            <view key="contentView" id="WqD-GT-0tP" customClass="CustomVisualEffectView">
                 <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <scrollView autoresizesSubviews="NO" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3ao-qj-m8B">
                         <rect key="frame" x="-1" y="-1" width="482" height="272"/>
-                        <clipView key="contentView" copiesOnScroll="NO" id="HJn-Ac-fXb">
+                        <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="HJn-Ac-fXb">
                             <rect key="frame" x="1" y="1" width="223" height="133"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <textView editable="NO" importsGraphics="NO" findStyle="panel" verticallyResizable="YES" id="chf-96-iDp">
+                                <textView editable="NO" drawsBackground="NO" importsGraphics="NO" findStyle="panel" verticallyResizable="YES" id="chf-96-iDp">
                                     <rect key="frame" x="0.0" y="0.0" width="223" height="270"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="backgroundColor" white="1" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <size key="minSize" width="465" height="270"/>
                                     <size key="maxSize" width="482" height="10000000"/>
                                     <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1225,7 +1225,7 @@
                     <constraint firstItem="3ao-qj-m8B" firstAttribute="leading" secondItem="WqD-GT-0tP" secondAttribute="leading" constant="-1" id="gt0-kp-UkU"/>
                 </constraints>
             </view>
-            <point key="canvasLocation" x="146" y="540"/>
+            <point key="canvasLocation" x="-145" y="474"/>
         </window>
     </objects>
 </document>
