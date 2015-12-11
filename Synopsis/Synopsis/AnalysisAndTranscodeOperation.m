@@ -24,8 +24,6 @@
 @property (atomic, readwrite, strong) NSDictionary* transcodeOptions;
 @property (atomic, readwrite, strong) NSArray* availableAnalyzers;
 
-
-
 // If we Transcode
 // Pass 1: we create our video decoders and analyzers and encoders
 
@@ -161,7 +159,7 @@
         AVAssetTrack* firstVideoTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual][0];
         
         self.transcodeAssetReaderVideo = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
-                                                                                    outputSettings:@{ (NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
+                                                                                    outputSettings:@{(NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
                                                                                                       }];
         self.transcodeAssetReaderVideo.alwaysCopiesSampleData = YES;
         prefferedTrackTransform = firstVideoTrack.preferredTransform;
@@ -209,21 +207,21 @@
         }
     }
 
-//    if(self.transcodeAssetHasAudio)
-//    {
-//        if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudio])
-//        {
-//            [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudio];
-//        }
-//
-//        if(!self.transcoding)
-//        {
-//            if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudioPassthrough])
-//            {
-//                [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudioPassthrough];
-//            }
-//        }
-//    }
+    if(self.transcodeAssetHasAudio)
+    {
+        if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudio])
+        {
+            [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudio];
+        }
+
+        if(!self.transcoding)
+        {
+            if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudioPassthrough])
+            {
+                [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudioPassthrough];
+            }
+        }
+    }
     
     // Writers
     self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:&error];
@@ -243,8 +241,8 @@
         if(self.transcodeAssetHasVideo)
             [self.transcodeAssetWriter addInput:self.transcodeAssetWriterVideo];
         
-//        if(self.transcodeAssetHasAudio)
-//            [self.transcodeAssetWriter addInput:self.transcodeAssetWriterAudio];
+        if(self.transcodeAssetHasAudio)
+            [self.transcodeAssetWriter addInput:self.transcodeAssetWriterAudio];
     }
 
     // For every Analyzer, begin an new Analysis Session
@@ -274,190 +272,363 @@
         // Or use the CMBufferqueue callbacks with a semaphore signal
         CMItemCount numBuffers = 0;
         
-        // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
-        CMBufferQueueRef passthroughVideoBufferQueue;
-        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &passthroughVideoBufferQueue);
-
-        CMBufferQueueRef uncompressedVideoBufferQueue;
-        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &uncompressedVideoBufferQueue);
-
-        dispatch_queue_t passthroughVideoDecodeQueue = dispatch_queue_create("passthroughVideoDecodeQueue", DISPATCH_QUEUE_SERIAL);
-        dispatch_group_enter(g);
+#pragma mark - Video Requirements
         
-        dispatch_queue_t passthroughVideoEncodeQueue = dispatch_queue_create("passthroughVideoEncodeQueue", DISPATCH_QUEUE_SERIAL);
-        dispatch_group_enter(g);
+        // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
+        CMBufferQueueRef videoPassthroughBufferQueue;
+        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
+
+        CMBufferQueueRef videoUncompressedBufferQueue;
+        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &videoUncompressedBufferQueue);
+
+        dispatch_queue_t videoPassthrougDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL);
+        if(self.transcodeAssetHasVideo)
+            dispatch_group_enter(g);
+        
+        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
+        if(self.transcodeAssetHasVideo)
+            dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t uncompressedVideoDecodeQueue = dispatch_queue_create("uncompressedVideoDecodeQueue", DISPATCH_QUEUE_SERIAL);
-        dispatch_group_enter(g);
+        dispatch_queue_t videoUncompressedDecodeQueue = dispatch_queue_create("videoUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL);
+        if(self.transcodeAssetHasVideo)
+            dispatch_group_enter(g);
         
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
-        dispatch_queue_t concurrentAnalysisQueue = dispatch_queue_create("concurrentAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
+        dispatch_queue_t concurrentVideoAnalysisQueue = dispatch_queue_create("concurrentVideoAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
         
-//        CMBufferQueueRef passthroughAudioBufferQueue;
-//        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &passthroughAudioBufferQueue);
-//
-//        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", 0);
-//        dispatch_group_enter(g);
-//
-//        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", 0);
-//        dispatch_group_enter(g);
+#pragma mark - Audio Requirements
+        
+        CMBufferQueueRef audioPassthroughBufferQueue;
+        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &audioPassthroughBufferQueue);
+
+        CMBufferQueueRef audioUncompressedBufferQueue;
+        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &audioUncompressedBufferQueue);
+
+        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", 0);
+        if(self.transcodeAssetHasAudio)
+            dispatch_group_enter(g);
+        
+        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", 0);
+        if(self.transcodeAssetHasAudio)
+            dispatch_group_enter(g);
+        
+        // We always need to decode uncompressed frames to send to our analysis plugins
+        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL);
+        if(self.transcodeAssetHasAudio)
+            dispatch_group_enter(g);
+        
+        // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
+        dispatch_semaphore_t audioDequeueSemaphore = dispatch_semaphore_create(0);
+        
+        dispatch_queue_t concurrentAudioAnalysisQueue = dispatch_queue_create("concurrentAudioAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
+
         
 #pragma mark - Read Video pass through
 
         __block BOOL finishedReadingAllPassthroughVideo = NO;
         
-        // Passthrough Video Read into our Buffer Queue
-        dispatch_async(passthroughVideoDecodeQueue, ^{
-            
-            // read sample buffers from our video reader - and append them to the queue.
-            // only read while we have samples, and while our buffer queue isnt full
-            
-            [[LogController sharedLogController] appendVerboseLog:@"Begun Passthrough Video"];
-            
-            while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
-            {
-                @autoreleasepool
+        if(self.transcodeAssetHasVideo)
+        {
+            // Passthrough Video Read into our Buffer Queue
+            dispatch_async(videoPassthrougDecodeQueue, ^{
+                
+                // read sample buffers from our video reader - and append them to the queue.
+                // only read while we have samples, and while our buffer queue isnt full
+                
+                [[LogController sharedLogController] appendVerboseLog:@"Begun Passthrough Video"];
+                
+                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
                 {
-                    CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
-                    if(passthroughVideoSampleBuffer)
+                    @autoreleasepool
                     {
-                        // Only add to our passthrough buffer queue if we are going to use those buffers on the encoder end.
-                        if(!self.transcoding)
+                        CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
+                        if(passthroughVideoSampleBuffer)
                         {
-                            CMBufferQueueEnqueue(passthroughVideoBufferQueue, passthroughVideoSampleBuffer);
-                            // Free to dequeue on other thread
-                            dispatch_semaphore_signal(videoDequeueSemaphore);
+                            // Only add to our passthrough buffer queue if we are going to use those buffers on the encoder end.
+                            if(!self.transcoding)
+                            {
+                                CMBufferQueueEnqueue(videoPassthroughBufferQueue, passthroughVideoSampleBuffer);
+                                // Free to dequeue on other thread
+                                dispatch_semaphore_signal(videoDequeueSemaphore);
+                            }
+                            
+                            CFRelease(passthroughVideoSampleBuffer);
                         }
-                        
-                        CFRelease(passthroughVideoSampleBuffer);
-                    }
-                    else
-                    {
-                        // Got NULL - were done
-                        break;
+                        else
+                        {
+                            // Got NULL - were done
+                            break;
+                        }
                     }
                 }
-            }
-            
-            finishedReadingAllPassthroughVideo = YES;
+                
+                finishedReadingAllPassthroughVideo = YES;
 
-            [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
+                [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
 
-            // Fire final semaphore signal to hit finalization
-            dispatch_semaphore_signal(videoDequeueSemaphore);
+                // Fire final semaphore signal to hit finalization
+                dispatch_semaphore_signal(videoDequeueSemaphore);
 
-            dispatch_group_leave(g);
-        });
+                dispatch_group_leave(g);
+            });
+        }
         
-#pragma mark Read Video Decompressed
+#pragma mark - Read Audio pass through
+        
+        __block BOOL finishedReadingAllPassthroughAudio = NO;
+
+        if(self.transcodeAssetHasAudio)
+        {
+            // Passthrough Video Read into our Buffer Queue
+            dispatch_async(audioPassthroughDecodeQueue, ^{
+                
+                // read sample buffers from our video reader - and append them to the queue.
+                // only read while we have samples, and while our buffer queue isnt full
+                
+                [[LogController sharedLogController] appendVerboseLog:@"Begun Passthrough Audio"];
+                
+                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
+                {
+                    @autoreleasepool
+                    {
+                        CMSampleBufferRef passthroughAudioSampleBuffer = [self.transcodeAssetReaderAudioPassthrough copyNextSampleBuffer];
+                        if(passthroughAudioSampleBuffer)
+                        {
+                            // Only add to our passthrough buffer queue if we are going to use those buffers on the encoder end.
+                            if(!self.transcoding)
+                            {
+                                CMBufferQueueEnqueue(audioPassthroughBufferQueue, passthroughAudioSampleBuffer);
+                                // Free to dequeue on other threao
+                                dispatch_semaphore_signal(audioDequeueSemaphore);
+                            }
+                            
+                            CFRelease(passthroughAudioSampleBuffer);
+                        }
+                        else
+                        {
+                            // Got NULL - were done
+                            break;
+                        }
+                    }
+                }
+                
+                finishedReadingAllPassthroughAudio = YES;
+                
+                [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Audio Buffers"];
+                
+                // Fire final semaphore signal to hit finalization
+                dispatch_semaphore_signal(audioDequeueSemaphore);
+                
+                dispatch_group_leave(g);
+            });
+        }
+        
+#pragma mark - Read Video Decompressed
         
         // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
         __block BOOL finishedReadingAllUncompressedVideo = NO;
         
-        dispatch_async(uncompressedVideoDecodeQueue, ^{
+        if(self.transcodeAssetHasVideo)
+        {
+            dispatch_async(videoUncompressedDecodeQueue, ^{
+                
+                [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
+                
+                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
+                {
+                    @autoreleasepool
+                    {
+                        CMSampleBufferRef uncompressedVideoSampleBuffer = [self.transcodeAssetReaderVideo copyNextSampleBuffer];
+                        if(uncompressedVideoSampleBuffer)
+                        {
+                            // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
+                            if(self.transcoding)
+                            {
+                                CMBufferQueueEnqueue(videoUncompressedBufferQueue, uncompressedVideoSampleBuffer);
+                                // Free to dequeue on other thread
+                                dispatch_semaphore_signal(videoDequeueSemaphore);
+                            }
+
+                            CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(uncompressedVideoSampleBuffer);
+                            CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(uncompressedVideoSampleBuffer);
+                            CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
+                            
+                            CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
+                            
+                            self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
+
+                            __block NSError* analyzerError = nil;
+
+                                NSLock* dictionaryLock = [[NSLock alloc] init];
+                            
+                            NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
+                            
+                            dispatch_group_t analysisGroup = dispatch_group_create();
+                            
+                            for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+                            {
+                                // enter our group.
+                                dispatch_group_enter(analysisGroup);
+                                
+                                // Run an analysis pass on each
+                                dispatch_async(concurrentVideoAnalysisQueue, ^{
+                                    
+                                    NSString* newMetadataKey = [analyzer pluginIdentifier];
+                                    NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedVideoSampleBuffer transform:self.transcodeAssetWriterVideo.transform error:&analyzerError];
+                                    
+                                    if(analyzerError)
+                                    {
+                                        NSString* errorString = [@"Error Analyzing Sample buffer - bailing: " stringByAppendingString:[analyzerError description]];
+                                        [[LogController sharedLogController] appendErrorLog:errorString];
+                                    }
+                                    
+                                    if(newMetadataValue)
+                                    {
+                                        // provide some thread safety to our now async fetches.
+                                        [dictionaryLock lock];
+                                        [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+                                        [dictionaryLock unlock];
+                                    }
+
+                                    dispatch_group_leave(analysisGroup);
+
+                                });
+                                
+                                dispatch_group_wait(analysisGroup, DISPATCH_TIME_FOREVER);
+                                
+                                // if we had an analyzer error, bail.
+                                if(analyzerError)
+                                    break;
+                            }
+                            
+                            // Store out running metadata
+                            AVTimedMetadataGroup *group = [self compressedTimedMetadataFromDictionary:aggregatedAndAnalyzedMetadata atTime:currentSampleTimeRange];
+                            if(group)
+                            {
+                                [self.inFlightVideoSampleBufferMetadata addObject:group];
+                            }
+                            else
+                            {
+                                [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
+                            }
+
+                            CFRelease(uncompressedVideoSampleBuffer);
+                        }
+                        else
+                        {
+                            // Got NULL - were done
+                            // Todo: Move Analysis Finalization here
+                            break;
+                        }
+                        
+                    }
+                }
+
+                finishedReadingAllUncompressedVideo = YES;
+
+                [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Video Buffers"];
+                
+                // Fire final semaphore signal to hit finalization
+                dispatch_semaphore_signal(videoDequeueSemaphore);
+
+                dispatch_group_leave(g);
+            });
+        }
+        
+#pragma mark - Read Audio Decompressed
+        
+        // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
+        __block BOOL finishedReadingAllUncompressedAudio = NO;
+        
+        if(self.transcodeAssetHasAudio)
+        {
+            dispatch_async(audioUncompressedDecodeQueue, ^{
             
-            [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
+            [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Audio"];
             
             while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
             {
                 @autoreleasepool
                 {
-                    CMSampleBufferRef uncompressedVideoSampleBuffer = [self.transcodeAssetReaderVideo copyNextSampleBuffer];
-                    if(uncompressedVideoSampleBuffer)
+                    CMSampleBufferRef uncompressedAudioSampleBuffer = [self.transcodeAssetReaderAudio copyNextSampleBuffer];
+                    if(uncompressedAudioSampleBuffer)
                     {
                         // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
                         if(self.transcoding)
                         {
-                            CMBufferQueueEnqueue(uncompressedVideoBufferQueue, uncompressedVideoSampleBuffer);
+                            CMBufferQueueEnqueue(audioUncompressedBufferQueue, uncompressedAudioSampleBuffer);
                             // Free to dequeue on other thread
-                            dispatch_semaphore_signal(videoDequeueSemaphore);
+                            dispatch_semaphore_signal(audioDequeueSemaphore);
                         }
-
-                        CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(uncompressedVideoSampleBuffer);
-                        CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(uncompressedVideoSampleBuffer);
+                        
+                        CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(uncompressedAudioSampleBuffer);
+                        CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(uncompressedAudioSampleBuffer);
                         CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
                         
                         CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
                         
                         self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
-
-                        __block NSError* analyzerError = nil;
-
-                            NSLock* dictionaryLock = [[NSLock alloc] init];
                         
-                        NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
+                        // Disable Audio Analysis Plugins for now.
+//                        __block NSError* analyzerError = nil;
+//                        
+//                        NSLock* dictionaryLock = [[NSLock alloc] init];
+//                        
+//                        NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
+//                        
+//                        dispatch_group_t analysisGroup = dispatch_group_create();
+
+//                        for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+//                        {
+//                            // enter our group.
+//                            dispatch_group_enter(analysisGroup);
+//                            
+//                            // Run an analysis pass on each
+//                            dispatch_async(concurrentAudioAnalysisQueue, ^{
+//                                
+//                                NSString* newMetadataKey = [analyzer pluginIdentifier];
+//                                NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedAudioSampleBuffer transform:self.transcodeAssetWriterVideo.transform error:&analyzerError];
+//                                
+//                                if(analyzerError)
+//                                {
+//                                    NSString* errorString = [@"Error Analyzing Sample buffer - bailing: " stringByAppendingString:[analyzerError description]];
+//                                    [[LogController sharedLogController] appendErrorLog:errorString];
+//                                }
+//                                
+//                                if(newMetadataValue)
+//                                {
+//                                    // provide some thread safety to our now async fetches.
+//                                    [dictionaryLock lock];
+//                                    [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+//                                    [dictionaryLock unlock];
+//                                }
+//                                
+//                                dispatch_group_leave(analysisGroup);
+//                                
+//                            });
+//                            
+//                            dispatch_group_wait(analysisGroup, DISPATCH_TIME_FOREVER);
+//                            
+//                            // if we had an analyzer error, bail.
+//                            if(analyzerError)
+//                                break;
+//                        }
+//                        
+//                        // Store out running metadata
+//                        AVTimedMetadataGroup *group = [self compressedTimedMetadataFromDictionary:aggregatedAndAnalyzedMetadata atTime:currentSampleTimeRange];
+//                        if(group)
+//                        {
+//                            [self.inFlightVideoSampleBufferMetadata addObject:group];
+//                        }
+//                        else
+//                        {
+//                            [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
+//                        }
                         
-                        dispatch_group_t analysisGroup = dispatch_group_create();
-                        
-                        for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
-                        {
-                            // enter our group.
-                            dispatch_group_enter(analysisGroup);
-                            
-                            // Run an analysis pass on each
-                            dispatch_async(concurrentAnalysisQueue, ^{
-                                
-
-                                NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedVideoSampleBuffer transform:self.transcodeAssetWriterVideo.transform error:&analyzerError];
-                                
-                                if(analyzerError)
-                                {
-                                    NSString* errorString = [@"Error Analyzing Sample buffer - bailing: " stringByAppendingString:[analyzerError description]];
-                                    [[LogController sharedLogController] appendErrorLog:errorString];
-                                }
-                                
-                                if(newMetadataValue)
-                                {
-                                    // provide some thread safety to our now async fetches.
-                                    [dictionaryLock lock];
-                                    [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
-                                    [dictionaryLock unlock];
-                                }
-
-                                dispatch_group_leave(analysisGroup);
-
-                            });
-                            
-                            dispatch_group_wait(analysisGroup, DISPATCH_TIME_FOREVER);
-                            
-                            // if we had an analyzer error, bail.
-                            if(analyzerError)
-                                break;
-                        }
-                        
-                        // Convert to BSON // JSON
-                        if([NSJSONSerialization isValidJSONObject:aggregatedAndAnalyzedMetadata])
-//                            NSData* BSONData = [aggregatedAndAnalyzedMetadata BSONRepresentation];
-//                            NSData* gzipData = [BSONData gzippedData];
-//                            if(gzipData)
-                        {
-                            // TODO: Probably want to mark to NO for shipping code:
-                            NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:NO];
-                            NSData* jsonData = [aggregateMetadataAsJSON dataUsingEncoding:NSUTF8StringEncoding];
-                            
-                            NSData* gzipData = [jsonData gzippedData];
-                            
-                            // Annotation text item
-                            AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
-                            textItem.identifier = kSynopsislMetadataIdentifier;
-                            textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_RawData;
-                            textItem.value = gzipData;
-                            
-                            AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
-                            
-                            // Store out running metadata
-                            [self.inFlightVideoSampleBufferMetadata addObject:group];
-                        }
-                        else
-                        {
-                            [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
-                        }
-
-                        CFRelease(uncompressedVideoSampleBuffer);
+                        CFRelease(uncompressedAudioSampleBuffer);
                     }
                     else
                     {
@@ -468,115 +639,223 @@
                     
                 }
             }
-
-            finishedReadingAllUncompressedVideo = YES;
-
-            [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Video Buffers"];
+            
+            finishedReadingAllUncompressedAudio = YES;
+            
+            [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Audio Buffers"];
             
             // Fire final semaphore signal to hit finalization
-            dispatch_semaphore_signal(videoDequeueSemaphore);
-
+            dispatch_semaphore_signal(audioDequeueSemaphore);
+            
             dispatch_group_leave(g);
         });
+        }
         
-#pragma mark Write Video (Pass through or Encoded)
+#pragma mark - Write Video (Pass through or Encoded)
         
-        [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:passthroughVideoEncodeQueue usingBlock:^
+        if(self.transcodeAssetHasVideo)
         {
-            [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Video"];
-            
-            while([self.transcodeAssetWriterVideo isReadyForMoreMediaData])
+            [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
             {
-                // Are we done reading,
-                if(finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo)
+                [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Video"];
+                
+                while([self.transcodeAssetWriterVideo isReadyForMoreMediaData])
                 {
-                    NSLog(@"Finished Reading waiting to empty queue...");
-                    dispatch_semaphore_signal(videoDequeueSemaphore);
-
-                    if(CMBufferQueueIsEmpty(passthroughVideoBufferQueue) && CMBufferQueueIsEmpty(uncompressedVideoBufferQueue))
+                    // Are we done reading,
+                    if(finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo)
                     {
-                        // TODO: AGGREGATE METADATA THAT ISNT PER FRAME
-                        NSError* analyzerError = nil;
-                        for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+                        NSLog(@"Finished Reading waiting to empty queue...");
+                        dispatch_semaphore_signal(videoDequeueSemaphore);
+
+                        if(CMBufferQueueIsEmpty(videoPassthroughBufferQueue) && CMBufferQueueIsEmpty(videoUncompressedBufferQueue))
                         {
-                            NSDictionary* finalizedMetadata = [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
-                            if(analyzerError)
+                            // TODO: AGGREGATE METADATA THAT ISNT PER FRAME
+                            NSError* analyzerError = nil;
+                            for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
-                                NSString* errorString = [@"Error Finalizing Analysis - bailing: " stringByAppendingString:[analyzerError description]];
-                                [[LogController sharedLogController] appendErrorLog:errorString];
+                                NSDictionary* finalizedMetadata = [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
+                                if(analyzerError)
+                                {
+                                    NSString* errorString = [@"Error Finalizing Analysis - bailing: " stringByAppendingString:[analyzerError description]];
+                                    [[LogController sharedLogController] appendErrorLog:errorString];
 
-                                dispatch_group_leave(g);
+                                    dispatch_group_leave(g);
 
-                                break;
+                                    break;
+                                }
+                                
+                                // set our global metadata for the analyzer
+                                if(finalizedMetadata)
+                                {
+                                    self.inFlightGlobalMetadata[analyzer.pluginIdentifier] = finalizedMetadata;
+                                }
+                                else
+                                {
+                                    NSString* warning = [@"No Global Analysis Data for Analyzer %@ " stringByAppendingString:analyzer.pluginIdentifier];
+                                    [[LogController sharedLogController] appendWarningLog:warning];
+                                }
                             }
-                            
-                            // set our global metadata for the analyzer
-                            if(finalizedMetadata)
-                            {
-                                self.inFlightGlobalMetadata[analyzer.pluginIdentifier] = finalizedMetadata;
-                            }
-                            else
-                            {
-                                NSString* warning = [@"No Global Analysis Data for Analyzer %@ " stringByAppendingString:analyzer.pluginIdentifier];
-                                [[LogController sharedLogController] appendWarningLog:warning];
-                            }
-                        }
-                    
-                        [self.transcodeAssetWriterVideo markAsFinished];
                         
-                        [[LogController sharedLogController] appendSuccessLog:@"Finished Writing Video"];
+                            [self.transcodeAssetWriterVideo markAsFinished];
+                            
+                            [[LogController sharedLogController] appendSuccessLog:@"Finished Writing Video"];
 
-                        dispatch_group_leave(g);
-                        break;
+                            dispatch_group_leave(g);
+                            break;
+                        }
+                    }
+                    
+                    CMSampleBufferRef videoSampleBuffer = NULL;
+
+                    // wait to dequeue until we have a enqueued buffer signal from our enqueue thread.
+                    dispatch_semaphore_wait(videoDequeueSemaphore, DISPATCH_TIME_FOREVER);
+
+                    // Pull from an appropriate source - passthrough or decompressed
+                    if(self.transcoding)
+                    {
+                        videoSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(videoUncompressedBufferQueue);
+                    }
+                    else
+                    {
+                        videoSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(videoPassthroughBufferQueue);
+                    }
+                    
+                    if(videoSampleBuffer)
+                    {
+                        //[[LogController sharedLogController] appendVerboseLog:@"Dequeueing and Writing Uncompressed Sample Buffer"];
+                        if(![self.transcodeAssetWriterVideo appendSampleBuffer:videoSampleBuffer])
+                        {
+                            NSString* errorString = [@"Unable to append sampleBuffer: " stringByAppendingString:[self.transcodeAssetWriter.error description]];
+                            [[LogController sharedLogController] appendErrorLog:errorString];
+                        }
+                        CFRelease(videoSampleBuffer);
                     }
                 }
                 
-                CMSampleBufferRef videoSampleBuffer = NULL;
-
-                // wait to dequeue until we have a enqueued buffer signal from our enqueue thread.
-                dispatch_semaphore_wait(videoDequeueSemaphore, DISPATCH_TIME_FOREVER);
-
-                // Pull from an appropriate source - passthrough or decompressed
-                if(self.transcoding)
+                // some debug code to see 
+                if(finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo)
                 {
-                    videoSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(uncompressedVideoBufferQueue);
+                    if(!CMBufferQueueIsEmpty(videoPassthroughBufferQueue) || !CMBufferQueueIsEmpty(videoUncompressedBufferQueue))
+                    {
+                        [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Video but did not empty Source Queues"];
+                    }
                 }
                 else
                 {
-                    videoSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(passthroughVideoBufferQueue);
-                }
-                
-                if(videoSampleBuffer)
-                {
-                    //[[LogController sharedLogController] appendVerboseLog:@"Dequeueing and Writing Uncompressed Sample Buffer"];
-                    if(![self.transcodeAssetWriterVideo appendSampleBuffer:videoSampleBuffer])
+                    [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Video but did not finish reading Source Video"];
+                    
+                    if(!CMBufferQueueIsEmpty(videoPassthroughBufferQueue) || !CMBufferQueueIsEmpty(videoUncompressedBufferQueue))
                     {
-                        NSString* errorString = [@"Unable to append sampleBuffer: " stringByAppendingString:[self.transcodeAssetWriter.error description]];
-                        [[LogController sharedLogController] appendErrorLog:errorString];
+                        [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Video but did not empty Source Queues"];
                     }
-                    CFRelease(videoSampleBuffer);
                 }
-            }
             
-            // some debug code to see 
-            if(finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo)
-            {
-                if(!CMBufferQueueIsEmpty(passthroughVideoBufferQueue) || !CMBufferQueueIsEmpty(uncompressedVideoBufferQueue))
-                {
-                    [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Video but did not empty Source Queues"];
-                }
-            }
-            else
-            {
-                [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Video but did not finish reading Source Video"];
-                
-                if(!CMBufferQueueIsEmpty(passthroughVideoBufferQueue) || !CMBufferQueueIsEmpty(uncompressedVideoBufferQueue))
-                {
-                    [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Video but did not empty Source Queues"];
-                }
-            }
+            }];
+        }
         
-        }];
+#pragma mark - Write Audio (Pass through or Encoded)
+        
+        if(self.transcodeAssetHasAudio)
+        {
+            [self.transcodeAssetWriterAudio requestMediaDataWhenReadyOnQueue:audioPassthroughEncodeQueue usingBlock:^
+             {
+                 [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Audio"];
+                 
+                 while([self.transcodeAssetWriterAudio isReadyForMoreMediaData])
+                 {
+                     // Are we done reading,
+                     if(finishedReadingAllPassthroughAudio && finishedReadingAllUncompressedAudio)
+                     {
+                         NSLog(@"Finished Reading waiting to empty queue...");
+                         dispatch_semaphore_signal(audioDequeueSemaphore);
+                         
+                         if(CMBufferQueueIsEmpty(audioPassthroughBufferQueue) && CMBufferQueueIsEmpty(audioUncompressedBufferQueue))
+                         {
+                             // TODO: AGGREGATE METADATA THAT ISNT PER FRAME
+    //                         NSError* analyzerError = nil;
+    //                         for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+    //                         {
+    //                             NSDictionary* finalizedMetadata = [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
+    //                             if(analyzerError)
+    //                             {
+    //                                 NSString* errorString = [@"Error Finalizing Analysis - bailing: " stringByAppendingString:[analyzerError description]];
+    //                                 [[LogController sharedLogController] appendErrorLog:errorString];
+    //                                 
+    //                                 dispatch_group_leave(g);
+    //                                 
+    //                                 break;
+    //                             }
+    //                             
+    //                             // set our global metadata for the analyzer
+    //                             if(finalizedMetadata)
+    //                             {
+    //                                 self.inFlightGlobalMetadata[analyzer.pluginIdentifier] = finalizedMetadata;
+    //                             }
+    //                             else
+    //                             {
+    //                                 NSString* warning = [@"No Global Analysis Data for Analyzer %@ " stringByAppendingString:analyzer.pluginIdentifier];
+    //                                 [[LogController sharedLogController] appendWarningLog:warning];
+    //                             }
+    //                         }
+                             
+                             [self.transcodeAssetWriterAudio markAsFinished];
+                             
+                             [[LogController sharedLogController] appendSuccessLog:@"Finished Writing Audio"];
+                             
+                             dispatch_group_leave(g);
+                             break;
+                         }
+                     }
+                     
+                     CMSampleBufferRef audioSampleBuffer = NULL;
+                     
+                     // wait to dequeue until we have a enqueued buffer signal from our enqueue thread.
+                     dispatch_semaphore_wait(audioDequeueSemaphore, DISPATCH_TIME_FOREVER);
+                     
+                     // Pull from an appropriate source - passthrough or decompressed
+                     if(self.transcoding)
+                     {
+                         audioSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(audioUncompressedBufferQueue);
+                     }
+                     else
+                     {
+                         audioSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(audioPassthroughBufferQueue);
+                     }
+                     
+                     if(audioSampleBuffer)
+                     {
+                         //[[LogController sharedLogController] appendVerboseLog:@"Dequeueing and Writing Uncompressed Sample Buffer"];
+                         if(![self.transcodeAssetWriterAudio appendSampleBuffer:audioSampleBuffer])
+                         {
+                             NSString* errorString = [@"Unable to append sampleBuffer: " stringByAppendingString:[self.transcodeAssetWriter.error description]];
+                             [[LogController sharedLogController] appendErrorLog:errorString];
+                         }
+                         CFRelease(audioSampleBuffer);
+                     }
+                 }
+                 
+                 // some debug code to see
+                 if(finishedReadingAllPassthroughAudio && finishedReadingAllUncompressedAudio)
+                 {
+                     if(!CMBufferQueueIsEmpty(audioPassthroughBufferQueue) || !CMBufferQueueIsEmpty(audioUncompressedBufferQueue))
+                     {
+                         [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Audio but did not empty Source Queues"];
+                     }
+                 }
+                 else
+                 {
+                     [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Audio but did not finish reading Source Video"];
+                     
+                     if(!CMBufferQueueIsEmpty(audioPassthroughBufferQueue) || !CMBufferQueueIsEmpty(audioUncompressedBufferQueue))
+                     {
+                         [[LogController sharedLogController] appendErrorLog:@"Stopped Requesting Destination Audio but did not empty Source Queues"];
+                     }
+                 }
+                 
+             }];
+        }
+        
+#pragma mark - Cleanup
         
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);
@@ -598,12 +877,37 @@
         self.analyzedAudioSampleBufferMetadata = self.inFlightAudioSampleBufferMetadata;
         
         // reset / empty our buffer queues
-        CMBufferQueueReset(passthroughVideoBufferQueue);
-        CMBufferQueueReset(uncompressedVideoBufferQueue);
+        CMBufferQueueReset(videoPassthroughBufferQueue);
+        CMBufferQueueReset(videoUncompressedBufferQueue);
         
         [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis Operation"];
     }
 }
 
+#pragma mark - Metadata Helper
+
+-(AVTimedMetadataGroup*) compressedTimedMetadataFromDictionary:(NSDictionary*)aggregatedAndAnalyzedMetadata atTime:(CMTimeRange)currentSampleTimeRange
+{
+    if([NSJSONSerialization isValidJSONObject:aggregatedAndAnalyzedMetadata])
+    {
+        // TODO: Probably want to mark to NO for shipping code:
+        NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:NO];
+        NSData* jsonData = [aggregateMetadataAsJSON dataUsingEncoding:NSUTF8StringEncoding];
+        
+        NSData* gzipData = [jsonData gzippedData];
+        
+        // Annotation text item
+        AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
+        textItem.identifier = kSynopsislMetadataIdentifier;
+        textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_RawData;
+        textItem.value = gzipData;
+        
+        AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
+        
+        return group;
+    }
+
+    return nil;
+}
 
 @end
