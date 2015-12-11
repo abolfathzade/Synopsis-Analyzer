@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1B61BCF81ACF26710013418D"
-               BuildableName = "StandardAnalyzer.bundle"
+               BuildableName = "StandardAnalyzer.plugin"
                BlueprintName = "StandardAnalyzer"
                ReferencedContainer = "container:Synopsis.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1B61BCF81ACF26710013418D"
-            BuildableName = "StandardAnalyzer.bundle"
+            BuildableName = "StandardAnalyzer.plugin"
             BlueprintName = "StandardAnalyzer"
             ReferencedContainer = "container:Synopsis.xcodeproj">
          </BuildableReference>
@@ -61,7 +61,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1B61BCF81ACF26710013418D"
-            BuildableName = "StandardAnalyzer.bundle"
+            BuildableName = "StandardAnalyzer.plugin"
             BlueprintName = "StandardAnalyzer"
             ReferencedContainer = "container:Synopsis.xcodeproj">
          </BuildableReference>
