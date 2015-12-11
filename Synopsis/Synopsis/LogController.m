@@ -55,7 +55,7 @@
     self = [super init];
     if (self)
     {
-        self.verboseStyle = @{ NSForegroundColorAttributeName : [NSColor darkGrayColor]};
+        self.verboseStyle = @{ NSForegroundColorAttributeName : [NSColor lightGrayColor]};
         self.warningStyle = @{ NSForegroundColorAttributeName : [NSColor orangeColor]};
         self.errorStyle = @{ NSForegroundColorAttributeName : [NSColor redColor]};
         self.successStyle = @{ NSForegroundColorAttributeName : [NSColor colorWithRed:0 green:0.66 blue:0 alpha:1]};
