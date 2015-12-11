@@ -191,6 +191,10 @@ const NSString* value = @"Value";
 {
     [self initVideoPrefs];
     [self initAudioPrefs];
+    
+    // update UI / hack since we dont have validator code yet
+    [self selectVideoEncoder:nil];
+    [self selectAudioFormat:nil];
 }
 
 - (void) initVideoPrefs
@@ -332,14 +336,14 @@ const NSString* value = @"Value";
     
     NSArray* rateArray = @[
                            //                              @{title : @"Recommended", value : [NSNull null]} ,
-                           @{title : @"16.000 Khz", value : @16.000},
-                           @{title : @"22.050 Khz", value : @22.050},
-                           @{title : @"24.000 Khz", value : @24.000},
-                           @{title : @"32.000 Khz", value : @32.000},
-                           @{title : @"44.100 Khz", value : @44.100},
-                           @{title : @"48.000 Khz", value : @48.000},
-                           @{title : @"88.200 Khz", value : @88.200},
-                           @{title : @"96.000 Khz", value : @96.0000},
+                           @{title : @"16.000 Khz", value : @(16000.0)},
+                           @{title : @"22.050 Khz", value : @(22050.0)},
+                           @{title : @"24.000 Khz", value : @(24000.0)},
+                           @{title : @"32.000 Khz", value : @(32000.0)},
+                           @{title : @"44.100 Khz", value : @(44100.0)},
+                           @{title : @"48.000 Khz", value : @(48000.0)},
+                           @{title : @"88.200 Khz", value : @(88200.0)},
+                           @{title : @"96.000 Khz", value : @(960000.0)},
                            ];
     
     [self addMenuItemsToMenu:self.prefsAudioRate.menu withArray:rateArray withSelector:@selector(selectAudioSamplerate:)];
@@ -347,11 +351,11 @@ const NSString* value = @"Value";
 #pragma mark - Audio Prefs Quality
     
     NSArray* qualityArray = @[
-                              @{title : @"Minimum", value : @0.0} ,
-                              @{title : @"Low", value : @0.25},
-                              @{title : @"Normal", value : @0.5},
-                              @{title : @"High", value : @0.75},
-                              @{title : @"Maximum", value : @1.0}
+                              @{title : @"Minimum", value : @(0.0)} ,
+                              @{title : @"Low", value : @(0.25)},
+                              @{title : @"Normal", value : @(0.5)},
+                              @{title : @"High", value : @(0.75)},
+                              @{title : @"Maximum", value : @(1.0)}
                               ];
     
     [self addMenuItemsToMenu:self.prefsAudioQuality.menu withArray:qualityArray withSelector:@selector(selectAudioQuality:)];
@@ -365,19 +369,19 @@ const NSString* value = @"Value";
     
     NSArray* bitRateArray = @[
                               //@{title : @"Recommended", value : [NSNull null]} ,
-                              @{title : @"24 Kbps", value : @24.0},
-                              @{title : @"32 Kbps", value : @32},
-                              @{title : @"48 Kbps", value : @38},
-                              @{title : @"64 Kbps", value : @64},
-                              @{title : @"80 Kbps", value : @80},
-                              @{title : @"96 Kbps", value : @96},
-                              @{title : @"112 Kbps", value : @112},
-                              @{title : @"128 Kbps", value : @128},
-                              @{title : @"160 Kbps", value : @160},
-                              @{title : @"192 Kbps", value : @192},
-                              @{title : @"224 Kbps", value : @224},
-                              @{title : @"256 Kbps", value : @256},
-                              @{title : @"320 Kbps", value : @320},
+                              @{title : @"24 Kbps", value : @(24.0)},
+                              @{title : @"32 Kbps", value : @(32)},
+                              @{title : @"48 Kbps", value : @(38)},
+                              @{title : @"64 Kbps", value : @(64)},
+                              @{title : @"80 Kbps", value : @(80)},
+                              @{title : @"96 Kbps", value : @(96)},
+                              @{title : @"112 Kbps", value : @(112)},
+                              @{title : @"128 Kbps", value : @(128)},
+                              @{title : @"160 Kbps", value : @(160)},
+                              @{title : @"192 Kbps", value : @(192)},
+                              @{title : @"224 Kbps", value : @(224)},
+                              @{title : @"256 Kbps", value : @(256)},
+                              @{title : @"320 Kbps", value : @(320)},
                               ];
     
     [self addMenuItemsToMenu:self.prefsAudioBitrate.menu withArray:bitRateArray withSelector:@selector(selectAudioBitrate:)];
@@ -666,13 +670,13 @@ const NSString* value = @"Value";
     }
     
     // audio fourcc
-    FourCharCode fourcc = (FourCharCode)audioFormat;
-    NSString* fourCCString = NSFileTypeForHFSTypeCode(fourcc);
+//    FourCharCode fourcc = (FourCharCode)audioFormat;
+//    NSString* fourCCString = NSFileTypeForHFSTypeCode(fourcc);
+//    
+//    // remove ' so "'jpeg'" becomes "jpeg" for example
+//    fourCCString = [fourCCString stringByReplacingOccurrencesOfString:@"'" withString:@""];
     
-    // remove ' so "'jpeg'" becomes "jpeg" for example
-    fourCCString = [fourCCString stringByReplacingOccurrencesOfString:@"'" withString:@""];
-    
-    audioSettingsDictonary[AVFormatIDKey] = fourCCString;
+    audioSettingsDictonary[AVFormatIDKey] = audioFormat;
     
     // our sample rate may be NULL
     audioSettingsDictonary[AVSampleRateKey] = self.prefsAudioRate.selectedItem.representedObject;
@@ -687,6 +691,14 @@ const NSString* value = @"Value";
     {
         audioSettingsDictonary[AVEncoderAudioQualityKey] = self.prefsAudioQuality.selectedItem.representedObject;
         audioSettingsDictonary[AVEncoderBitRateKey] = self.prefsAudioBitrate.selectedItem.representedObject;
+    }
+    else
+    {
+        // Add LinearPCM required keys
+        audioSettingsDictonary[AVLinearPCMBitDepthKey] = @(16);
+        audioSettingsDictonary[AVLinearPCMIsBigEndianKey] = @(NO);
+        audioSettingsDictonary[AVLinearPCMIsFloatKey] = @(NO);
+        audioSettingsDictonary[AVLinearPCMIsNonInterleavedKey] = @(NO);
     }
     
     self.prefsAudioSettings = [audioSettingsDictonary copy];
@@ -735,14 +747,16 @@ const NSString* value = @"Value";
     destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPath2] URLByAppendingPathExtension:lastPathExtention];
     
     // Pass 1 is our analysis pass, and our decode pass
-    NSDictionary* transcodeOptions = @{kSynopsisTranscodeVideoSettingsKey : (self.prefsVideoSettings) ? self.prefsVideoSettings : [NSNull null],
-                                       kSynopsisTranscodeAudioSettingsKey : [NSNull null],
+    NSDictionary* transcodeOptions = @{kSynopsisTranscodeVideoSettingsKey : (self.prefsVideoSettings) ? [self.prefsVideoSettings copy] : [NSNull null],
+                                       kSynopsisTranscodeAudioSettingsKey : (self.prefsAudioSettings) ? [self.prefsAudioSettings copy] : [NSNull null],
                                        };
     
     AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL
                                                                                         destinationURL:destinationURL
                                                                                       transcodeOptions:transcodeOptions
                                                                                     availableAnalyzers:self.analyzerPlugins];
+    
+    assert(analysis);
     
     // pass2 is depended on pass one being complete, and on pass1's analyzed metadata
     __weak AnalysisAndTranscodeOperation* weakAnalysis = analysis;

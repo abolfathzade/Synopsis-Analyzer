@@ -176,6 +176,29 @@
     if(self.transcodeAssetHasAudio)
     {
         AVAssetTrack* firstAudioTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicAudible][0];
+        
+        // get our audio tracks channel layout - we need this because we ought to match our audios channel count even if we transcode
+        
+        CMAudioFormatDescriptionRef audioDescription = (__bridge CMAudioFormatDescriptionRef)([firstAudioTrack formatDescriptions][0]);
+        
+        size_t layoutSize;
+        const AudioChannelLayout* layout = CMAudioFormatDescriptionGetChannelLayout(audioDescription, &layoutSize);
+        
+        unsigned int numberOfChannels = AudioChannelLayoutTag_GetNumberOfChannels(layout->mChannelLayoutTag);
+        
+        if(self.audioTranscodeSettings[AVNumberOfChannelsKey] == [NSNull null])
+        {
+            NSMutableDictionary* newAudioSettingsWithChannelCountAndLayout = [self.audioTranscodeSettings mutableCopy];
+        
+            NSData* audioLayoutData = [[NSData alloc] initWithBytes:layout length:layoutSize];
+            
+            newAudioSettingsWithChannelCountAndLayout[AVChannelLayoutKey] = audioLayoutData;
+            newAudioSettingsWithChannelCountAndLayout[AVNumberOfChannelsKey] = @(numberOfChannels);
+            
+            self.audioTranscodeSettings = newAudioSettingsWithChannelCountAndLayout;
+        }
+        
+        
         self.transcodeAssetReaderAudio = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstAudioTrack
                                                                                 outputSettings:@{(NSString*) AVFormatIDKey : @(kAudioFormatLinearPCM)}];
         self.transcodeAssetReaderAudio.alwaysCopiesSampleData = YES;
@@ -881,6 +904,14 @@
         CMBufferQueueReset(videoUncompressedBufferQueue);
         
         [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis Operation"];
+    }
+    
+    else
+    {
+        [[LogController sharedLogController] appendErrorLog:@"Unable to start transcode:"];
+        [[LogController sharedLogController] appendErrorLog:[@"Read Error" stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+        [[LogController sharedLogController] appendErrorLog:[@"Write Error" stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
+
     }
 }
 
