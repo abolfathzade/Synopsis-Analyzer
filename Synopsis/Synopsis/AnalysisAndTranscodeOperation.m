@@ -354,7 +354,6 @@
         
         dispatch_queue_t concurrentAudioAnalysisQueue = dispatch_queue_create("concurrentAudioAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
 
-        
 #pragma mark - Read Video pass through
 
         __block BOOL finishedReadingAllPassthroughVideo = NO;
@@ -908,16 +907,25 @@
         // reset / empty our buffer queues
         CMBufferQueueReset(videoPassthroughBufferQueue);
         CMBufferQueueReset(videoUncompressedBufferQueue);
+        CMBufferQueueReset(audioPassthroughBufferQueue);
+        CMBufferQueueReset(audioUncompressedBufferQueue);
+        
+        // cleanup
+        CFRelease(videoPassthroughBufferQueue);
+        CFRelease(videoUncompressedBufferQueue);
+        CFRelease(audioPassthroughBufferQueue);
+        CFRelease(audioUncompressedBufferQueue);
+        
+        // dealloc any analyzers now
+        self.availableAnalyzers = nil;
         
         [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis Operation"];
     }
-    
     else
     {
         [[LogController sharedLogController] appendErrorLog:@"Unable to start transcode:"];
         [[LogController sharedLogController] appendErrorLog:[@"Read Error" stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
         [[LogController sharedLogController] appendErrorLog:[@"Write Error" stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
-
     }
 }
 
