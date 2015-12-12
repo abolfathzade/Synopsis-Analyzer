@@ -46,15 +46,6 @@
         self.pluginVersionMajor = 0;
         self.pluginVersionMinor = 1;
         self.pluginMediaType = AVMediaTypeVideo;
-        
-        NSString* networkPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"jetpac" ofType:@"ntwk"];
-        if (networkPath == NULL)
-        {
-            assert(false);
-        }
-        network = jpcnn_create_network([networkPath UTF8String]);
-        assert(network != NULL);
-        
     }
     
     return self;
@@ -70,6 +61,13 @@
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint andEnabledModules:(NSDictionary*)enabledModuleKeys
 {
+    NSString* networkPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"jetpac" ofType:@"ntwk"];
+    if (networkPath == NULL)
+    {
+        assert(false);
+    }
+    network = jpcnn_create_network([networkPath UTF8String]);
+    assert(network != NULL);
 
 }
 
@@ -151,6 +149,12 @@
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
 {
+    // clean up
+    if(network)
+    {
+        jpcnn_destroy_network(network);
+    }
+
     return nil;
 }
 
