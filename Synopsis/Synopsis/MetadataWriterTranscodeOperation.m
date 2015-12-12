@@ -39,6 +39,9 @@
 @property (atomic, readwrite, strong) NSMutableArray* analyzedAudioSampleBufferMetadata;
 @property (atomic, readwrite, strong) NSMutableDictionary* analyzedGlobalMetadata;
 
+@property (atomic, readwrite, assign) BOOL transcodeAssetHasVideo;
+@property (atomic, readwrite, assign) BOOL transcodeAssetHasAudio;
+
 // Reading the original sample Data
 @property (atomic, readwrite, strong) AVURLAsset* transcodeAsset;
 @property (atomic, readwrite, strong) AVAssetReader* transcodeAssetReader;
@@ -70,6 +73,9 @@
         self.destinationURL = destinationURL;
         self.metadataOptions = metadataOptions;
         
+        self.transcodeAssetHasVideo = NO;
+        self.transcodeAssetHasAudio = NO;
+
         if(self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey])
         {
             self.analyzedVideoSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey] mutableCopy];
@@ -106,8 +112,8 @@
 {
     self.transcodeAsset = [AVURLAsset URLAssetWithURL:self.sourceURL options:@{AVURLAssetPreferPreciseDurationAndTimingKey : @TRUE}];
     
-    BOOL hasVideo = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual].count ? YES : NO;
-    BOOL hasAudio = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicAudible].count ? YES : NO;
+    self.transcodeAssetHasVideo = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual].count ? YES : NO;
+    self.transcodeAssetHasAudio = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicAudible].count ? YES : NO;
     
     // TODO: error checking / handling
     NSError* error = nil;
@@ -118,7 +124,7 @@
     CGAffineTransform preferredTransform = CGAffineTransformIdentity;
     
     // Video Reader -
-    if(hasVideo)
+    if(self.transcodeAssetHasVideo)
     {
         // Passthrough Video Reader -
         AVAssetTrack* firstVideoTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual][0];
@@ -129,7 +135,7 @@
     }
     
     // Audio Reader -
-    if(hasAudio)
+    if(self.transcodeAssetHasAudio)
     {
         AVAssetTrack* firstAudioTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicAudible][0];
         
@@ -140,7 +146,7 @@
     }
     
     // Assign all our specific Outputs to our Reader
-    if(hasVideo)
+    if(self.transcodeAssetHasVideo)
     {
         if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderVideoPassthrough])
         {
@@ -153,7 +159,7 @@
 
     }
     
-    if(hasAudio)
+    if(self.transcodeAssetHasAudio)
     {
         if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudioPassthrough])
         {
@@ -191,7 +197,7 @@
     self.transcodeAssetWriterAudioPassthrough.expectsMediaDataInRealTime = NO;
     
     // Assign all our specific inputs to our Writer
-    if(hasVideo)
+    if(self.transcodeAssetHasVideo)
     {
         if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideoPassthrough])
         {
@@ -214,7 +220,7 @@
             }
         }
     }
-    if(hasAudio)
+    if(self.transcodeAssetHasAudio)
     {
         if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterAudioPassthrough])
         {
@@ -261,7 +267,6 @@
             NSString* warning = @"Unable To Convert Global Metadata to JSON Format, invalid object";
             [[LogController sharedLogController] appendErrorLog:warning];
         }
-
     }
     
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading])
@@ -277,190 +282,384 @@
         // Or use the CMBufferqueue callbacks with a semaphore signal
         CMItemCount numBuffers = 0;
         
-        //        CMBufferQueueRef decodeVideoBufferQueue;
-        //        CMBufferQueueRef decodeAudioBufferQueue;
-        //        CMBufferQueueRef metadataVideoAnalysisQueue;
-        
         // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
         
-        CMBufferQueueRef passthroughVideoBufferQueue;
+#pragma mark - Video Requirements
+
+        CMBufferQueueRef videoPassthroughBufferQueue;
         // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
-        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &passthroughVideoBufferQueue);
+        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
         
         dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthroughDecodeQueue", 0);
-        dispatch_group_enter(g);
+        if(self.transcodeAssetHasVideo)
+            dispatch_group_enter(g);
         
         dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", 0);
-        dispatch_group_enter(g);
+        if(self.transcodeAssetHasVideo)
+            dispatch_group_enter(g);
         
-        //        CMBufferQueueRef passthroughAudioBufferQueue;
-        //        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &passthroughAudioBufferQueue);
-        //
-        //        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", 0);
-        //        dispatch_group_enter(g);
-        //
-        //        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", 0);
-        //        dispatch_group_enter(g);
+        // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
+        dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
+#pragma mark - Audio Requirements
+
+        CMBufferQueueRef audioPassthroughBufferQueue;
+        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &audioPassthroughBufferQueue);
+        
+        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", 0);
+        if(self.transcodeAssetHasAudio)
+            dispatch_group_enter(g);
+        
+        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", 0);
+        if(self.transcodeAssetHasAudio)
+            dispatch_group_enter(g);
+        
+        // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
+        dispatch_semaphore_t audioDequeueSemaphore = dispatch_semaphore_create(0);
+        
+#pragma mark - Read Video pass through
         
         __block BOOL finishedReadingAllPassthroughVideo = NO;
         
-        // Passthrough Video Read into our Buffer Queue
-        dispatch_async(videoPassthroughDecodeQueue, ^{
-            
-            // read sample buffers from our video reader - and append them to the queue.
-            // only read while we have samples, and while our buffer queue isnt full
-            
-            while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
-            {
-                @autoreleasepool
+        if(self.transcodeAssetHasVideo)
+        {
+            dispatch_async(videoPassthroughDecodeQueue, ^{
+                
+                // read sample buffers from our video reader - and append them to the queue.
+                // only read while we have samples, and while our buffer queue isnt full
+                
+                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
                 {
-                    CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
-                    if(passthroughVideoSampleBuffer)
+                    @autoreleasepool
                     {
-                        //                            NSLog(@"Got Sample Buffer and Enqued it");
-                        CMBufferQueueEnqueue(passthroughVideoBufferQueue, passthroughVideoSampleBuffer);
-                        
-                        CFRelease(passthroughVideoSampleBuffer);
-                    }
-                    else
-                    {
-                        // Got NULL - were done
-                        break;
+                        CMSampleBufferRef passthroughVideoSampleBuffer = [self.transcodeAssetReaderVideoPassthrough copyNextSampleBuffer];
+                        if(passthroughVideoSampleBuffer)
+                        {
+                            //                            NSLog(@"Got Sample Buffer and Enqued it");
+                            CMBufferQueueEnqueue(videoPassthroughBufferQueue, passthroughVideoSampleBuffer);
+                            
+                            CFRelease(passthroughVideoSampleBuffer);
+                        }
+                        else
+                        {
+                            // Got NULL - were done
+                            break;
+                        }
                     }
                 }
-            }
-            
-            finishedReadingAllPassthroughVideo = YES;
-            NSLog(@"Reading Done");
-            
-            dispatch_group_leave(g);
-        });
-        
-        // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
-        __block NSUInteger sampleCount = 0;
-        __block CMTimeRange lastSampleTimeRange = kCMTimeRangeZero;
-        
-        // Passthrough Video Write from Buffer Queue
-        [self.transcodeAssetWriterVideoPassthrough requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
-         {
-//           NSLog(@"Started Requesting Media");
-             while([self.transcodeAssetWriterVideoPassthrough isReadyForMoreMediaData]
-                   && [self.transcodeAssetWriterMetadata isReadyForMoreMediaData])
-             {
-                 // Are we done reading,
-                 if(finishedReadingAllPassthroughVideo)
-                 {
-                     // if our video is done, were done. We dont care if we missed a single piece of metadata or not.
-                     if(CMBufferQueueIsEmpty(passthroughVideoBufferQueue) )//&& !self.analyzedVideoSampleBufferMetadata.count)
-                     {
-                         [self.transcodeAssetWriterVideoPassthrough markAsFinished];
-                         [self.transcodeAssetWriterMetadata markAsFinished];
-//                          NSLog(@"Writing Done");
-                         
-                         dispatch_group_leave(g);
-                         break;
-                     }
-                 }
-                 
-                 CMSampleBufferRef passthroughVideoSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(passthroughVideoBufferQueue);
-                 if(passthroughVideoSampleBuffer)
-                 {
-                     CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
-                     CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(passthroughVideoSampleBuffer);
-                     CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
-                     
-                     CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
-                     
-                     self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
-                     
-                     if(![self.transcodeAssetWriterVideoPassthrough appendSampleBuffer:passthroughVideoSampleBuffer])
-                     {
-                         [[LogController sharedLogController] appendErrorLog:[@"Unable to append video sample to asset at time: " stringByAppendingString:CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, currentSamplePTS))]];
-                     }
-                     
-                     if(self.analyzedVideoSampleBufferMetadata.count)
-                     {
-                         unsigned int index = 0;
-                         AVTimedMetadataGroup *group = self.analyzedVideoSampleBufferMetadata[index];
-                         
-                         // So this is tricky
-                         // Our video is passthrough - which means for some video codecs we get samples in decode not presentation order
-                         // since our metadata was analyzed by decoding (by definition), its in presentation timestamp order.
-                         // So we need to search every passthrough sample for a metadata sample of the nearest timestamp
-                         // If we find a match, we remove it from the dictionary to at least try to speed shit up...
-                         // Theoretically DTS and PTS should be at least 'near' one another, so we dont need to iterate the entire dictionary.
-                         
-                         CMTime currentSamplePTS = CMSampleBufferGetPresentationTimeStamp(passthroughVideoSampleBuffer);
-                         CMTime currentSampleOPTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
-                         CMTime currentSampleDTS = CMSampleBufferGetDecodeTimeStamp(passthroughVideoSampleBuffer);
-                         CMTime currentSampleODTS = CMSampleBufferGetOutputDecodeTimeStamp(passthroughVideoSampleBuffer);
-                         
-                         int32_t compareResult =  CMTimeCompare(currentSampleDTS, group.timeRange.start);
-                         
-                         if(compareResult < 0 )
-                         {
-                             while(CMTIME_COMPARE_INLINE(currentSampleDTS, <, group.timeRange.start))
-                             {
-                                 index++;
-                                 
-                                 if(index < self.analyzedVideoSampleBufferMetadata.count)
-                                     group = self.analyzedVideoSampleBufferMetadata[index];
-                                 else
-                                 {
-                                     group = nil;
-                                     break;
-                                 }
-                             }
+                
+                finishedReadingAllPassthroughVideo = YES;
+                [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
+                
+                // Fire final semaphore signal to hit finalization
+                dispatch_semaphore_signal(videoDequeueSemaphore);
+                
+                dispatch_group_leave(g);
+            });
+        }
 
-                         }
-                         else if(compareResult > 0)
+#pragma mark - Read Audio pass through
+        
+        __block BOOL finishedReadingAllPassthroughAudio = NO;
+        
+        if(self.transcodeAssetHasAudio)
+        {
+            dispatch_async(audioPassthroughDecodeQueue, ^{
+                
+                // read sample buffers from our video reader - and append them to the queue.
+                // only read while we have samples, and while our buffer queue isnt full
+                
+                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
+                {
+                    @autoreleasepool
+                    {
+                        CMSampleBufferRef passthroughAudioSampleBuffer = [self.transcodeAssetReaderAudioPassthrough copyNextSampleBuffer];
+                        if(passthroughAudioSampleBuffer)
+                        {
+                            //                            NSLog(@"Got Sample Buffer and Enqued it");
+                            CMBufferQueueEnqueue(audioPassthroughBufferQueue, passthroughAudioSampleBuffer);
+                            
+                            CFRelease(passthroughAudioSampleBuffer);
+                        }
+                        else
+                        {
+                            // Got NULL - were done
+                            break;
+                        }
+                    }
+                }
+                
+                finishedReadingAllPassthroughAudio = YES;
+                [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Audio Buffers"];
+                
+                // Fire final semaphore signal to hit finalization
+                dispatch_semaphore_signal(audioDequeueSemaphore);
+                
+                dispatch_group_leave(g);
+            });
+        }
+
+#pragma mark - Video and Metadata Write
+        
+        if(self.transcodeAssetHasVideo)
+        {
+            // Passthrough Video Write from Buffer Queue
+            [self.transcodeAssetWriterVideoPassthrough requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
+             {
+    //           NSLog(@"Started Requesting Media");
+                 while([self.transcodeAssetWriterVideoPassthrough isReadyForMoreMediaData]
+                       && [self.transcodeAssetWriterMetadata isReadyForMoreMediaData])
+                 {
+                     // Are we done reading,
+                     if(finishedReadingAllPassthroughVideo)
+                     {
+                         NSLog(@"Finished Reading waiting to empty queue...");
+                         dispatch_semaphore_signal(videoDequeueSemaphore);
+
+                         // if our video is done, were done. We dont care if we missed a single piece of metadata or not.
+                         if(CMBufferQueueIsEmpty(videoPassthroughBufferQueue) )//&& !self.analyzedVideoSampleBufferMetadata.count)
                          {
-                             while(CMTIME_COMPARE_INLINE(currentSampleDTS, >, group.timeRange.start))
-                             {
-                                 index++;
-                                 
-                                 if(index < self.analyzedVideoSampleBufferMetadata.count)
-                                     group = self.analyzedVideoSampleBufferMetadata[index];
-                                 else
-                                 {
-                                     group = nil;
-                                     break;
-                                 }
-                             }
+                             [self.transcodeAssetWriterVideoPassthrough markAsFinished];
+                             [self.transcodeAssetWriterMetadata markAsFinished];
+    //                          NSLog(@"Writing Done");
+                             
+                             dispatch_group_leave(g);
+                             break;
+                         }
+                     }
+                     
+                     // wait to dequeue until we have an enqueued buffer / signal from our enqueue thread.
+                     dispatch_semaphore_wait(videoDequeueSemaphore, DISPATCH_TIME_FOREVER);
+                     
+                     CMSampleBufferRef passthroughVideoSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(videoPassthroughBufferQueue);
+                     if(passthroughVideoSampleBuffer)
+                     {
+                         CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
+                         CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(passthroughVideoSampleBuffer);
+                         CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
+                         
+                         CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
+                         
+                         self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
+                         
+                         if(![self.transcodeAssetWriterVideoPassthrough appendSampleBuffer:passthroughVideoSampleBuffer])
+                         {
+                             [[LogController sharedLogController] appendErrorLog:[@"Unable to append video sample to asset at time: " stringByAppendingString:CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, currentSamplePTS))]];
                          }
                          
-                         if(group)
+                         if(self.analyzedVideoSampleBufferMetadata.count)
                          {
-                             if([self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group])
+                             unsigned int index = 0;
+                             AVTimedMetadataGroup *group = self.analyzedVideoSampleBufferMetadata[index];
+                             
+                             // So this is tricky
+                             // Our video is passthrough - which means for some video codecs we get samples in decode not presentation order
+                             // since our metadata was analyzed by decoding (by definition), its in presentation timestamp order.
+                             // So we need to search every passthrough sample for a metadata sample of the nearest timestamp
+                             // If we find a match, we remove it from the dictionary to at least try to speed shit up...
+                             // Theoretically DTS and PTS should be at least 'near' one another, so we dont need to iterate the entire dictionary.
+                             
+                             CMTime currentSamplePTS = CMSampleBufferGetPresentationTimeStamp(passthroughVideoSampleBuffer);
+                             CMTime currentSampleOPTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
+                             CMTime currentSampleDTS = CMSampleBufferGetDecodeTimeStamp(passthroughVideoSampleBuffer);
+                             CMTime currentSampleODTS = CMSampleBufferGetOutputDecodeTimeStamp(passthroughVideoSampleBuffer);
+                             
+                             int32_t compareResult =  CMTimeCompare(currentSampleDTS, group.timeRange.start);
+                             
+                             if(compareResult < 0 )
                              {
-                                 // Pop our metadata off...
-                                 [self.analyzedVideoSampleBufferMetadata removeObject:group];
+                                 while(CMTIME_COMPARE_INLINE(currentSampleDTS, <, group.timeRange.start))
+                                 {
+                                     index++;
+                                     
+                                     if(index < self.analyzedVideoSampleBufferMetadata.count)
+                                         group = self.analyzedVideoSampleBufferMetadata[index];
+                                     else
+                                     {
+                                         group = nil;
+                                         break;
+                                     }
+                                 }
+
+                             }
+                             else if(compareResult > 0)
+                             {
+                                 while(CMTIME_COMPARE_INLINE(currentSampleDTS, >, group.timeRange.start))
+                                 {
+                                     index++;
+                                     
+                                     if(index < self.analyzedVideoSampleBufferMetadata.count)
+                                         group = self.analyzedVideoSampleBufferMetadata[index];
+                                     else
+                                     {
+                                         group = nil;
+                                         break;
+                                     }
+                                 }
+                             }
+                             
+                             if(group)
+                             {
+                                 if([self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group])
+                                 {
+                                     // Pop our metadata off...
+                                     [self.analyzedVideoSampleBufferMetadata removeObject:group];
+                                 }
+                                 else
+                                 {
+                                     // Pop our metadata off...
+                                     [self.analyzedVideoSampleBufferMetadata removeObject:group];
+
+                                     [[LogController sharedLogController] appendErrorLog:[@"Unable to append metadata timed group to asset: " stringByAppendingString:self.transcodeAssetWriter.error.localizedDescription]];
+                                 }
                              }
                              else
                              {
-                                 // Pop our metadata off...
-                                 [self.analyzedVideoSampleBufferMetadata removeObject:group];
-
-                                 [[LogController sharedLogController] appendErrorLog:[@"Unable to append metadata timed group to asset: " stringByAppendingString:self.transcodeAssetWriter.error.localizedDescription]];
+                                 [[LogController sharedLogController] appendWarningLog:@"No Metadata Sample Buffer for Video Sample"];
                              }
                          }
-                         else
+
+                         CFRelease(passthroughVideoSampleBuffer);
+                     }
+                 }
+             }];
+        }
+        
+#pragma mark - Audio and Metadata Write (Metadata Disabled for now until we have Audio Analysis API / Plugins)
+        
+        // TODO:: AUDIO METADATA (SEE VIDEO ABOVE FOR PATTERN)
+        if(self.transcodeAssetHasAudio)
+        {
+            // Passthrough Video Write from Buffer Queue
+            [self.transcodeAssetWriterAudioPassthrough requestMediaDataWhenReadyOnQueue:audioPassthroughEncodeQueue usingBlock:^
+             {
+                 while([self.transcodeAssetWriterAudioPassthrough isReadyForMoreMediaData])
+                     // && audioMetadataWriter isReadyForMoreMediaData])
+                     
+                 {
+                     // Are we done reading,
+                     if(finishedReadingAllPassthroughAudio)
+                     {
+                         NSLog(@"Finished Reading waiting to empty queue...");
+                         dispatch_semaphore_signal(audioDequeueSemaphore);
+                         
+                         // if our audio is done, were done. We dont care if we missed a single piece of metadata or not.
+                         if(CMBufferQueueIsEmpty(audioPassthroughBufferQueue) )//&& !self.analyzedVideoSampleBufferMetadata.count)
                          {
-                             [[LogController sharedLogController] appendErrorLog:@"No Metadata Sample Buffer for Video Sample"];
+                             [self.transcodeAssetWriterAudioPassthrough markAsFinished];
+//                             [self.transcodeAssetWriterMetadata markAsFinished];
+                             //                          NSLog(@"Writing Done");
+                             
+                             dispatch_group_leave(g);
+                             break;
                          }
                      }
-
-                     CFRelease(passthroughVideoSampleBuffer);
+                     
+                     // wait to dequeue until we have an enqueued buffer / signal from our enqueue thread.
+                     dispatch_semaphore_wait(audioDequeueSemaphore, DISPATCH_TIME_FOREVER);
+                     
+                     CMSampleBufferRef passthroughAudioSampleBuffer = (CMSampleBufferRef) CMBufferQueueDequeueAndRetain(audioPassthroughBufferQueue);
+                     if(passthroughAudioSampleBuffer)
+                     {
+                         CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughAudioSampleBuffer);
+                         CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(passthroughAudioSampleBuffer);
+                         CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
+                         
+                         CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
+                         
+                         self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
+                         
+                         if(![self.transcodeAssetWriterAudioPassthrough appendSampleBuffer:passthroughAudioSampleBuffer])
+                         {
+                             [[LogController sharedLogController] appendErrorLog:[@"Unable to append audio sample to asset at time: " stringByAppendingString:CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, currentSamplePTS))]];
+                         }
+                         
+                         // Todo:: Audio Metadata
+//                         if(self.analyzedVideoSampleBufferMetadata.count)
+//                         {
+//                             unsigned int index = 0;
+//                             AVTimedMetadataGroup *group = self.analyzedVideoSampleBufferMetadata[index];
+//                             
+//                             // So this is tricky
+//                             // Our video is passthrough - which means for some video codecs we get samples in decode not presentation order
+//                             // since our metadata was analyzed by decoding (by definition), its in presentation timestamp order.
+//                             // So we need to search every passthrough sample for a metadata sample of the nearest timestamp
+//                             // If we find a match, we remove it from the dictionary to at least try to speed shit up...
+//                             // Theoretically DTS and PTS should be at least 'near' one another, so we dont need to iterate the entire dictionary.
+//                             
+//                             CMTime currentSamplePTS = CMSampleBufferGetPresentationTimeStamp(passthroughVideoSampleBuffer);
+//                             CMTime currentSampleOPTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
+//                             CMTime currentSampleDTS = CMSampleBufferGetDecodeTimeStamp(passthroughVideoSampleBuffer);
+//                             CMTime currentSampleODTS = CMSampleBufferGetOutputDecodeTimeStamp(passthroughVideoSampleBuffer);
+//                             
+//                             int32_t compareResult =  CMTimeCompare(currentSampleDTS, group.timeRange.start);
+//                             
+//                             if(compareResult < 0 )
+//                             {
+//                                 while(CMTIME_COMPARE_INLINE(currentSampleDTS, <, group.timeRange.start))
+//                                 {
+//                                     index++;
+//                                     
+//                                     if(index < self.analyzedVideoSampleBufferMetadata.count)
+//                                         group = self.analyzedVideoSampleBufferMetadata[index];
+//                                     else
+//                                     {
+//                                         group = nil;
+//                                         break;
+//                                     }
+//                                 }
+//                                 
+//                             }
+//                             else if(compareResult > 0)
+//                             {
+//                                 while(CMTIME_COMPARE_INLINE(currentSampleDTS, >, group.timeRange.start))
+//                                 {
+//                                     index++;
+//                                     
+//                                     if(index < self.analyzedVideoSampleBufferMetadata.count)
+//                                         group = self.analyzedVideoSampleBufferMetadata[index];
+//                                     else
+//                                     {
+//                                         group = nil;
+//                                         break;
+//                                     }
+//                                 }
+//                             }
+//                             
+//                             if(group)
+//                             {
+//                                 if([self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group])
+//                                 {
+//                                     // Pop our metadata off...
+//                                     [self.analyzedVideoSampleBufferMetadata removeObject:group];
+//                                 }
+//                                 else
+//                                 {
+//                                     // Pop our metadata off...
+//                                     [self.analyzedVideoSampleBufferMetadata removeObject:group];
+//                                     
+//                                     [[LogController sharedLogController] appendErrorLog:[@"Unable to append metadata timed group to asset: " stringByAppendingString:self.transcodeAssetWriter.error.localizedDescription]];
+//                                 }
+//                             }
+//                             else
+//                             {
+//                                 [[LogController sharedLogController] appendErrorLog:@"No Metadata Sample Buffer for Video Sample"];
+//                             }
+//                         }
+                         
+                         CFRelease(passthroughAudioSampleBuffer);
+                     }
                  }
-             }
-         }];
+             }];
+        }
+        
+#pragma mark - Cleanup
         
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);
         
         // Reset our queue to free anything we didnt already use.
-        CMBufferQueueReset(passthroughVideoBufferQueue);
+        CMBufferQueueReset(videoPassthroughBufferQueue);
         
         dispatch_semaphore_t waitForWriting = dispatch_semaphore_create(0);
         
@@ -489,6 +688,12 @@
         
         // Wait till our finish writing completion block is done to return
         dispatch_semaphore_wait(waitForWriting, DISPATCH_TIME_FOREVER);
+    }
+    else
+    {
+        [[LogController sharedLogController] appendErrorLog:@"Unable to start transcode:"];
+        [[LogController sharedLogController] appendErrorLog:[@"Read Error" stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+        [[LogController sharedLogController] appendErrorLog:[@"Write Error" stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
     }
 }
 

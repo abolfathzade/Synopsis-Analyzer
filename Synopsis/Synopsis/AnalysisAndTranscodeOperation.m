@@ -303,6 +303,7 @@
         
         // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
         CMBufferQueueRef videoPassthroughBufferQueue;
+        // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
 
         CMBufferQueueRef videoUncompressedBufferQueue;
@@ -329,6 +330,7 @@
 #pragma mark - Audio Requirements
         
         CMBufferQueueRef audioPassthroughBufferQueue;
+        // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &audioPassthroughBufferQueue);
 
         CMBufferQueueRef audioUncompressedBufferQueue;
@@ -734,7 +736,7 @@
                     
                     CMSampleBufferRef videoSampleBuffer = NULL;
 
-                    // wait to dequeue until we have a enqueued buffer signal from our enqueue thread.
+                    // wait to dequeue until we have an enqueued buffer / signal from our enqueue thread.
                     dispatch_semaphore_wait(videoDequeueSemaphore, DISPATCH_TIME_FOREVER);
 
                     // Pull from an appropriate source - passthrough or decompressed
