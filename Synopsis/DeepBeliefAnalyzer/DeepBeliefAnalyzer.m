@@ -56,6 +56,7 @@
     if(network)
     {
         jpcnn_destroy_network(network);
+        network = NULL;
     }
 }
 
@@ -153,6 +154,7 @@
     if(network)
     {
         jpcnn_destroy_network(network);
+        network = NULL;
     }
 
     return nil;
