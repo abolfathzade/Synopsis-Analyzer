@@ -9,6 +9,7 @@
 // Include OpenCV before anything else because FUCK C++
 //#import "highgui.hpp"
 #import "opencv.hpp"
+#import "ocl.hpp"
 #import "types_c.h"
 #import "features2d.hpp"
 
@@ -76,6 +77,8 @@
         
         cv::namedWindow("OpenCV Debug");
         
+        
+        
         self.everyDominantColor = [NSMutableArray new];
 
     }
@@ -90,7 +93,47 @@
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint andEnabledModules:(NSDictionary*)enabledModuleKeys
 {
-    
+    // setup OpenCV to use OpenCL and a specific device
+    if(cv::ocl::haveOpenCL())
+    {
+        cv::ocl::setUseOpenCL(true);
+        
+        //OpenCL: Platform Info
+        std::vector<cv::ocl::PlatformInfo> platforms;
+        cv::ocl::getPlatfomsInfo(platforms);
+        
+        //OpenCL Platforms
+        for (size_t i = 0; i < platforms.size(); i++)
+        {
+            //Access to Platform
+            const cv::ocl::PlatformInfo* platform = &platforms[i];
+            
+            //Platform Name
+            std::cout << "Platform Name: " << platform->name().c_str() << "\n";
+            
+            //Access Device within Platform
+            cv::ocl::Device current_device;
+            for (int j = 0; j < platform->deviceNumber(); j++)
+            {
+                //Access Device
+                platform->getDevice(current_device, j);
+                
+                //Device Type
+                int deviceType = current_device.type();
+                
+                if(deviceType == cv::ocl::Device::TYPE_GPU)
+                {
+                    // set our device
+                    cv::ocl::Device(current_device);
+                    
+                    break;
+                }
+                
+            }
+        }
+        
+    }
+
 }
 
 // NOTE YOU HAVE TO MANUALLY MANAGE LOCKING AND UNLOCKING YOURSELF - lifetime of the baseAddress is yours to manage
@@ -115,8 +158,6 @@
 
 - (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer transform:(CGAffineTransform)transform error:(NSError**) error
 {
-//    return nil;
-    
     if(sampleBuffer == NULL)
     {
         if (error != NULL)
@@ -411,13 +452,13 @@
                 }
                 
                 // Normalize tx and ty from our transform since they are pixel sized transforms
-                if(transform.tx)
-                    transform.tx = (float)transform.tx/(float)currentBGRAImage.size().width;
-                if(transform.ty)
-                    transform.ty = (float)transform.ty/(float)currentBGRAImage.size().height;
-
-////                point = CGPointApplyAffineTransform(point, CGAffineTransformMakeScale(1.0/currentBGRAImage.size().width, 1.0/currentBGRAImage.size().height));
-                point = CGPointApplyAffineTransform(point, transform);
+//                if(transform.tx)
+//                    transform.tx = (float)transform.tx/(float)currentBGRAImage.size().width;
+//                if(transform.ty)
+//                    transform.ty = (float)transform.ty/(float)currentBGRAImage.size().height;
+//
+//////                point = CGPointApplyAffineTransform(point, CGAffineTransformMakeScale(1.0/currentBGRAImage.size().width, 1.0/currentBGRAImage.size().height));
+//                point = CGPointApplyAffineTransform(point, transform);
                 
                 [keyPointsArray addObject:@[ @(point.x), @(point.y)]];
             }
