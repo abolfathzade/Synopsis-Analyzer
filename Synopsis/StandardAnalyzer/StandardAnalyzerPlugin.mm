@@ -23,7 +23,7 @@
 
 @interface StandardAnalyzerPlugin ()
 {
-    CMSampleBufferRef lastSampleBuffer;
+    cv::Mat lastImage;
     cv::Ptr<cv::ORB> detector;
 }
 
@@ -44,7 +44,11 @@
 
 @property (atomic, readwrite, strong) NSString* pluginMediaType;
 
+// Module Support
+@property (readwrite) BOOL hasModules;
+
 @property (atomic, readwrite, strong) NSArray* pluginModuleNames;
+
 
 @property (atomic, readwrite, strong) NSMutableArray* everyDominantColor;
 
@@ -67,17 +71,21 @@
         self.pluginVersionMinor = 1;
         self.pluginMediaType = AVMediaTypeVideo;
         
+        self.hasModules = YES;
+        
         self.pluginModuleNames  = @[@"Average Color",
                                     @"Dominant Colors",
                                     @"Features To Track",
                                     @"Motion",
                                     ];
         
+        
+        
         detector = cv::ORB::create(100);
         
         cv::namedWindow("OpenCV Debug");
         
-        
+        lastImage = NULL;
         
         self.everyDominantColor = [NSMutableArray new];
 
@@ -91,7 +99,7 @@
     detector.release();
 }
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint andEnabledModules:(NSDictionary*)enabledModuleKeys
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModule:(NSString*)moduleName
 {
     // setup OpenCV to use OpenCL and a specific device
     if(cv::ocl::haveOpenCL())
@@ -134,31 +142,42 @@
         
     }
 
+    
+    
 }
 
-// NOTE YOU HAVE TO MANUALLY MANAGE LOCKING AND UNLOCKING YOURSELF - lifetime of the baseAddress is yours to manage
-- (cv::Mat) cvPixelBufferToCVMat:(CVPixelBufferRef)pixelBuffer
+//// NOTE YOU HAVE TO MANUALLY MANAGE LOCKING AND UNLOCKING YOURSELF - lifetime of the baseAddress is yours to manage
+//- (cv::Mat) cvPixelBufferToCVMat:(CVPixelBufferRef)pixelBuffer
+//{
+//    unsigned char *base = (unsigned char *)CVPixelBufferGetBaseAddress( pixelBuffer );
+////    size_t width = CVPixelBufferGetWidth( pixelBuffer );
+//    size_t height = CVPixelBufferGetHeight( pixelBuffer );
+//    size_t stride = CVPixelBufferGetBytesPerRow( pixelBuffer );
+//    size_t extendedWidth = stride / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits
+//    
+//    // Since the OpenCV Mat is wrapping the CVPixelBuffer's pixel data, we must do all of our modifications while its base address is locked.
+//    // If we want to operate on the buffer later, we'll have to do an expensive deep copy of the pixel data, using memcpy or Mat::clone().
+//    
+//    // Use extendedWidth instead of width to account for possible row extensions (sometimes used for memory alignment).
+//    // We only need to work on columms from [0, width - 1] regardless.
+//    
+//    cv::Mat bgraImage = cv::Mat( (int)height, (int)extendedWidth, CV_8UC4, base );
+//    
+//    return bgraImage;
+//}
+
+- (cv::Mat) imageFromBaseAddress:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
-    unsigned char *base = (unsigned char *)CVPixelBufferGetBaseAddress( pixelBuffer );
-//    size_t width = CVPixelBufferGetWidth( pixelBuffer );
-    size_t height = CVPixelBufferGetHeight( pixelBuffer );
-    size_t stride = CVPixelBufferGetBytesPerRow( pixelBuffer );
-    size_t extendedWidth = stride / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits
-    
-    // Since the OpenCV Mat is wrapping the CVPixelBuffer's pixel data, we must do all of our modifications while its base address is locked.
-    // If we want to operate on the buffer later, we'll have to do an expensive deep copy of the pixel data, using memcpy or Mat::clone().
-    
-    // Use extendedWidth instead of width to account for possible row extensions (sometimes used for memory alignment).
-    // We only need to work on columms from [0, width - 1] regardless.
-    
-    cv::Mat bgraImage = cv::Mat( (int)height, (int)extendedWidth, CV_8UC4, base );
-    
+    size_t extendedWidth = bytesPerRow / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits
+
+    cv::Mat bgraImage = cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
     return bgraImage;
 }
 
-- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer transform:(CGAffineTransform)transform error:(NSError**) error
+
+- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModule:(NSString*)moduleName error:(NSError**)error;
 {
-    if(sampleBuffer == NULL)
+    if(baseAddress == NULL)
     {
         if (error != NULL)
         {
@@ -171,22 +190,8 @@
         // Our Mutable Metadata Dictionary:
         NSMutableDictionary* metadata = [NSMutableDictionary new];
         
-        // Step 1, grab a CVImageBuffer from our CMSampleBuffer
-        // This requires our sample buffer to be decoded, not passthrough.
-        CVPixelBufferRef currentPixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-        
-        if(currentPixelBuffer == NULL)
         {
-            if (error != NULL)
-            {
-                *error = [[NSError alloc] initWithDomain:@"Synopsis.noPixelBufferInSampleBuffer" code:-666 userInfo:nil];
-            }
-            return nil;
-        }
-        else
-        {
-            CVPixelBufferLockBaseAddress( currentPixelBuffer, 0 );
-            cv::Mat currentBGRAImage = [self cvPixelBufferToCVMat:currentPixelBuffer];
+            cv::Mat currentBGRAImage = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
             
 #pragma mark - Average Color
 
@@ -439,13 +444,13 @@
             {
 //                NSArray* point = nil;
                 CGPoint point = CGPointZero;
-                // Ensure our coordinate system is correct
-                if(CVImageBufferIsFlipped(currentPixelBuffer))
-                {
-                    point = CGPointMake((float)keyPoint->pt.x / (float)currentBGRAImage.size().width,
-                                        1.0f - (float)(keyPoint->pt.y / (float)currentBGRAImage.size().height));
-                }
-                else
+//                // Ensure our coordinate system is correct
+//                if(CVImageBufferIsFlipped(currentPixelBuffer))
+//                {
+//                    point = CGPointMake((float)keyPoint->pt.x / (float)currentBGRAImage.size().width,
+//                                        1.0f - (float)(keyPoint->pt.y / (float)currentBGRAImage.size().height));
+//                }
+//                else
                 {
                     point = CGPointMake((float)keyPoint->pt.x / (float)currentBGRAImage.size().width,
                                         (float)keyPoint->pt.y / (float)currentBGRAImage.size().height);
@@ -470,21 +475,14 @@
 
             // Can we do frame differencing - note all these tests should pass because we got it last time when the sample was current
             // otherwise it wouldnt be set as last.
-            if(lastSampleBuffer != NULL)
+            if(!lastImage.empty())
             {
-                CVPixelBufferRef lastPixelBuffer = CMSampleBufferGetImageBuffer(lastSampleBuffer);
-                if(lastPixelBuffer)
-                {
-                    CVPixelBufferRetain(lastPixelBuffer);
-
-                    CVPixelBufferLockBaseAddress( lastPixelBuffer, 0 );
-                    cv::Mat lastBGRAImage = [self cvPixelBufferToCVMat:lastPixelBuffer];
-                    
+                
                     // Convert to greyscale
                     cv::Mat currentGreyImage;
                     cv::Mat lastGreyImage;
                     cv::cvtColor(currentBGRAImage, currentGreyImage, cv::COLOR_BGRA2GRAY);
-                    cv::cvtColor(lastBGRAImage, lastGreyImage, cv::COLOR_BGRA2GRAY);
+                    cv::cvtColor(self->lastImage, lastGreyImage, cv::COLOR_BGRA2GRAY);
                     
                     cv::Mat diff;
                     cv::subtract(currentGreyImage, lastGreyImage, diff);
@@ -494,26 +492,19 @@
 
                     // Normalize to float
                     metadata[@"Motion"] = @(avgMotion.val[0] / 255.0);
-                    
-                    CVPixelBufferUnlockBaseAddress(lastPixelBuffer, 0);
-                    CVPixelBufferRelease(lastPixelBuffer);
-                }
             }
             
 #pragma mark -
             
-            // Finished with our current pixel buffer, we have to unlock it.
-            CVPixelBufferUnlockBaseAddress( currentPixelBuffer, 0 );
-                              
+            
             // If we have our old last sample buffer, free it
-            if(lastSampleBuffer != NULL)
+            if(!lastImage.empty())
             {
-                CFRelease(lastSampleBuffer);
-                lastSampleBuffer = NULL;
+                lastImage.release();
             }
             
             // set a new one
-            lastSampleBuffer = (CMSampleBufferRef)CFRetain(sampleBuffer);
+            currentBGRAImage.copyTo(self->lastImage);
         }
         
         return metadata;
@@ -565,11 +556,8 @@
     }
     
     // If we have our old last sample buffer, free it
-    if(lastSampleBuffer != NULL)
-    {
-        CFRelease(lastSampleBuffer);
-        lastSampleBuffer = NULL;
-    }
+    
+    lastImage.release();
     
     return  @{@"DominantColors" : dominantColors};
 }

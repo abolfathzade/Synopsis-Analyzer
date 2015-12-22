@@ -130,7 +130,7 @@
         AVAssetTrack* firstVideoTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual][0];
         self.transcodeAssetReaderVideoPassthrough = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
                                                                                                outputSettings:nil];
-        self.transcodeAssetReaderVideoPassthrough.alwaysCopiesSampleData = YES;
+        self.transcodeAssetReaderVideoPassthrough.alwaysCopiesSampleData = NO;
         preferredTransform = firstVideoTrack.preferredTransform;
     }
     
@@ -142,7 +142,7 @@
         // Passthrough Audio Reader -
         self.transcodeAssetReaderAudioPassthrough = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstAudioTrack
                                                                                                outputSettings:nil];
-        self.transcodeAssetReaderAudioPassthrough.alwaysCopiesSampleData = YES;
+        self.transcodeAssetReaderAudioPassthrough.alwaysCopiesSampleData = NO;
     }
     
     // Assign all our specific Outputs to our Reader

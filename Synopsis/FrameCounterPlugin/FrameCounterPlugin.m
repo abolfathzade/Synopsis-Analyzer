@@ -21,6 +21,9 @@
 @property (atomic, readwrite, assign) NSUInteger pluginVersionMinor;
 @property (atomic, readwrite, strong) NSString* pluginMediaType;
 
+
+@property (readwrite) BOOL hasModules;
+
 // Some 'metadata' we track
 @property (atomic, readwrite, assign) NSUInteger sampleCount;
 
@@ -43,19 +46,21 @@
         self.pluginVersionMinor = 1;
         self.pluginMediaType = AVMediaTypeVideo;
         
+        self.hasModules = NO;
+        
         self.sampleCount = 0;
     }
     
     return self;
 }
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint andEnabledModules:(NSDictionary*)enabledModuleKeys
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModule:(NSString*)moduleName;
 {
     // Reset
     self.sampleCount = 0;
 }
 
-- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer transform:(CGAffineTransform)transform error:(NSError**) error
+- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModule:(NSString*)moduleName error:(NSError**)error;
 {
     NSDictionary* metadata =  @{@"Sample Count" : @(self.sampleCount)};
     

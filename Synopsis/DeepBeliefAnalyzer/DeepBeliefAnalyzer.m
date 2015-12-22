@@ -25,6 +25,8 @@
 @property (atomic, readwrite, assign) NSUInteger pluginVersionMinor;
 @property (atomic, readwrite, strong) NSString* pluginMediaType;
 
+@property (readwrite) BOOL hasModules;
+
 // Some 'metadata' we track
 @property (atomic, readwrite, assign) NSUInteger sampleCount;
 
@@ -46,6 +48,8 @@
         self.pluginVersionMajor = 0;
         self.pluginVersionMinor = 1;
         self.pluginMediaType = AVMediaTypeVideo;
+
+        self.hasModules = NO;
     }
     
     return self;
@@ -60,7 +64,7 @@
     }
 }
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint andEnabledModules:(NSDictionary*)enabledModuleKeys
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModule:(NSString*)moduleName
 {
     NSString* networkPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"jetpac" ofType:@"ntwk"];
     if (networkPath == NULL)
@@ -72,25 +76,12 @@
 
 }
 
-- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer transform:(CGAffineTransform)transform error:(NSError**) error
+- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModule:(NSString*)moduleName error:(NSError**)error;
 {
-    if(sampleBuffer != NULL)
+    if(baseAddress != NULL)
     {
-        CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-        
-        if(pixelBuffer != NULL)
         {
-            OSType sourcePixelFormat = CVPixelBufferGetPixelFormatType( pixelBuffer );
             
-            assert( kCVPixelFormatType_32BGRA == sourcePixelFormat);
-            
-            const int sourceRowBytes = (int)CVPixelBufferGetBytesPerRow( pixelBuffer );
-            const int width = (int)CVPixelBufferGetWidth( pixelBuffer );
-            const int height = (int)CVPixelBufferGetHeight( pixelBuffer );
-            
-            CVPixelBufferLockBaseAddress( pixelBuffer, 0 );
-            
-            unsigned char* sourceStartAddr = CVPixelBufferGetBaseAddress( pixelBuffer );
             const int sourceChannels = 4;
             const int destChannels = 3;
             const int destRowBytes = (width * destChannels);
@@ -101,7 +92,7 @@
             
             for (int y = 0; y < height; y += 1)
             {
-                uint8_t* source = (sourceStartAddr + (y * sourceRowBytes));
+                uint8_t* source = (baseAddress + (y * bytesPerRow));
                 uint8_t* sourceRowEnd = (source + (width * sourceChannels));
                 uint8_t* dest = (destData + (y * destRowBytes));
                 while (source < sourceRowEnd)
@@ -114,10 +105,9 @@
                 }
             }
             
-            void* cnnInput = jpcnn_create_image_buffer_from_uint8_data(destData, width, height, destChannels, destRowBytes, 0, 0);
+            void* cnnInput = jpcnn_create_image_buffer_from_uint8_data(destData, (int)width, (int)height, destChannels, destRowBytes, 0, 0);
             
             free(destData);
-            CVPixelBufferUnlockBaseAddress( pixelBuffer, 0 );
             
             float* predictions;
             int predictionsLength;

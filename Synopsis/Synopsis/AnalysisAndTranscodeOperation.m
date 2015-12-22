@@ -113,7 +113,15 @@
             Class pluginClass = NSClassFromString(analyzerClassNameString);
             id<AnalyzerPluginProtocol> pluginInstance = [[pluginClass alloc] init];
 
-            [initializedAnalyzers addObject:pluginInstance];
+            if([[pluginInstance pluginMediaType] isEqualToString:AVMediaTypeVideo])
+            {
+                [initializedAnalyzers addObject:pluginInstance];
+            }
+            else
+            {
+                NSLog(@"%@ incompatible with analysis type - not using", analyzerClassNameString);
+                pluginInstance = nil;
+            }
         }
         
         self.availableAnalyzers = initializedAnalyzers;
@@ -163,14 +171,14 @@
         self.transcodeAssetReaderVideo = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
                                                                                     outputSettings:@{(NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
                                                                                                       }];
-        self.transcodeAssetReaderVideo.alwaysCopiesSampleData = YES;
+        self.transcodeAssetReaderVideo.alwaysCopiesSampleData = NO;
         prefferedTrackTransform = firstVideoTrack.preferredTransform;
         
         // Do we use passthrough?
         if(!self.transcodingVideo)
         {
             self.transcodeAssetReaderVideoPassthrough = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack outputSettings:nil];
-            self.transcodeAssetReaderVideoPassthrough.alwaysCopiesSampleData = YES;
+            self.transcodeAssetReaderVideoPassthrough.alwaysCopiesSampleData = NO;
         }
     }
     
@@ -203,12 +211,12 @@
         
         self.transcodeAssetReaderAudio = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstAudioTrack
                                                                                 outputSettings:@{(NSString*) AVFormatIDKey : @(kAudioFormatLinearPCM)}];
-        self.transcodeAssetReaderAudio.alwaysCopiesSampleData = YES;
+        self.transcodeAssetReaderAudio.alwaysCopiesSampleData = NO;
         
         if(!self.transcodingAudio)
         {
             self.transcodeAssetReaderAudioPassthrough = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstAudioTrack outputSettings:nil];
-            self.transcodeAssetReaderAudioPassthrough.alwaysCopiesSampleData = YES;
+            self.transcodeAssetReaderAudioPassthrough.alwaysCopiesSampleData = NO;
         }
     }
 
@@ -275,7 +283,7 @@
     // For every Analyzer, begin an new Analysis Session
     for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
     {
-        [analyzer beginMetadataAnalysisSessionWithQuality:SynopsisAnalysisQualityHintHigh andEnabledModules:nil];
+        [analyzer beginMetadataAnalysisSessionWithQuality:SynopsisAnalysisQualityHintHigh forModule:nil];
     }
     
     return error;
@@ -495,17 +503,33 @@
                             NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
                             
                             dispatch_group_t analysisGroup = dispatch_group_create();
+
+                            // grab our image buffer
+                            CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(uncompressedVideoSampleBuffer);
                             
+                            // resize and transform it to match expected raster
+                            
+                            CVPixelBufferRetain(pixelBuffer);
+                            
+                            assert( kCVPixelFormatType_32BGRA == CVPixelBufferGetPixelFormatType(pixelBuffer));
+                            
+                            CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+                            
+                            // Run an analysis pass on each plugin
                             for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
                                 // enter our group.
                                 dispatch_group_enter(analysisGroup);
                                 
-                                // Run an analysis pass on each
                                 dispatch_async(concurrentVideoAnalysisQueue, ^{
                                     
                                     NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                    NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForSampleBuffer:uncompressedVideoSampleBuffer transform:self.transcodeAssetWriterVideo.transform error:&analyzerError];
+                                    NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForVideoBuffer:CVPixelBufferGetBaseAddress(pixelBuffer)
+                                                                                                                  width:CVPixelBufferGetWidth(pixelBuffer)
+                                                                                                                 height:CVPixelBufferGetHeight(pixelBuffer)
+                                                                                                            bytesPerRow:CVPixelBufferGetBytesPerRow(pixelBuffer)
+                                                                                                              forModule:nil
+                                                                                                                  error:&analyzerError];
                                     
                                     if(analyzerError)
                                     {
@@ -529,9 +553,15 @@
                                 
                                 // if we had an analyzer error, bail.
                                 if(analyzerError)
+                                {
+                                    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
                                     break;
+                                }
                             }
                             
+                            CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+                            CVPixelBufferRelease(pixelBuffer);
+
                             // Store out running metadata
                             AVTimedMetadataGroup *group = [self compressedTimedMetadataFromDictionary:aggregatedAndAnalyzedMetadata atTime:currentSampleTimeRange];
                             if(group)

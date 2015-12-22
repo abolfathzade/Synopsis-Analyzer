@@ -103,7 +103,7 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
         
     if(self.progressBlock)
     {
-        self.progressBlock(progress);
+        self.progressBlock(self.progress);
     }
 }
 
@@ -126,7 +126,7 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
     
     if(self.progressBlock)
     {
-        self.progressBlock(progress);
+        self.progressBlock(self.progress);
     }
 }
 
