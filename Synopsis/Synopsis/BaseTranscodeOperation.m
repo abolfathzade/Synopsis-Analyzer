@@ -19,6 +19,7 @@ NSString * const kSynopsisAnalyzedAudioSampleBufferMetadataKey = @"kSynopsisAnal
 NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalMetadata";
 
 @interface BaseTranscodeOperation ()
+
 @property (atomic, readwrite, strong) NSDate* startDate;
 @property (atomic, readwrite, assign) NSTimeInterval elapsedTime;
 @property (atomic, readwrite, assign) NSTimeInterval remainingTime;
@@ -28,13 +29,16 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
 @implementation BaseTranscodeOperation
 
 @synthesize progress = _progress;
+@synthesize audioProgress = _audioProgress;
+@synthesize videoProgress = _videoProgress;
 
 - (id) init
 {
     self = [super init];
     if(self)
     {
-        self.progress = (CGFloat)0.0;
+        self.videoProgress = (CGFloat)0.0;
+        self.audioProgress = (CGFloat)0.0;
     }
     
     return self;
@@ -76,15 +80,23 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
 {
     @synchronized(self)
     {
-        return _progress;
+        return (self.videoProgress + self.audioProgress) * (CGFloat)0.5;
     }
 }
 
-- (void) setProgress:(CGFloat)progress
+- (CGFloat) videoProgress
 {
     @synchronized(self)
     {
-        _progress = progress;
+        return _videoProgress;
+    }
+}
+
+- (void) setVideoProgress:(CGFloat)progress
+{
+    @synchronized(self)
+    {
+        _videoProgress = progress;
     }
     
     [self calculateEta];
@@ -94,6 +106,30 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
         self.progressBlock(progress);
     }
 }
+
+- (CGFloat) audioProgress
+{
+    @synchronized(self)
+    {
+        return _audioProgress;
+    }
+}
+
+- (void) setAudioProgress:(CGFloat)progress
+{
+    @synchronized(self)
+    {
+        _audioProgress = progress;
+    }
+    
+    [self calculateEta];
+    
+    if(self.progressBlock)
+    {
+        self.progressBlock(progress);
+    }
+}
+
 
 - (void) calculateEta
 {

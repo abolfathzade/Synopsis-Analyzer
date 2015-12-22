@@ -61,9 +61,13 @@ extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
 @interface BaseTranscodeOperation : NSOperation
 @property (atomic, readwrite, strong) NSURL* sourceURL;
 @property (atomic, readwrite, strong) NSURL* destinationURL;
-@property (atomic, readwrite) CGFloat progress;
+@property (atomic, readonly) CGFloat progress;
 @property (atomic, readonly) NSTimeInterval elapsedTime;
 @property (atomic, readonly) NSTimeInterval remainingTime;
+
+// internal use - exposed for subclasses
+@property (atomic, readwrite) CGFloat videoProgress;
+@property (atomic, readwrite) CGFloat audioProgress;
 
 // Every progress update tick this block is fired - update your ui on the main queue here.
 @property (copy) void (^progressBlock)(CGFloat progress);

@@ -486,7 +486,7 @@
                             
                             CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
                             
-                            self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
+                            self.videoProgress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
 
                             __block NSError* analyzerError = nil;
 
@@ -598,7 +598,7 @@
                         
                         CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
                         
-                        self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
+                        self.audioProgress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
                         
                         // Disable Audio Analysis Plugins for now.
 //                        __block NSError* analyzerError = nil;

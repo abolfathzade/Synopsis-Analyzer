@@ -440,7 +440,7 @@
                          
                          CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
                          
-                         self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
+                         self.videoProgress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
                          
                          if(![self.transcodeAssetWriterVideoPassthrough appendSampleBuffer:passthroughVideoSampleBuffer])
                          {
@@ -567,7 +567,7 @@
                          
                          CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
                          
-                         self.progress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
+                         self.audioProgress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
                          
                          if(![self.transcodeAssetWriterAudioPassthrough appendSampleBuffer:passthroughAudioSampleBuffer])
                          {
