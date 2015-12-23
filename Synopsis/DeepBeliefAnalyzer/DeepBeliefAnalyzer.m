@@ -64,7 +64,7 @@
     }
 }
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModule:(NSString*)moduleName
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModuleIndex:(SynopsisModuleIndex)moduleIndex
 {
     NSString* networkPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"jetpac" ofType:@"ntwk"];
     if (networkPath == NULL)
@@ -76,65 +76,62 @@
 
 }
 
-- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModule:(NSString*)moduleName error:(NSError**)error;
+- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error;
 {
     if(baseAddress != NULL)
     {
+        const int sourceChannels = 4;
+        const int destChannels = 3;
+        const int destRowBytes = ((int)width * destChannels);
+        const size_t destByteCount = (destRowBytes * height);
+        
+        // COnvert BGRA to RGB ??
+        uint8_t* destData = (uint8_t*)(malloc(destByteCount));
+        
+        for (int y = 0; y < height; y += 1)
         {
-            
-            const int sourceChannels = 4;
-            const int destChannels = 3;
-            const int destRowBytes = (width * destChannels);
-            const size_t destByteCount = (destRowBytes * height);
-            
-            // COnvert BGRA to RGB ??
-            uint8_t* destData = (uint8_t*)(malloc(destByteCount));
-            
-            for (int y = 0; y < height; y += 1)
+            uint8_t* source = (baseAddress + (y * bytesPerRow));
+            uint8_t* sourceRowEnd = (source + (width * sourceChannels));
+            uint8_t* dest = (destData + (y * destRowBytes));
+            while (source < sourceRowEnd)
             {
-                uint8_t* source = (baseAddress + (y * bytesPerRow));
-                uint8_t* sourceRowEnd = (source + (width * sourceChannels));
-                uint8_t* dest = (destData + (y * destRowBytes));
-                while (source < sourceRowEnd)
-                {
-                    dest[0] = source[2]; //r < b
-                    dest[1] = source[1]; //g < g
-                    dest[2] = source[0]; //b < r
-                    source += sourceChannels;
-                    dest += destChannels;
-                }
+                dest[0] = source[2]; //r < b
+                dest[1] = source[1]; //g < g
+                dest[2] = source[0]; //b < r
+                source += sourceChannels;
+                dest += destChannels;
             }
-            
-            void* cnnInput = jpcnn_create_image_buffer_from_uint8_data(destData, (int)width, (int)height, destChannels, destRowBytes, 0, 0);
-            
-            free(destData);
-            
-            float* predictions;
-            int predictionsLength;
-            char** predictionsLabels;
-            int predictionsLabelsLength;
-            
-            jpcnn_classify_image(network, cnnInput, JPCNN_RANDOM_SAMPLE, 0, &predictions, &predictionsLength, &predictionsLabels, &predictionsLabelsLength);
-
-            jpcnn_destroy_image_buffer(cnnInput);
-
-            NSMutableDictionary* newValues = [NSMutableDictionary dictionary];
-            for (int index = 0; index < predictionsLength; index += 1)
-            {
-                const float predictionValue = predictions[index];
-                if (predictionValue > 0.05f)
-                {
-                    char* label = predictionsLabels[index % predictionsLabelsLength];
-                    NSString* labelObject = [NSString stringWithCString:label encoding:NSUTF8StringEncoding];
-                    NSNumber* valueObject = [NSNumber numberWithFloat: predictionValue];
-                    [newValues setObject: valueObject forKey: labelObject];
-                }
-            }
-            
-            return @{ @"Keywords" : newValues};
         }
+        
+        void* cnnInput = jpcnn_create_image_buffer_from_uint8_data(destData, (int)width, (int)height, destChannels, destRowBytes, 0, 0);
+        
+        free(destData);
+        
+        float* predictions;
+        int predictionsLength;
+        char** predictionsLabels;
+        int predictionsLabelsLength;
+        
+        jpcnn_classify_image(network, cnnInput, JPCNN_RANDOM_SAMPLE, 0, &predictions, &predictionsLength, &predictionsLabels, &predictionsLabelsLength);
+
+        jpcnn_destroy_image_buffer(cnnInput);
+
+        NSMutableDictionary* newValues = [NSMutableDictionary dictionary];
+        for (int index = 0; index < predictionsLength; index += 1)
+        {
+            const float predictionValue = predictions[index];
+            if (predictionValue > 0.05f)
+            {
+                char* label = predictionsLabels[index % predictionsLabelsLength];
+                NSString* labelObject = [NSString stringWithCString:label encoding:NSUTF8StringEncoding];
+                NSNumber* valueObject = [NSNumber numberWithFloat: predictionValue];
+                [newValues setObject: valueObject forKey: labelObject];
+            }
+        }
+        
+        return @{ @"Keywords" : newValues};
     }
-    
+
     return nil;
 }
 

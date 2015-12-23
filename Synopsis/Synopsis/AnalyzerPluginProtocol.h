@@ -41,6 +41,13 @@ typedef enum : NSUInteger {
     SynopsisAnalysisOverheadHigh,
 } SynopsisAnalysisOverhead;
 
+
+typedef NSInteger SynopsisModuleIndex;
+
+enum : SynopsisModuleIndex {
+    SynopsisModuleIndexNone = -1,
+};
+
 // Should a plugin have configurable quality settings
 // Hint the plugin to use a specific quality hint
 typedef enum : NSUInteger {
@@ -93,11 +100,11 @@ typedef enum : NSUInteger {
 // Initialize any resources required by the plugin for Analysis
 // moduleName may be nil if the plugin has no modules
 //
-// if a module name is supplied, the plugin should initialize resources required for that module only.
+// if a module is supplied, the plugin should initialize resources required for that module only.
 // This method will be called once per enabled module.
 // This method may be called from a different thread per invocation.
 // If this method is called more than once, quality will not change between invocations
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModule:(NSString*)moduleName;
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModuleIndex:(SynopsisModuleIndex)moduleIndex;
 
 // Analyze a sample buffer.
 // The resulting dictionary is aggregated with all other plugins and added to the 
@@ -107,7 +114,7 @@ typedef enum : NSUInteger {
 // This method may be called from a different thread per invocation.
 //- (NSDictionary*) analyzedMetadataDictionaryForSampleBuffer:(CMSampleBufferRef)sampleBuffer forModule:(NSString*)moduleName error:(NSError**)error;
 
-- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModule:(NSString*)moduleName error:(NSError**)error;
+- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error;
 
 // Finalize any calculations required to return global metadata
 // Global Metadata is metadata that describes the entire file, not the individual frames or samples

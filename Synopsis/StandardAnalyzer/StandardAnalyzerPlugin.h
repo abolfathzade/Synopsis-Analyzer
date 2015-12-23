@@ -28,13 +28,13 @@
 
 @property (readonly) NSString* pluginMediaType;
 
-@property (readonly) NSArray* pluginModuleNames;
+@property (readonly) NSArray* moduleNames;
 
 @property (readonly) BOOL hasModules;
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModule:(NSString*)moduleName;
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModuleIndex:(SynopsisModuleIndex)moduleIndex;
 
-- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModule:(NSString*)moduleName error:(NSError**)error;
+- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error;
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error;
 
