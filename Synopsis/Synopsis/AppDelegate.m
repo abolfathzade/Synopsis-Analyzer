@@ -34,32 +34,32 @@ const NSString* value = @"Value";
 
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPlugins;
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPluginsInitializedForPrefs;
-@property (weak) IBOutlet NSArrayController* prefsAnalyzerArrayController;
 
 // Preferences
+@property (weak) IBOutlet NSWindow* prefsWindow;
+@property (weak) IBOutlet NSArrayController* prefsAnalyzerArrayController;
+
+// Preferences Video
 @property (weak) IBOutlet NSPopUpButton* prefsVideoCompressor;
 @property (weak) IBOutlet NSPopUpButton* prefsVideoDimensions;
 @property (weak) IBOutlet NSPopUpButton* prefsVideoQuality;
 @property (weak) IBOutlet NSTextField* prefsVideoDimensionsCustomWidth;
 @property (weak) IBOutlet NSTextField* prefsVideoDimensionsCustomHeight;
 @property (weak) IBOutlet NSPopUpButton* prefsVideoAspectRatio;
+@property (atomic, readwrite, strong) NSDictionary* prefsVideoSettings; // sent to kSynopsisTranscodeVideoSettingsKey
 
-// sent to kSynopsisTranscodeVideoSettingsKey
-@property (atomic, readwrite, strong) NSDictionary* prefsVideoSettings;
-
+// Preferences Audio
 @property (weak) IBOutlet NSPopUpButton* prefsAudioFormat;
 @property (weak) IBOutlet NSPopUpButton* prefsAudioRate;
 @property (weak) IBOutlet NSPopUpButton* prefsAudioQuality;
 @property (weak) IBOutlet NSPopUpButton* prefsAudioBitrate;
-
-// sent to kSynopsisTranscodeAudioSettingsKey
-@property (atomic, readwrite, strong) NSDictionary* prefsAudioSettings;
+@property (atomic, readwrite, strong) NSDictionary* prefsAudioSettings; // sent to kSynopsisTranscodeAudioSettingsKey
 
 // Log
 @property (weak) IBOutlet NSWindow* logWindow;
 
 // Toolbar
-@property (weak) IBOutlet NSToolbarItem* logToolbarItem;
+@property (weak) IBOutlet NSToolbarItem* startPauseToolbarItem;
 
 
 
@@ -818,17 +818,43 @@ const NSString* value = @"Value";
 
 #pragma mark - Toolbar
 
-- (IBAction) revealLog:(id)sender
+static BOOL isRunning = NO;
+- (IBAction) runAnalysisAndTranscode:(id)sender
 {
-    if([self.logWindow isVisible])
+    isRunning = !isRunning;
+    
+    if(isRunning)
     {
-        [self.logWindow orderOut:sender];
+        self.startPauseToolbarItem.image = [NSImage imageNamed:@"ic_pause_circle_filled"];
     }
     else
     {
-        [self.logWindow orderFront:sender];
+        self.startPauseToolbarItem.image = [NSImage imageNamed:@"ic_play_circle_filled"];
     }
 }
 
+- (IBAction) revealLog:(id)sender
+{
+    [self revealHelper:self.logWindow sender:sender];
+}
+
+- (IBAction) revealPreferences:(id)sender
+{
+    [self revealHelper:self.prefsWindow sender:sender];
+}
+
+#pragma mark - Helpers
+
+- (void) revealHelper:(NSWindow*)window sender:(id)sender
+{
+    if([window isVisible])
+    {
+        [window orderOut:sender];
+    }
+    else
+    {
+        [window makeKeyAndOrderFront:sender];
+    }
+}
 
 @end

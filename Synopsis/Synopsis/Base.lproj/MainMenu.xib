@@ -26,6 +26,8 @@
                 <outlet property="prefsVideoDimensionsCustomHeight" destination="oZN-jg-atQ" id="shy-f8-42R"/>
                 <outlet property="prefsVideoDimensionsCustomWidth" destination="EfT-k6-jsG" id="a2k-Yo-uo6"/>
                 <outlet property="prefsVideoQuality" destination="BDH-QV-dQR" id="EIH-h2-aV6"/>
+                <outlet property="prefsWindow" destination="zai-oB-ZKM" id="r6U-Fu-BuR"/>
+                <outlet property="startPauseToolbarItem" destination="fLX-kf-tpC" id="JXf-cB-ede"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="gIp-Ho-8D9"/>
             </connections>
         </customObject>
@@ -711,12 +713,12 @@
                 <rect key="frame" x="0.0" y="5" width="623" height="478"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <splitView id="SsR-0Y-gGv">
+                    <splitView dividerStyle="thin" id="SsR-0Y-gGv">
                         <rect key="frame" x="0.0" y="0.0" width="623" height="478"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <customView id="5D9-ej-34t" customClass="CustomVisualEffectView">
-                                <rect key="frame" x="0.0" y="0.0" width="623" height="236.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="623" height="240.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
                                     <customView id="UrI-I2-Ixg" customClass="DropFilesView">
@@ -726,14 +728,14 @@
                                 </subviews>
                             </customView>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="20" horizontalPageScroll="10" verticalLineScroll="20" verticalPageScroll="10" hasHorizontalScroller="NO" id="VN5-ui-0hD">
-                                <rect key="frame" x="0.0" y="245.5" width="623" height="232.5"/>
+                                <rect key="frame" x="0.0" y="241.5" width="623" height="236.5"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <clipView key="contentView" copiesOnScroll="NO" id="M1f-rb-1gT">
-                                    <rect key="frame" x="0.0" y="17" width="623" height="215.5"/>
+                                    <rect key="frame" x="0.0" y="17" width="623" height="219.5"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView appearanceType="vibrantLight" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="sequential" selectionHighlightStyle="sourceList" columnReordering="NO" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="18" rowSizeStyle="automatic" headerView="jXf-cj-VVW" viewBased="YES" id="ivs-Jx-fnR">
-                                            <rect key="frame" x="0.0" y="0.0" width="623" height="215.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="623" height="219.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="_sourceListBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -870,13 +872,25 @@
             </view>
             <toolbar key="toolbar" implicitIdentifier="12C62AB2-26DF-452C-A2DA-B0A0C737ABC9" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="exv-6G-lvf">
                 <allowedToolbarItems>
-                    <toolbarItem implicitItemIdentifier="880F5564-39AC-4665-81B7-ABA8D05E0E27" label="Start" paletteLabel="Start" tag="-1" image="ic_play_circle_filled" id="fLX-kf-tpC"/>
+                    <toolbarItem implicitItemIdentifier="880F5564-39AC-4665-81B7-ABA8D05E0E27" label="Start" paletteLabel="Start" tag="-1" image="ic_play_circle_filled" id="fLX-kf-tpC">
+                        <connections>
+                            <action selector="runAnalysisAndTranscode:" target="Voe-Tx-rLC" id="1yI-Hg-gwr"/>
+                        </connections>
+                    </toolbarItem>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" explicitItemIdentifier="NSToolbarSpaceItem1" id="82t-uH-QoN"/>
-                    <toolbarItem implicitItemIdentifier="1DAFF81F-5D0E-45F4-8F37-716E73060526" label="Add" paletteLabel="Add" tag="-1" image="ic_add_circle" selectable="YES" id="aui-BK-xNK" userLabel="Add"/>
+                    <toolbarItem implicitItemIdentifier="1DAFF81F-5D0E-45F4-8F37-716E73060526" label="Add" paletteLabel="Add" tag="-1" image="ic_add_circle" selectable="YES" id="aui-BK-xNK" userLabel="Add">
+                        <connections>
+                            <action selector="openMovies:" target="Voe-Tx-rLC" id="WLe-yw-sCF"/>
+                        </connections>
+                    </toolbarItem>
                     <toolbarItem implicitItemIdentifier="E9D05B5D-3078-4E68-B6EB-0A7C7A692488" label="Remove" paletteLabel="Remove" tag="-1" image="ic_remove_circle" selectable="YES" id="c5v-Zl-ptw"/>
                     <toolbarItem implicitItemIdentifier="F701EA0A-633C-42A6-9B24-C4068C0A9643" label="Clear" paletteLabel="Clear" tag="-1" image="ic_cancel" selectable="YES" id="OOH-dd-hUG"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="6D5-hI-SI2"/>
-                    <toolbarItem implicitItemIdentifier="885FD633-C461-4B0B-B592-A3A26E8C14CE" label="Settings" paletteLabel="Settings" tag="-1" image="ic_settings" id="ULQ-C6-hVr"/>
+                    <toolbarItem implicitItemIdentifier="885FD633-C461-4B0B-B592-A3A26E8C14CE" label="Settings" paletteLabel="Settings" tag="-1" image="ic_settings_applications_white" id="ULQ-C6-hVr">
+                        <connections>
+                            <action selector="revealPreferences:" target="Voe-Tx-rLC" id="JS1-cB-mbo"/>
+                        </connections>
+                    </toolbarItem>
                     <toolbarItem implicitItemIdentifier="31AAC622-4CD8-499E-9D30-9A99B09AC050" label="Log" paletteLabel="Log" tag="-1" image="ic_assessment_white" id="Lbu-MD-8cy">
                         <connections>
                             <action selector="revealLog:" target="Voe-Tx-rLC" id="hDA-KE-wB8"/>
@@ -1236,7 +1250,7 @@
             </view>
             <point key="canvasLocation" x="77.5" y="959.5"/>
         </window>
-        <window title="Log" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" animationBehavior="default" id="3EF-QC-5lQ">
+        <window title="Log" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="3EF-QC-5lQ">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES" unifiedTitleAndToolbar="YES" fullSizeContentView="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="196" y="240" width="480" height="270"/>
@@ -1286,6 +1300,6 @@
         <image name="ic_cancel" width="24" height="24"/>
         <image name="ic_play_circle_filled" width="24" height="24"/>
         <image name="ic_remove_circle" width="24" height="24"/>
-        <image name="ic_settings" width="24" height="24"/>
+        <image name="ic_settings_applications_white" width="24" height="24"/>
     </resources>
 </document>

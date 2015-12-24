@@ -1009,7 +1009,7 @@
 			path = videostab;
 			sourceTree = "<group>";
 		};
-		1B805E2D1B0114DD005D7354 /* Transcode & Analysis */ = {
+		1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */ = {
 			isa = PBXGroup;
 			children = (
 				1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */,
@@ -1019,7 +1019,7 @@
 				1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */,
 				1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */,
 			);
-			name = "Transcode & Analysis";
+			name = "Transcode & Analysis Operations";
 			sourceTree = "<group>";
 		};
 		1B805E381B012B5E005D7354 /* TableView & Cells */ = {
@@ -1110,7 +1110,7 @@
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
 				1B61BCDC1ACEFEEE0013418D /* AnalyzerPluginProtocol.h */,
 				1B805E381B012B5E005D7354 /* TableView & Cells */,
-				1B805E2D1B0114DD005D7354 /* Transcode & Analysis */,
+				1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */,
 				1B805E3E1B028BB6005D7354 /* LogController.h */,
 				1B805E3F1B028BB6005D7354 /* LogController.m */,
 				1B578C3F1B02F37E00D76F62 /* DropFilesView.h */,
@@ -1753,6 +1753,7 @@
 				1BA8F8411C138B330066BDDB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1BEA4D141ACB2BCC00AB57C1 /* Build configuration list for PBXProject "Synopsis" */ = {
 			isa = XCConfigurationList;
