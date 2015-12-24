@@ -55,6 +55,14 @@ const NSString* value = @"Value";
 // sent to kSynopsisTranscodeAudioSettingsKey
 @property (atomic, readwrite, strong) NSDictionary* prefsAudioSettings;
 
+// Log
+@property (weak) IBOutlet NSWindow* logWindow;
+
+// Toolbar
+@property (weak) IBOutlet NSToolbarItem* logToolbarItem;
+
+
+
 @end
 
 @implementation AppDelegate
@@ -805,6 +813,20 @@ const NSString* value = @"Value";
     for(NSURL* url in fileURLArray)
     {
         [self enqueueFileForTranscode:url];
+    }
+}
+
+#pragma mark - Toolbar
+
+- (IBAction) revealLog:(id)sender
+{
+    if([self.logWindow isVisible])
+    {
+        [self.logWindow orderOut:sender];
+    }
+    else
+    {
+        [self.logWindow orderFront:sender];
     }
 }
 
