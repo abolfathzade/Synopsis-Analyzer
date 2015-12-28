@@ -80,7 +80,7 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
 {
     @synchronized(self)
     {
-        return (self.videoProgress + self.audioProgress) * (CGFloat)0.5;
+        return ((self.videoProgress * 0.9) + (self.audioProgress * 0.1));
     }
 }
 

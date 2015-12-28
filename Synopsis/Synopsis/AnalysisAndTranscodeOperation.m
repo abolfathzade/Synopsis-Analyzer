@@ -9,6 +9,7 @@
 #import "AnalysisAndTranscodeOperation.h"
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
+#import <Accelerate/Accelerate.h>
 
 #import "AnalyzerPluginProtocol.h"
 
@@ -519,13 +520,14 @@
                             // grab our image buffer
                             CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(uncompressedVideoSampleBuffer);
                             
-                            // resize and transform it to match expected raster
-                            
                             CVPixelBufferRetain(pixelBuffer);
                             
                             assert( kCVPixelFormatType_32BGRA == CVPixelBufferGetPixelFormatType(pixelBuffer));
                             
-                            CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+                            // resize and transform it to match expected raster
+                            CVPixelBufferRef transformedPixelBuffer = [self pixelBuffer:pixelBuffer withTransform:self.transcodeAssetWriterVideo.transform forQuality:SynopsisAnalysisQualityHintMedium];
+                            
+                            CVPixelBufferLockBaseAddress(transformedPixelBuffer, kCVPixelBufferLock_ReadOnly);
                             
                             // Run an analysis pass on each plugin
                             for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
@@ -545,10 +547,10 @@
                                         // dispatch a single module
                                         dispatch_async(concurrentVideoAnalysisQueue, ^{
                                                                                         
-                                            NSDictionary* newModuleValue = [analyzer analyzedMetadataDictionaryForVideoBuffer:CVPixelBufferGetBaseAddress(pixelBuffer)
-                                                                                                                          width:CVPixelBufferGetWidth(pixelBuffer)
-                                                                                                                         height:CVPixelBufferGetHeight(pixelBuffer)
-                                                                                                                    bytesPerRow:CVPixelBufferGetBytesPerRow(pixelBuffer)
+                                            NSDictionary* newModuleValue = [analyzer analyzedMetadataDictionaryForVideoBuffer:CVPixelBufferGetBaseAddress(transformedPixelBuffer)
+                                                                                                                          width:CVPixelBufferGetWidth(transformedPixelBuffer)
+                                                                                                                         height:CVPixelBufferGetHeight(transformedPixelBuffer)
+                                                                                                                    bytesPerRow:CVPixelBufferGetBytesPerRow(transformedPixelBuffer)
                                                                                                                  forModuleIndex:moduleIndex
                                                                                                                           error:&analyzerError];
                                             
@@ -585,10 +587,10 @@
                                     dispatch_async(concurrentVideoAnalysisQueue, ^{
                                         
                                         NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                        NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForVideoBuffer:CVPixelBufferGetBaseAddress(pixelBuffer)
-                                                                                                                      width:CVPixelBufferGetWidth(pixelBuffer)
-                                                                                                                     height:CVPixelBufferGetHeight(pixelBuffer)
-                                                                                                                bytesPerRow:CVPixelBufferGetBytesPerRow(pixelBuffer)
+                                        NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForVideoBuffer:CVPixelBufferGetBaseAddress(transformedPixelBuffer)
+                                                                                                                      width:CVPixelBufferGetWidth(transformedPixelBuffer)
+                                                                                                                     height:CVPixelBufferGetHeight(transformedPixelBuffer)
+                                                                                                                bytesPerRow:CVPixelBufferGetBytesPerRow(transformedPixelBuffer)
                                                                                                              forModuleIndex:SynopsisModuleIndexNone
                                                                                                                       error:&analyzerError];
                                         
@@ -615,12 +617,13 @@
                                 // if we had an analyzer error, bail.
                                 if(analyzerError)
                                 {
-                                    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+//                                    CVPixelBufferLockBaseAddress(transformedPixelBuffer, kCVPixelBufferLock_ReadOnly);
                                     break;
                                 }
                             }
                             
-                            CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+                            CVPixelBufferUnlockBaseAddress(transformedPixelBuffer, kCVPixelBufferLock_ReadOnly);
+                            CVPixelBufferRelease(transformedPixelBuffer);
                             CVPixelBufferRelease(pixelBuffer);
 
                             // Store out running metadata
@@ -1018,6 +1021,103 @@
         [[LogController sharedLogController] appendErrorLog:[@"Read Error" stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
         [[LogController sharedLogController] appendErrorLog:[@"Write Error" stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
     }
+}
+
+static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
+{
+    free(baseAddress);
+}
+
+#pragma mark - CVPixelBuffer Transform and scale helper
+- (CVPixelBufferRef) pixelBuffer:(CVPixelBufferRef)pixelBuffer withTransform:(CGAffineTransform)transform forQuality:(SynopsisAnalysisQualityHint)quality
+{
+    CGSize scaledSize = CGSizeZero;
+    size_t width = CVPixelBufferGetWidth(pixelBuffer);
+    size_t height = CVPixelBufferGetHeight(pixelBuffer);
+    BOOL resize = YES;
+    
+    BOOL flipped = CVImageBufferIsFlipped(pixelBuffer);
+    
+    switch (quality)
+    {
+        case SynopsisAnalysisQualityHintLow:
+        {
+            width = floorf((float)width * 0.2);
+            height = floorf((float)height * 0.2);
+            break;
+        }
+        case SynopsisAnalysisQualityHintMedium:
+        {
+            width = floorf((float)width * 0.5);
+            height = floorf((float)height * 0.5);
+            break;
+        }
+        case SynopsisAnalysisQualityHintHigh:
+        {
+            width = floorf((float)width * 0.8);
+            height = floorf((float)height * 0.8);
+            break;
+        }
+        case SynopsisAnalysisQualityHintOriginal:
+            resize = NO;
+            break;
+    }
+    
+    
+    CVPixelBufferLockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
+    void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
+    
+    vImage_Buffer inBuff;
+    inBuff.height = CVPixelBufferGetHeight(pixelBuffer);
+    inBuff.width = CVPixelBufferGetWidth(pixelBuffer);
+    inBuff.rowBytes = bytesPerRow;
+    inBuff.data = baseAddress;
+    
+    unsigned char *outImg= (unsigned char*)malloc(4*width*height);
+    vImage_Buffer resized = {outImg, height, width, 4*width};
+    
+    vImage_Error err = vImageScale_ARGB8888(&inBuff, &resized, NULL, 0);
+    if (err != kvImageNoError)
+        NSLog(@" error %ld", err);
+
+    CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
+    
+    if(flipped)
+    {
+        unsigned char *outImg3= (unsigned char*)malloc(4*width*height);
+        vImage_Buffer flipped = {outImg3, height, width, 4*width};
+        
+        vImageVerticalReflect_ARGB8888(&resized, &flipped, kvImageNoFlags);
+        
+        free(resized.data);
+        resized = flipped;
+    }
+    
+    vImage_CGAffineTransform affineTransform;
+    affineTransform.a = transform.a;
+    affineTransform.b = transform.b;
+    affineTransform.c = transform.c;
+    affineTransform.d = transform.d;
+    affineTransform.tx = transform.tx;
+    affineTransform.ty = transform.ty;
+
+    unsigned char *outImg2= (unsigned char*)malloc(4*width*height);
+    vImage_Buffer transformed = {outImg2, height, width, 4*width};
+
+    err = vImageAffineWarpCG_ARGB8888(&resized, &transformed, NULL, &affineTransform, NULL, kvImageNoFlags);
+    if (err != kvImageNoError)
+        NSLog(@" error %ld", err);
+
+    free(resized.data);
+
+    CVPixelBufferRef finalOut = NULL;
+    CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, width, height, kCVPixelFormatType_32BGRA, transformed.data, transformed.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
+    
+    if(ret != kCVReturnSuccess)
+        NSLog(@" error %d", ret);
+    
+    return finalOut;
 }
 
 #pragma mark - Metadata Helper

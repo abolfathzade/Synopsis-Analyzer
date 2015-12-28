@@ -24,6 +24,7 @@
 		1B3233D11C2EFDD300C9CF5E /* PreferencesAdvancedViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B3233CF1C2EFDD300C9CF5E /* PreferencesAdvancedViewController.xib */; };
 		1B3233D41C2F0A7000C9CF5E /* CustomBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233D31C2F0A7000C9CF5E /* CustomBackgroundView.m */; };
 		1B3233D71C306B2300C9CF5E /* PresetObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233D61C306B2300C9CF5E /* PresetObject.m */; };
+		1B3233D91C30C6CE00C9CF5E /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B3233D81C30C6CE00C9CF5E /* Accelerate.framework */; };
 		1B49BD9E1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */; };
 		1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B4FA1061B2DECCB004DBD63 /* libpython.dylib */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
@@ -186,6 +187,7 @@
 		1B3233D31C2F0A7000C9CF5E /* CustomBackgroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomBackgroundView.m; sourceTree = "<group>"; };
 		1B3233D51C306B2300C9CF5E /* PresetObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PresetObject.h; sourceTree = "<group>"; };
 		1B3233D61C306B2300C9CF5E /* PresetObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PresetObject.m; sourceTree = "<group>"; };
+		1B3233D81C30C6CE00C9CF5E /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = StandardAnalyzerPlugin.mm; sourceTree = "<group>"; };
 		1B4FA1061B2DECCB004DBD63 /* libpython.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpython.dylib; path = usr/lib/libpython.dylib; sourceTree = SDKROOT; };
 		1B578C3F1B02F37E00D76F62 /* DropFilesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropFilesView.h; sourceTree = "<group>"; };
@@ -523,6 +525,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B3233D91C30C6CE00C9CF5E /* Accelerate.framework in Frameworks */,
 				1BA68C701AD5D924003B3CE9 /* libz.dylib in Frameworks */,
 				1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */,
 				1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */,
@@ -577,6 +580,7 @@
 		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1B3233D81C30C6CE00C9CF5E /* Accelerate.framework */,
 				1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */,
 				1BA8F8331C125DAA0066BDDB /* Quartz.framework */,
 				1B4FA1061B2DECCB004DBD63 /* libpython.dylib */,
@@ -1154,8 +1158,8 @@
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
 				1B61BCDC1ACEFEEE0013418D /* AnalyzerPluginProtocol.h */,
 				1B805E381B012B5E005D7354 /* TableView & Cells */,
-				1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */,
 				1B3233BC1C2E390600C9CF5E /* Preferences */,
+				1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */,
 				1B805E3E1B028BB6005D7354 /* LogController.h */,
 				1B805E3F1B028BB6005D7354 /* LogController.m */,
 				1B578C3F1B02F37E00D76F62 /* DropFilesView.h */,

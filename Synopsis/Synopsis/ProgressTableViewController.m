@@ -163,6 +163,7 @@
     // Set up our callbacks if we need to.
     if(operationForRow)
     {
+        __weak typeof(operationForRow) weakOperationForRow = operationForRow;
         // set up our callback
         operationForRow.progressBlock = ^void(CGFloat progress)
         {
@@ -172,7 +173,7 @@
                 if(progressController)
                 {
                     [progressController setProgress:progress];
-                    [progressController setTimeRemainingSeconds:operationForRow.remainingTime];
+                    [progressController setTimeRemainingSeconds:weakOperationForRow.remainingTime];
                 }
             });
         };
