@@ -54,7 +54,7 @@
     }
     
     // set our default for now - since we arent loading for NSUserDefaults
-    [[self.preferencesGeneralViewController.defaultPresetPopupButton menu] performActionForItemAtIndex:0];
+//    [[self.preferencesGeneralViewController.defaultPresetPopupButton menu] performActionForItemAtIndex:0];
 }
 
 #pragma mark -

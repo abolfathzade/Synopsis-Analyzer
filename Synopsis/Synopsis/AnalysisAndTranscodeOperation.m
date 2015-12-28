@@ -1025,18 +1025,20 @@
 
 static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
 {
-    free(baseAddress);
+    free((void*)baseAddress);
 }
 
 #pragma mark - CVPixelBuffer Transform and scale helper
 - (CVPixelBufferRef) pixelBuffer:(CVPixelBufferRef)pixelBuffer withTransform:(CGAffineTransform)transform forQuality:(SynopsisAnalysisQualityHint)quality
 {
-    CGSize scaledSize = CGSizeZero;
     size_t width = CVPixelBufferGetWidth(pixelBuffer);
     size_t height = CVPixelBufferGetHeight(pixelBuffer);
+ 
+    CGSize originalSize = {width, height};
+
     BOOL resize = YES;
     
-    BOOL flipped = CVImageBufferIsFlipped(pixelBuffer);
+    BOOL flip = CVImageBufferIsFlipped(pixelBuffer);
     
     switch (quality)
     {
@@ -1063,7 +1065,8 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
             break;
     }
     
-    
+    CGSize scaledSize = {width, height};
+
     CVPixelBufferLockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
     void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
     size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
@@ -1074,26 +1077,31 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
     inBuff.rowBytes = bytesPerRow;
     inBuff.data = baseAddress;
     
-    unsigned char *outImg= (unsigned char*)malloc(4*width*height);
-    vImage_Buffer resized = {outImg, height, width, 4*width};
-    
-    vImage_Error err = vImageScale_ARGB8888(&inBuff, &resized, NULL, 0);
-    if (err != kvImageNoError)
-        NSLog(@" error %ld", err);
-
-    CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
-    
-    if(flipped)
+    // Transform:
+    if(flip)
     {
-        unsigned char *outImg3= (unsigned char*)malloc(4*width*height);
-        vImage_Buffer flipped = {outImg3, height, width, 4*width};
-        
-        vImageVerticalReflect_ARGB8888(&resized, &flipped, kvImageNoFlags);
-        
-        free(resized.data);
-        resized = flipped;
+        CGSize flippedSize = CGSizeApplyAffineTransform(originalSize, transform);
+//        CGSize flippedSize = originalSize;
+        flippedSize.width = fabs(flippedSize.width);
+        flippedSize.height = fabs(flippedSize.height);
+
+        CGAffineTransform flip = CGAffineTransformMakeTranslation(flippedSize.width * 0.5, flippedSize.height * 0.5);
+        flip = CGAffineTransformScale(flip, 1, -1);
+        flip = CGAffineTransformTranslate(flip, -flippedSize.width * 0.5, -flippedSize.height * 0.5);
+
+        transform = CGAffineTransformConcat(transform, flip);
     }
     
+    
+    originalSize = CGSizeApplyAffineTransform(originalSize, transform);
+    scaledSize = CGSizeApplyAffineTransform(scaledSize, transform);
+
+    originalSize.width = fabs(originalSize.width);
+    originalSize.height = fabs(originalSize.height);
+
+    scaledSize.width = fabs(scaledSize.width);
+    scaledSize.height = fabs(scaledSize.height);
+
     vImage_CGAffineTransform affineTransform;
     affineTransform.a = transform.a;
     affineTransform.b = transform.b;
@@ -1102,17 +1110,31 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
     affineTransform.tx = transform.tx;
     affineTransform.ty = transform.ty;
 
-    unsigned char *outImg2= (unsigned char*)malloc(4*width*height);
-    vImage_Buffer transformed = {outImg2, height, width, 4*width};
-
-    err = vImageAffineWarpCG_ARGB8888(&resized, &transformed, NULL, &affineTransform, NULL, kvImageNoFlags);
+    unsigned char *transformBytes= (unsigned char*)malloc(4 * originalSize.width * originalSize.height);
+    vImage_Buffer transformed = {transformBytes, originalSize.height, originalSize.width, 4 * originalSize.width};
+    
+    uint8_t backColor[4] = {0};
+    
+    vImage_Error err = vImageAffineWarpCG_ARGB8888(&inBuff, &transformed, NULL, &affineTransform, backColor, kvImageBackgroundColorFill);
     if (err != kvImageNoError)
         NSLog(@" error %ld", err);
 
-    free(resized.data);
+    CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
+    
+    // Scale
+    unsigned char *resizedBytes= (unsigned char*)malloc(4 * scaledSize.width * scaledSize.height);
+    vImage_Buffer resized = {resizedBytes, scaledSize.height, scaledSize.width, 4 * scaledSize.width};
+    
+    err = vImageScale_ARGB8888(&transformed, &resized, NULL, 0);
+    if (err != kvImageNoError)
+        NSLog(@" error %ld", err);
 
+    // Free Transform
+    free(transformed.data);
+    transformed.data = NULL;
+    
     CVPixelBufferRef finalOut = NULL;
-    CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, width, height, kCVPixelFormatType_32BGRA, transformed.data, transformed.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
+    CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, scaledSize.width, scaledSize.height, kCVPixelFormatType_32BGRA, resized.data, resized.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
     
     if(ret != kCVReturnSuccess)
         NSLog(@" error %d", ret);

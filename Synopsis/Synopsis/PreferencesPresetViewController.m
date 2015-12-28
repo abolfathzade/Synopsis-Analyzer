@@ -12,6 +12,8 @@
 #import <VideoToolbox/VTVideoEncoderList.h>
 #import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 
+#import "PresetGroup.h"
+
 // Preferences Keys
 const NSString* title = @"Title";
 const NSString* value = @"Value";
@@ -53,8 +55,8 @@ const NSString* value = @"Value";
 
 
 // Outline View Data source
-@property (atomic, readwrite, strong) NSMutableArray* standardPresets;
-@property (atomic, readwrite, strong) NSMutableArray* customPresets;
+@property (atomic, readwrite, strong) PresetGroup* standardPresets;
+@property (atomic, readwrite, strong) PresetGroup* customPresets;
 
 @property (atomic, readwrite, strong) PresetObject* selectedPreset;
 
@@ -68,15 +70,13 @@ const NSString* value = @"Value";
     if(self)
     {
         self.selectedPreset = nil;
-        self.standardPresets = [NSMutableArray new];
-        self.customPresets = [NSMutableArray new];
+        self.standardPresets = [[PresetGroup alloc] initWithTitle:@"Standard Presets"];
+        self.customPresets = [[PresetGroup alloc] initWithTitle:@"Custom Presets"];
         
         // set up some basic presets
         PresetObject* passthrough = [[PresetObject alloc] initWithTitle:@"Passthrough" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:YES useVideo:YES useAnalysis:YES];
-        [self.standardPresets addObject:passthrough];
         
         PresetObject* passthroughVideoOnly = [[PresetObject alloc] initWithTitle:@"Passthrough Video" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:NO useVideo:YES useAnalysis:YES];
-        [self.standardPresets addObject:passthroughVideoOnly];
         
         PresetObject* appleIntermediateLinearPCM = [[PresetObject alloc] initWithTitle:@"Apple Intermediate Only"
                                                                          audioSettings:nil
@@ -86,7 +86,10 @@ const NSString* value = @"Value";
                                                                               useVideo:YES
                                                                            useAnalysis:YES];
         
-        [self.standardPresets addObject:appleIntermediateLinearPCM];
+        PresetGroup* passthroughGroup = [[PresetGroup alloc] initWithTitle:@"Passthrough"];
+        passthroughGroup.children = @[passthrough, passthroughVideoOnly];
+        
+        self.standardPresets.children = @[passthroughGroup, appleIntermediateLinearPCM];
 
         return self;
     }
@@ -631,14 +634,10 @@ const NSString* value = @"Value";
 {
     NSTableCellView* view = (NSTableCellView*)[outlineView makeViewWithIdentifier:@"Preset" owner:self];
 
-    if(item == self.standardPresets)
+    if([item isKindOfClass:[PresetGroup class]])
     {
-        view.textField.stringValue = @"Standard Presets";
-        view.imageView.image = [NSImage imageNamed:@"ic_folder_white"];
-    }
-    else if(item == self.customPresets)
-    {
-        view.textField.stringValue = @"Custom Presets";
+        PresetGroup* itemGroup = (PresetGroup*)item;
+        view.textField.stringValue = itemGroup.title;
         view.imageView.image = [NSImage imageNamed:@"ic_folder_white"];
     }
     else if ([item isKindOfClass:[PresetObject class]])
@@ -773,13 +772,10 @@ const NSString* value = @"Value";
     {
         return 2;
     }
-    else if (item == self.standardPresets)
+    else if([item isKindOfClass:[PresetGroup class]])
     {
-        return self.standardPresets.count;
-    }
-    else if (item == self.customPresets)
-    {
-        return self.customPresets.count;
+        PresetGroup* itemGroup = (PresetGroup*)item;
+        return itemGroup.children.count;
     }
     else if ([item isKindOfClass:[PresetObject class]])
     {
@@ -790,10 +786,8 @@ const NSString* value = @"Value";
     {
         return 0;
     }
-    else
-    {
-        return 0;
-    }
+  
+    return 0;
 }
 
 - (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
@@ -811,14 +805,10 @@ const NSString* value = @"Value";
         }
     }
     
-    else if(item == self.standardPresets)
+    else if([item isKindOfClass:[PresetGroup class]])
     {
-        return self.standardPresets[index];
-    }
-    
-    else if(item == self.customPresets)
-    {
-        return self.customPresets[index];
+        PresetGroup* itemGroup = (PresetGroup*)item;
+        return itemGroup.children[index];
     }
     
     else if ([item isKindOfClass:[PresetObject class]])
@@ -828,12 +818,11 @@ const NSString* value = @"Value";
         return [NSNumber numberWithInteger:index];
     }
     return nil;
-    
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
 {
-    if(item == nil || item == self.standardPresets || item == self.customPresets || [item isKindOfClass:[PresetObject class]])
+    if(item == nil || [item isKindOfClass:[PresetGroup class]] || [item isKindOfClass:[PresetObject class]])
         return YES;
     
     return NO;
@@ -841,7 +830,7 @@ const NSString* value = @"Value";
 
 - (NSArray*) allPresets
 {
-    return [[self.standardPresets arrayByAddingObjectsFromArray:self.customPresets] copy];
+    return [[self.standardPresets.children arrayByAddingObjectsFromArray:self.customPresets.children] copy];
 }
 
 @end

@@ -83,7 +83,6 @@
         
         detector = cv::ORB::create(100);
         
-        cv::namedWindow("OpenCV Debug");
         
         lastImage = NULL;
         
@@ -140,7 +139,8 @@
             }
         }
     }
-    
+    cv::namedWindow("OpenCV Debug", CV_WINDOW_NORMAL);
+
     
 }
 
@@ -169,34 +169,34 @@
         
         // Half width/height image -
         // TODO: Maybe this becomes part of a quality preference?
-        cv::Size quaterSize(currentBGRAImage.size().width * 0.2, currentBGRAImage.size().height * 0.2);
+//        cv::Size quaterSize(currentBGRAImage.size().width * 0.2, currentBGRAImage.size().height * 0.2);
         
-        cv::Mat quarterResBGRA(quaterSize, CV_8UC4);
-        
-        cv::resize(currentBGRAImage,
-                   quarterResBGRA,
-                   quaterSize,
-                   0,
-                   0,
-                   cv::INTER_AREA); // INTER_AREA resize gives cleaner downsample results vs INTER_LINEAR.
+//        cv::Mat quarterResBGRA(quaterSize, CV_8UC4);
+//        
+//        cv::resize(currentBGRAImage,
+//                   quarterResBGRA,
+//                   quaterSize,
+//                   0,
+//                   0,
+//                   cv::INTER_AREA); // INTER_AREA resize gives cleaner downsample results vs INTER_LINEAR.
         
         switch (moduleIndex)
         {
             case 0:
             {
-                return [self averageColorForCVMat:quarterResBGRA];
+                return [self averageColorForCVMat:currentBGRAImage];
             }
             case 1:
             {
-                return [self dominantColorForCVMat:quarterResBGRA];
+                return [self dominantColorForCVMat:currentBGRAImage];
             }
             case 2:
             {
-                return [self detectFeaturesCVMat:quarterResBGRA];
+                return [self detectFeaturesCVMat:currentBGRAImage];
             }
             case 3:
             {
-                return [self detectMotionInCVMat:quarterResBGRA];
+                return [self detectMotionInCVMat:currentBGRAImage];
             }
                 
             default:
@@ -453,6 +453,11 @@
 
 - (NSDictionary*) detectFeaturesCVMat:(cv::Mat)image
 {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        cv::imshow("OpenCV Debug", image);
+    });
+ 
+    
     NSMutableDictionary* metadata = [NSMutableDictionary new];
     
     std::vector<cv::KeyPoint> keypoints;
@@ -465,7 +470,7 @@
         CGPoint point = CGPointZero;
         {
             point = CGPointMake((float)keyPoint->pt.x / (float)image.size().width,
-                                (float)keyPoint->pt.y / (float)image.size().height);
+                                1.0f - (float)keyPoint->pt.y / (float)image.size().height);
         }
         
         [keyPointsArray addObject:@[ @(point.x), @(point.y)]];
