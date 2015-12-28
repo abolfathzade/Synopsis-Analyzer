@@ -8,6 +8,9 @@
 
 #import "PresetObject.h"
 #import <AVFoundation/AVFoundation.h>
+#import <VideoToolbox/VideoToolbox.h>
+#import <VideoToolbox/VTVideoEncoderList.h>
+#import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 
 @interface PresetObject ()
 {
@@ -49,14 +52,14 @@
 {
     NSString* description = [self.title stringByAppendingString:@"\n\r"];
     
-    NSString* audioSettingsString = [@"Audio Settings:\n\r" stringByAppendingString:[self audioFormatString]];
+    NSString* audioSettingsString = [@"• Audio Settings:\n\r" stringByAppendingString:[self audioFormatString]];
     
     description = [description stringByAppendingString:audioSettingsString];
     
     description = [description stringByAppendingString:@"\n\r"];
     description = [description stringByAppendingString:@"\n\r"];
 
-    NSString* videoSettingsString = [@"Video Settings:\n\r" stringByAppendingString:[self videoFormatString]];
+    NSString* videoSettingsString = [@"• Video Settings:\n\r" stringByAppendingString:[self videoFormatString]];
     
     description = [description stringByAppendingString:videoSettingsString];
 
@@ -66,7 +69,7 @@
 
 - (NSString*) audioFormatString
 {
-    NSString* audioFormat = @"Audio Format: ";
+    NSString* audioFormat = @"\tAudio Format: ";
     
     if(self.useAudio == NO)
         return [audioFormat stringByAppendingString:@"None"];
@@ -87,11 +90,11 @@
         audioFormat = [audioFormat stringByAppendingString:@"AAC"];
     
     audioFormat = [audioFormat stringByAppendingString:@"\n\r"];
-    audioFormat = [audioFormat stringByAppendingString:@"Sampling Rate: "];
+    audioFormat = [audioFormat stringByAppendingString:@"\tSampling Rate: "];
     audioFormat = [audioFormat stringByAppendingString:self.audioSettings[AVSampleRateKey]];
 
     audioFormat = [audioFormat stringByAppendingString:@"\n\r"];
-    audioFormat = [audioFormat stringByAppendingString:@"Number of Channels: "];
+    audioFormat = [audioFormat stringByAppendingString:@"\tNumber of Channels: "];
     audioFormat = [audioFormat stringByAppendingString:self.audioSettings[AVNumberOfChannelsKey]];
 
     return audioFormat;
@@ -99,7 +102,7 @@
 
 - (NSString*) videoFormatString
 {
-    NSString* videoFormat = @"Video Format: ";
+    NSString* videoFormat = @"\tVideo Format: ";
     
     if(self.useVideo == NO)
         return [videoFormat stringByAppendingString:@"None"];
@@ -109,26 +112,38 @@
 
     if(self.videoSettings[AVVideoCodecKey] == [NSNull null])
         return [videoFormat stringByAppendingString:@"Passthrough"];
+
+    CFArrayRef videoEncoders;
+    VTCopyVideoEncoderList(NULL, &videoEncoders);
+    NSArray* videoEncodersArray = (__bridge NSArray*)videoEncoders;
     
-    if([self.videoSettings[AVVideoCodecKey] isEqualToString:AVVideoCodecH264])
-        [videoFormat stringByAppendingString:@"H.264"];
-
-    if([self.videoSettings[AVVideoCodecKey] isEqualToString:AVVideoCodecJPEG])
-        [videoFormat stringByAppendingString:@"Photo Jpeg"];
-
-    if([self.videoSettings[AVVideoCodecKey] isEqualToString:AVVideoCodecAppleProRes422])
-        [videoFormat stringByAppendingString:@"ProRes 422"];
-
-    if([self.videoSettings[AVVideoCodecKey] isEqualToString:AVVideoCodecAppleProRes4444])
-        [videoFormat stringByAppendingString:@"ProRes 4444"];
-
+    // fourcc requires 'icod' (need to add the 's)
+    OSType fourcc = NSHFSTypeCodeFromFileType([@"'" stringByAppendingString:[self.videoSettings[AVVideoCodecKey] stringByAppendingString:@"'"]]);
+    NSNumber* fourccNum = [NSNumber numberWithInt:fourcc];
     
-    videoFormat = [videoFormat stringByAppendingString:@"\n\r"];
-    videoFormat = [videoFormat stringByAppendingString:@"Dimensions: "];
-    videoFormat = [videoFormat stringByAppendingString:self.videoSettings[AVVideoWidthKey]];
-    videoFormat = [videoFormat stringByAppendingString:@" x "];
-    videoFormat = [videoFormat stringByAppendingString:self.videoSettings[AVVideoHeightKey]];
-
+    for(NSDictionary* encoder in videoEncodersArray)
+    {
+        NSNumber* codecType = (NSNumber*)encoder[(NSString*)kVTVideoEncoderList_CodecType];
+        if([codecType isEqual:fourccNum])
+        {
+            videoFormat = [videoFormat stringByAppendingString:encoder[(NSString*)kVTVideoEncoderList_DisplayName]];
+            break;
+        }
+    }
+    
+    if(self.videoSettings[AVVideoWidthKey] && self.videoSettings[AVVideoHeightKey])
+    {
+        videoFormat = [videoFormat stringByAppendingString:@"\n\r"];
+        videoFormat = [videoFormat stringByAppendingString:@"\tDimensions: "];
+        videoFormat = [videoFormat stringByAppendingString:self.videoSettings[AVVideoWidthKey]];
+        videoFormat = [videoFormat stringByAppendingString:@" x "];
+        videoFormat = [videoFormat stringByAppendingString:self.videoSettings[AVVideoHeightKey]];
+    }
+    else
+    {
+        videoFormat = [videoFormat stringByAppendingString:@"\n\r"];
+        videoFormat = [videoFormat stringByAppendingString:@"\tDimensions: Native"];
+    }
     
     return videoFormat;
 }

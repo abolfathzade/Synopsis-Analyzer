@@ -81,8 +81,17 @@ const NSString* value = @"Value";
     [self.standardPresets addObject:passthrough];
 
     PresetObject* passthroughVideoOnly = [[PresetObject alloc] initWithTitle:@"Passthrough Video" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:NO useVideo:YES useAnalysis:YES];
-
     [self.standardPresets addObject:passthroughVideoOnly];
+
+    PresetObject* appleIntermediateLinearPCM = [[PresetObject alloc] initWithTitle:@"Apple Intermediate Only"
+                                                                     audioSettings:nil
+                                                                     videoSettings:@{AVVideoCodecKey:@"icod"}
+                                                                  analyzerSettings:nil
+                                                                          useAudio:NO
+                                                                          useVideo:YES
+                                                                       useAnalysis:YES];
+    
+    [self.standardPresets addObject:appleIntermediateLinearPCM];
 }
 
 #pragma mark -
