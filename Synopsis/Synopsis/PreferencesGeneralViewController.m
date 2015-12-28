@@ -7,9 +7,10 @@
 //
 
 #import "PreferencesGeneralViewController.h"
+#import "PresetObject.h"
 
 @interface PreferencesGeneralViewController ()
-
+@property (weak) IBOutlet NSTextField* selectedDefaultPresetDescription;
 @end
 
 @implementation PreferencesGeneralViewController
@@ -17,6 +18,15 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do view setup here.
+}
+
+- (IBAction)setDefaultPresetAction:(NSMenuItem*)sender
+{
+    PresetObject* selectedPreset = [sender representedObject];
+    
+    self.selectedDefaultPresetDescription.stringValue = selectedPreset.description;
+    
+    self.defaultPreset = selectedPreset;
 }
 
 @end

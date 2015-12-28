@@ -48,6 +48,17 @@
     return nil;
 }
 
+- (id) copyWithZone:(NSZone *)zone
+{
+    return [[PresetObject allocWithZone:zone] initWithTitle:self.title
+                                 audioSettings:self.audioSettings
+                                 videoSettings:self.videoSettings
+                              analyzerSettings:self.analyzerSettings
+                                      useAudio:self.useAudio
+                                      useVideo:self.useVideo
+                                   useAnalysis:self.useAnalysis];
+}
+
 - (NSString*) description
 {
     NSString* description = [self.title stringByAppendingString:@"\n\r"];

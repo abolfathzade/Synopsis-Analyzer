@@ -6,6 +6,8 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PreferencesGeneralViewController">
             <connections>
+                <outlet property="defaultPresetPopupButton" destination="918-v1-aGz" id="NeX-te-bYq"/>
+                <outlet property="selectedDefaultPresetDescription" destination="TaS-Nl-Eef" id="QH5-6f-9zy"/>
                 <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
             </connections>
         </customObject>
@@ -15,14 +17,39 @@
             <rect key="frame" x="0.0" y="0.0" width="480" height="272"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LPy-V5-eAm">
-                    <rect key="frame" x="214" y="128" width="52" height="17"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="General" id="ey7-S9-lIP">
-                        <font key="font" metaFont="system"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
+                <box autoresizesSubviews="NO" fixedFrame="YES" title="Default Preset" borderType="line" translatesAutoresizingMaskIntoConstraints="NO" id="BzG-v1-ojR">
+                    <rect key="frame" x="17" y="16" width="446" height="236"/>
+                    <view key="contentView">
+                        <rect key="frame" x="1" y="1" width="444" height="220"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="918-v1-aGz">
+                                <rect key="frame" x="15" y="186" width="214" height="22"/>
+                                <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Ecd-tb-Sye" id="rxG-7b-dM6">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="smallSystem"/>
+                                    <menu key="menu" id="SVF-cT-731">
+                                        <items>
+                                            <menuItem title="Item 1" state="on" id="Ecd-tb-Sye"/>
+                                            <menuItem title="Item 2" id="6bH-3x-QB7"/>
+                                            <menuItem title="Item 3" id="ba1-Cc-0M7"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                            </popUpButton>
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TaS-Nl-Eef">
+                                <rect key="frame" x="16" y="14" width="412" height="160"/>
+                                <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" title="Multiline Label" id="tpc-gG-iNP">
+                                    <font key="font" metaFont="smallSystem"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                    </view>
+                    <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                    <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                </box>
             </subviews>
         </customView>
     </objects>

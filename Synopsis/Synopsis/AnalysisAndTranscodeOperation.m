@@ -151,6 +151,7 @@
 - (NSError*) setupTranscodeShitSucessfullyOrDontWhatverMan
 {
     CGAffineTransform prefferedTrackTransform = CGAffineTransformIdentity;
+    CGSize nativeSize = CGSizeZero;
     
     self.transcodeAsset = [AVURLAsset URLAssetWithURL:self.sourceURL options:@{AVURLAssetPreferPreciseDurationAndTimingKey : @TRUE}];
     
@@ -173,6 +174,7 @@
                                                                                                       }];
         self.transcodeAssetReaderVideo.alwaysCopiesSampleData = NO;
         prefferedTrackTransform = firstVideoTrack.preferredTransform;
+        nativeSize = firstVideoTrack.naturalSize;
         
         // Do we use passthrough?
         if(!self.transcodingVideo)
@@ -257,6 +259,16 @@
     }
     
     NSLog(@"Final Audio Settings: %@", self.audioTranscodeSettings);
+    
+    // check if we need to use our natural size - we might not have AVVideoHeightKey or AVVideoWidthKey
+    if(!self.videoTranscodeSettings[AVVideoHeightKey] || !self.videoTranscodeSettings[AVVideoWidthKey])
+    {
+        NSMutableDictionary* newVideoSettings = [self.videoTranscodeSettings mutableCopy];
+        newVideoSettings[AVVideoHeightKey] = @(nativeSize.height);
+        newVideoSettings[AVVideoWidthKey] = @(nativeSize.width);
+        
+        self.videoTranscodeSettings = newVideoSettings;
+    }
     
     // Writers
     self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:&error];

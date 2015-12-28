@@ -134,8 +134,8 @@
                                             </button>
                                         </subviews>
                                     </view>
-                                    <color key="borderColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="fillColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="borderColor" white="0.0" alpha="0.0" colorSpace="deviceWhite"/>
+                                    <color key="fillColor" white="0.0" alpha="0.0" colorSpace="deviceWhite"/>
                                 </box>
                             </subviews>
                         </customView>

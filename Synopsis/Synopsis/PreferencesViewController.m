@@ -39,25 +39,29 @@
     
     self.currentViewController = self.preferencesGeneralViewController;
     
-}
 
-#pragma mark - 
+    // populate our general prefs default preset button with all available presets
+    [self.preferencesGeneralViewController.defaultPresetPopupButton.menu removeAllItems];
 
-- (NSDictionary*) audioSettingsDictionaryForPreset:(NSDictionary*)preset
-{
-    return nil;
-}
-
-- (NSDictionary*) videoSettingsDictionaryForPreset:(NSDictionary*)preset
-{
-    return nil;
+    for(PresetObject* preset in [self.preferencesPresetViewController allPresets])
+    {
+        NSMenuItem* presetMenuItem = [[NSMenuItem alloc] initWithTitle:preset.title action:@selector(setDefaultPresetAction:) keyEquivalent:@""];
+        
+        presetMenuItem.representedObject = preset;
+        presetMenuItem.target = self.preferencesGeneralViewController;
+        
+        [self.preferencesGeneralViewController.defaultPresetPopupButton.menu addItem:presetMenuItem];
+    }
     
+    // set our default for now - since we arent loading for NSUserDefaults
+    [[self.preferencesGeneralViewController.defaultPresetPopupButton menu] performActionForItemAtIndex:0];
 }
 
-- (NSDictionary*) analysisSettingsDictionaryForPreset:(NSDictionary*)preset
+#pragma mark -
+
+- (PresetObject*) defaultPreset
 {
-    return nil;
-    
+    return self.preferencesGeneralViewController.defaultPreset;
 }
 
 #pragma mark -

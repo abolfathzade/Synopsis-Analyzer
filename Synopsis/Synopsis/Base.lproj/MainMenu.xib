@@ -16,6 +16,7 @@
                 <outlet property="dropFilesView" destination="UrI-I2-Ixg" id="gaJ-g0-LQb"/>
                 <outlet property="logWindow" destination="3EF-QC-5lQ" id="KTw-AJ-e8M"/>
                 <outlet property="prefsAnalyzerArrayController" destination="7s5-x7-dF6" id="6g4-d4-Hh9"/>
+                <outlet property="prefsViewController" destination="RWQ-ld-8hs" id="JTU-2M-UCo"/>
                 <outlet property="prefsWindow" destination="zai-oB-ZKM" id="r6U-Fu-BuR"/>
                 <outlet property="startPauseToolbarItem" destination="fLX-kf-tpC" id="JXf-cB-ede"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="gIp-Ho-8D9"/>

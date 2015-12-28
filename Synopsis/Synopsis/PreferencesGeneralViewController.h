@@ -7,7 +7,13 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "PresetObject.h"
 
 @interface PreferencesGeneralViewController : NSViewController
+@property (weak) IBOutlet NSPopUpButton* defaultPresetPopupButton;
+@property (copy) PresetObject* defaultPreset;
+
+- (IBAction)setDefaultPresetAction:(NSMenuItem*)sender;
+
 
 @end

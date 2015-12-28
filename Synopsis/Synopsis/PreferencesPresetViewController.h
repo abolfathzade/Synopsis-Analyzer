@@ -12,4 +12,7 @@
 
 @interface PreferencesPresetViewController : NSViewController
 
+
+- (NSArray*) allPresets;
+
 @end

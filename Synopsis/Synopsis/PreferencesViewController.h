@@ -7,11 +7,10 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "PresetObject.h"
 
 @interface PreferencesViewController : NSViewController
 
-- (NSDictionary*) audioSettingsDictionaryForPreset:(NSDictionary*)preset;
-- (NSDictionary*) videoSettingsDictionaryForPreset:(NSDictionary*)preset;
-- (NSDictionary*) analysisSettingsDictionaryForPreset:(NSDictionary*)preset;
+- (PresetObject*) defaultPreset;
 
 @end

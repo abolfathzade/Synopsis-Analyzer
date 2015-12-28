@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface PresetObject : NSObject
+@interface PresetObject : NSObject<NSCopying>
 
 - (id) initWithTitle:(NSString*)title audioSettings:(NSDictionary*)audioSettings videoSettings:(NSDictionary*)videoSettings analyzerSettings:(NSDictionary*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis NS_DESIGNATED_INITIALIZER;
 

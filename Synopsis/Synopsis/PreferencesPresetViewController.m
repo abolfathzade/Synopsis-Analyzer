@@ -62,36 +62,46 @@ const NSString* value = @"Value";
 
 @implementation PreferencesPresetViewController
 
+- (id) initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if(self)
+    {
+        self.selectedPreset = nil;
+        self.standardPresets = [NSMutableArray new];
+        self.customPresets = [NSMutableArray new];
+        
+        // set up some basic presets
+        PresetObject* passthrough = [[PresetObject alloc] initWithTitle:@"Passthrough" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:YES useVideo:YES useAnalysis:YES];
+        [self.standardPresets addObject:passthrough];
+        
+        PresetObject* passthroughVideoOnly = [[PresetObject alloc] initWithTitle:@"Passthrough Video" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:NO useVideo:YES useAnalysis:YES];
+        [self.standardPresets addObject:passthroughVideoOnly];
+        
+        PresetObject* appleIntermediateLinearPCM = [[PresetObject alloc] initWithTitle:@"Apple Intermediate Only"
+                                                                         audioSettings:nil
+                                                                         videoSettings:@{AVVideoCodecKey:@"icod"}
+                                                                      analyzerSettings:nil
+                                                                              useAudio:NO
+                                                                              useVideo:YES
+                                                                           useAnalysis:YES];
+        
+        [self.standardPresets addObject:appleIntermediateLinearPCM];
+
+        return self;
+    }
+    
+    return nil;
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 
-    [self initPrefs];
-    
-    self.standardPresets = [NSMutableArray new];
-    self.customPresets = [NSMutableArray new];
-    
     self.presetOutlineView.dataSource = self;
     self.presetOutlineView.delegate = self;
-    
-    self.selectedPreset = nil;
-    
-    // set up some basic presets
-    PresetObject* passthrough = [[PresetObject alloc] initWithTitle:@"Passthrough" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:YES useVideo:YES useAnalysis:YES];
-    [self.standardPresets addObject:passthrough];
 
-    PresetObject* passthroughVideoOnly = [[PresetObject alloc] initWithTitle:@"Passthrough Video" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:NO useVideo:YES useAnalysis:YES];
-    [self.standardPresets addObject:passthroughVideoOnly];
-
-    PresetObject* appleIntermediateLinearPCM = [[PresetObject alloc] initWithTitle:@"Apple Intermediate Only"
-                                                                     audioSettings:nil
-                                                                     videoSettings:@{AVVideoCodecKey:@"icod"}
-                                                                  analyzerSettings:nil
-                                                                          useAudio:NO
-                                                                          useVideo:YES
-                                                                       useAnalysis:YES];
-    
-    [self.standardPresets addObject:appleIntermediateLinearPCM];
+    [self initPrefs];
 }
 
 #pragma mark -
@@ -827,6 +837,11 @@ const NSString* value = @"Value";
         return YES;
     
     return NO;
+}
+
+- (NSArray*) allPresets
+{
+    return [[self.standardPresets arrayByAddingObjectsFromArray:self.customPresets] copy];
 }
 
 @end

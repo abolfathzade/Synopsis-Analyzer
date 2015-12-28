@@ -16,6 +16,7 @@
 #import "MetadataWriterTranscodeOperation.h"
 
 #import "PreferencesViewController.h"
+#import "PresetObject.h"
 
 @interface AppDelegate ()
 
@@ -212,8 +213,9 @@
     // Pass 1 is our analysis pass, and our decode pass
 
     // todo: get the selected preset and fill in the logic here
-    NSDictionary* videoSettings = [self.prefsViewController videoSettingsDictionaryForPreset:nil];
-    NSDictionary* audioSettings = [self.prefsViewController videoSettingsDictionaryForPreset:nil];
+    PresetObject* currentPreset = [self.prefsViewController defaultPreset];
+    NSDictionary* videoSettings = currentPreset.videoSettings;
+    NSDictionary* audioSettings = currentPreset.audioSettings;
     
     NSDictionary* transcodeOptions = @{kSynopsisTranscodeVideoSettingsKey : (videoSettings) ? [videoSettings copy] : [NSNull null],
                                        kSynopsisTranscodeAudioSettingsKey : (audioSettings) ? [audioSettings copy] : [NSNull null],
