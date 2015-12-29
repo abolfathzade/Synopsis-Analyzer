@@ -279,6 +279,9 @@
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
+                                <connections>
+                                    <action selector="selectVideoQuality:" target="-2" id="Bg6-SY-Q2R"/>
+                                </connections>
                             </popUpButton>
                         </subviews>
                     </view>
@@ -314,6 +317,9 @@
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
+                                <connections>
+                                    <action selector="selectVideoAspectRatio:" target="-2" id="6OC-DL-Jew"/>
+                                </connections>
                             </popUpButton>
                         </subviews>
                     </view>
@@ -374,6 +380,9 @@
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
+                                <connections>
+                                    <action selector="selectVideoResolution:" target="-2" id="UQT-5O-hUd"/>
+                                </connections>
                             </popUpButton>
                         </subviews>
                     </view>
@@ -401,6 +410,9 @@
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
+                                <connections>
+                                    <action selector="selectVideoEncoder:" target="-2" id="xo8-xp-ESp"/>
+                                </connections>
                             </popUpButton>
                         </subviews>
                     </view>
@@ -435,6 +447,9 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
+                    <connections>
+                        <action selector="selectAudioFormat:" target="-2" id="DYO-5B-kCC"/>
+                    </connections>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="xEq-fZ-K94">
                     <rect key="frame" x="15" y="359" width="45" height="14"/>
@@ -459,6 +474,9 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
+                    <connections>
+                        <action selector="selectAudioSamplerate:" target="-2" id="bca-hF-pzO"/>
+                    </connections>
                 </popUpButton>
                 <popUpButton verticalHuggingPriority="750" id="hFk-0X-eqA">
                     <rect key="frame" x="70" y="328" width="127" height="19"/>
@@ -480,6 +498,9 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
+                    <connections>
+                        <action selector="selectAudioQuality:" target="-2" id="lXv-6l-LKt"/>
+                    </connections>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Kjf-3d-bVi">
                     <rect key="frame" x="15" y="331" width="45" height="14"/>
@@ -513,6 +534,9 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
+                    <connections>
+                        <action selector="selectAudioBitrate:" target="-2" id="W1o-8l-Ca9"/>
+                    </connections>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="zUN-ZH-XJZ">
                     <rect key="frame" x="18" y="279" width="43" height="14"/>

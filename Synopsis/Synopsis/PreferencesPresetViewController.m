@@ -615,7 +615,7 @@ const NSString* value = @"Value";
         case kAudioFormatAppleLossless:
         case kAudioFormatMPEG4AAC:
         {
-            //            audioSettingsDictonary[AVEncoderAudioQualityKey] = self.prefsAudioQuality.selectedItem.representedObject;
+            // audioSettingsDictonary[AVEncoderAudioQualityKey] = self.prefsAudioQuality.selectedItem.representedObject;
             audioSettingsDictonary[AVEncoderBitRateKey] = self.prefsAudioBitrate.selectedItem.representedObject;
             audioSettingsDictonary[AVSampleRateConverterAlgorithmKey] = AVSampleRateConverterAlgorithm_Normal;
             audioSettingsDictonary[AVEncoderBitRateStrategyKey] = AVAudioBitRateStrategy_Constant;
@@ -758,32 +758,6 @@ const NSString* value = @"Value";
     return NO;
 }
 
-
-#pragma mark - Container View Helpers
-
-- (void) configureOverviewContainerViewFromPreset:(PresetObject*)preset
-{
-    self.selectedPreset = preset;
-    
-    self.overviewDescriptionTextField.stringValue = self.selectedPreset.description;
-}
-
-- (void) configureAudioSettingsFromPreset:(PresetObject*)preset
-{
-    
-}
-
-- (void) configureVideoSettingsFromPreset:(PresetObject*)preset
-{
-    
-}
-
-- (void) configureAnalysisSettingsFromPreset:(PresetObject*)preset
-{
-    
-}
-
-
 #pragma mark - Outline View Data Source
 
 - (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
@@ -855,6 +829,8 @@ const NSString* value = @"Value";
     return NO;
 }
 
+#pragma mark - Presets
+
 - (NSArray*) allPresets
 {
     return [[self.standardPresets.children arrayByAddingObjectsFromArray:self.customPresets.children] copy];
@@ -880,6 +856,33 @@ const NSString* value = @"Value";
     self.selectedPresetGroup.children = newChildren;
     
     [self.presetOutlineView reloadData];
+}
+
+- (void) configureOverviewContainerViewFromPreset:(PresetObject*)preset
+{
+    self.selectedPreset = preset;
+    
+    self.overviewDescriptionTextField.stringValue = self.selectedPreset.description;
+}
+
+- (void) configureAudioSettingsFromPreset:(PresetObject*)preset
+{
+    
+}
+
+- (void) configureVideoSettingsFromPreset:(PresetObject*)preset
+{
+    
+}
+
+- (void) configureAnalysisSettingsFromPreset:(PresetObject*)preset
+{
+    
+}
+
+- (void) configurePresetFromUI:(id)sender
+{
+    
 }
 
 @end
