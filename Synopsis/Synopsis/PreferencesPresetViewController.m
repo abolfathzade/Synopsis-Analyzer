@@ -38,7 +38,8 @@ const NSString* value = @"Value";
 @property (weak) IBOutlet NSTextField* prefsVideoDimensionsCustomWidth;
 @property (weak) IBOutlet NSTextField* prefsVideoDimensionsCustomHeight;
 @property (weak) IBOutlet NSPopUpButton* prefsVideoAspectRatio;
-@property (atomic, readwrite, strong) NSDictionary* prefsVideoSettings; // sent to kSynopsisTranscodeVideoSettingsKey
+
+//@property (atomic, readwrite, strong) NSDictionary* prefsVideoSettings; // sent to kSynopsisTranscodeVideoSettingsKey
 
 // Preferences Audio
 @property (weak) IBOutlet NSView* audioContainerView;
@@ -47,7 +48,8 @@ const NSString* value = @"Value";
 @property (weak) IBOutlet NSPopUpButton* prefsAudioRate;
 @property (weak) IBOutlet NSPopUpButton* prefsAudioQuality;
 @property (weak) IBOutlet NSPopUpButton* prefsAudioBitrate;
-@property (atomic, readwrite, strong) NSDictionary* prefsAudioSettings; // sent to kSynopsisTranscodeAudioSettingsKey
+
+//@property (atomic, readwrite, strong) NSDictionary* prefsAudioSettings; // sent to kSynopsisTranscodeAudioSettingsKey
 
 // Preferences Analysis
 @property (weak) IBOutlet NSView* analysisContainerView;
@@ -448,7 +450,7 @@ const NSString* value = @"Value";
     // If we are passthrough, we set out video prefs to nil and bail early
     if(compressorDict == [NSNull null] || compressorDict == nil)
     {
-        self.prefsVideoSettings = nil;
+        self.selectedPreset.videoSettings = nil;
         return;
     }
     
@@ -503,9 +505,9 @@ const NSString* value = @"Value";
         }
     }
     
-    self.prefsVideoSettings = [videoSettingsDictonary copy];
+    self.selectedPreset.videoSettings = [videoSettingsDictonary copy];
     
-    NSLog(@"Calculated Video Settings : %@", self.prefsVideoSettings);
+    NSLog(@"Calculated Video Settings : %@", self.selectedPreset.videoSettings);
 }
 
 #pragma mark - Audio Prefs Actions
@@ -589,7 +591,7 @@ const NSString* value = @"Value";
     // If we are passthrough, we set out video prefs to nil and bail early
     if(audioFormat == [NSNull null] || audioFormat == nil)
     {
-        self.prefsAudioSettings = nil;
+        self.selectedPreset.audioSettings = nil;
         return;
     }
     
@@ -625,10 +627,9 @@ const NSString* value = @"Value";
             break;
     }
     
-    self.prefsAudioSettings = [audioSettingsDictonary copy];
+    self.selectedPreset.audioSettings = [audioSettingsDictonary copy];
     
-    NSLog(@"Calculated Audio Settings : %@", self.prefsAudioSettings);
-    
+    NSLog(@"Calculated Audio Settings : %@", self.selectedPreset.audioSettings);
 }
 
 #pragma mark - Outline View Delegate
@@ -867,20 +868,30 @@ const NSString* value = @"Value";
 
 - (void) configureAudioSettingsFromPreset:(PresetObject*)preset
 {
-    
+    // configure editability:
+    self.useAudioCheckButton.enabled = preset.editable;
+    self.prefsAudioFormat.enabled = preset.editable;
+    self.prefsAudioBitrate.enabled = preset.editable;
+    self.prefsAudioQuality.enabled = preset.editable;
+    self.prefsAudioRate.enabled = preset.editable;
+
+    // set values
+//    self.prefsAudioFormat
 }
 
 - (void) configureVideoSettingsFromPreset:(PresetObject*)preset
 {
-    
+    // configure editability:
+    self.useVideoCheckButton.enabled = preset.editable;
+    self.prefsVideoCompressor.enabled = preset.editable;
+    self.prefsVideoDimensions.enabled = preset.editable;
+    self.prefsVideoDimensionsCustomWidth.enabled = preset.editable;
+    self.prefsVideoDimensionsCustomHeight.enabled = preset.editable;
+    self.prefsVideoQuality.enabled = preset.editable;
+    self.prefsVideoAspectRatio.enabled = preset.editable;
 }
 
 - (void) configureAnalysisSettingsFromPreset:(PresetObject*)preset
-{
-    
-}
-
-- (void) configurePresetFromUI:(id)sender
 {
     
 }

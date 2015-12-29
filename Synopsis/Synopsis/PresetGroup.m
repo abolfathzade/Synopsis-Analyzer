@@ -25,4 +25,10 @@
     }
     return nil;
 }
+
+- (NSString*) description
+{
+    return self.title;
+}
+
 @end

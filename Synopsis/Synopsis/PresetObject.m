@@ -13,20 +13,7 @@
 #import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 
 @interface PresetObject ()
-{
-    
-}
-@property (readwrite) NSString* title;
-@property (readwrite) NSDictionary* audioSettings;
-@property (readwrite) NSDictionary* videoSettings;
-@property (readwrite) NSDictionary* analyzerSettings;
-
-@property (readwrite) BOOL useAudio;
-@property (readwrite) BOOL useVideo;
-@property (readwrite) BOOL useAnalysis;
-
 @property (readwrite) BOOL editable;
-
 @end
 
 @implementation PresetObject
@@ -106,11 +93,17 @@
     
     audioFormat = [audioFormat stringByAppendingString:@"\n\r"];
     audioFormat = [audioFormat stringByAppendingString:@"\tSampling Rate: "];
-    audioFormat = [audioFormat stringByAppendingString:self.audioSettings[AVSampleRateKey]];
-
+    if(self.audioSettings[AVSampleRateKey] != [NSNull null] && self.audioSettings[AVSampleRateKey] != nil)
+        audioFormat = [audioFormat stringByAppendingString:[self.audioSettings[AVSampleRateKey] stringValue]];
+    else
+        audioFormat = [audioFormat stringByAppendingString:@"Match"];
+                   
     audioFormat = [audioFormat stringByAppendingString:@"\n\r"];
     audioFormat = [audioFormat stringByAppendingString:@"\tNumber of Channels: "];
-    audioFormat = [audioFormat stringByAppendingString:self.audioSettings[AVNumberOfChannelsKey]];
+    if(self.audioSettings[AVNumberOfChannelsKey] != [NSNull null] && self.audioSettings[AVNumberOfChannelsKey] != nil)
+        audioFormat = [audioFormat stringByAppendingString:[self.audioSettings[AVNumberOfChannelsKey] stringValue]];
+    else
+        audioFormat = [audioFormat stringByAppendingString:@"Match"];
 
     return audioFormat;
 }
@@ -150,9 +143,9 @@
     {
         videoFormat = [videoFormat stringByAppendingString:@"\n\r"];
         videoFormat = [videoFormat stringByAppendingString:@"\tDimensions: "];
-        videoFormat = [videoFormat stringByAppendingString:self.videoSettings[AVVideoWidthKey]];
+        videoFormat = [videoFormat stringByAppendingString:[self.videoSettings[AVVideoWidthKey] stringValue]];
         videoFormat = [videoFormat stringByAppendingString:@" x "];
-        videoFormat = [videoFormat stringByAppendingString:self.videoSettings[AVVideoHeightKey]];
+        videoFormat = [videoFormat stringByAppendingString:[self.videoSettings[AVVideoHeightKey] stringValue]];
     }
     else
     {

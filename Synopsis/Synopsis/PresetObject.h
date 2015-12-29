@@ -12,15 +12,14 @@
 
 - (id) initWithTitle:(NSString*)title audioSettings:(NSDictionary*)audioSettings videoSettings:(NSDictionary*)videoSettings analyzerSettings:(NSDictionary*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable NS_DESIGNATED_INITIALIZER;
 
-@property (readonly) NSString* title;
+@property (readwrite) NSString* title;
+@property (readwrite) NSDictionary* audioSettings;
+@property (readwrite) NSDictionary* videoSettings;
+@property (readwrite) NSDictionary* analyzerSettings;
 
-@property (readonly) NSDictionary* audioSettings;
-@property (readonly) NSDictionary* videoSettings;
-@property (readonly) NSDictionary* analyzerSettings;
-
-@property (readonly) BOOL useAudio;
-@property (readonly) BOOL useVideo;
-@property (readonly) BOOL useAnalysis;
+@property (readwrite) BOOL useAudio;
+@property (readwrite) BOOL useVideo;
+@property (readwrite) BOOL useAnalysis;
 
 @property (readonly) BOOL editable;
 
