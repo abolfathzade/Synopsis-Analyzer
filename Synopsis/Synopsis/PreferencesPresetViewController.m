@@ -59,6 +59,7 @@ const NSString* value = @"Value";
 @property (atomic, readwrite, strong) PresetGroup* customPresets;
 
 @property (atomic, readwrite, strong) PresetObject* selectedPreset;
+@property (atomic, readwrite, strong) PresetGroup* selectedPresetGroup;
 
 @end
 
@@ -70,13 +71,13 @@ const NSString* value = @"Value";
     if(self)
     {
         self.selectedPreset = nil;
-        self.standardPresets = [[PresetGroup alloc] initWithTitle:@"Standard Presets"];
-        self.customPresets = [[PresetGroup alloc] initWithTitle:@"Custom Presets"];
+        self.standardPresets = [[PresetGroup alloc] initWithTitle:@"Standard Presets" editable:NO];
+        self.customPresets = [[PresetGroup alloc] initWithTitle:@"Custom Presets" editable:NO];
         
         // set up some basic presets
-        PresetObject* passthrough = [[PresetObject alloc] initWithTitle:@"Passthrough" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:YES useVideo:YES useAnalysis:YES];
+        PresetObject* passthrough = [[PresetObject alloc] initWithTitle:@"Passthrough" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:YES useVideo:YES useAnalysis:YES editable:NO];
         
-        PresetObject* passthroughVideoOnly = [[PresetObject alloc] initWithTitle:@"Passthrough Video" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:NO useVideo:YES useAnalysis:YES];
+        PresetObject* passthroughVideoOnly = [[PresetObject alloc] initWithTitle:@"Passthrough Video" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:NO useVideo:YES useAnalysis:YES editable:NO];
         
         PresetObject* appleIntermediateLinearPCM = [[PresetObject alloc] initWithTitle:@"Apple Intermediate Only"
                                                                          audioSettings:nil
@@ -84,13 +85,16 @@ const NSString* value = @"Value";
                                                                       analyzerSettings:nil
                                                                               useAudio:NO
                                                                               useVideo:YES
-                                                                           useAnalysis:YES];
+                                                                           useAnalysis:YES
+                                                                              editable:NO];
         
-        PresetGroup* passthroughGroup = [[PresetGroup alloc] initWithTitle:@"Passthrough"];
+        PresetGroup* passthroughGroup = [[PresetGroup alloc] initWithTitle:@"Passthrough" editable:NO];
         passthroughGroup.children = @[passthrough, passthroughVideoOnly];
         
         self.standardPresets.children = @[passthroughGroup, appleIntermediateLinearPCM];
 
+        self.selectedPresetGroup = self.customPresets;
+        
         return self;
     }
     
@@ -126,7 +130,7 @@ const NSString* value = @"Value";
     [self.prefsVideoQuality removeAllItems];
     [self.prefsVideoAspectRatio removeAllItems];
     
-#pragma mark - Video Prefs Encoders
+    // Video Prefs Encoders
     
     VTRegisterProfessionalVideoWorkflowVideoDecoders();
     VTRegisterProfessionalVideoWorkflowVideoEncoders();
@@ -142,7 +146,6 @@ const NSString* value = @"Value";
     //    [self.prefsVideoCompressor addItemWithTitle:@"HAP Alpha"];
     //    [self.prefsVideoCompressor addItemWithTitle:@"HAP Q"];
     
-    // TODO:CMVideoCodecType / check what works as a value for AVVideoCodecKey
     CFArrayRef videoEncoders;
     VTCopyVideoEncoderList(NULL, &videoEncoders);
     NSArray* videoEncodersArray = (__bridge NSArray*)videoEncoders;
@@ -159,7 +162,7 @@ const NSString* value = @"Value";
     
     [self addMenuItemsToMenu:self.prefsVideoCompressor.menu withArray:encoderArrayWithTitles withSelector:@selector(selectVideoEncoder:)];
     
-#pragma mark - Video Prefs Resolution
+    // Video Prefs Resolution
     
     NSMenuItem* nativeItem = [[NSMenuItem alloc] initWithTitle:@"Native Resolution" action:@selector(selectVideoResolution:) keyEquivalent:@""];
     [nativeItem setRepresentedObject:[NSValue valueWithSize:NSZeroSize] ];
@@ -189,7 +192,7 @@ const NSString* value = @"Value";
     [customItem setRepresentedObject:[NSNull null]];
     [self.prefsVideoDimensions.menu addItem:customItem];
     
-#pragma mark - Video Prefs Quality
+    // Video Prefs Quality
     
     NSMenuItem* qualityItem = [[NSMenuItem alloc] initWithTitle:@"Not Applicable" action:@selector(selectVideoQuality:) keyEquivalent:@""];
     [qualityItem setRepresentedObject:[NSNull null]];
@@ -206,7 +209,7 @@ const NSString* value = @"Value";
     
     [self addMenuItemsToMenu:self.prefsVideoQuality.menu withArray:qualityArray withSelector:@selector(selectVideoQuality:)];
     
-#pragma mark - Video Prefs Aspect Ratio
+    // Video Prefs Aspect Ratio
     
     NSMenuItem* aspectItem = [[NSMenuItem alloc] initWithTitle:@"Native" action:@selector(selectVideoAspectRatio:) keyEquivalent:@""];
     [aspectItem setRepresentedObject:[NSNull null]];
@@ -233,7 +236,7 @@ const NSString* value = @"Value";
     [self.prefsAudioQuality removeAllItems];
     [self.prefsAudioBitrate removeAllItems];
     
-#pragma mark - Audio Prefs Format
+    // Audio Prefs Format
     
     NSMenuItem* passthroughItem = [[NSMenuItem alloc] initWithTitle:@"Passthrough" action:@selector(selectAudioFormat:) keyEquivalent:@""];
     [passthroughItem setRepresentedObject:[NSNull null]];
@@ -249,7 +252,7 @@ const NSString* value = @"Value";
     
     [self addMenuItemsToMenu:self.prefsAudioFormat.menu withArray:formatArray withSelector:@selector(selectAudioFormat:)];
     
-#pragma mark - Audio Prefs Rate
+    // Audio Prefs Rate
     
     NSMenuItem* recommendedItem = [[NSMenuItem alloc] initWithTitle:@"Recommended" action:@selector(selectAudioSamplerate:) keyEquivalent:@""];
     [recommendedItem setRepresentedObject:[NSNull null]];
@@ -270,7 +273,7 @@ const NSString* value = @"Value";
     
     [self addMenuItemsToMenu:self.prefsAudioRate.menu withArray:rateArray withSelector:@selector(selectAudioSamplerate:)];
     
-#pragma mark - Audio Prefs Quality
+    // Audio Prefs Quality
     
     NSArray* qualityArray = @[
                               @{title : @"Minimum", value : @(AVAudioQualityMin)} ,
@@ -282,7 +285,7 @@ const NSString* value = @"Value";
     
     [self addMenuItemsToMenu:self.prefsAudioQuality.menu withArray:qualityArray withSelector:@selector(selectAudioQuality:)];
     
-#pragma mark - Audio Prefs Bitrate
+    // Audio Prefs Bitrate
     
     NSMenuItem* recommendedItem2 = [[NSMenuItem alloc] initWithTitle:@"Recommended" action:@selector(selectAudioBitrate:) keyEquivalent:@""];
     [recommendedItem2 setRepresentedObject:[NSNull null]];
@@ -633,24 +636,31 @@ const NSString* value = @"Value";
 - (NSView *)outlineView:(NSOutlineView *)outlineView viewForTableColumn:(NSTableColumn *)tableColumn item:(id)item
 {
     NSTableCellView* view = (NSTableCellView*)[outlineView makeViewWithIdentifier:@"Preset" owner:self];
-
+    
     if([item isKindOfClass:[PresetGroup class]])
     {
         PresetGroup* itemGroup = (PresetGroup*)item;
+        view.objectValue = itemGroup;
         view.textField.stringValue = itemGroup.title;
+        view.textField.editable = itemGroup.editable;
+        view.textField.selectable = itemGroup.editable;
         view.imageView.image = [NSImage imageNamed:@"ic_folder_white"];
     }
     else if ([item isKindOfClass:[PresetObject class]])
     {
         PresetObject* presetItem = (PresetObject*)item;
-
+        view.objectValue = presetItem;
         view.textField.stringValue = presetItem.title;
+        view.textField.editable = presetItem.editable;
+        view.textField.selectable = presetItem.editable;
         view.imageView.image = [NSImage imageNamed:@"ic_insert_drive_file_white"];
     }
     else if([item isKindOfClass:[NSNumber class]])
     {
         NSNumber* itemNumber = (NSNumber*)item;
-        
+        view.textField.editable = NO;
+        view.textField.selectable = NO;
+
         switch (itemNumber.integerValue)
         {
             case 0:
@@ -688,13 +698,24 @@ const NSString* value = @"Value";
     
     if([item isKindOfClass:[PresetObject class]])
     {
-        
         [self.presetInfoContainerBox addSubview:self.overviewContainerView];
         
         self.overviewContainerView.frame = self.presetInfoContainerBox.bounds;
         
         [self configureOverviewContainerViewFromPreset:(PresetObject*)item];
         
+        return YES;
+    }
+    
+    if([item isKindOfClass:[PresetGroup class]])
+    {
+        PresetGroup* itemGroup = (PresetGroup*)item;
+        if(itemGroup.editable)
+        {
+            self.selectedPresetGroup = item;
+        }
+        else
+            self.selectedPresetGroup = self.customPresets;
         return YES;
     }
     
@@ -736,6 +757,7 @@ const NSString* value = @"Value";
     
     return NO;
 }
+
 
 #pragma mark - Container View Helpers
 
@@ -820,6 +842,11 @@ const NSString* value = @"Value";
     return nil;
 }
 
+- (void)outlineView:(NSOutlineView *)outlineView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
+{
+    NSLog(@"blah");
+}
+
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
 {
     if(item == nil || [item isKindOfClass:[PresetGroup class]] || [item isKindOfClass:[PresetObject class]])
@@ -831,6 +858,28 @@ const NSString* value = @"Value";
 - (NSArray*) allPresets
 {
     return [[self.standardPresets.children arrayByAddingObjectsFromArray:self.customPresets.children] copy];
+}
+
+- (IBAction)addPresetGroup:(id)sender
+{
+    PresetGroup* new = [[PresetGroup alloc] initWithTitle:@"New Group" editable:YES];
+    
+    NSArray* newChildren = [[self.selectedPresetGroup children] arrayByAddingObject:new];
+    
+    self.selectedPresetGroup.children = newChildren;
+    
+    [self.presetOutlineView reloadData];
+}
+
+- (IBAction)addPreset:(id)sender
+{
+    PresetObject* new = [[PresetObject alloc] initWithTitle:@"Unititled" audioSettings:nil videoSettings:nil analyzerSettings:nil useAudio:YES useVideo:YES useAnalysis:YES editable:YES];
+    
+    NSArray* newChildren = [[self.selectedPresetGroup children] arrayByAddingObject:new];
+    
+    self.selectedPresetGroup.children = newChildren;
+    
+    [self.presetOutlineView reloadData];
 }
 
 @end

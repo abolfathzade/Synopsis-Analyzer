@@ -88,9 +88,9 @@
                                                                                 <textField verticalHuggingPriority="750" id="Z3f-ct-WGH">
                                                                                     <rect key="frame" x="30" y="5" width="142" height="14"/>
                                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                                    <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="VvQ-mK-9Ya">
+                                                                                    <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingTail" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" title="Table View Cell" id="VvQ-mK-9Ya">
                                                                                         <font key="font" metaFont="smallSystem"/>
-                                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                        <color key="textColor" name="selectedTextBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                                     </textFieldCell>
                                                                                 </textField>
@@ -123,6 +123,9 @@
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
+                                                <connections>
+                                                    <action selector="addPreset:" target="-2" id="SmJ-IV-717"/>
+                                                </connections>
                                             </button>
                                             <button id="lQA-4i-tKY">
                                                 <rect key="frame" x="47" y="14" width="30" height="26"/>
@@ -131,6 +134,17 @@
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
+                                            </button>
+                                            <button id="RLo-uq-NkL">
+                                                <rect key="frame" x="76" y="14" width="30" height="26"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="ic_remove_circle" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="RDd-B1-VaQ">
+                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                    <font key="font" metaFont="system"/>
+                                                </buttonCell>
+                                                <connections>
+                                                    <action selector="addPresetGroup:" target="-2" id="hDh-mN-JZp"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                     </view>

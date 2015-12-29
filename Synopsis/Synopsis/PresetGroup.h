@@ -11,9 +11,10 @@
 @interface PresetGroup : NSObject
 
 @property (copy) NSString* title;
+@property (readonly) BOOL editable;
 
 @property (copy) NSArray* children;
 
-- (id) initWithTitle:(NSString*)title NS_DESIGNATED_INITIALIZER;
+- (id) initWithTitle:(NSString*)title editable:(BOOL)editable NS_DESIGNATED_INITIALIZER;
 
 @end

@@ -25,11 +25,13 @@
 @property (readwrite) BOOL useVideo;
 @property (readwrite) BOOL useAnalysis;
 
+@property (readwrite) BOOL editable;
+
 @end
 
 @implementation PresetObject
 
-- (id) initWithTitle:(NSString*)title audioSettings:(NSDictionary*)audioSettings videoSettings:(NSDictionary*)videoSettings analyzerSettings:(NSDictionary*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis
+- (id) initWithTitle:(NSString*)title audioSettings:(NSDictionary*)audioSettings videoSettings:(NSDictionary*)videoSettings analyzerSettings:(NSDictionary*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable
 {
     self = [super init];
     if(self)
@@ -43,6 +45,7 @@
         self.useVideo = useVideo;
         self.useAnalysis = useAnalysis;
         
+        self.editable = editable;
         return self;
     }
     return nil;
@@ -51,12 +54,13 @@
 - (id) copyWithZone:(NSZone *)zone
 {
     return [[PresetObject allocWithZone:zone] initWithTitle:self.title
-                                 audioSettings:self.audioSettings
-                                 videoSettings:self.videoSettings
-                              analyzerSettings:self.analyzerSettings
-                                      useAudio:self.useAudio
-                                      useVideo:self.useVideo
-                                   useAnalysis:self.useAnalysis];
+                                              audioSettings:self.audioSettings
+                                              videoSettings:self.videoSettings
+                                           analyzerSettings:self.analyzerSettings
+                                                   useAudio:self.useAudio
+                                                   useVideo:self.useVideo
+                                                useAnalysis:self.useAnalysis
+                                                   editable:self.editable];
 }
 
 - (NSString*) description
