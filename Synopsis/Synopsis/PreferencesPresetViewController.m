@@ -691,10 +691,10 @@ const NSString* value = @"Value";
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldSelectItem:(id)item
 {
-    [self.videoContainerView removeFromSuperview];
-    [self.audioContainerView removeFromSuperview];
-    [self.analysisContainerView removeFromSuperview];
-    [self.overviewContainerView removeFromSuperview];
+//    [self.videoContainerView removeFromSuperview];
+//    [self.audioContainerView removeFromSuperview];
+//    [self.analysisContainerView removeFromSuperview];
+//    [self.overviewContainerView removeFromSuperview];
     
     if([item isKindOfClass:[PresetGroup class]])
     {
@@ -725,45 +725,45 @@ const NSString* value = @"Value";
         return YES;
     }
 
-    if([item isKindOfClass:[PresetAudioSettings class]])
-    {
-        self.selectedPreset = [self.presetOutlineView parentForItem:item];
-        self.selectedPresetGroup = [self.presetOutlineView parentForItem:self.selectedPreset];
-
-        [self.presetInfoContainerBox addSubview:self.audioContainerView];
-        self.audioContainerView.frame = self.presetInfoContainerBox.bounds;
-        
-        [self configureAudioSettingsFromPreset:self.selectedPreset];
-
-        return YES;
-    }
-    
-    if([item isKindOfClass:[PresetVideoSettings class]])
-    {
-        self.selectedPreset = [self.presetOutlineView parentForItem:item];
-        self.selectedPresetGroup = [self.presetOutlineView parentForItem:self.selectedPreset];
-        
-        [self.presetInfoContainerBox addSubview:self.videoContainerView];
-        self.videoContainerView.frame = self.presetInfoContainerBox.bounds;
-        
-        [self configureVideoSettingsFromPreset:self.selectedPreset];
-        
-        return YES;
-    }
-    
-    if([item isKindOfClass:[PresetAnalysisSettings class]])
-    {
-        self.selectedPreset = [self.presetOutlineView parentForItem:item];
-        self.selectedPresetGroup = [self.presetOutlineView parentForItem:self.selectedPreset];
-        
-        [self.presetInfoContainerBox addSubview:self.analysisContainerView];
-        self.analysisContainerView.frame = self.presetInfoContainerBox.bounds;
-        
-        [self configureAnalysisSettingsFromPreset:self.selectedPreset];
-        
-        return YES;
-    }
-    
+//    if([item isKindOfClass:[PresetAudioSettings class]])
+//    {
+//        self.selectedPreset = [self.presetOutlineView parentForItem:item];
+//        self.selectedPresetGroup = [self.presetOutlineView parentForItem:self.selectedPreset];
+//
+//        [self.presetInfoContainerBox addSubview:self.audioContainerView];
+//        self.audioContainerView.frame = self.presetInfoContainerBox.bounds;
+//        
+//        [self configureAudioSettingsFromPreset:self.selectedPreset];
+//
+//        return YES;
+//    }
+//    
+//    if([item isKindOfClass:[PresetVideoSettings class]])
+//    {
+//        self.selectedPreset = [self.presetOutlineView parentForItem:item];
+//        self.selectedPresetGroup = [self.presetOutlineView parentForItem:self.selectedPreset];
+//        
+//        [self.presetInfoContainerBox addSubview:self.videoContainerView];
+//        self.videoContainerView.frame = self.presetInfoContainerBox.bounds;
+//        
+//        [self configureVideoSettingsFromPreset:self.selectedPreset];
+//        
+//        return YES;
+//    }
+//    
+//    if([item isKindOfClass:[PresetAnalysisSettings class]])
+//    {
+//        self.selectedPreset = [self.presetOutlineView parentForItem:item];
+//        self.selectedPresetGroup = [self.presetOutlineView parentForItem:self.selectedPreset];
+//        
+//        [self.presetInfoContainerBox addSubview:self.analysisContainerView];
+//        self.analysisContainerView.frame = self.presetInfoContainerBox.bounds;
+//        
+//        [self configureAnalysisSettingsFromPreset:self.selectedPreset];
+//        
+//        return YES;
+//    }
+//    
     return NO;
 }
 
@@ -785,7 +785,7 @@ const NSString* value = @"Value";
     else if ([item isKindOfClass:[PresetObject class]])
     {
         // audio, video, analysis
-        return 3;
+        return 0; //3
     }
   
     return 0;
@@ -812,27 +812,27 @@ const NSString* value = @"Value";
         return itemGroup.children[index];
     }
     
-    else if ([item isKindOfClass:[PresetObject class]])
-    {
-        // return an NSNumber object that is the index
-        // 0 = audio, 1 = video, 2 = analysis;
-        
-        PresetObject* presetItem = (PresetObject*)item;
-        switch (index) {
-            case 0:
-                return presetItem.audioSettings;
-            case 1:
-                return presetItem.videoSettings;
-            case 2:
-                return presetItem.analyzerSettings;
-        }
-    }
+//    else if ([item isKindOfClass:[PresetObject class]])
+//    {
+//        // return an NSNumber object that is the index
+//        // 0 = audio, 1 = video, 2 = analysis;
+//        
+//        PresetObject* presetItem = (PresetObject*)item;
+//        switch (index) {
+//            case 0:
+//                return presetItem.audioSettings;
+//            case 1:
+//                return presetItem.videoSettings;
+//            case 2:
+//                return presetItem.analyzerSettings;
+//        }
+//    }
     return nil;
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
 {
-    if(item == nil || [item isKindOfClass:[PresetGroup class]] || [item isKindOfClass:[PresetObject class]])
+    if(item == nil || [item isKindOfClass:[PresetGroup class]] )//|| [item isKindOfClass:[PresetObject class]])
         return YES;
     
     return NO;
@@ -872,6 +872,10 @@ const NSString* value = @"Value";
     self.selectedPreset = preset;
     
     self.overviewDescriptionTextField.stringValue = self.selectedPreset.description;
+    
+    [self configureAudioSettingsFromPreset:self.selectedPreset];
+    [self configureVideoSettingsFromPreset:self.selectedPreset];
+    [self configureAnalysisSettingsFromPreset:self.selectedPreset];
 }
 
 - (void) configureAudioSettingsFromPreset:(PresetObject*)preset
