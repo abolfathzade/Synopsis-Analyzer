@@ -27,6 +27,12 @@
 
 @end
 
+// We had / use unique types for NSOutlineView so we could determine the type of a preset
+// this could probably go away  or be simplified into an NSDictionary category that
+// returns a dictionary with a type key prepopulated...
+// whatever man
+// at some point this needs to be removed or made serializable
+
 @interface PresetAudioSettings : NSObject
 + (PresetAudioSettings*) none;
 @property (copy) NSDictionary* settingsDictionary;

@@ -18,8 +18,9 @@ const NSString* title = @"Title";
 const NSString* value = @"Value";
 
 
-@interface PreferencesPresetViewController ()  <NSOutlineViewDataSource, NSOutlineViewDelegate>
+@interface PreferencesPresetViewController ()  <NSOutlineViewDataSource, NSOutlineViewDelegate, NSSplitViewDelegate>
 
+@property (weak) IBOutlet NSSplitView* stupidFuckingSplitview;
 @property (weak) IBOutlet NSBox* presetInfoContainerBox;
 
 @property (weak) IBOutlet NSOutlineView* presetOutlineView;
@@ -111,6 +112,8 @@ const NSString* value = @"Value";
 {
     [super viewDidLoad];
 
+    self.stupidFuckingSplitview.delegate = self;
+    
     self.presetOutlineView.dataSource = self;
     self.presetOutlineView.delegate = self;
 
@@ -636,6 +639,19 @@ const NSString* value = @"Value";
     NSLog(@"Calculated Audio Settings : %@", self.selectedPreset.audioSettings);
 }
 
+#pragma mark - SplitView Delegate
+
+- (CGFloat)splitView:(NSSplitView *)splitView constrainMinCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex
+{
+    return 200;
+}
+
+- (CGFloat)splitView:(NSSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMin ofSubviewAt:(NSInteger)dividerIndex
+{
+    return 400;
+}
+
+
 #pragma mark - Outline View Delegate
 
 - (NSView *)outlineView:(NSOutlineView *)outlineView viewForTableColumn:(NSTableColumn *)tableColumn item:(id)item
@@ -694,7 +710,7 @@ const NSString* value = @"Value";
 //    [self.videoContainerView removeFromSuperview];
 //    [self.audioContainerView removeFromSuperview];
 //    [self.analysisContainerView removeFromSuperview];
-//    [self.overviewContainerView removeFromSuperview];
+    [self.overviewContainerView removeFromSuperview];
     
     if([item isKindOfClass:[PresetGroup class]])
     {
@@ -713,9 +729,8 @@ const NSString* value = @"Value";
 
     if([item isKindOfClass:[PresetObject class]])
     {
-        [self.presetInfoContainerBox addSubview:self.overviewContainerView];
-        
         self.overviewContainerView.frame = self.presetInfoContainerBox.bounds;
+        [self.presetInfoContainerBox setContentView:self.overviewContainerView];
         
         [self configureOverviewContainerViewFromPreset:(PresetObject*)item];
         
@@ -907,5 +922,7 @@ const NSString* value = @"Value";
 {
     
 }
+
+
 
 @end

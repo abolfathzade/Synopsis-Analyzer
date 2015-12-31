@@ -13,6 +13,7 @@
 - (void) awakeFromNib
 {
     [self setState:NSVisualEffectStateInactive];
+    [self setBlendingMode:NSVisualEffectBlendingModeWithinWindow];
     [self.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
 }
 
@@ -20,11 +21,9 @@
     [super drawRect:dirtyRect];
     
     // Drawing code here.
-    
     [[NSColor darkGrayColor] set];
     
     NSRectFill(dirtyRect);
-    
 }
 
 @end

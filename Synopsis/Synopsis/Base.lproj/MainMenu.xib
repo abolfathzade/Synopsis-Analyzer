@@ -714,24 +714,24 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <customView id="5D9-ej-34t" customClass="CustomVisualEffectView">
-                                <rect key="frame" x="0.0" y="0.0" width="623" height="240.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="623" height="240"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
                                     <customView id="UrI-I2-Ixg" customClass="DropFilesView">
-                                        <rect key="frame" x="0.0" y="0.0" width="623" height="240.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="623" height="240"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     </customView>
                                 </subviews>
                             </customView>
-                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="20" horizontalPageScroll="10" verticalLineScroll="20" verticalPageScroll="10" hasHorizontalScroller="NO" id="VN5-ui-0hD">
-                                <rect key="frame" x="0.0" y="241.5" width="623" height="236.5"/>
+                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="17" horizontalPageScroll="10" verticalLineScroll="17" verticalPageScroll="10" hasHorizontalScroller="NO" id="VN5-ui-0hD">
+                                <rect key="frame" x="0.0" y="241" width="623" height="237"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                <clipView key="contentView" copiesOnScroll="NO" id="M1f-rb-1gT">
-                                    <rect key="frame" x="0.0" y="17" width="623" height="219.5"/>
+                                <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="M1f-rb-1gT">
+                                    <rect key="frame" x="0.0" y="17" width="623" height="220"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView appearanceType="vibrantLight" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="sequential" selectionHighlightStyle="sourceList" columnReordering="NO" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="18" rowSizeStyle="automatic" headerView="jXf-cj-VVW" viewBased="YES" id="ivs-Jx-fnR">
-                                            <rect key="frame" x="0.0" y="0.0" width="623" height="219.5"/>
+                                        <tableView appearanceType="vibrantLight" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="sequential" selectionHighlightStyle="sourceList" columnReordering="NO" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="15" rowSizeStyle="automatic" headerView="jXf-cj-VVW" viewBased="YES" id="ivs-Jx-fnR">
+                                            <rect key="frame" x="0.0" y="0.0" width="623" height="220"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="_sourceListBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -918,19 +918,19 @@
             </view>
             <toolbar key="toolbar" implicitIdentifier="7E8DB8AF-4DB8-4061-B1FF-6BBE39806D5E" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="F3i-Ki-p5O">
                 <allowedToolbarItems>
-                    <toolbarItem implicitItemIdentifier="C48F9A12-A6F7-4B0E-A564-E69496782AFE" label="General" paletteLabel="General" tag="-1" image="ic_watch_later_white" id="uEb-hq-BfP">
+                    <toolbarItem implicitItemIdentifier="C48F9A12-A6F7-4B0E-A564-E69496782AFE" label="General" paletteLabel="General" image="ic_watch_later_white" id="uEb-hq-BfP">
                         <connections>
                             <action selector="transitionToGeneral:" target="RWQ-ld-8hs" id="CD3-Km-nMf"/>
                         </connections>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="5388A660-6B72-41DF-A950-CD74C07FC447" label="Plugins" paletteLabel="Plugins" tag="-1" image="ic_extension_white" id="Vvf-Ls-lIb" userLabel="Plugins"/>
-                    <toolbarItem implicitItemIdentifier="E065B788-51B2-4C93-B044-D0ED56CC532C" label="Presets" paletteLabel="Presets" tag="-1" image="ic_insert_drive_file_white" id="XyE-px-xvm">
+                    <toolbarItem implicitItemIdentifier="5388A660-6B72-41DF-A950-CD74C07FC447" label="Plugins" paletteLabel="Plugins" tag="1" image="ic_extension_white" id="Vvf-Ls-lIb" userLabel="Plugins"/>
+                    <toolbarItem implicitItemIdentifier="E065B788-51B2-4C93-B044-D0ED56CC532C" label="Presets" paletteLabel="Presets" tag="2" image="ic_insert_drive_file_white" id="XyE-px-xvm">
                         <connections>
                             <action selector="transitionToPreset:" target="RWQ-ld-8hs" id="Bvb-k6-xeT"/>
                         </connections>
                     </toolbarItem>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="PIU-ey-UUD"/>
-                    <toolbarItem implicitItemIdentifier="D4CCB399-CACF-4930-AB9D-B49E219079E7" label="Advanced" paletteLabel="Advanced" tag="-1" image="ic_tune_white" id="tpz-kj-eKa">
+                    <toolbarItem implicitItemIdentifier="D4CCB399-CACF-4930-AB9D-B49E219079E7" label="Advanced" paletteLabel="Advanced" tag="10" image="ic_tune_white" id="tpz-kj-eKa">
                         <connections>
                             <action selector="transitionToAdvanced:" target="RWQ-ld-8hs" id="qvg-10-u0K"/>
                         </connections>
@@ -968,10 +968,10 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="backgroundColor" white="1" alpha="0.0" colorSpace="calibratedWhite"/>
-                                    <size key="minSize" width="200" height="270"/>
+                                    <size key="minSize" width="465" height="270"/>
                                     <size key="maxSize" width="1000000" height="10000000"/>
                                     <color key="insertionPointColor" name="controlShadowColor" catalog="System" colorSpace="catalog"/>
-                                    <size key="minSize" width="200" height="270"/>
+                                    <size key="minSize" width="465" height="270"/>
                                     <size key="maxSize" width="1000000" height="10000000"/>
                                 </textView>
                             </subviews>

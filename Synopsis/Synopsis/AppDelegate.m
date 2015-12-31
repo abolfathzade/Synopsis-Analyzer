@@ -85,7 +85,6 @@
     // But Yea
     [self initSpotlight];
     
-    
     // Load our plugins
     NSString* pluginsPath = [[NSBundle mainBundle] builtInPlugInsPath];
     
@@ -214,13 +213,14 @@
 
     // todo: get the selected preset and fill in the logic here
     PresetObject* currentPreset = [self.prefsViewController defaultPreset];
-    NSDictionary* videoSettings = currentPreset.videoSettings;
-    NSDictionary* audioSettings = currentPreset.audioSettings;
+    PresetVideoSettings* videoSettings = currentPreset.videoSettings;
+    PresetAudioSettings* audioSettings = currentPreset.audioSettings;
     
     NSDictionary* transcodeOptions = @{kSynopsisTranscodeVideoSettingsKey : (videoSettings) ? [videoSettings copy] : [NSNull null],
                                        kSynopsisTranscodeAudioSettingsKey : (audioSettings) ? [audioSettings copy] : [NSNull null],
                                        };
     
+    // TODO: Just pass a copy of the current Preset directly.
     AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL
                                                                                         destinationURL:destinationURL
                                                                                       transcodeOptions:transcodeOptions

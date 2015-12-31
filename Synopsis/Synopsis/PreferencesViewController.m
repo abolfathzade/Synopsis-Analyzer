@@ -68,22 +68,26 @@
 
 - (IBAction)transitionToGeneral:(id)sender
 {
-    [self transitionToViewController:self.preferencesGeneralViewController];
+    [self transitionToViewController:self.preferencesGeneralViewController option:NSViewControllerTransitionSlideRight];
 }
 
 
 - (IBAction)transitionToPreset:(id)sender
 {
-    [self transitionToViewController:self.preferencesPresetViewController];
+    NSViewControllerTransitionOptions option = NSViewControllerTransitionSlideLeft;
+    if(1 - [sender tag] > 1)
+        option = NSViewControllerTransitionSlideRight;
+    
+    [self transitionToViewController:self.preferencesPresetViewController option:option];
 }
 
 
 - (IBAction)transitionToAdvanced:(id)sender
 {
-    [self transitionToViewController:self.preferencesAdvancedViewController];
+    [self transitionToViewController:self.preferencesAdvancedViewController option:NSViewControllerTransitionSlideLeft];
 }
 
-- (void) transitionToViewController:(NSViewController*)viewController
+- (void) transitionToViewController:(NSViewController*)viewController option:(NSViewControllerTransitionOptions)option
 {
     // early bail if equality
     if(self.currentViewController == viewController)
@@ -96,7 +100,7 @@
 
     [self transitionFromViewController:self.currentViewController
                       toViewController:viewController
-                               options:NSViewControllerTransitionCrossfade
+                               options:option
                      completionHandler:^{
 
                          [self.currentViewController removeFromParentViewController];
