@@ -21,6 +21,7 @@
 @property (weak) NSViewController* currentViewController;
 
 @end
+static NSInteger currentTag = 0;
 
 @implementation PreferencesViewController
 
@@ -68,27 +69,29 @@
 
 - (IBAction)transitionToGeneral:(id)sender
 {
-    [self transitionToViewController:self.preferencesGeneralViewController option:NSViewControllerTransitionSlideRight];
+    [self transitionToViewController:self.preferencesGeneralViewController tag:[sender tag]];
 }
 
 
 - (IBAction)transitionToPreset:(id)sender
 {
-    NSViewControllerTransitionOptions option = NSViewControllerTransitionSlideLeft;
-    if(1 - [sender tag] > 1)
-        option = NSViewControllerTransitionSlideRight;
-    
-    [self transitionToViewController:self.preferencesPresetViewController option:option];
+    [self transitionToViewController:self.preferencesPresetViewController tag:[sender tag]];
 }
 
 
 - (IBAction)transitionToAdvanced:(id)sender
 {
-    [self transitionToViewController:self.preferencesAdvancedViewController option:NSViewControllerTransitionSlideLeft];
+    [self transitionToViewController:self.preferencesAdvancedViewController tag:[sender tag]];
 }
 
-- (void) transitionToViewController:(NSViewController*)viewController option:(NSViewControllerTransitionOptions)option
+- (void) transitionToViewController:(NSViewController*)viewController tag:(NSInteger)tag
 {
+    NSViewControllerTransitionOptions option = NSViewControllerTransitionSlideRight;
+    if( tag > currentTag)
+        option = NSViewControllerTransitionSlideLeft;
+
+    currentTag = tag;
+    
     // early bail if equality
     if(self.currentViewController == viewController)
         return;
