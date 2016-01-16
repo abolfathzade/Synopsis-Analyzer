@@ -12,14 +12,17 @@
 #import "ProgressTableViewCellSourceController.h"
 #import "ProgressTableViewCellProgressController.h"
 #import "ProgressTableViewCellRevealController.h"
+#import "ProgressTableViewCellPresetController.h"
+
 @interface ProgressTableViewController ()
 @property (weak) IBOutlet NSTableView* tableView;
 
 // We dont want to hold on to our NSOperationQueues because we want to dealloc all the heavy media bullshit each one retains internally
 @property (atomic, readwrite, strong) NSPointerArray* transcodeAndAnalysisOperationsWeak;
-@property (atomic, readwrite, strong) NSMutableArray* sourceControllerArray;
 @property (atomic, readwrite, strong) NSMutableArray* progressControllerArray;
+@property (atomic, readwrite, strong) NSMutableArray* presetControllerArray;
 @property (atomic, readwrite, strong) NSMutableArray* revealControllerArray;
+@property (atomic, readwrite, strong) NSMutableArray* sourceControllerArray;
 @end
 
 @implementation ProgressTableViewController
@@ -52,6 +55,10 @@
         NSNib* revealTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellReveal" bundle:[NSBundle mainBundle]];
         [self.tableView registerNib:revealTableViewCell forIdentifier:@"Reveal"];
 
+        NSNib* presetTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellPreset" bundle:[NSBundle mainBundle]];
+        [self.tableView registerNib:presetTableViewCell forIdentifier:@"Preset"];
+
+        
         // We dont want to hold on to our NSOperationQueues because we want to dealloc all the heavy media bullshit each one retains internally
         self.transcodeAndAnalysisOperationsWeak = [[NSPointerArray alloc] initWithOptions:NSPointerFunctionsWeakMemory];
 
@@ -59,6 +66,7 @@
         self.sourceControllerArray = [NSMutableArray new];
         self.progressControllerArray = [NSMutableArray new];
         self.revealControllerArray = [NSMutableArray new];
+        self.presetControllerArray = [NSMutableArray new];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addTranscodeAndAnalysisOperation:) name:kSynopsisNewTranscodeOperationAvailable object:nil];
     });
@@ -135,29 +143,50 @@
          result = [tableView makeViewWithIdentifier:@"Progress" owner:controller];
     }
 
-    else  if([tableColumn.identifier isEqualToString:@"Reveal"])
+    else  if([tableColumn.identifier isEqualToString:@"Progress"])
     {
         // find our cached controller if we have one
-        ProgressTableViewCellRevealController* controller = nil;
-        if(self.revealControllerArray.count > row)
+        ProgressTableViewCellProgressController* controller = nil;
+        
+        if(self.progressControllerArray.count > row)
         {
-            controller = self.revealControllerArray[row];
+            controller = self.progressControllerArray[row];
         }
         
         if(!controller)
         {
             // cache if we dont have...
-            controller = [[ProgressTableViewCellRevealController alloc] init];
+            controller = [[ProgressTableViewCellProgressController alloc] init];
+            self.progressControllerArray[row] = controller;
+        }
+        
+        result = [tableView makeViewWithIdentifier:@"Progress" owner:controller];
+    }
+
+    
+    else  if([tableColumn.identifier isEqualToString:@"Preset"])
+    {
+        // find our cached controller if we have one
+        ProgressTableViewCellPresetController* controller = nil;
+        if(self.presetControllerArray.count > row)
+        {
+            controller = self.presetControllerArray[row];
+        }
+        
+        if(!controller)
+        {
+            // cache if we dont have...
+            controller = [[ProgressTableViewCellPresetController alloc] init];
             self.revealControllerArray[row] = controller;
         }
 
-        result = [tableView makeViewWithIdentifier:@"Reveal" owner:controller];
+        result = [tableView makeViewWithIdentifier:@"Preset" owner:controller];
         
-        if(operationForRow)
-        {
-            NSURL* destinationURL = operationForRow.destinationURL;
-            controller.destinationURL = destinationURL;
-        }
+//        if(operationForRow)
+//        {
+//            NSURL* destinationURL = operationForRow.destinationURL;
+//            controller.destinationURL = destinationURL;
+//        }
     }
 
     // Set up our callbacks if we need to.

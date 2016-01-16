@@ -10,6 +10,7 @@
 #import "PreferencesGeneralViewController.h"
 #import "PreferencesPresetViewController.h"
 #import "PreferencesAdvancedViewController.h"
+#import "PresetGroup.h"
 
 @interface PreferencesViewController ()
 
@@ -39,23 +40,60 @@ static NSInteger currentTag = 0;
     [self.preferencesGeneralViewController.view setFrame:self.view.bounds];
     
     self.currentViewController = self.preferencesGeneralViewController;
-    
 
     // populate our general prefs default preset button with all available presets
     [self.preferencesGeneralViewController.defaultPresetPopupButton.menu removeAllItems];
 
-    for(PresetObject* preset in [self.preferencesPresetViewController allPresets])
-    {
-        NSMenuItem* presetMenuItem = [[NSMenuItem alloc] initWithTitle:preset.title action:@selector(setDefaultPresetAction:) keyEquivalent:@""];
-        
-        presetMenuItem.representedObject = preset;
-        presetMenuItem.target = self.preferencesGeneralViewController;
-        
-        [self.preferencesGeneralViewController.defaultPresetPopupButton.menu addItem:presetMenuItem];
-    }
+    
+    [self recursiveBuildMenu:self.preferencesGeneralViewController.defaultPresetPopupButton.menu forObjects:[self.preferencesPresetViewController allPresets]];
+//    for(NSObject* object in [self.preferencesPresetViewController allPresets])
+//    {
+//        if([object isKindOfClass:[PresetObject class]])
+//        {
+//            PresetObject* preset = (PresetObject*)object;
+//            NSMenuItem* presetMenuItem = [[NSMenuItem alloc] initWithTitle:preset.title action:@selector(setDefaultPresetAction:) keyEquivalent:@""];
+//            
+//            presetMenuItem.representedObject = preset;
+//            presetMenuItem.target = self.preferencesGeneralViewController;
+//            
+//            [self.preferencesGeneralViewController.defaultPresetPopupButton.menu addItem:presetMenuItem];
+//        }
+//        
+//    }
     
     // set our default for now - since we arent loading for NSUserDefaults
 //    [[self.preferencesGeneralViewController.defaultPresetPopupButton menu] performActionForItemAtIndex:0];
+}
+
+- (void) recursiveBuildMenu:(NSMenu*)menu forObjects:(NSArray*)arrayOfPresetOrGroup
+{
+    for(NSObject* object in arrayOfPresetOrGroup)
+    {
+        if([object isKindOfClass:[PresetObject class]])
+        {
+            PresetObject* preset = (PresetObject*)object;
+            NSMenuItem* presetMenuItem = [[NSMenuItem alloc] initWithTitle:preset.title action:@selector(setDefaultPresetAction:) keyEquivalent:@""];
+            
+            presetMenuItem.representedObject = preset;
+            presetMenuItem.target = self.preferencesGeneralViewController;
+            
+            [menu addItem:presetMenuItem];
+        }
+        
+        if ([object isKindOfClass:[PresetGroup class]])
+        {
+            PresetGroup* group = (PresetGroup*)object;
+            NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:group.title action:NULL keyEquivalent:@""];
+            
+            NSMenu* subMenu = [[NSMenu alloc] initWithTitle:group.title];
+            [menuItem setSubmenu:subMenu];
+            
+            [menu addItem:menuItem];
+     
+            // recurse
+            [self recursiveBuildMenu:subMenu forObjects:group.children];
+        }
+    }
 }
 
 #pragma mark -
@@ -63,6 +101,11 @@ static NSInteger currentTag = 0;
 - (PresetObject*) defaultPreset
 {
     return self.preferencesGeneralViewController.defaultPreset;
+}
+
+- (NSArray*) availablePresets
+{
+    return self.preferencesPresetViewController.allPresets;
 }
 
 #pragma mark -

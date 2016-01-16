@@ -12,5 +12,6 @@
 @interface PreferencesViewController : NSViewController
 
 - (PresetObject*) defaultPreset;
+- (NSArray*) availablePresets;
 
 @end

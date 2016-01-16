@@ -49,6 +49,8 @@
 		1B805E3C1B01488D005D7354 /* ProgressTableViewCellRevealController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3A1B01488D005D7354 /* ProgressTableViewCellRevealController.m */; };
 		1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */; };
 		1B805E401B028BB6005D7354 /* LogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3F1B028BB6005D7354 /* LogController.m */; };
+		1BA4D1991C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA4D1971C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m */; };
+		1BA4D19A1C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BA4D1981C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib */; };
 		1BA68C501AD02E97003B3CE9 /* BaseTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */; };
 		1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */; };
 		1BA68C571AD26696003B3CE9 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C561AD26696003B3CE9 /* CoreVideo.framework */; };
@@ -417,6 +419,9 @@
 		1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProgressTableViewCellReveal.xib; sourceTree = "<group>"; };
 		1B805E3E1B028BB6005D7354 /* LogController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogController.h; sourceTree = "<group>"; };
 		1B805E3F1B028BB6005D7354 /* LogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogController.m; sourceTree = "<group>"; };
+		1BA4D1961C3AD5C1003BD135 /* ProgressTableViewCellPresetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTableViewCellPresetController.h; sourceTree = "<group>"; };
+		1BA4D1971C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTableViewCellPresetController.m; sourceTree = "<group>"; };
+		1BA4D1981C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProgressTableViewCellPreset.xib; sourceTree = "<group>"; };
 		1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseTranscodeOperation.h; sourceTree = "<group>"; };
 		1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseTranscodeOperation.m; sourceTree = "<group>"; };
 		1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetadataWriterTranscodeOperation.h; sourceTree = "<group>"; };
@@ -1089,6 +1094,9 @@
 				1B805E391B01488D005D7354 /* ProgressTableViewCellRevealController.h */,
 				1B805E3A1B01488D005D7354 /* ProgressTableViewCellRevealController.m */,
 				1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */,
+				1BA4D1961C3AD5C1003BD135 /* ProgressTableViewCellPresetController.h */,
+				1BA4D1971C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m */,
+				1BA4D1981C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib */,
 			);
 			name = "TableView & Cells";
 			sourceTree = "<group>";
@@ -1377,6 +1385,7 @@
 			files = (
 				1B3233CC1C2EFDC500C9CF5E /* PreferencesPresetViewController.xib in Resources */,
 				1B805E2F1B012309005D7354 /* ProgressTableViewCellSource.xib in Resources */,
+				1BA4D19A1C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib in Resources */,
 				1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */,
 				1B805E341B012AA0005D7354 /* ProgressTableViewCellProgress.xib in Resources */,
 				1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */,
@@ -1473,6 +1482,7 @@
 				1B3233DC1C31F8F200C9CF5E /* PresetGroup.m in Sources */,
 				1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */,
 				1B805E3C1B01488D005D7354 /* ProgressTableViewCellRevealController.m in Sources */,
+				1BA4D1991C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m in Sources */,
 				1B805E321B012386005D7354 /* ProgressTableViewCellSourceController.m in Sources */,
 				1B805E401B028BB6005D7354 /* LogController.m in Sources */,
 				1BA68C501AD02E97003B3CE9 /* BaseTranscodeOperation.m in Sources */,
