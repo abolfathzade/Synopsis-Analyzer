@@ -226,10 +226,13 @@
                                         (NSString*) kCMFormatDescriptionExtension_Version : @1
                                         };
 
-    CMVideoFormatDescriptionCreate(kCFAllocatorDefault, 'synp', 32, 32, (__bridge CFDictionaryRef)bufferExtensions, &metadataFormatDescription);
+    CMMuxedFormatDescriptionCreate(kCFAllocatorDefault, 'synp', (__bridge CFDictionaryRef)bufferExtensions, &metadataFormatDescription);
     
-    self.transcodeAssetWriterMetadata = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:nil sourceFormatHint:metadataFormatDescription];
+    self.transcodeAssetWriterMetadata = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeMuxed outputSettings:nil sourceFormatHint:metadataFormatDescription];
 
+    // ?
+    self.transcodeAssetWriterMetadata.marksOutputTrackAsEnabled = NO;
+    
     // TODO: Associate metadata to video
 //    [self.transcodeAssetWriterMetadata addTrackAssociationWithTrackOfInput:self.transcodeAssetWriterVideoPassthrough type:AVTrackAssociationTypeMetadataReferent];
     
@@ -612,6 +615,7 @@
                                      sampleTimingInfo->duration = CMTimeMake(1001, 30000);
                                      sampleTimingInfo->decodeTimeStamp = kCMTimeInvalid;
                                      
+                                     
                                      NSDictionary *bufferExtensions = @{ (NSString*) kCMFormatDescriptionExtension_GammaLevel : @1.0,
                                                                          (NSString*) kCMFormatDescriptionExtension_Depth: @1.0,
                                                                          (NSString*) kCMFormatDescriptionExtension_FormatName : @"Synopsis Video Metadata",
@@ -623,6 +627,7 @@
                                                                          };
                                      
                                      CMVideoFormatDescriptionRef formatDesc;
+                                     CMMuxedFormatDescriptionCreate(kCFAllocatorDefault, 'synp', (__bridge CFDictionaryRef)bufferExtensions, &formatDesc);
                                      CMVideoFormatDescriptionCreate(kCFAllocatorDefault,
                                                                     'synp',
                                                                     (uint32_t)32,

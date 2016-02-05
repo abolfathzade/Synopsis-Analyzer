@@ -216,8 +216,8 @@
     PresetVideoSettings* videoSettings = currentPreset.videoSettings;
     PresetAudioSettings* audioSettings = currentPreset.audioSettings;
     
-    NSDictionary* transcodeOptions = @{kSynopsisTranscodeVideoSettingsKey : (videoSettings) ? videoSettings : [NSNull null],
-                                       kSynopsisTranscodeAudioSettingsKey : (audioSettings) ? audioSettings : [NSNull null],
+    NSDictionary* transcodeOptions = @{kSynopsisTranscodeVideoSettingsKey : (videoSettings.settingsDictionary) ? videoSettings : [NSNull null],
+                                       kSynopsisTranscodeAudioSettingsKey : (audioSettings.settingsDictionary) ? audioSettings : [NSNull null],
                                        };
     
     // TODO: Just pass a copy of the current Preset directly.
