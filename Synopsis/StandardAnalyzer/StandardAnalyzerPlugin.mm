@@ -453,9 +453,9 @@
 
 - (NSDictionary*) detectFeaturesCVMat:(cv::Mat)image
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        cv::imshow("OpenCV Debug", image);
-    });
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//        cv::imshow("OpenCV Debug", image);
+//    });
  
     
     NSMutableDictionary* metadata = [NSMutableDictionary new];

@@ -102,7 +102,6 @@
             self.audioTranscodeSettings = self.transcodeOptions[kSynopsisTranscodeAudioSettingsKey];
             self.transcodingAudio = YES;
         }
-        
 
         self.sourceURL = sourceURL;
         self.destinationURL = destinationURL;
