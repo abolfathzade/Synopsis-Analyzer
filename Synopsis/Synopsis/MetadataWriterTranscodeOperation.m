@@ -53,7 +53,7 @@
 @property (atomic, readwrite, strong) AVAssetWriterInput* transcodeAssetWriterVideoPassthrough;
 @property (atomic, readwrite, strong) AVAssetWriterInput* transcodeAssetWriterAudioPassthrough;
 @property (atomic, readwrite, strong) AVAssetWriterInput* transcodeAssetWriterMetadata;
-@property (atomic, readwrite, strong) AVAssetWriterInputMetadataAdaptor* transcodeAssetWriterMetadataAdaptor;
+//@property (atomic, readwrite, strong) AVAssetWriterInputMetadataAdaptor* transcodeAssetWriterMetadataAdaptor;
 
 @end
 
@@ -110,6 +110,9 @@
 
 - (NSError*) setupTranscodeShitSucessfullyOrDontWhatverMan
 {
+    CMFormatDescriptionRef audioFormatDesc = NULL;
+    CMFormatDescriptionRef videoFormatDesc = NULL;
+    
     self.transcodeAsset = [AVURLAsset URLAssetWithURL:self.sourceURL options:@{AVURLAssetPreferPreciseDurationAndTimingKey : @TRUE}];
     
     self.transcodeAssetHasVideo = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual].count ? YES : NO;
@@ -128,6 +131,14 @@
     {
         // Passthrough Video Reader -
         AVAssetTrack* firstVideoTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual][0];
+        
+        //Check if we are self contained, (no references)
+        // and if we have a single source format hint
+        if(firstVideoTrack.formatDescriptions.count == 1 && firstVideoTrack.selfContained)
+        {
+            videoFormatDesc = (__bridge CMFormatDescriptionRef)(firstVideoTrack.formatDescriptions[0]);
+        }
+        
         self.transcodeAssetReaderVideoPassthrough = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
                                                                                                outputSettings:nil];
         self.transcodeAssetReaderVideoPassthrough.alwaysCopiesSampleData = NO;
@@ -138,6 +149,13 @@
     if(self.transcodeAssetHasAudio)
     {
         AVAssetTrack* firstAudioTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicAudible][0];
+        
+        //Check if we are self contained, (no references)
+        // and if we have a single source format hint
+        if(firstAudioTrack.formatDescriptions.count == 1 && firstAudioTrack.selfContained)
+        {
+            audioFormatDesc = (__bridge CMFormatDescriptionRef)(firstAudioTrack.formatDescriptions[0]);
+        }
         
         // Passthrough Audio Reader -
         self.transcodeAssetReaderAudioPassthrough = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstAudioTrack
@@ -175,20 +193,45 @@
     self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:&error];
     
     // Passthrough Video and Audio
-    self.transcodeAssetWriterVideoPassthrough = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:nil];
-    self.transcodeAssetWriterAudioPassthrough = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:nil];
+    // Use the format description for MPEG4 pass through compatibility as per asset writer docs
+    if(videoFormatDesc != NULL)
+        self.transcodeAssetWriterVideoPassthrough = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:nil sourceFormatHint:videoFormatDesc];
+    else
+        self.transcodeAssetWriterVideoPassthrough = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:nil];
     
-    // Metadata
-    CMFormatDescriptionRef metadataFormatDescription = NULL;
-    NSArray *specs = @[@{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : kSynopsislMetadataIdentifier,
-                         (__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType : (__bridge NSString *)kCMMetadataBaseDataType_RawData}];
+    if(audioFormatDesc != NULL)
+        self.transcodeAssetWriterAudioPassthrough = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:nil sourceFormatHint:audioFormatDesc];
+    else
+        self.transcodeAssetWriterAudioPassthrough = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:nil];
     
-    OSStatus err = CMMetadataFormatDescriptionCreateWithMetadataSpecifications(kCFAllocatorDefault, kCMMetadataFormatType_Boxed, (__bridge CFArrayRef)specs, &metadataFormatDescription);
-    self.transcodeAssetWriterMetadata = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeMetadata outputSettings:nil sourceFormatHint:metadataFormatDescription];
-    self.transcodeAssetWriterMetadataAdaptor = [AVAssetWriterInputMetadataAdaptor assetWriterInputMetadataAdaptorWithAssetWriterInput:self.transcodeAssetWriterMetadata];
+    // Attempt at private mpeg4 track type?
+//    CMFormatDescriptionRef metadataFormatDescription = NULL;
+//    NSArray *specs = @[@{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : kSynopsislMetadataIdentifier,
+//                              (__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType : (__bridge NSString *)kCMMetadataBaseDataType_RawData}];
+//    
+//    OSStatus err = CMMetadataFormatDescriptionCreateWithMetadataSpecifications(kCFAllocatorDefault, kCMMetadataFormatType_Boxed, (__bridge CFArrayRef)specs, &metadataFormatDescription);
 
-    // Associate metadata to video
-    [self.transcodeAssetWriterMetadata addTrackAssociationWithTrackOfInput:self.transcodeAssetWriterVideoPassthrough type:AVTrackAssociationTypeMetadataReferent];
+    
+    CMFormatDescriptionRef metadataFormatDescription = NULL;
+
+//    CMFormatDescriptionCreate(kCFAllocatorDefault, kCMMediaType_Video, 'synp', NULL, &metadataFormatDescription);
+    
+    NSDictionary *bufferExtensions = @{ (NSString*) kCMFormatDescriptionExtension_GammaLevel : @1.0,
+                                        (NSString*) kCMFormatDescriptionExtension_Depth: @1.0,
+                                        (NSString*) kCMFormatDescriptionExtension_FormatName : @"Synopsis Video Metadata",
+                                        (NSString*) kCMFormatDescriptionExtension_RevisionLevel : @1,
+                                        (NSString*) kCMFormatDescriptionExtension_SpatialQuality : @1,
+                                        (NSString*) kCMFormatDescriptionExtension_TemporalQuality : @0,
+                                        (NSString*) kCMFormatDescriptionExtension_Vendor : @"v002",
+                                        (NSString*) kCMFormatDescriptionExtension_Version : @1
+                                        };
+
+    CMVideoFormatDescriptionCreate(kCFAllocatorDefault, 'synp', 32, 32, (__bridge CFDictionaryRef)bufferExtensions, &metadataFormatDescription);
+    
+    self.transcodeAssetWriterMetadata = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:nil sourceFormatHint:metadataFormatDescription];
+
+    // TODO: Associate metadata to video
+//    [self.transcodeAssetWriterMetadata addTrackAssociationWithTrackOfInput:self.transcodeAssetWriterVideoPassthrough type:AVTrackAssociationTypeMetadataReferent];
     
     // Is this needed?
     self.transcodeAssetWriterMetadata.expectsMediaDataInRealTime = NO;
@@ -317,6 +360,18 @@
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t audioDequeueSemaphore = dispatch_semaphore_create(0);
         
+        
+#pragma mark - Metadata Requirements
+       
+        // Since we are attempting to write out metadata as another video track
+        // we write it out in parallel
+        // Since metadata is precomputed we dont need a semaphore to wait on, or a buffer queue
+        
+        dispatch_queue_t metadataEncodeQueue = dispatch_queue_create("metadataEncodeQueue", 0);
+        if(self.analyzedVideoSampleBufferMetadata.count)
+            dispatch_group_enter(g);
+        
+        
 #pragma mark - Read Video pass through
         
         __block BOOL finishedReadingAllPassthroughVideo = NO;
@@ -399,7 +454,7 @@
             });
         }
 
-#pragma mark - Video and Metadata Write
+#pragma mark - Video
         
         if(self.transcodeAssetHasVideo)
         {
@@ -407,8 +462,7 @@
             [self.transcodeAssetWriterVideoPassthrough requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
              {
     //           NSLog(@"Started Requesting Media");
-                 while([self.transcodeAssetWriterVideoPassthrough isReadyForMoreMediaData]
-                       && [self.transcodeAssetWriterMetadata isReadyForMoreMediaData])
+                 while([self.transcodeAssetWriterVideoPassthrough isReadyForMoreMediaData])
                  {
                      // Are we done reading,
                      if(finishedReadingAllPassthroughVideo)
@@ -420,9 +474,6 @@
                          if(CMBufferQueueIsEmpty(videoPassthroughBufferQueue) )//&& !self.analyzedVideoSampleBufferMetadata.count)
                          {
                              [self.transcodeAssetWriterVideoPassthrough markAsFinished];
-                             [self.transcodeAssetWriterMetadata markAsFinished];
-    //                          NSLog(@"Writing Done");
-                             
                              dispatch_group_leave(g);
                              break;
                          }
@@ -447,82 +498,194 @@
                              [[LogController sharedLogController] appendErrorLog:[@"Unable to append video sample to asset at time: " stringByAppendingString:CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, currentSamplePTS))]];
                          }
                          
-                         if(self.analyzedVideoSampleBufferMetadata.count)
-                         {
-                             unsigned int index = 0;
-                             AVTimedMetadataGroup *group = self.analyzedVideoSampleBufferMetadata[index];
-                             
-                             // So this is tricky
-                             // Our video is passthrough - which means for some video codecs we get samples in decode not presentation order
-                             // since our metadata was analyzed by decoding (by definition), its in presentation timestamp order.
-                             // So we need to search every passthrough sample for a metadata sample of the nearest timestamp
-                             // If we find a match, we remove it from the dictionary to at least try to speed shit up...
-                             // Theoretically DTS and PTS should be at least 'near' one another, so we dont need to iterate the entire dictionary.
-                             
-                             CMTime currentSamplePTS = CMSampleBufferGetPresentationTimeStamp(passthroughVideoSampleBuffer);
-                             CMTime currentSampleOPTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
-                             CMTime currentSampleDTS = CMSampleBufferGetDecodeTimeStamp(passthroughVideoSampleBuffer);
-                             CMTime currentSampleODTS = CMSampleBufferGetOutputDecodeTimeStamp(passthroughVideoSampleBuffer);
-                             
-                             int32_t compareResult =  CMTimeCompare(currentSampleDTS, group.timeRange.start);
-                             
-                             if(compareResult < 0 )
-                             {
-                                 while(CMTIME_COMPARE_INLINE(currentSampleDTS, <, group.timeRange.start))
-                                 {
-                                     index++;
-                                     
-                                     if(index < self.analyzedVideoSampleBufferMetadata.count)
-                                         group = self.analyzedVideoSampleBufferMetadata[index];
-                                     else
-                                     {
-                                         group = nil;
-                                         break;
-                                     }
-                                 }
-
-                             }
-                             else if(compareResult > 0)
-                             {
-                                 while(CMTIME_COMPARE_INLINE(currentSampleDTS, >, group.timeRange.start))
-                                 {
-                                     index++;
-                                     
-                                     if(index < self.analyzedVideoSampleBufferMetadata.count)
-                                         group = self.analyzedVideoSampleBufferMetadata[index];
-                                     else
-                                     {
-                                         group = nil;
-                                         break;
-                                     }
-                                 }
-                             }
-                             
-                             if(group)
-                             {
-                                 if([self.transcodeAssetWriterMetadataAdaptor appendTimedMetadataGroup:group])
-                                 {
-                                     // Pop our metadata off...
-                                     [self.analyzedVideoSampleBufferMetadata removeObject:group];
-                                 }
-                                 else
-                                 {
-                                     // Pop our metadata off...
-                                     [self.analyzedVideoSampleBufferMetadata removeObject:group];
-
-                                     [[LogController sharedLogController] appendErrorLog:[@"Unable to append metadata timed group to asset: " stringByAppendingString:self.transcodeAssetWriter.error.localizedDescription]];
-                                 }
-                             }
-                             else
-                             {
-                                 [[LogController sharedLogController] appendWarningLog:@"No Metadata Sample Buffer for Video Sample"];
-                             }
-                         }
-
                          CFRelease(passthroughVideoSampleBuffer);
                      }
                  }
              }];
+        }
+        
+#pragma mark - Video Metadata Write
+        
+        __block CMTime metadataTime = kCMTimeZero;
+        if(self.analyzedVideoSampleBufferMetadata.count)
+        {
+            // Passthrough Video Write from Buffer Queue
+            [self.transcodeAssetWriterMetadata requestMediaDataWhenReadyOnQueue:metadataEncodeQueue usingBlock:^
+             {
+                 while([self.transcodeAssetWriterMetadata isReadyForMoreMediaData])
+                 {
+                     // Are we no longer have metadata samples
+                     // Note we need to test if we go past the last frame of video
+                     // we sometimes have weird metadata timing?
+                     if(!self.analyzedVideoSampleBufferMetadata.count)
+                     {
+                         [self.transcodeAssetWriterMetadata markAsFinished];
+                         dispatch_group_leave(g);
+                         break;
+                     }
+                     
+                     if(self.analyzedVideoSampleBufferMetadata.count)
+                     {
+                         unsigned int index = 0;
+                         AVTimedMetadataGroup *group = self.analyzedVideoSampleBufferMetadata[index];
+                         
+//                         // So this is tricky
+//                         // Our video is passthrough - which means for some video codecs we get samples in decode not presentation order
+//                         // since our metadata was analyzed by decoding (by definition), its in presentation timestamp order.
+//                         // So we need to search every passthrough sample for a metadata sample of the nearest timestamp
+//                         // If we find a match, we remove it from the dictionary to at least try to speed shit up...
+//                         // Theoretically DTS and PTS should be at least 'near' one another, so we dont need to iterate the entire dictionary.
+//                         
+//                         int32_t compareResult =  CMTimeCompare(metadataTime, group.timeRange.start);
+//                         
+//                         if(compareResult < 0 )
+//                         {
+//                             while(CMTIME_COMPARE_INLINE(metadataTime, <, group.timeRange.start))
+//                             {
+//                                 index++;
+//                                 
+//                                 if(index < self.analyzedVideoSampleBufferMetadata.count)
+//                                     group = self.analyzedVideoSampleBufferMetadata[index];
+//                                 else
+//                                 {
+//                                     group = nil;
+//                                     break;
+//                                 }
+//                             }
+//                             
+//                         }
+//                         else if(compareResult > 0)
+//                         {
+//                             while(CMTIME_COMPARE_INLINE(metadataTime, >, group.timeRange.start))
+//                             {
+//                                 index++;
+//                                 
+//                                 if(index < self.analyzedVideoSampleBufferMetadata.count)
+//                                     group = self.analyzedVideoSampleBufferMetadata[index];
+//                                 else
+//                                 {
+//                                     group = nil;
+//                                     break;
+//                                 }
+//                             }
+//                         }
+                         
+                         if(group)
+                         {
+                             metadataTime = group.timeRange.start;
+                             
+                             // TODO: Create CMSampleBuffer / CMBlockBuffer from AVTimedMetadataGroup
+                             // Append the sample buffer and check for success
+                             
+                             // Get our Data from our timed metadata group
+                             
+                             CMBlockBufferRef metadataBlockBufferRef = NULL;
+                             CMBlockBufferCreateEmpty(kCFAllocatorDefault, 0, kCMBlockBufferAlwaysCopyDataFlag, &metadataBlockBufferRef);
+                             
+                             // copy our metadata compressed JSON NSDAta blob into our CMBlockBuffer and mark it ready
+                             if([group.items count] && (metadataBlockBufferRef != NULL))
+                             {
+                                 NSData* data = (NSData*)group.items[0].value;
+                                 
+                                 if(data)
+                                 {
+                                     OSStatus append = CMBlockBufferAppendMemoryBlock(metadataBlockBufferRef,
+                                                                                      data.bytes,
+                                                                                      data.length,
+                                                                                      kCFAllocatorDefault,
+                                                                                      NULL,
+                                                                                      0,
+                                                                                      data.length,
+                                                                                      kCMBlockBufferAlwaysCopyDataFlag);
+                                     
+                                     if(append != kCMBlockBufferNoErr)
+                                     {
+                                         [[LogController sharedLogController] appendErrorLog:@"Unable to copy metadata block buffer"];
+                                         
+                                     }
+                                     // Create our timing info from our AVTimedMetadataGroup
+                                     
+                                     
+                                     CMSampleTimingInfo* sampleTimingInfo = malloc(sizeof(CMSampleTimingInfo));
+                                     
+                                     sampleTimingInfo->presentationTimeStamp = group.timeRange.start;
+                                     sampleTimingInfo->duration = CMTimeMake(1001, 30000);
+                                     sampleTimingInfo->decodeTimeStamp = kCMTimeInvalid;
+                                     
+                                     NSDictionary *bufferExtensions = @{ (NSString*) kCMFormatDescriptionExtension_GammaLevel : @1.0,
+                                                                         (NSString*) kCMFormatDescriptionExtension_Depth: @1.0,
+                                                                         (NSString*) kCMFormatDescriptionExtension_FormatName : @"Synopsis Video Metadata",
+                                                                         (NSString*) kCMFormatDescriptionExtension_RevisionLevel : @1,
+                                                                         (NSString*) kCMFormatDescriptionExtension_SpatialQuality : @1,
+                                                                         (NSString*) kCMFormatDescriptionExtension_TemporalQuality : @0,
+                                                                         (NSString*) kCMFormatDescriptionExtension_Vendor : @"v002",
+                                                                         (NSString*) kCMFormatDescriptionExtension_Version : @1
+                                                                         };
+                                     
+                                     CMVideoFormatDescriptionRef formatDesc;
+                                     CMVideoFormatDescriptionCreate(kCFAllocatorDefault,
+                                                                    'synp',
+                                                                    (uint32_t)32,
+                                                                    (uint32_t)32,
+                                                                    (__bridge CFDictionaryRef)bufferExtensions,
+                                                                    &formatDesc);
+                                     
+                                     CMSampleBufferRef metadataSampleBufferRef = NULL;
+                                     size_t length = data.length;
+                                     OSStatus createStatus = CMSampleBufferCreate(kCFAllocatorDefault,
+                                                                                  metadataBlockBufferRef,
+                                                                                  YES,
+                                                                                  NULL,
+                                                                                  NULL,
+                                                                                  formatDesc,
+                                                                                  1, // numSamples
+                                                                                  1, //CMItemCount numSampleTimingEntries,
+                                                                                  sampleTimingInfo, //const CMSampleTimingInfo * _Nullable sampleTimingArray,
+                                                                                  1, //CMItemCount numSampleSizeEntries,
+                                                                                  &length, //const size_t * _Nullable sampleSizeArray,
+                                                                                  &metadataSampleBufferRef);
+                                     
+                                     free(sampleTimingInfo);
+                                     
+                                     if(createStatus != kCMBlockBufferNoErr)
+                                     {
+                                         [[LogController sharedLogController] appendErrorLog:@"Unable to copy metadata sample buffer"];
+                                         
+                                     }
+                                     
+                                     
+                                     if((metadataSampleBufferRef != NULL) )
+                                     {
+                                         if(![self.transcodeAssetWriterMetadata appendSampleBuffer:metadataSampleBufferRef])
+                                         {
+                                             [[LogController sharedLogController] appendErrorLog:[@"Unable to append metadata timed group to asset: " stringByAppendingString:self.transcodeAssetWriter.error.localizedDescription]];
+                                         }
+
+                                         // Pop our metadata off...
+                                         [self.analyzedVideoSampleBufferMetadata removeObject:group];
+                                     }
+                                     else
+                                     {
+                                         // Pop our metadata off...
+                                         [self.analyzedVideoSampleBufferMetadata removeObject:group];
+                                         
+                                         [[LogController sharedLogController] appendErrorLog:[@"Unable to append metadata timed group to asset: " stringByAppendingString:self.transcodeAssetWriter.error.localizedDescription]];
+                                     }
+                                     
+                                     if(metadataSampleBufferRef != NULL)
+                                         CFRelease(metadataSampleBufferRef);
+                                     
+                                 }
+                             }
+                         }
+                         else
+                         {
+                             [[LogController sharedLogController] appendWarningLog:@"No Metadata Sample Buffer for Video Sample"];
+                         }
+                     }
+                 }
+             }];
+
         }
         
 #pragma mark - Audio and Metadata Write (Metadata Disabled for now until we have Audio Analysis API / Plugins)
