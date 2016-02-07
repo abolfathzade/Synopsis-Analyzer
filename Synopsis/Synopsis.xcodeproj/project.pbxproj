@@ -13,7 +13,7 @@
 		1B007ED61B4EBAC700DE6E98 /* schema.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1B007ED81B4EBAC700DE6E98 /* schema.strings */; };
 		1B007ED91B4EBAD500DE6E98 /* schema.xml in Resources */ = {isa = PBXBuildFile; fileRef = 1B007EDB1B4EBAD500DE6E98 /* schema.xml */; };
 		1B007EDD1B4EC6E900DE6E98 /* SynopsisImporter.mdimporter in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		1B105A391B41F18300997345 /* cv2.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA68C781AD6EAFB003B3CE9 /* cv2.so */; };
+		1B105A391B41F18300997345 /* cv2.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA68C781AD6EAFB003B3CE9 /* cv2.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
 		1B3233C21C2E395700C9CF5E /* PreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233C11C2E395700C9CF5E /* PreferencesViewController.m */; };
 		1B3233C61C2EFDB200C9CF5E /* PreferencesGeneralViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233C41C2EFDB200C9CF5E /* PreferencesGeneralViewController.m */; };
@@ -1305,7 +1305,7 @@
 		1BEA4D111ACB2BCC00AB57C1 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0620;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = metavisual;
 				TargetAttributes = {
 					1B007EBF1B4D7D0900DE6E98 = {
@@ -1558,6 +1558,7 @@
 				INFOPLIST_FILE = SpotlightImporter/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/Library/Spotlight";
 				LIBRARY_STYLE = BUNDLE;
+				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = mdimporter;
@@ -1573,6 +1574,7 @@
 				INFOPLIST_FILE = SpotlightImporter/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/Library/Spotlight";
 				LIBRARY_STYLE = BUNDLE;
+				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = mdimporter;
@@ -1590,6 +1592,7 @@
 				);
 				INFOPLIST_FILE = FrameCounterPlugin/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = plugin;
@@ -1603,6 +1606,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = FrameCounterPlugin/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = plugin;
@@ -1625,6 +1629,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/lib",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
@@ -1644,6 +1649,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/lib",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
@@ -1667,6 +1673,7 @@
 				);
 				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = plugin;
@@ -1684,6 +1691,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = plugin;
@@ -1710,6 +1718,7 @@
 				CODE_SIGN_IDENTITY = "";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1775,6 +1784,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1788,6 +1798,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
