@@ -39,6 +39,10 @@ const NSString* value = @"Value";
 @property (weak) IBOutlet NSTextField* prefsVideoDimensionsCustomHeight;
 @property (weak) IBOutlet NSPopUpButton* prefsVideoAspectRatio;
 
+// Video Prefs Logic Backing /
+@property (readwrite, atomic, strong) NSArray* videoResolutions;
+
+
 //@property (atomic, readwrite, strong) NSDictionary* prefsVideoSettings; // sent to kSynopsisTranscodeVideoSettingsKey
 
 // Preferences Audio
@@ -144,22 +148,17 @@ const NSString* value = @"Value";
     VTRegisterProfessionalVideoWorkflowVideoDecoders();
     VTRegisterProfessionalVideoWorkflowVideoEncoders();
     
-    // Passthrough :
-    NSMenuItem* passthroughItem = [[NSMenuItem alloc] initWithTitle:@"Passthrough" action:@selector(selectVideoEncoder:) keyEquivalent:@""];
-    [passthroughItem setRepresentedObject:[NSNull null]];
-    [self.prefsVideoCompressor.menu addItem:passthroughItem];
-    [self.prefsVideoCompressor.menu addItem:[NSMenuItem separatorItem]];
     
-    // TODO: HAP / Hardware Accelerated HAP encoding
-    //    [self.prefsVideoCompressor addItemWithTitle:@"HAP"];
-    //    [self.prefsVideoCompressor addItemWithTitle:@"HAP Alpha"];
-    //    [self.prefsVideoCompressor addItemWithTitle:@"HAP Q"];
+    // TODO: HAP / Hardware Accelerated HAP, HAP Alpha, HAP Q encoding
     
     CFArrayRef videoEncoders;
     VTCopyVideoEncoderList(NULL, &videoEncoders);
     NSArray* videoEncodersArray = (__bridge NSArray*)videoEncoders;
     
-    NSMutableArray* encoderArrayWithTitles = [NSMutableArray arrayWithCapacity:videoEncodersArray.count];
+    NSMutableArray* encoderArrayWithTitles = [NSMutableArray arrayWithCapacity:videoEncodersArray.count + 2];
+
+    [encoderArrayWithTitles addObject: @{title : @"Passthrough", value :[NSNull null] }];
+    [encoderArrayWithTitles addObject: @{title : @"Seperator", value : @"Seperator" }];
     
     for(NSDictionary* encoder in videoEncodersArray)
     {
@@ -171,44 +170,31 @@ const NSString* value = @"Value";
     
     [self addMenuItemsToMenu:self.prefsVideoCompressor.menu withArray:encoderArrayWithTitles withSelector:@selector(selectVideoEncoder:)];
     
-    // Video Prefs Resolution
+    // Video Prefs Resolution    
+    self.videoResolutions = @[
+                              @{title : @"Native", value : [NSValue valueWithSize:NSZeroSize] },
+                              @{title : @"Seperator", value : @"Seperator" },
+                              @{title : @"640 x 480 (NTSC)", value : [NSValue valueWithSize:(NSSize){640.0, 480.0}] },
+                              @{title : @"768 x 576 (PAL)", value : [NSValue valueWithSize:(NSSize){786.0, 576.0}] },
+                              @{title : @"720 x 480 (480p)", value : [NSValue valueWithSize:(NSSize){720.0, 480.0}] },
+                              @{title : @"720 x 576 (576p)", value : [NSValue valueWithSize:(NSSize){720.0, 576.0}] },
+                              @{title : @"1280 x 720 (720p)", value : [NSValue valueWithSize:(NSSize){1280.0, 720.0}] },
+                              @{title : @"1920 x 1080 (1080p)", value : [NSValue valueWithSize:(NSSize){1920.0, 1080.0}] },
+                              @{title : @"2048 × 1080 (2k)", value : [NSValue valueWithSize:(NSSize){2048.0, 1080.0}] },
+                              @{title : @"2048 × 858 (2k Cinemascope)", value : [NSValue valueWithSize:(NSSize){2048.0, 858.0}] },
+                              @{title : @"3840 × 2160 (UHD)", value : [NSValue valueWithSize:(NSSize){3840.0, 2160.0}] },
+                              @{title : @"4096 × 2160 (4k)", value : [NSValue valueWithSize:(NSSize){4096.0, 2160.0}] },
+                              @{title : @"4096 × 1716 (4k Cinemascope)", value : [NSValue valueWithSize:(NSSize){4096.0, 1716.0}] },
+                              @{title : @"Seperator", value : @"Seperator" },
+                              @{title : @"Custom", value : [NSNull null] },
+                              ];
     
-    NSMenuItem* nativeItem = [[NSMenuItem alloc] initWithTitle:@"Native Resolution" action:@selector(selectVideoResolution:) keyEquivalent:@""];
-    [nativeItem setRepresentedObject:[NSValue valueWithSize:NSZeroSize] ];
-    [self.prefsVideoDimensions.menu addItem:nativeItem];
-    [self.prefsVideoDimensions.menu addItem:[NSMenuItem separatorItem]];
-    
-    NSArray* videoResolutions = @[
-                                  @{title : @"640 x 480 (NTSC)", value : [NSValue valueWithSize:(NSSize){640.0, 480.0}] },
-                                  @{title : @"768 x 576 (PAL)", value : [NSValue valueWithSize:(NSSize){786.0, 576.0}] },
-                                  @{title : @"720 x 480 (480p)", value : [NSValue valueWithSize:(NSSize){720.0, 480.0}] },
-                                  @{title : @"720 x 576 (576p)", value : [NSValue valueWithSize:(NSSize){720.0, 576.0}] },
-                                  @{title : @"1280 x 720 (720p)", value : [NSValue valueWithSize:(NSSize){1280.0, 720.0}] },
-                                  @{title : @"1920 x 1080 (1080p)", value : [NSValue valueWithSize:(NSSize){1920.0, 1080.0}] },
-                                  @{title : @"2048 × 1080 (2k)", value : [NSValue valueWithSize:(NSSize){2048.0, 1080.0}] },
-                                  @{title : @"2048 × 858 (2k Cinemascope)", value : [NSValue valueWithSize:(NSSize){2048.0, 858.0}] },
-                                  @{title : @"3840 × 2160 (UHD)", value : [NSValue valueWithSize:(NSSize){3840.0, 2160.0}] },
-                                  @{title : @"4096 × 2160 (4k)", value : [NSValue valueWithSize:(NSSize){4096.0, 2160.0}] },
-                                  @{title : @"4096 × 1716 (4k Cinemascope)", value : [NSValue valueWithSize:(NSSize){4096.0, 1716.0}] },
-                                  //@"Custom"
-                                  ];
-    
-    [self addMenuItemsToMenu:self.prefsVideoDimensions.menu withArray:videoResolutions withSelector:@selector(selectVideoResolution:)];
-    
-    [self.prefsVideoDimensions.menu addItem:[NSMenuItem separatorItem]];
-    
-    NSMenuItem* customItem = [[NSMenuItem alloc] initWithTitle:@"Custom" action:@selector(selectVideoEncoder:) keyEquivalent:@""];
-    [customItem setRepresentedObject:[NSNull null]];
-    [self.prefsVideoDimensions.menu addItem:customItem];
-    
+    [self addMenuItemsToMenu:self.prefsVideoDimensions.menu withArray:self.videoResolutions withSelector:@selector(selectVideoResolution:)];
+
     // Video Prefs Quality
-    
-    NSMenuItem* qualityItem = [[NSMenuItem alloc] initWithTitle:@"Not Applicable" action:@selector(selectVideoQuality:) keyEquivalent:@""];
-    [qualityItem setRepresentedObject:[NSNull null]];
-    [self.prefsVideoQuality.menu addItem:qualityItem];
-    [self.prefsVideoQuality.menu addItem:[NSMenuItem separatorItem]];
-    
     NSArray* qualityArray = @[
+                              @{title : @"Not Applicable", value : [NSNull null] },
+                              @{title : @"Seperator", value : @"Seperator" },
                               @{title : @"Minimum", value : @0.0} ,
                               @{title : @"Low", value : @0.25},
                               @{title : @"Normal", value : @0.5},
@@ -219,14 +205,10 @@ const NSString* value = @"Value";
     [self addMenuItemsToMenu:self.prefsVideoQuality.menu withArray:qualityArray withSelector:@selector(selectVideoQuality:)];
     
     // Video Prefs Aspect Ratio
-    
-    NSMenuItem* aspectItem = [[NSMenuItem alloc] initWithTitle:@"Native" action:@selector(selectVideoAspectRatio:) keyEquivalent:@""];
-    [aspectItem setRepresentedObject:[NSNull null]];
-    [self.prefsVideoAspectRatio.menu addItem:aspectItem];
-    [self.prefsVideoAspectRatio.menu addItem:[NSMenuItem separatorItem]];
-    
     // AVVideoScalingModeKey
     NSArray* aspectArray = @[
+                             @{title : @"Native", value : [NSNull null] },
+                             @{title : @"Seperator", value : @"Seperator" },
                              @{title : @"Aspect Fill", value : AVVideoScalingModeResizeAspectFill},
                              @{title : @"Aspect Fit", value : AVVideoScalingModeResizeAspect},
                              @{title : @"Resize", value : AVVideoScalingModeResize},
@@ -246,13 +228,9 @@ const NSString* value = @"Value";
     [self.prefsAudioBitrate removeAllItems];
     
     // Audio Prefs Format
-    
-    NSMenuItem* passthroughItem = [[NSMenuItem alloc] initWithTitle:@"Passthrough" action:@selector(selectAudioFormat:) keyEquivalent:@""];
-    [passthroughItem setRepresentedObject:[NSNull null]];
-    [self.prefsAudioFormat.menu addItem:passthroughItem];
-    [self.prefsAudioFormat.menu addItem:[NSMenuItem separatorItem]];
-    
     NSArray* formatArray = @[
+                             @{title : @"Passthrough", value :[NSNull null] },
+                             @{title : @"Seperator", value : @"Seperator" },
                              @{title : @"LinearPCM", value : @(kAudioFormatLinearPCM)} ,
                              @{title : @"Apple Lossless", value : @(kAudioFormatAppleLossless)},
                              @{title : @"AAC", value : @(kAudioFormatMPEG4AAC)},
@@ -262,14 +240,9 @@ const NSString* value = @"Value";
     [self addMenuItemsToMenu:self.prefsAudioFormat.menu withArray:formatArray withSelector:@selector(selectAudioFormat:)];
     
     // Audio Prefs Rate
-    
-    NSMenuItem* recommendedItem = [[NSMenuItem alloc] initWithTitle:@"Recommended" action:@selector(selectAudioSamplerate:) keyEquivalent:@""];
-    [recommendedItem setRepresentedObject:[NSNull null]];
-    [self.prefsAudioRate.menu addItem:recommendedItem];
-    [self.prefsAudioRate.menu addItem:[NSMenuItem separatorItem]];
-    
     NSArray* rateArray = @[
-                           //                              @{title : @"Recommended", value : [NSNull null]} ,
+                           @{title : @"Recommended", value : [NSNull null]},
+                           @{title : @"Seperator", value : @"Seperator" },
                            @{title : @"16.000 Khz", value : @(16000.0)},
                            @{title : @"22.050 Khz", value : @(22050.0)},
                            @{title : @"24.000 Khz", value : @(24000.0)},
@@ -295,14 +268,9 @@ const NSString* value = @"Value";
     [self addMenuItemsToMenu:self.prefsAudioQuality.menu withArray:qualityArray withSelector:@selector(selectAudioQuality:)];
     
     // Audio Prefs Bitrate
-    
-    NSMenuItem* recommendedItem2 = [[NSMenuItem alloc] initWithTitle:@"Recommended" action:@selector(selectAudioBitrate:) keyEquivalent:@""];
-    [recommendedItem2 setRepresentedObject:[NSNull null]];
-    [self.prefsAudioBitrate.menu addItem:recommendedItem2];
-    [self.prefsAudioBitrate.menu addItem:[NSMenuItem separatorItem]];
-    
     NSArray* bitRateArray = @[
-                              //@{title : @"Recommended", value : [NSNull null]} ,
+                              @{title : @"Recommended", value : [NSNull null]},
+                              @{title : @"Seperator", value : @"Seperator" },
                               @{title : @"16 Kbps", value : @(16000)},
                               @{title : @"24 Kbps", value : @(24000)},
                               @{title : @"32 Kbps", value : @(32000)},
@@ -328,9 +296,16 @@ const NSString* value = @"Value";
 {
     for(NSDictionary* item in array)
     {
-        NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:item[title] action:selector keyEquivalent:@""];
-        [menuItem setRepresentedObject:item[value]];
-        [aMenu addItem:menuItem];
+        if([item[title] isEqualToString:@"Seperator"])
+        {
+            [aMenu addItem:[NSMenuItem separatorItem]];
+        }
+        else
+        {
+            NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:item[title] action:selector keyEquivalent:@""];
+            [menuItem setRepresentedObject:item[value]];
+            [aMenu addItem:menuItem];
+        }
     }
 }
 
@@ -916,6 +891,16 @@ const NSString* value = @"Value";
     self.prefsVideoDimensionsCustomHeight.enabled = preset.editable;
     self.prefsVideoQuality.enabled = preset.editable;
     self.prefsVideoAspectRatio.enabled = preset.editable;
+    
+//    [self selectVideoEncoder:preset.videoSettings];
+    
+    if(preset.videoSettings.settingsDictionary)
+    {
+        NSInteger index = [self.prefsVideoCompressor indexOfItemWithRepresentedObject:preset.videoSettings.settingsDictionary[AVVideoCodecKey]];
+        
+        [self.prefsVideoCompressor selectItemAtIndex:index];
+        
+    }
 }
 
 - (void) configureAnalysisSettingsFromPreset:(PresetObject*)preset
