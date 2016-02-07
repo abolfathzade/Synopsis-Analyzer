@@ -130,10 +130,6 @@ const NSString* value = @"Value";
 {
     [self initVideoPrefs];
     [self initAudioPrefs];
-    
-    // update UI / hack since we dont have validator code yet
-    [self selectVideoEncoder:self.prefsVideoCompressor.selectedItem];
-    [self selectAudioFormat:self.prefsAudioFormat.selectedItem];
 }
 
 - (void) initVideoPrefs
@@ -353,7 +349,7 @@ const NSString* value = @"Value";
     }
     
     
-    [self validateVideoPrefsUI];
+//    [self validateVideoPrefsUI];
     [self buildVideoPreferences];
 }
 
@@ -395,7 +391,7 @@ const NSString* value = @"Value";
         self.prefsVideoDimensionsCustomHeight.enabled = NO;
     }
     
-    [self validateVideoPrefsUI];
+//    [self validateVideoPrefsUI];
     [self buildVideoPreferences];
 }
 
@@ -403,7 +399,7 @@ const NSString* value = @"Value";
 {
     NSLog(@"selected Video Quality: %@", [sender representedObject]);
     
-    [self validateVideoPrefsUI];
+//    [self validateVideoPrefsUI];
     [self buildVideoPreferences];
 }
 
@@ -411,7 +407,7 @@ const NSString* value = @"Value";
 {
     NSLog(@"selected Video Quality: %@", [sender representedObject]);
     
-    [self validateVideoPrefsUI];
+//    [self validateVideoPrefsUI];
     [self buildVideoPreferences];
 }
 
@@ -419,7 +415,8 @@ const NSString* value = @"Value";
 
 - (void) validateVideoPrefsUI
 {
-    
+    // update UI / hack since we dont have validator code yet
+    [self selectVideoEncoder:self.prefsVideoCompressor.selectedItem];
 }
 
 - (void) buildVideoPreferences
@@ -487,9 +484,9 @@ const NSString* value = @"Value";
         }
     }
     
-    self.selectedPreset.videoSettings = [videoSettingsDictonary copy];
+    self.selectedPreset.videoSettings.settingsDictionary = [videoSettingsDictonary copy];
     
-    NSLog(@"Calculated Video Settings : %@", self.selectedPreset.videoSettings);
+    NSLog(@"Calculated Video Settings : %@", self.selectedPreset.videoSettings.settingsDictionary);
 }
 
 #pragma mark - Audio Prefs Actions
@@ -530,28 +527,28 @@ const NSString* value = @"Value";
         }
     }
     
-    [self validateAudioPrefsUI];
+//    [self validateAudioPrefsUI];
     [self buildAudioPreferences];
 }
 
 - (IBAction)selectAudioSamplerate:(id)sender
 {
     NSLog(@"selected Audio Sampleate: %@", [sender representedObject]);
-    [self validateAudioPrefsUI];
+//    [self validateAudioPrefsUI];
     [self buildAudioPreferences];
 }
 
 - (IBAction)selectAudioQuality:(id)sender
 {
     NSLog(@"selected Audio Quality: %@", [sender representedObject]);
-    [self validateAudioPrefsUI];
+//    [self validateAudioPrefsUI];
     [self buildAudioPreferences];
 }
 
 - (IBAction)selectAudioBitrate:(id)sender
 {
     NSLog(@"selected Audio Bitrate: %@", [sender representedObject]);
-    [self validateAudioPrefsUI];
+//    [self validateAudioPrefsUI];
     [self buildAudioPreferences];
 }
 
@@ -559,6 +556,8 @@ const NSString* value = @"Value";
 
 - (void) validateAudioPrefsUI
 {
+    // update UI / hack since we dont have validator code yet
+    [self selectAudioFormat:self.prefsAudioFormat.selectedItem];
 }
 
 
@@ -609,9 +608,9 @@ const NSString* value = @"Value";
             break;
     }
     
-    self.selectedPreset.audioSettings = [audioSettingsDictonary copy];
+    self.selectedPreset.audioSettings.settingsDictionary = [audioSettingsDictonary copy];
     
-    NSLog(@"Calculated Audio Settings : %@", self.selectedPreset.audioSettings);
+    NSLog(@"Calculated Audio Settings : %@", self.selectedPreset.audioSettings.settingsDictionary);
 }
 
 #pragma mark - SplitView Delegate
@@ -866,6 +865,9 @@ const NSString* value = @"Value";
     [self configureAudioSettingsFromPreset:self.selectedPreset];
     [self configureVideoSettingsFromPreset:self.selectedPreset];
     [self configureAnalysisSettingsFromPreset:self.selectedPreset];
+    
+    [self validateVideoPrefsUI];
+    [self validateAudioPrefsUI];
 }
 
 - (void) configureAudioSettingsFromPreset:(PresetObject*)preset
@@ -896,9 +898,26 @@ const NSString* value = @"Value";
     
     if(preset.videoSettings.settingsDictionary)
     {
-        NSInteger index = [self.prefsVideoCompressor indexOfItemWithRepresentedObject:preset.videoSettings.settingsDictionary[AVVideoCodecKey]];
-        
-        [self.prefsVideoCompressor selectItemAtIndex:index];
+        // Codec
+        if(preset.videoSettings.settingsDictionary[AVVideoCodecKey])
+        {
+            NSInteger index = [self.prefsVideoCompressor indexOfItemWithRepresentedObject:preset.videoSettings.settingsDictionary[AVVideoCodecKey]];
+            if(index > 0)
+                [self.prefsVideoCompressor selectItemAtIndex:index];
+            else
+                [self.prefsVideoCompressor selectItemAtIndex:0];
+        }
+
+        // Aspect Ratio
+        if(preset.videoSettings.settingsDictionary[AVVideoScalingModeKey])
+        {
+            NSInteger index = [self.prefsVideoAspectRatio indexOfItemWithRepresentedObject:preset.videoSettings.settingsDictionary[AVVideoScalingModeKey]];
+            
+            if(index > 0)
+                    [self.prefsVideoAspectRatio selectItemAtIndex:index];
+            else
+                [self.prefsVideoAspectRatio selectItemAtIndex:0];
+        }
         
     }
 }
