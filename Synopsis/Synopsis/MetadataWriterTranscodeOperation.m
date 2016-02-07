@@ -203,33 +203,53 @@
         self.transcodeAssetWriterAudioPassthrough = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:nil sourceFormatHint:audioFormatDesc];
     else
         self.transcodeAssetWriterAudioPassthrough = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:nil];
+
+    
+//    // Our custom extensions for versioning and what not
+//    CMFormatDescriptionRef metadataExtensionDescription = NULL;
 //    
-//    NSDictionary *bufferExtensions = @{ (NSString*) kCMFormatDescriptionExtension_GammaLevel : @1.0,
-//                                        (NSString*) kCMFormatDescriptionExtension_Depth: @1.0,
-//                                        (NSString*) kCMFormatDescriptionExtension_FormatName : @"Synopsis Video Metadata",
-//                                        (NSString*) kCMFormatDescriptionExtension_RevisionLevel : @1,
-//                                        (NSString*) kCMFormatDescriptionExtension_SpatialQuality : @1,
-//                                        (NSString*) kCMFormatDescriptionExtension_TemporalQuality : @0,
+//    NSDictionary* metadataKeys = @{(NSString*)kCMMetadataFormatDescriptionKey_Namespace : @('v002'),
+//                                   (NSString*)kCMMetadataFormatDescriptionKey_DataTypeNamespace : @(0),
+////                                   (NSString*)kCMMetadataFormatDescriptionKey_DataType :
+//                                   };
+//    
+//    NSDictionary *bufferExtensions = @{ (NSString*) kCMFormatDescriptionExtension_FormatName : @"Synopsis Metadata",
 //                                        (NSString*) kCMFormatDescriptionExtension_Vendor : @"v002",
-//                                        (NSString*) kCMFormatDescriptionExtension_Version : @1
+//                                        (NSString*) kCMFormatDescriptionExtension_Version : @1,
+////                                        (NSString*) kCMFormatDescriptionExtensionKey_MetadataKeyTable : @[ metadataKeys],
+//                                        
 //                                        };
+//    OSStatus err = CMFormatDescriptionCreate(kCFAllocatorDefault, 'meta', kCMMetadataFormatType_Boxed, (__bridge CFDictionaryRef _Nullable)(bufferExtensions), &metadataExtensionDescription);
 //    
-//    CMVideoFormatDescriptionRef formatDesc;
-//    CMVideoFormatDescriptionCreate(kCFAllocatorDefault,
-//                                   'synp',
-//                                   (uint32_t)32,
-//                                   (uint32_t)32,
-//                                   (__bridge CFDictionaryRef)bufferExtensions,
-//                                   &formastDesc);
+//    if(err)
+//    {
+//        NSLog(@"Error creating CMMetdataFormatDesc");
+//    }
+//    
+    // Metadata valid
+    CMFormatDescriptionRef metadataFormatDescriptionValid = NULL;
+    NSArray *specs = @[@{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : kSynopsislMetadataIdentifier,
+                         (__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType : (__bridge NSString *)kCMMetadataBaseDataType_RawData,
+                         }];
+    
+    OSStatus err = CMMetadataFormatDescriptionCreateWithMetadataSpecifications(kCFAllocatorDefault, kCMMetadataFormatType_Boxed, (__bridge CFArrayRef)specs, &metadataFormatDescriptionValid);
+    if(err)
+    {
+        NSLog(@"Error creating CMMetdataFormatDesc");
+    }
+
+    
+//    CMFormatDescriptionRef metadataFormatDescription = NULL;
+    // combine them to hopefully get a valid format desc with extensions?
+//    err = CMMetadataFormatDescriptionCreateByMergingMetadataFormatDescriptions(kCFAllocatorDefault, metadataFormatDescriptionValid, metadataExtensionDescription, &metadataFormatDescription);
+    
+//    if(err)
+//    {
+//        NSLog(@"Error creating CMMetdataFormatDesc");
+//    }
 //
     
-    // Metadata
-    CMFormatDescriptionRef metadataFormatDescription = NULL;
-    NSArray *specs = @[@{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : kSynopsislMetadataIdentifier,
-                         (__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType : (__bridge NSString *)kCMMetadataBaseDataType_RawData}];
-    
-    OSStatus err = CMMetadataFormatDescriptionCreateWithMetadataSpecifications(kCFAllocatorDefault, kCMMetadataFormatType_Boxed, (__bridge CFArrayRef)specs, &metadataFormatDescription);
-    self.transcodeAssetWriterMetadata = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeMetadata outputSettings:nil sourceFormatHint:metadataFormatDescription];
+    self.transcodeAssetWriterMetadata = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeMetadata outputSettings:nil sourceFormatHint:metadataFormatDescriptionValid];
     self.transcodeAssetWriterMetadataAdaptor = [AVAssetWriterInputMetadataAdaptor assetWriterInputMetadataAdaptorWithAssetWriterInput:self.transcodeAssetWriterMetadata];
 
     // Associate metadata to video
