@@ -33,18 +33,18 @@
 // whatever man
 // at some point this needs to be removed or made serializable
 
-@interface PresetAudioSettings : NSObject
-+ (PresetAudioSettings*) none;
+@interface PresetSettings : NSObject;
 @property (copy) NSDictionary* settingsDictionary;
++ (instancetype) settingsWithDict:(NSDictionary*)dictionary;
++ (instancetype) none;
 @end
 
-@interface PresetVideoSettings : NSObject
-+ (PresetVideoSettings*) none;
-@property (copy) NSDictionary* settingsDictionary;
+@interface PresetAudioSettings : PresetSettings
 @end
 
-@interface PresetAnalysisSettings : NSObject
-+ (PresetAnalysisSettings*) none;
-@property (copy) NSDictionary* settingsDictionary;
+@interface PresetVideoSettings : PresetSettings
+@end
+
+@interface PresetAnalysisSettings : PresetSettings
 @end
 

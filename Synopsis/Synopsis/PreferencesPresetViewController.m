@@ -158,7 +158,14 @@ const NSString* value = @"Value";
     
     for(NSDictionary* encoder in videoEncodersArray)
     {
-        [encoderArrayWithTitles addObject:@{title:encoder[@"DisplayName"], value:encoder}];
+        NSNumber* codecType = encoder[@"CodecType"];
+        FourCharCode fourcc = (FourCharCode)[codecType intValue];
+        NSString* fourCCString = NSFileTypeForHFSTypeCode(fourcc);
+        
+        // remove ' so "'jpeg'" becomes "jpeg" for example
+        fourCCString = [fourCCString stringByReplacingOccurrencesOfString:@"'" withString:@""];
+
+        [encoderArrayWithTitles addObject:@{title:encoder[@"DisplayName"], value:fourCCString}];
     }
     
     //    NSDictionary* animationDictionary = @{ title : @"MPEG4 Video" , value: @{ @"CodecType" : [NSNumber numberWithInt:kCMVideoCodecType_MPEG4Video]}};
@@ -335,8 +342,8 @@ const NSString* value = @"Value";
         self.prefsVideoDimensions.enabled = YES;
         
         // If we are on JPEG, enable quality
-        NSDictionary* codecInfo = self.prefsVideoCompressor.selectedItem.representedObject;
-        if( [codecInfo[@"CodecName"] containsString:@"JPEG"])
+        NSString* codecFourCC = self.prefsVideoCompressor.selectedItem.representedObject;
+        if( [codecFourCC isEqualToString:@"JPEG"])
         {
             self.prefsVideoQuality.enabled = YES;
             [self.prefsVideoQuality selectItemAtIndex:4];
@@ -424,26 +431,20 @@ const NSString* value = @"Value";
     NSMutableDictionary* videoSettingsDictonary = [NSMutableDictionary new];
     
     // get our fourcc from our compressor UI represented object and convert it to a string
-    id compressorDict = self.prefsVideoCompressor.selectedItem.representedObject;
+    id compressorFourCC = self.prefsVideoCompressor.selectedItem.representedObject;
     
     // If we are passthrough, we set out video prefs to nil and bail early
-    if(compressorDict == [NSNull null] || compressorDict == nil)
+    if(compressorFourCC == [NSNull null] || compressorFourCC == nil)
     {
         self.selectedPreset.videoSettings = nil;
         return;
     }
     
     // Otherwise introspect our codec dictionary
-    if([compressorDict isKindOfClass:[NSDictionary class]])
+    if([compressorFourCC isKindOfClass:[NSString class]])
     {
-        NSNumber* codecType = compressorDict[@"CodecType"];
-        FourCharCode fourcc = (FourCharCode)[codecType intValue];
-        NSString* fourCCString = NSFileTypeForHFSTypeCode(fourcc);
         
-        // remove ' so "'jpeg'" becomes "jpeg" for example
-        fourCCString = [fourCCString stringByReplacingOccurrencesOfString:@"'" withString:@""];
-        
-        videoSettingsDictonary[AVVideoCodecKey] = fourCCString;
+        videoSettingsDictonary[AVVideoCodecKey] = compressorFourCC;
     }
     // if we have a dimension, custom or other wise, get it
     id sizeValue = self.prefsVideoDimensions.selectedItem.representedObject;
@@ -484,7 +485,7 @@ const NSString* value = @"Value";
         }
     }
     
-    self.selectedPreset.videoSettings.settingsDictionary = [videoSettingsDictonary copy];
+    self.selectedPreset.videoSettings = [PresetVideoSettings settingsWithDict:videoSettingsDictonary];
     
     NSLog(@"Calculated Video Settings : %@", self.selectedPreset.videoSettings.settingsDictionary);
 }
@@ -608,7 +609,7 @@ const NSString* value = @"Value";
             break;
     }
     
-    self.selectedPreset.audioSettings.settingsDictionary = [audioSettingsDictonary copy];
+    self.selectedPreset.audioSettings = [PresetAudioSettings settingsWithDict:audioSettingsDictonary];
     
     NSLog(@"Calculated Audio Settings : %@", self.selectedPreset.audioSettings.settingsDictionary);
 }
@@ -698,6 +699,8 @@ const NSString* value = @"Value";
             self.selectedPresetGroup = self.customPresets;
         }
         
+        self.selectedPreset = nil;
+
         return YES;
     }
 
@@ -706,10 +709,10 @@ const NSString* value = @"Value";
         self.overviewContainerView.frame = self.presetInfoContainerBox.bounds;
         [self.presetInfoContainerBox setContentView:self.overviewContainerView];
         
+        self.selectedPresetGroup = [self.presetOutlineView parentForItem:item];
+
         [self configureOverviewContainerViewFromPreset:(PresetObject*)item];
         
-        self.selectedPreset = item;
-        self.selectedPresetGroup = [self.presetOutlineView parentForItem:item];
         
         return YES;
     }
@@ -889,12 +892,15 @@ const NSString* value = @"Value";
     self.useVideoCheckButton.enabled = preset.editable;
     self.prefsVideoCompressor.enabled = preset.editable;
     self.prefsVideoDimensions.enabled = preset.editable;
+    self.prefsVideoDimensionsCustomWidth.stringValue = @"";
+    self.prefsVideoDimensionsCustomHeight.stringValue = @"";
     self.prefsVideoDimensionsCustomWidth.enabled = preset.editable;
     self.prefsVideoDimensionsCustomHeight.enabled = preset.editable;
     self.prefsVideoQuality.enabled = preset.editable;
     self.prefsVideoAspectRatio.enabled = preset.editable;
     
 //    [self selectVideoEncoder:preset.videoSettings];
+
     
     if(preset.videoSettings.settingsDictionary)
     {
@@ -907,6 +913,9 @@ const NSString* value = @"Value";
             else
                 [self.prefsVideoCompressor selectItemAtIndex:0];
         }
+        else
+            [self.prefsVideoCompressor selectItemAtIndex:0];
+
 
         // Aspect Ratio
         if(preset.videoSettings.settingsDictionary[AVVideoScalingModeKey])
@@ -918,8 +927,50 @@ const NSString* value = @"Value";
             else
                 [self.prefsVideoAspectRatio selectItemAtIndex:0];
         }
+        else
+            [self.prefsVideoAspectRatio selectItemAtIndex:0];
+        
+        // Size
+        if(preset.videoSettings.settingsDictionary[AVVideoWidthKey]
+           && preset.videoSettings.settingsDictionary[AVVideoHeightKey])
+        {
+            float width = [preset.videoSettings.settingsDictionary[AVVideoWidthKey] floatValue];
+            float height = [preset.videoSettings.settingsDictionary[AVVideoHeightKey] floatValue];
+            
+            NSSize presetSize = NSMakeSize(width, height);
+
+            if(!NSEqualSizes(presetSize, NSZeroSize))
+            {
+                NSValue* sizeValue = [NSValue valueWithSize:presetSize];
+                
+                NSInteger index = [self.prefsVideoDimensions indexOfItemWithRepresentedObject:sizeValue];
+                
+                if(index > 0)
+                    [self.prefsVideoDimensions selectItemAtIndex:index];
+                // Custom size
+                else
+                {
+                    [self.prefsVideoDimensions selectItemAtIndex:[self.prefsVideoDimensions itemArray].count - 1];
+                    self.prefsVideoDimensionsCustomWidth.stringValue = [NSString stringWithFormat:@"%f", width, nil];
+                    self.prefsVideoDimensionsCustomHeight.stringValue = [NSString stringWithFormat:@"%f", height, nil];
+                    
+                }
+            }
+            // Native size if NSZeroSize
+            else
+                [self.prefsVideoDimensions selectItemAtIndex:0];
+
+        }
+        
+        else
+            [self.prefsVideoDimensions selectItemAtIndex:0];
+
         
     }
+    // No video settings at all = passthrough
+    else
+        [self.prefsVideoCompressor selectItemAtIndex:0];
+
 }
 
 - (void) configureAnalysisSettingsFromPreset:(PresetObject*)preset

@@ -27,6 +27,7 @@
     if(self)
     {
         self.title = title;
+        
         self.audioSettings = audioSettings;
         self.videoSettings = videoSettings;
         self.analyzerSettings = analyzerSettings;
@@ -169,25 +170,32 @@
 
 @end
 
-@implementation PresetAudioSettings
-+ (PresetAudioSettings*) none;
+@implementation PresetSettings;
++ (instancetype) settingsWithDict:(NSDictionary*)dictionary
 {
-    return [[PresetAudioSettings alloc] init];
+    PresetSettings* preset =  [[[self class] alloc] init];
+    
+    if(preset)
+        preset.settingsDictionary = dictionary;
+    
+    return preset;
 }
+
++ (instancetype) none;
+{
+    return [[[self class] alloc] init];
+}
+
+@end
+
+
+@implementation PresetAudioSettings
 @end
 
 @implementation PresetVideoSettings
-+ (PresetVideoSettings*) none;
-{
-    return [[PresetVideoSettings alloc] init];
-}
 @end
 
 @implementation PresetAnalysisSettings;
-+ (PresetAnalysisSettings*) none;
-{
-    return [[PresetAnalysisSettings alloc] init];
-}
 @end
 
 
