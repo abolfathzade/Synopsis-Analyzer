@@ -339,13 +339,15 @@ const NSString* value = @"Value";
     }
     else
     {
-        self.prefsVideoDimensions.enabled = YES;
+        if(self.selectedPreset.editable)
+            self.prefsVideoDimensions.enabled = YES;
         
         // If we are on JPEG, enable quality
         NSString* codecFourCC = self.prefsVideoCompressor.selectedItem.representedObject;
         if( [codecFourCC isEqualToString:@"JPEG"])
         {
-            self.prefsVideoQuality.enabled = YES;
+            if(self.selectedPreset.editable)
+                self.prefsVideoQuality.enabled = YES;
             [self.prefsVideoQuality selectItemAtIndex:4];
         }
         else
@@ -899,9 +901,6 @@ const NSString* value = @"Value";
     self.prefsVideoQuality.enabled = preset.editable;
     self.prefsVideoAspectRatio.enabled = preset.editable;
     
-//    [self selectVideoEncoder:preset.videoSettings];
-
-    
     if(preset.videoSettings.settingsDictionary)
     {
         // Codec
@@ -916,20 +915,6 @@ const NSString* value = @"Value";
         else
             [self.prefsVideoCompressor selectItemAtIndex:0];
 
-
-        // Aspect Ratio
-        if(preset.videoSettings.settingsDictionary[AVVideoScalingModeKey])
-        {
-            NSInteger index = [self.prefsVideoAspectRatio indexOfItemWithRepresentedObject:preset.videoSettings.settingsDictionary[AVVideoScalingModeKey]];
-            
-            if(index > 0)
-                    [self.prefsVideoAspectRatio selectItemAtIndex:index];
-            else
-                [self.prefsVideoAspectRatio selectItemAtIndex:0];
-        }
-        else
-            [self.prefsVideoAspectRatio selectItemAtIndex:0];
-        
         // Size
         if(preset.videoSettings.settingsDictionary[AVVideoWidthKey]
            && preset.videoSettings.settingsDictionary[AVVideoHeightKey])
@@ -961,10 +946,33 @@ const NSString* value = @"Value";
                 [self.prefsVideoDimensions selectItemAtIndex:0];
 
         }
-        
         else
             [self.prefsVideoDimensions selectItemAtIndex:0];
 
+        // Quality
+        if(preset.videoSettings.settingsDictionary[AVVideoQualityKey])
+        {
+            NSInteger index = [self.prefsVideoQuality indexOfItemWithRepresentedObject:preset.videoSettings.settingsDictionary[AVVideoQualityKey]];
+            if(index > 0)
+                [self.prefsVideoQuality selectItemAtIndex:index];
+            else
+                [self.prefsVideoQuality selectItemAtIndex:0];
+        }
+        else
+            [self.prefsVideoQuality selectItemAtIndex:0];
+        
+        // Aspect Ratio
+        if(preset.videoSettings.settingsDictionary[AVVideoScalingModeKey])
+        {
+            NSInteger index = [self.prefsVideoAspectRatio indexOfItemWithRepresentedObject:preset.videoSettings.settingsDictionary[AVVideoScalingModeKey]];
+            
+            if(index > 0)
+                [self.prefsVideoAspectRatio selectItemAtIndex:index];
+            else
+                [self.prefsVideoAspectRatio selectItemAtIndex:0];
+        }
+        else
+            [self.prefsVideoAspectRatio selectItemAtIndex:0];
         
     }
     // No video settings at all = passthrough
