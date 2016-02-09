@@ -150,6 +150,9 @@
 
 - (NSError*) setupTranscodeShitSucessfullyOrDontWhatverMan
 {
+    CMFormatDescriptionRef audioFormatDesc = NULL;
+    CMFormatDescriptionRef videoFormatDesc = NULL;
+
     CGAffineTransform prefferedTrackTransform = CGAffineTransformIdentity;
     CGSize nativeSize = CGSizeZero;
     
@@ -168,6 +171,13 @@
     if(self.transcodeAssetHasVideo)
     {
         AVAssetTrack* firstVideoTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual][0];
+        
+        //Check if we are self contained, (no references)
+        // and if we have a single source format hint
+        if(firstVideoTrack.formatDescriptions.count == 1 && firstVideoTrack.selfContained)
+        {
+            videoFormatDesc = (__bridge CMFormatDescriptionRef)(firstVideoTrack.formatDescriptions[0]);
+        }
         
         self.transcodeAssetReaderVideo = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
                                                                                     outputSettings:@{(NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
@@ -188,6 +198,13 @@
     if(self.transcodeAssetHasAudio)
     {
         AVAssetTrack* firstAudioTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicAudible][0];
+        
+        //Check if we are self contained, (no references)
+        // and if we have a single source format hint
+        if(firstAudioTrack.formatDescriptions.count == 1 && firstAudioTrack.selfContained)
+        {
+            audioFormatDesc = (__bridge CMFormatDescriptionRef)(firstAudioTrack.formatDescriptions[0]);
+        }
         
         // get our audio tracks channel layout - we need this because we ought to match our audios channel count even if we transcode
         
@@ -271,10 +288,18 @@
     }
     
     // Writers
-    self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:&error];
-    self.transcodeAssetWriterVideo = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:self.videoTranscodeSettings];
-    self.transcodeAssetWriterAudio = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:self.audioTranscodeSettings];
+    self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeMPEG4 error:&error];
     
+    if(videoFormatDesc != NULL)
+        self.transcodeAssetWriterVideo = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:self.videoTranscodeSettings sourceFormatHint:videoFormatDesc];
+    else
+        self.transcodeAssetWriterVideo = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:self.videoTranscodeSettings];
+
+    if(audioFormatDesc != NULL)
+        self.transcodeAssetWriterAudio = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:self.audioTranscodeSettings sourceFormatHint:audioFormatDesc];
+    else
+        self.transcodeAssetWriterAudio = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:self.audioTranscodeSettings];
+
     self.transcodeAssetWriterVideo.expectsMediaDataInRealTime = NO;
     self.transcodeAssetWriterVideo.transform = prefferedTrackTransform;
     
