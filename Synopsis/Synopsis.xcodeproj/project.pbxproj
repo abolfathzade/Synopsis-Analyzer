@@ -81,6 +81,8 @@
 		1BA8F84B1C138FDD0066BDDB /* jetpac.ntwk in Resources */ = {isa = PBXBuildFile; fileRef = 1BA8F84A1C138FDD0066BDDB /* jetpac.ntwk */; };
 		1BA8F84C1C1395F10066BDDB /* DeepBeliefAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA8F83B1C138B330066BDDB /* DeepBeliefAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1BA8F84F1C13968E0066BDDB /* DeepBelief.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA8F8481C138D440066BDDB /* DeepBelief.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1BD0C1EF1C69AD8D00C60650 /* libmp4v2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BD0C1EE1C69AD8D00C60650 /* libmp4v2.a */; };
+		1BD0C1F31C69ADEF00C60650 /* MetadataWriterMP4v2Operation.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1BD0C1F21C69ADEF00C60650 /* MetadataWriterMP4v2Operation.mm */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -459,6 +461,10 @@
 		1BA8F8441C138C250066BDDB /* DeepBeliefAnalyzer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeepBeliefAnalyzer.m; path = DeepBeliefAnalyzer/DeepBeliefAnalyzer.m; sourceTree = "<group>"; };
 		1BA8F8481C138D440066BDDB /* DeepBelief.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeepBelief.framework; path = DeepBeliefAnalyzer/DeepBelief.framework; sourceTree = "<group>"; };
 		1BA8F84A1C138FDD0066BDDB /* jetpac.ntwk */ = {isa = PBXFileReference; lastKnownFileType = file; path = jetpac.ntwk; sourceTree = "<group>"; };
+		1BD0C1EE1C69AD8D00C60650 /* libmp4v2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmp4v2.a; path = mp4v2/lib/mac/Release/libmp4v2.a; sourceTree = "<group>"; };
+		1BD0C1F01C69ADC800C60650 /* mp4v2 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = mp4v2; path = mp4v2/include/mp4v2; sourceTree = SOURCE_ROOT; };
+		1BD0C1F11C69ADEF00C60650 /* MetadataWriterMP4v2Operation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetadataWriterMP4v2Operation.h; sourceTree = "<group>"; };
+		1BD0C1F21C69ADEF00C60650 /* MetadataWriterMP4v2Operation.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MetadataWriterMP4v2Operation.mm; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Synopsis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -533,6 +539,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BD0C1EF1C69AD8D00C60650 /* libmp4v2.a in Frameworks */,
 				1B3233D91C30C6CE00C9CF5E /* Accelerate.framework in Frameworks */,
 				1BA68C701AD5D924003B3CE9 /* libz.dylib in Frameworks */,
 				1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */,
@@ -590,6 +597,7 @@
 		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1BD0C1EE1C69AD8D00C60650 /* libmp4v2.a */,
 				1B3233D81C30C6CE00C9CF5E /* Accelerate.framework */,
 				1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */,
 				1BA8F8331C125DAA0066BDDB /* Quartz.framework */,
@@ -1070,12 +1078,15 @@
 		1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */ = {
 			isa = PBXGroup;
 			children = (
+				1BD0C1F01C69ADC800C60650 /* mp4v2 */,
 				1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */,
 				1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */,
 				1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */,
 				1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */,
 				1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */,
 				1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */,
+				1BD0C1F11C69ADEF00C60650 /* MetadataWriterMP4v2Operation.h */,
+				1BD0C1F21C69ADEF00C60650 /* MetadataWriterMP4v2Operation.mm */,
 			);
 			name = "Transcode & Analysis Operations";
 			sourceTree = "<group>";
@@ -1474,6 +1485,7 @@
 				1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */,
 				1B805E371B012ADF005D7354 /* ProgressTableViewCellProgressController.m in Sources */,
 				1B805E2C1B0114D0005D7354 /* ProgressTableViewController.m in Sources */,
+				1BD0C1F31C69ADEF00C60650 /* MetadataWriterMP4v2Operation.mm in Sources */,
 				1B3233C21C2E395700C9CF5E /* PreferencesViewController.m in Sources */,
 				1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */,
 				1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */,
@@ -1779,10 +1791,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LIBRARY = "libstdc++";
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
+				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/mp4v2/**";
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/mp4v2/lib/mac/Release",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1793,10 +1811,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LIBRARY = "libstdc++";
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
+				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/mp4v2/**";
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/mp4v2/lib/mac/Release",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";

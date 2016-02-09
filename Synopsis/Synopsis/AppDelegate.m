@@ -14,7 +14,7 @@
 
 #import "AnalysisAndTranscodeOperation.h"
 #import "MetadataWriterTranscodeOperation.h"
-
+#import "MetadataWriterMP4v2Operation.h"
 #import "PreferencesViewController.h"
 #import "PresetObject.h"
 
@@ -241,7 +241,7 @@
                                                                       kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
                                                                       };
                                     
-                                    MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];
+                                    MetadataWriterMP4v2Operation* pass2 = [[MetadataWriterMP4v2Operation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];
                                     
                                     pass2.completionBlock = (^(void)
                                                              {

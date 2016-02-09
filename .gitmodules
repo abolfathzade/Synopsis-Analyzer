@@ -1,0 +1,3 @@
+[submodule "Synopsis/mp4v2"]
+	path = Synopsis/mp4v2
+	url = https://github.com/TechSmith/mp4v2.git
