@@ -1078,7 +1078,6 @@
 		1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */ = {
 			isa = PBXGroup;
 			children = (
-				1BD0C1F01C69ADC800C60650 /* mp4v2 */,
 				1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */,
 				1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */,
 				1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */,
@@ -1087,6 +1086,7 @@
 				1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */,
 				1BD0C1F11C69ADEF00C60650 /* MetadataWriterMP4v2Operation.h */,
 				1BD0C1F21C69ADEF00C60650 /* MetadataWriterMP4v2Operation.mm */,
+				1BD0C1F01C69ADC800C60650 /* mp4v2 */,
 			);
 			name = "Transcode & Analysis Operations";
 			sourceTree = "<group>";
@@ -1801,7 +1801,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/mp4v2/lib/mac/Release",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1821,7 +1821,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/mp4v2/lib/mac/Release",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

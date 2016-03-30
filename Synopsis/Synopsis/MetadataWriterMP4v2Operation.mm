@@ -88,26 +88,27 @@
     {
         if(self.analyzedVideoSampleBufferMetadata.count)
         {
-            MP4TrackId synvTrackID = MP4AddTrack(file, "synp", 9000);
-            MP4SetTrackName(file, synvTrackID, "Synopsis Metadata");
             
-//            _props.flags.SetValue( (_enabled ? 0x01 : 0) | (_inMovie ? 0x02 : 0) | (_inPreview ? 0x04 : 0) );
+            MP4TrackId synvTrackID = MP4AddSynopsisTrack(file, 9000);
+            
+//            MP4TrackId synvTrackID = MP4AddTrack(file, "mhlr", 9000);
+//            MP4SetTrackName(file, synvTrackID, "Synopsis Metadata");
+//
+//            // Disabled flag 0 (enabled = 0x01), in movie flag 0x02, no in preview flag 0x04 - taken from the mp4track.cpp utility
+//            if(!MP4SetTrackIntegerProperty(file, synvTrackID, "tkhd.flags", 0 | 0x02))
+//                NSLog(@"Unable to modify flags");
+//            
+//            if(!MP4SetTrackStringProperty(file, synvTrackID, "mdia.hdlr.handlerSubType", "synp"))
+//                NSLog(@"unable to set mdia.hdlr.handlerSubType property");
+//            
+//            if(!MP4SetTrackStringProperty(file, synvTrackID, "mdia.hdlr.handlerManufacturer", "v002"))
+//                NSLog(@"unable to set mdia.hdlr.handlerManufacturer property");
+//            
+//            if(!MP4SetTrackStringProperty(file, synvTrackID, "mdia.hdlr.name", "Synopsis Metadata"))
+//                NSLog(@"unable to set mdia.hdlr.name property");
 
-            if(!MP4SetTrackIntegerProperty(file, synvTrackID, "tkhd.flags", 0 | 0x02))
-                NSLog(@"Unable to modify flags");
-            if(!MP4SetTrackIntegerProperty(file, synvTrackID, "mdia.hdlr.type", 'mhlr'))
-                NSLog(@"unable to set mdia.hdlr.type property");
+            MP4Dump(file);
 
-            if(!MP4SetTrackIntegerProperty(file, synvTrackID, "mdia.hdlr.subType", 'synp'))
-                NSLog(@"unable to set mdia.hdlr.subType property");
-
-            if(!MP4SetTrackIntegerProperty(file, synvTrackID, "mdia.hdlr.manufacturer", 'v002'))
-                NSLog(@"unable to set mdia.hdlr.manufacturer property");
-            if(!MP4SetTrackStringProperty(file, synvTrackID, "mdia.hdlr.name", "Synopsis Metadata"))
-                NSLog(@"unable to set mdia.hdlr.name property");
-
-
-                        
             MP4Duration renderingOffset = 0;
             for( unsigned int index = 0; index < self.analyzedVideoSampleBufferMetadata.count; index++)
             {
@@ -118,7 +119,6 @@
                 MP4Duration sampleDuration = 1;
                 
                 const uint8_t *bytes = (const uint8_t*)[compressedJSONData bytes];
-//                if(!MP4WriteSample(file, synvTrackID, compressedJSONData.bytes, compressedJSONData.length, sampleDuration, renderingOffset, true))
                 if(!MP4WriteSample(file, synvTrackID, bytes, compressedJSONData.length, sampleDuration, renderingOffset, true))
                 {
                     NSLog(@"Error Writing Metadata Sample what!?");
@@ -129,12 +129,16 @@
         }
     }
     
-//    MP4MakeIsmaCompliant
     
     MP4Close(file, 0);
-            
-    MP4Optimize([filePath cStringUsingEncoding:NSUTF8StringEncoding]);
     
+    
+    if(!MP4MakeIsmaCompliant([filePath cStringUsingEncoding:NSUTF8StringEncoding]))
+        NSLog(@"Unable to force ISMA Complaince");
+
+    if(!MP4Optimize([filePath cStringUsingEncoding:NSUTF8StringEncoding]))
+        NSLog(@"Unable to Optimize File");
+
     AVURLAsset* urlAsset = [AVURLAsset URLAssetWithURL:self.sourceURL options:@{AVURLAssetPreferPreciseDurationAndTimingKey : @TRUE}];
     
 //    AVAssetReader* assetReader = [AVAssetReader assetReaderWithAsset:urlAsset error:nil];
@@ -147,8 +151,9 @@
     
     for(AVAssetTrack* track in assetTracks)
     {
-        NSLog(@"Format Description: %@", [track formatDescriptions]);
         NSLog(@"Media Type: %@", [track mediaType]);
+        NSLog(@"");
+        NSLog(@"Format Description: %@", [track formatDescriptions]);
     }
     //
 }

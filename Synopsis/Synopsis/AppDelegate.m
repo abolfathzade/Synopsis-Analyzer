@@ -209,9 +209,6 @@
     destinationURL2 = [destinationURL2 URLByDeletingPathExtension];
     destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPath2] URLByAppendingPathExtension:@"mp4"];
     
-//    self.destinationURL = [self.destinationURL URLByDeletingPathExtension];
-//    self.destinationURL = [self.destinationURL URLByAppendingPathExtension:@"mp4"];
-
     
     // Pass 1 is our analysis pass, and our decode pass
 
