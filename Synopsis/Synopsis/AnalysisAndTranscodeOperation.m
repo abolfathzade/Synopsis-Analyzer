@@ -858,16 +858,16 @@
                 {
                     if(!CMBufferQueueIsEmpty(videoPassthroughBufferQueue) || !CMBufferQueueIsEmpty(videoUncompressedBufferQueue))
                     {
-                        [[LogController sharedLogController] appendWarningLog:@"Stopped Requesting Destination Video but did not empty Source Queues"];
+                        [[LogController sharedLogController] appendVerboseLog:@"Stopped Requesting Destination Video but did not empty Source Queues"];
                     }
                 }
                 else
                 {
-                    [[LogController sharedLogController] appendWarningLog:@"Stopped Requesting Destination Video but did not finish reading Source Video"];
+                    [[LogController sharedLogController] appendVerboseLog:@"Stopped Requesting Destination Video but did not finish reading Source Video"];
                     
                     if(!CMBufferQueueIsEmpty(videoPassthroughBufferQueue) || !CMBufferQueueIsEmpty(videoUncompressedBufferQueue))
                     {
-                        [[LogController sharedLogController] appendWarningLog:@"Stopped Requesting Destination Video but did not empty Source Queues"];
+                        [[LogController sharedLogController] appendVerboseLog:@"Stopped Requesting Destination Video but did not empty Source Queues"];
                     }
                 }
             
@@ -960,16 +960,16 @@
                  {
                      if(!CMBufferQueueIsEmpty(audioPassthroughBufferQueue) || !CMBufferQueueIsEmpty(audioUncompressedBufferQueue))
                      {
-                         [[LogController sharedLogController] appendWarningLog:@"Stopped Requesting Destination Audio but did not empty Source Queues"];
+                         [[LogController sharedLogController] appendVerboseLog:@"Stopped Requesting Destination Audio but did not empty Source Queues"];
                      }
                  }
                  else
                  {
-                     [[LogController sharedLogController] appendWarningLog:@"Stopped Requesting Destination Audio but did not finish reading Source Video"];
+                     [[LogController sharedLogController] appendVerboseLog:@"Stopped Requesting Destination Audio but did not finish reading Source Video"];
                      
                      if(!CMBufferQueueIsEmpty(audioPassthroughBufferQueue) || !CMBufferQueueIsEmpty(audioUncompressedBufferQueue))
                      {
-                         [[LogController sharedLogController] appendWarningLog:@"Stopped Requesting Destination Audio but did not empty Source Queues"];
+                         [[LogController sharedLogController] appendVerboseLog:@"Stopped Requesting Destination Audio but did not empty Source Queues"];
                      }
                  }
                  
