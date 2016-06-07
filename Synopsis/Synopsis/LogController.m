@@ -11,11 +11,13 @@
 @interface LogController ()
 @property (strong) IBOutlet NSTextView* logTextField;
 @property (atomic, readwrite, strong) NSDateFormatter* dateFormatter;
+@property (atomic, readwrite, strong) NSDictionary* logStyle;
 @property (atomic, readwrite, strong) NSDictionary* verboseStyle;
 @property (atomic, readwrite, strong) NSDictionary* warningStyle;
 @property (atomic, readwrite, strong) NSDictionary* errorStyle;
 @property (atomic, readwrite, strong) NSDictionary* successStyle;
 
+@property (atomic, readwrite, strong) NSAttributedString* staticLogString;
 @property (atomic, readwrite, strong) NSAttributedString* staticVerboseString;
 @property (atomic, readwrite, strong) NSAttributedString* staticWarningString;
 @property (atomic, readwrite, strong) NSAttributedString* staticErrorString;
@@ -55,12 +57,14 @@
     self = [super init];
     if (self)
     {
-        self.verboseStyle = @{ NSForegroundColorAttributeName : [NSColor lightGrayColor]};
-        self.warningStyle = @{ NSForegroundColorAttributeName : [NSColor orangeColor]};
+        self.logStyle = @{ NSForegroundColorAttributeName : [NSColor lightGrayColor]};
+        self.verboseStyle = @{ NSForegroundColorAttributeName : [NSColor darkGrayColor]};
+        self.warningStyle = @{ NSForegroundColorAttributeName : [NSColor yellowColor]};
         self.errorStyle = @{ NSForegroundColorAttributeName : [NSColor redColor]};
-        self.successStyle = @{ NSForegroundColorAttributeName : [NSColor colorWithRed:0 green:0.66 blue:0 alpha:1]};
+        self.successStyle = @{ NSForegroundColorAttributeName : [NSColor greenColor]}; //[NSColor colorWithRed:0 green:0.66 blue:0 alpha:1]};
         
-        self.staticVerboseString = [[NSAttributedString alloc] initWithString:@" [LOG] " attributes:self.verboseStyle];
+        self.staticLogString = [[NSAttributedString alloc] initWithString:@" [LOG] " attributes:self.logStyle];
+        self.staticVerboseString = [[NSAttributedString alloc] initWithString:@" [INFO] " attributes:self.verboseStyle];
         self.staticWarningString = [[NSAttributedString alloc] initWithString:@" [WARNING] " attributes:self.warningStyle];
         self.staticErrorString = [[NSAttributedString alloc] initWithString:@" [ERROR] " attributes:self.errorStyle];
         self.staticSuccessString = [[NSAttributedString alloc] initWithString:@" [SUCCESS] " attributes:self.successStyle];
@@ -87,7 +91,15 @@
 - (NSMutableAttributedString*) logStringWithDate
 {    
     //Get the string date
-    return [[NSMutableAttributedString alloc] initWithString:[self.dateFormatter stringFromDate:[NSDate date] ] attributes:self.verboseStyle];
+    return [[NSMutableAttributedString alloc] initWithString:[self.dateFormatter stringFromDate:[NSDate date] ] attributes:self.logStyle];
+}
+
+
+- (NSMutableAttributedString*) logString
+{
+    NSMutableAttributedString* string = [self logStringWithDate];
+    [string appendAttributedString:self.staticLogString];
+    return string;
 }
 
 - (NSMutableAttributedString*) verboseString
@@ -124,6 +136,17 @@
     return [string stringByAppendingString:[NSString stringWithCharacters:&newLine length:1]];
 }
 
+- (void) appendLog:(NSString*)log
+{
+    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
+    NSMutableAttributedString* verboseString = [self logString];
+    [verboseString appendAttributedString:logString];
+    
+    dispatch_async(dispatch_get_main_queue(), ^ {
+        [self.logTextField.textStorage appendAttributedString:verboseString];
+    });
+}
+
 - (void) appendVerboseLog:(NSString*)log
 {
     NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
@@ -140,7 +163,7 @@
     // Always Log Warnings
     NSLog(@" [WARNING] %@", log);
 
-    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
+    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
     
     NSMutableAttributedString* warningString = [self warningString];
     [warningString appendAttributedString:logString];
@@ -156,7 +179,7 @@
     // Always Log Errors
     NSLog(@" [ERROR] %@", log);
     
-    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
+    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
    
     NSMutableAttributedString* errorString = [self errorString];
     [errorString appendAttributedString:logString];
@@ -169,7 +192,7 @@
 
 - (void) appendSuccessLog:(NSString*)log
 {
-    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
+    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
     
     NSMutableAttributedString* successString = [self successString];
     [successString appendAttributedString:logString];
@@ -180,6 +203,8 @@
     });
 
 }
+
+
 
 
 @end

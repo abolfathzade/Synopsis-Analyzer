@@ -12,6 +12,7 @@
 
 + (LogController*) sharedLogController;
 
+- (void) appendLog:(NSString*)log;
 - (void) appendVerboseLog:(NSString*)log;
 - (void) appendWarningLog:(NSString*)log;
 - (void) appendErrorLog:(NSString*)log;
