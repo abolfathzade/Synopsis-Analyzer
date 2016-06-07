@@ -15,6 +15,7 @@
 		1B007EDD1B4EC6E900DE6E98 /* SynopsisImporter.mdimporter in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B105A391B41F18300997345 /* cv2.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA68C781AD6EAFB003B3CE9 /* cv2.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
+		1B190E4C1D06806F00728443 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1B3233C21C2E395700C9CF5E /* PreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233C11C2E395700C9CF5E /* PreferencesViewController.m */; };
 		1B3233C61C2EFDB200C9CF5E /* PreferencesGeneralViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233C41C2EFDB200C9CF5E /* PreferencesGeneralViewController.m */; };
 		1B3233C71C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B3233C51C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib */; };
@@ -27,7 +28,6 @@
 		1B3233D91C30C6CE00C9CF5E /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B3233D81C30C6CE00C9CF5E /* Accelerate.framework */; };
 		1B3233DC1C31F8F200C9CF5E /* PresetGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233DB1C31F8F200C9CF5E /* PresetGroup.m */; };
 		1B49BD9E1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */; };
-		1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B4FA1061B2DECCB004DBD63 /* libpython.dylib */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
 		1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */; };
 		1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BCD91ACB90850013418D /* VideoToolbox.framework */; };
@@ -56,7 +56,6 @@
 		1BA68C571AD26696003B3CE9 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C561AD26696003B3CE9 /* CoreVideo.framework */; };
 		1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C5F1AD5D2A1003B3CE9 /* BSONSerialization.m */; };
 		1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C6D1AD5D8D3003B3CE9 /* GZIP.m */; };
-		1BA68C701AD5D924003B3CE9 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C6F1AD5D924003B3CE9 /* libz.dylib */; };
 		1BA68C8A1AD6EAFB003B3CE9 /* cv2.so in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C781AD6EAFB003B3CE9 /* cv2.so */; };
 		1BA68C8B1AD6EAFB003B3CE9 /* libopencv_calib3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C791AD6EAFB003B3CE9 /* libopencv_calib3d.a */; };
 		1BA68C8C1AD6EAFB003B3CE9 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C7A1AD6EAFB003B3CE9 /* libopencv_core.a */; };
@@ -175,6 +174,7 @@
 		1B007ECB1B4D7D0900DE6E98 /* Importer Read Me.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Importer Read Me.txt"; sourceTree = "<group>"; };
 		1B007ED71B4EBAC700DE6E98 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/schema.strings; sourceTree = "<group>"; };
 		1B007EDA1B4EBAD500DE6E98 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = en; path = en.lproj/schema.xml; sourceTree = "<group>"; };
+		1B190E4B1D06806F00728443 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		1B3233C01C2E395700C9CF5E /* PreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesViewController.h; sourceTree = "<group>"; };
 		1B3233C11C2E395700C9CF5E /* PreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesViewController.m; sourceTree = "<group>"; };
 		1B3233C31C2EFDB200C9CF5E /* PreferencesGeneralViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesGeneralViewController.h; sourceTree = "<group>"; };
@@ -194,7 +194,6 @@
 		1B3233DA1C31F8F200C9CF5E /* PresetGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PresetGroup.h; sourceTree = "<group>"; };
 		1B3233DB1C31F8F200C9CF5E /* PresetGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PresetGroup.m; sourceTree = "<group>"; };
 		1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = StandardAnalyzerPlugin.mm; sourceTree = "<group>"; };
-		1B4FA1061B2DECCB004DBD63 /* libpython.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpython.dylib; path = usr/lib/libpython.dylib; sourceTree = SDKROOT; };
 		1B578C3F1B02F37E00D76F62 /* DropFilesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropFilesView.h; sourceTree = "<group>"; };
 		1B578C401B02F37E00D76F62 /* DropFilesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropFilesView.m; sourceTree = "<group>"; };
 		1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MedianCut.cpp; sourceTree = "<group>"; };
@@ -432,7 +431,6 @@
 		1BA68C601AD5D2A1003B3CE9 /* ObjectiveBSON-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ObjectiveBSON-Prefix.pch"; sourceTree = "<group>"; };
 		1BA68C6C1AD5D8D3003B3CE9 /* GZIP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GZIP.h; sourceTree = "<group>"; };
 		1BA68C6D1AD5D8D3003B3CE9 /* GZIP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GZIP.m; sourceTree = "<group>"; };
-		1BA68C6F1AD5D924003B3CE9 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		1BA68C781AD6EAFB003B3CE9 /* cv2.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = cv2.so; sourceTree = "<group>"; };
 		1BA68C791AD6EAFB003B3CE9 /* libopencv_calib3d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_calib3d.a; sourceTree = "<group>"; };
 		1BA68C7A1AD6EAFB003B3CE9 /* libopencv_core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_core.a; sourceTree = "<group>"; };
@@ -495,7 +493,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1BA8F8361C125DC20066BDDB /* CoreGraphics.framework in Frameworks */,
-				1B4FA1081B2DECE2004DBD63 /* libpython.dylib in Frameworks */,
 				1BA68C901AD6EAFB003B3CE9 /* libopencv_imgcodecs.a in Frameworks */,
 				1BA68C931AD6EAFB003B3CE9 /* libopencv_objdetect.a in Frameworks */,
 				1BA68C9B1AD6EAFB003B3CE9 /* libopencv_videostab.a in Frameworks */,
@@ -533,8 +530,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B190E4C1D06806F00728443 /* libz.tbd in Frameworks */,
 				1B3233D91C30C6CE00C9CF5E /* Accelerate.framework in Frameworks */,
-				1BA68C701AD5D924003B3CE9 /* libz.dylib in Frameworks */,
 				1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */,
 				1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */,
 				1BEA4D3D1ACB2BDD00AB57C1 /* AVFoundation.framework in Frameworks */,
@@ -590,11 +587,10 @@
 		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1B190E4B1D06806F00728443 /* libz.tbd */,
 				1B3233D81C30C6CE00C9CF5E /* Accelerate.framework */,
 				1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */,
 				1BA8F8331C125DAA0066BDDB /* Quartz.framework */,
-				1B4FA1061B2DECCB004DBD63 /* libpython.dylib */,
-				1BA68C6F1AD5D924003B3CE9 /* libz.dylib */,
 				1BA68C561AD26696003B3CE9 /* CoreVideo.framework */,
 				1B61BD071ACF371A0013418D /* CoreFoundation.framework */,
 				1B61BCD91ACB90850013418D /* VideoToolbox.framework */,
