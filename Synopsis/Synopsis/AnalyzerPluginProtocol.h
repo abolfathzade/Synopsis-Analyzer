@@ -93,7 +93,7 @@ typedef enum : NSUInteger {
 @property (readonly) NSString* pluginMediaType;
 
 // Processing overhead for the plugin
-@property (readonly) SynopsisAnalysisOverhead pluginOverhead;
+//@property (readonly) SynopsisAnalysisOverhead pluginOverhead;
 
 #pragma mark - Analysis Methods
 

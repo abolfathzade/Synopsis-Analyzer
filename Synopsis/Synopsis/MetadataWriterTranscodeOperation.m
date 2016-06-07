@@ -500,8 +500,8 @@
                      if(passthroughVideoSampleBuffer)
                      {
                          CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
-                         CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(passthroughVideoSampleBuffer);
-                         CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
+//                         CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(passthroughVideoSampleBuffer);
+//                         CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
                          
                          CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
                          
@@ -524,10 +524,10 @@
                              // If we find a match, we remove it from the dictionary to at least try to speed shit up...
                              // Theoretically DTS and PTS should be at least 'near' one another, so we dont need to iterate the entire dictionary.
                              
-                             CMTime currentSamplePTS = CMSampleBufferGetPresentationTimeStamp(passthroughVideoSampleBuffer);
-                             CMTime currentSampleOPTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
+//                             CMTime currentSamplePTS = CMSampleBufferGetPresentationTimeStamp(passthroughVideoSampleBuffer);
+//                             CMTime currentSampleOPTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughVideoSampleBuffer);
                              CMTime currentSampleDTS = CMSampleBufferGetDecodeTimeStamp(passthroughVideoSampleBuffer);
-                             CMTime currentSampleODTS = CMSampleBufferGetOutputDecodeTimeStamp(passthroughVideoSampleBuffer);
+//                             CMTime currentSampleODTS = CMSampleBufferGetOutputDecodeTimeStamp(passthroughVideoSampleBuffer);
                              
                              int32_t compareResult =  CMTimeCompare(currentSampleDTS, group.timeRange.start);
                              
@@ -627,8 +627,8 @@
                      if(passthroughAudioSampleBuffer)
                      {
                          CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(passthroughAudioSampleBuffer);
-                         CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(passthroughAudioSampleBuffer);
-                         CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
+//                         CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(passthroughAudioSampleBuffer);
+//                         CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
                          
                          CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
                          
@@ -788,9 +788,13 @@
         const char *pathUTF8 = [destinationPath fileSystemRepresentation];
         const char *keyUTF8 = [[self xAttrStringFromString:key] fileSystemRepresentation];
         
-        long returnVal = setxattr(pathUTF8, keyUTF8, [plistData bytes], [plistData length], 0, XATTR_NOFOLLOW);
+        int returnVal = setxattr(pathUTF8, keyUTF8, [plistData bytes], [plistData length], 0, XATTR_NOFOLLOW);
         
-        return YES;
+        
+        if(returnVal >= 0)
+            return YES;
+        
+        return NO;
     }
 
     return NO;

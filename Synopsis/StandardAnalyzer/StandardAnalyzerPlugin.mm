@@ -49,7 +49,6 @@
 
 @property (atomic, readwrite, strong) NSArray* moduleNames;
 
-
 @property (atomic, readwrite, strong) NSMutableArray* everyDominantColor;
 
 @end
@@ -529,7 +528,7 @@
     
     // Also this code is heavilly borrowed so yea.
     int k = 5;
-    int numPixels = self.everyDominantColor.count;
+    int numPixels = (int)self.everyDominantColor.count;
     
     // Walk through the pixels and store colours.
     // Let's be fancy and make a smart pointer. Unfortunately shared_ptr doesn't automatically know how to delete a C++ array, so we have to write a [] lambda (aka 'block' in Obj-C) to clean up the object.

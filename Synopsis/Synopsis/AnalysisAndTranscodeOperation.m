@@ -71,7 +71,8 @@
 
 @implementation AnalysisAndTranscodeOperation
 
-- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions availableAnalyzers:(NSArray*)analyzers
+
+- (instancetype) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions availableAnalyzers:(NSArray*)analyzers
 {
     self = [super init];
     if(self)
@@ -372,7 +373,7 @@
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t audioDequeueSemaphore = dispatch_semaphore_create(0);
         
-        dispatch_queue_t concurrentAudioAnalysisQueue = dispatch_queue_create("concurrentAudioAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
+//        dispatch_queue_t concurrentAudioAnalysisQueue = dispatch_queue_create("concurrentAudioAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
 
 #pragma mark - Read Video pass through
 
@@ -686,8 +687,8 @@
                         }
                         
                         CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(uncompressedAudioSampleBuffer);
-                        CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(uncompressedAudioSampleBuffer);
-                        CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
+//                        CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(uncompressedAudioSampleBuffer);
+//                        CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
                         
                         CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
                         
