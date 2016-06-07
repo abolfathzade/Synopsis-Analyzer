@@ -14,6 +14,7 @@
 @interface PresetObject : NSObject<NSCopying>
 
 - (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable NS_DESIGNATED_INITIALIZER;
+- (instancetype) init NS_UNAVAILABLE;
 
 @property (readwrite) NSString* title;
 @property (readwrite) PresetAudioSettings* audioSettings;

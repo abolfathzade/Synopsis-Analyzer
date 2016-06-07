@@ -19,4 +19,6 @@
 
 - (instancetype) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions availableAnalyzers:(NSArray*)analyzers NS_DESIGNATED_INITIALIZER;
 
+- (instancetype) init NS_UNAVAILABLE;
+
 @end

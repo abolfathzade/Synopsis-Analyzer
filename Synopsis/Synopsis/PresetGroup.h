@@ -16,5 +16,6 @@
 @property (copy) NSArray* children;
 
 - (id) initWithTitle:(NSString*)title editable:(BOOL)editable NS_DESIGNATED_INITIALIZER;
+- (instancetype) init NS_UNAVAILABLE;
 
 @end
