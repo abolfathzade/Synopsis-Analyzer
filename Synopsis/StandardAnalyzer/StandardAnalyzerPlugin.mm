@@ -251,7 +251,7 @@
     cv::Mat quarterResLAB(quarterResBGRAFloat.size(), CV_32FC3);
     
     cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
-    cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
+    cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Luv);
     
     // Also this code is heavilly borrowed so yea.
     int k = 5;
@@ -291,11 +291,32 @@
         // convert from LAB to BGR
         const MedianCut::Point& labColor = colorCountPair.first;
         
-        cv::Mat lab(1,1, CV_32FC3, cv::Vec3f(labColor.x[0], labColor.x[1], labColor.x[2]));
+        // find our nearest *actual* LAB pixel in the frame, not from the median cut..
         
+        // Split image into channels
+        cv::Mat quarterResLABChannels[3];
+        cv::split(quarterResLAB, quarterResLABChannels);
+        
+        // Find absolute differences for each channel
+        cv::Mat diff_L;
+        cv::absdiff(quarterResLABChannels[2], labColor.x[2], diff_L);
+        cv::Mat diff_A;
+        cv::absdiff(quarterResLABChannels[1], labColor.x[1], diff_A);
+        cv::Mat diff_B;
+        cv::absdiff(quarterResLABChannels[0], labColor.x[0], diff_B);
+        
+        // Calculate L1 distance
+        cv::Mat dist = diff_L + diff_A + diff_B;
+        
+        // Find the location of pixel with minimum color distance
+        cv::Point minLoc;
+        cv::minMaxLoc(dist, 0, 0, &minLoc);
+        
+        // Convert to BGR
+        cv::Vec3f closestLABVec = quarterResLAB.at<cv::Vec3f>(minLoc);
+        cv::Mat closestLABPixel(1,1, CV_32FC3, closestLABVec);
         cv::Mat bgr(1,1, CV_32FC3);
-        
-        cv::cvtColor(lab, bgr, cv::COLOR_Lab2BGR);
+        cv::cvtColor(closestLABPixel, bgr, cv::COLOR_Luv2BGR);
         
         cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
         
