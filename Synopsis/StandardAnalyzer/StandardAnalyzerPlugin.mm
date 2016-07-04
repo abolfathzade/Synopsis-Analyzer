@@ -20,6 +20,8 @@
 #import "StandardAnalyzerPlugin.h"
 
 #import "MedianCut.h"
+#import "CIEDE2000.h"
+
 
 @interface StandardAnalyzerPlugin ()
 {
@@ -223,6 +225,81 @@
 
 #pragma mark - Dominant Colors / Median Cut Method
 
+- (cv::Mat) nearestColorCIEDE2000:(cv::Mat)labColor inFrame:(cv::Mat)frame
+{
+
+    CIEDE2000::LAB deltaEColor;
+    CIEDE2000::LAB closestDeltaEColor;
+    CIEDE2000::LAB frameDeltaEColor;
+
+    cv::Vec3f labColorVec3f = labColor.at<cv::Vec3f>(0,0);
+
+    deltaEColor.l = labColorVec3f[0];
+    deltaEColor.a = labColorVec3f[1];
+    deltaEColor.b = labColorVec3f[2];
+    
+    double delta = DBL_MAX;
+    
+    // iterate every pixel in our frame, and generate an CIEDE2000::LAB color from it
+    // test the delta, and test if our pixel is our min
+    
+    // Populate Median Cut Points by color values;
+    for(int i = 0;  i < frame.rows; i++)
+    {
+        for(int j = 0; j < frame.cols; j++)
+        {
+            // You can now access the pixel value with cv::Vec3 (or 4 for if BGRA)
+            cv::Vec3f frameLABColor = frame.at<cv::Vec3f>(i, j);
+            
+            frameDeltaEColor.l = frameLABColor[0];
+            frameDeltaEColor.a = frameLABColor[1];
+            frameDeltaEColor.b = frameLABColor[2];
+
+            double currentPixelDelta = CIEDE2000::CIEDE2000(deltaEColor, frameDeltaEColor);
+            
+            if(currentPixelDelta < delta)
+            {
+                closestDeltaEColor = deltaEColor;
+                delta = currentPixelDelta;
+            }
+        }
+    }
+    
+    cv::Mat closestLABColor(1,1, CV_32FC3, cv::Vec3f(closestDeltaEColor.l, closestDeltaEColor.a, closestDeltaEColor.b));
+    return closestLABColor;
+}
+
+- (cv::Mat) nearestColorMinMaxLoc:(cv::Mat)color inFrame:(cv::Mat)frame
+{
+    //  find our nearest *actual* LAB pixel in the frame, not from the median cut..
+    // Split image into channels
+    cv::Mat frameChannels[3];
+    cv::split(frame, frameChannels);
+    
+    cv::Vec3f colorVec = color.at<cv::Vec3f>(0,0);
+    
+    // Find absolute differences for each channel
+    cv::Mat diff_L;
+    cv::absdiff(frameChannels[2], colorVec[2], diff_L);
+    cv::Mat diff_A;
+    cv::absdiff(frameChannels[1], colorVec[1], diff_A);
+    cv::Mat diff_B;
+    cv::absdiff(frameChannels[0], colorVec[0], diff_B);
+    
+    // Calculate L1 distance
+    cv::Mat dist = diff_L + diff_A + diff_B;
+    
+    // Find the location of pixel with minimum color distance
+    cv::Point minLoc;
+    cv::minMaxLoc(dist, 0, 0, &minLoc);
+
+    // get pixel value
+    cv::Vec3f closestColor = frame.at<cv::Vec3f>(minLoc);
+    cv::Mat closestColorPixel(1,1, CV_32FC3, closestColor);
+
+    return closestColorPixel;
+}
+
 - (NSDictionary*) dominantColorForCVMat:(cv::Mat)image
 {
 
@@ -251,7 +328,7 @@
     cv::Mat quarterResLAB(quarterResBGRAFloat.size(), CV_32FC3);
     
     cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
-    cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Luv);
+    cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
     
     // Also this code is heavilly borrowed so yea.
     int k = 5;
@@ -289,36 +366,18 @@
     for ( auto colorCountPair: palette )
     {
         // convert from LAB to BGR
-        const MedianCut::Point& labColor = colorCountPair.first;
+        const MedianCut::Point& labColorPoint = colorCountPair.first;
+        cv::Mat labColor(1,1, CV_32FC3, cv::Vec3f(labColorPoint.x[0], labColorPoint.x[1], labColorPoint.x[2]));
         
-        // find our nearest *actual* LAB pixel in the frame, not from the median cut..
+//        cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColor inFrame:quarterResLAB];
+        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColor inFrame:quarterResLAB];
         
-        // Split image into channels
-        cv::Mat quarterResLABChannels[3];
-        cv::split(quarterResLAB, quarterResLABChannels);
-        
-        // Find absolute differences for each channel
-        cv::Mat diff_L;
-        cv::absdiff(quarterResLABChannels[2], labColor.x[2], diff_L);
-        cv::Mat diff_A;
-        cv::absdiff(quarterResLABChannels[1], labColor.x[1], diff_A);
-        cv::Mat diff_B;
-        cv::absdiff(quarterResLABChannels[0], labColor.x[0], diff_B);
-        
-        // Calculate L1 distance
-        cv::Mat dist = diff_L + diff_A + diff_B;
-        
-        // Find the location of pixel with minimum color distance
-        cv::Point minLoc;
-        cv::minMaxLoc(dist, 0, 0, &minLoc);
-        
-        // Convert to BGR
-        cv::Vec3f closestLABVec = quarterResLAB.at<cv::Vec3f>(minLoc);
-        cv::Mat closestLABPixel(1,1, CV_32FC3, closestLABVec);
+        // convert to BGR
         cv::Mat bgr(1,1, CV_32FC3);
-        cv::cvtColor(closestLABPixel, bgr, cv::COLOR_Luv2BGR);
+        cv::cvtColor(closestLABPixel, bgr, cv::COLOR_Lab2BGR);
         
         cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
+
         
         NSArray* color = @[@(bgrColor[2]), // / 255.0), // R
                            @(bgrColor[1]), // / 255.0), // G
