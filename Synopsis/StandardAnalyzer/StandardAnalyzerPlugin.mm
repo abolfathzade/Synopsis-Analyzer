@@ -26,6 +26,9 @@
 
 @interface StandardAnalyzerPlugin ()
 {
+    cv::Mat currentBGRAImageBacking;
+    cv::UMat currentBGRAImage;
+    
     cv::UMat lastImage;
     cv::Ptr<cv::ORB> detector;
 }
@@ -97,7 +100,7 @@
     detector.release();
 }
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModuleIndex:(SynopsisModuleIndex)moduleIndex
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
 {
     // setup OpenCV to use OpenCL and a specific device
     cv::setUseOptimized(true);
@@ -106,106 +109,126 @@
     {
         cv::ocl::setUseOpenCL(true);
         
-        //OpenCL: Platform Info
-        std::vector<cv::ocl::PlatformInfo> platforms;
-        cv::ocl::getPlatfomsInfo(platforms);
-        
-        //OpenCL Platforms
-        for (size_t i = 0; i < platforms.size(); i++)
+        cv::ocl::Context context;
+        if (!context.create(cv::ocl::Device::TYPE_DGPU))
         {
-            //Access to Platform
-            const cv::ocl::PlatformInfo* platform = &platforms[i];
-            
-            //Platform Name
-            std::cout << "Platform Name: " << platform->name().c_str() << "\n";
-            
-            //Access Device within Platform
-            cv::ocl::Device current_device;
-            for (int j = 0; j < platform->deviceNumber(); j++)
-            {
-                //Access Device
-                platform->getDevice(current_device, j);
-                
-                //Device Type
-                int deviceType = current_device.type();
-                
-                if(deviceType == cv::ocl::Device::TYPE_GPU)
-                {
-                    // set our device
-                    cv::ocl::Device(current_device);
-                    
-                    break;
-                }
-                
-            }
+            NSLog(@"Unable to create Discrete GPU OpenCL Context");
         }
+        
+//        cout << context.ndevices() << " GPU devices are detected." << endl; //This bit provides an overview of the OpenCL devices you have in your computer
+        for (int i = 0; i < context.ndevices(); i++)
+        {
+            cv::ocl::Device device = context.device(i);
+//            cout << "name:              " << device.name() << endl;
+//            cout << "available:         " << device.available() << endl;
+//            cout << "imageSupport:      " << device.imageSupport() << endl;
+//            cout << "OpenCL_C_Version:  " << device.OpenCL_C_Version() << endl;
+//            cout << endl;
+        }
+        
+        cv::ocl::Device(context.device(0)); //Here is where you change which GPU to use (e.g. 0 or 1)
+        
+        
+//        //OpenCL: Platform Info
+//        std::vector<cv::ocl::PlatformInfo> platforms;
+//        cv::ocl::getPlatfomsInfo(platforms);
+//        
+//        //OpenCL Platforms
+//        for (size_t i = 0; i < platforms.size(); i++)
+//        {
+//            //Access to Platform
+//            const cv::ocl::PlatformInfo* platform = &platforms[i];
+//            
+//            //Platform Name
+//            std::cout << "Platform Name: " << platform->name().c_str() << "\n";
+//            
+//            //Access Device within Platform
+//            cv::ocl::Device current_device;
+//            for (int j = 0; j < platform->deviceNumber(); j++)
+//            {
+//                //Access Device
+//                platform->getDevice(current_device, j);
+//                
+//                //Device Type
+//                int deviceType = current_device.type();
+//                
+//                if(deviceType == cv::ocl::Device::TYPE_GPU)
+//                {
+//                    // set our device
+//                    cv::ocl::Device(current_device);
+//                    
+//                    break;
+//                }
+//                
+//            }
+//        }
     }
     
     cv::namedWindow("OpenCV Debug", CV_WINDOW_NORMAL);
+}
 
+- (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
+{
+ 
+//    currentBGRAImage.release();
+//    NSLog(@"%@", NSStringFromSelector(_cmd));
+    
+    if(!currentBGRAImage.empty())
+        currentBGRAImage.release();
+    
+    currentBGRAImage = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
     
 }
 
 - (cv::UMat) imageFromBaseAddress:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
+    if(!currentBGRAImageBacking.empty())
+        currentBGRAImageBacking.release();
+    
     size_t extendedWidth = bytesPerRow / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits
 
-    cv::Mat bgraImage = cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
-    return  bgraImage.getUMat(cv::ACCESS_FAST);
+    currentBGRAImageBacking = cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
+    return  currentBGRAImageBacking.getUMat(cv::ACCESS_READ);
 }
 
-
-- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error;
+- (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
-    if(baseAddress == NULL)
-    {
-        if (error != NULL)
-        {
-            *error = [[NSError alloc] initWithDomain:@"Synopsis.noSampleBuffer" code:-6666 userInfo:nil];
-        }
-        return nil;
-    }
-    else
-    {
-        cv::UMat currentBGRAImage = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
-        
-        // Half width/height image -
-        // TODO: Maybe this becomes part of a quality preference?
-//        cv::Size quaterSize(currentBGRAImage.size().width * 0.2, currentBGRAImage.size().height * 0.2);
-        
-//        cv::Mat quarterResBGRA(quaterSize, CV_8UC4);
-//        
-//        cv::resize(currentBGRAImage,
-//                   quarterResBGRA,
-//                   quaterSize,
-//                   0,
-//                   0,
-//                   cv::INTER_AREA); // INTER_AREA resize gives cleaner downsample results vs INTER_LINEAR.
-        
+    NSDictionary* result = nil;
+    
         switch (moduleIndex)
         {
             case 0:
             {
-                return [self averageColorForCVMat:currentBGRAImage];
+//                NSLog(@"averageColorForCVMat");
+                
+                result = [self averageColorForCVMat:currentBGRAImage];
+                break;
             }
             case 1:
             {
-                return [self dominantColorForCVMat:currentBGRAImage];
+//                NSLog(@"dominantColorForCVMat");
+                result = [self dominantColorForCVMat:currentBGRAImage];
+                break;
             }
             case 2:
             {
-                return [self detectFeaturesCVMat:currentBGRAImage];
+//                NSLog(@"detectFeaturesCVMat");
+                result = [self detectFeaturesCVMat:currentBGRAImage];
+                break;
             }
             case 3:
             {
-                return [self detectMotionInCVMat:currentBGRAImage];
+//                NSLog(@"detectMotionInCVMat");
+                result = [self detectMotionInCVMat:currentBGRAImage];
+                break;
             }
                 
             default:
                 return nil;
         }
-    }
     
+    return result;
+
 }
 
 - (NSDictionary*) averageColorForCVMat:(cv::UMat)image
@@ -606,13 +629,16 @@
     
     
     // If we have our old last sample buffer, free it
-    if(!lastImage.empty())
-    {
-        lastImage.release();
-    }
-    
+//    if(!lastImage.empty())
+//    {
+//        lastImage.release();
+//    }
+//    
     // set a new one
+    // TODO:: Asign? 
     image.copyTo(self->lastImage);
+
+//    lastImage.addref();
     
     return metadata;
 }
