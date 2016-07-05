@@ -12,6 +12,7 @@
 #import "ocl.hpp"
 #import "types_c.h"
 #import "features2d.hpp"
+#import "utility.hpp"
 
 #import <AVFoundation/AVFoundation.h>
 #import <CoreVideo/CoreVideo.h>
@@ -80,10 +81,7 @@
                                     @"Motion",
                                     ];
         
-        
-        
         detector = cv::ORB::create(100);
-        
         
         lastImage = NULL;
         
@@ -102,6 +100,8 @@
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModuleIndex:(SynopsisModuleIndex)moduleIndex
 {
     // setup OpenCV to use OpenCL and a specific device
+    cv::setUseOptimized(true);
+
     if(cv::ocl::haveOpenCL())
     {
         cv::ocl::setUseOpenCL(true);
@@ -140,6 +140,7 @@
             }
         }
     }
+    
     cv::namedWindow("OpenCV Debug", CV_WINDOW_NORMAL);
 
     
@@ -328,7 +329,7 @@
     cv::Mat quarterResLAB(quarterResBGRAFloat.size(), CV_32FC3);
     
     cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
-    cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
+    cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Luv);
     
     // Also this code is heavilly borrowed so yea.
     int k = 5;
@@ -369,12 +370,12 @@
         const MedianCut::Point& labColorPoint = colorCountPair.first;
         cv::Mat labColor(1,1, CV_32FC3, cv::Vec3f(labColorPoint.x[0], labColorPoint.x[1], labColorPoint.x[2]));
         
-//        cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColor inFrame:quarterResLAB];
-        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColor inFrame:quarterResLAB];
+        cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColor inFrame:quarterResLAB];
+//        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColor inFrame:quarterResLAB];
         
         // convert to BGR
         cv::Mat bgr(1,1, CV_32FC3);
-        cv::cvtColor(closestLABPixel, bgr, cv::COLOR_Lab2BGR);
+        cv::cvtColor(closestLABPixel, bgr, cv::COLOR_Luv2BGR);
         
         cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
 
