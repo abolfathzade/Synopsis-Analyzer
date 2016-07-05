@@ -369,8 +369,8 @@
         const MedianCut::Point& labColorPoint = colorCountPair.first;
         cv::Mat labColor(1,1, CV_32FC3, cv::Vec3f(labColorPoint.x[0], labColorPoint.x[1], labColorPoint.x[2]));
         
-//        cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColor inFrame:quarterResLAB];
-        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColor inFrame:quarterResLAB];
+        cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColor inFrame:quarterResLAB];
+//        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColor inFrame:quarterResLAB];
         
         // convert to BGR
         cv::Mat bgr(1,1, CV_32FC3);
