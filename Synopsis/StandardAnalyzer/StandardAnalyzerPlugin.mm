@@ -26,7 +26,7 @@
 
 @interface StandardAnalyzerPlugin ()
 {
-    cv::Mat lastImage;
+    cv::UMat lastImage;
     cv::Ptr<cv::ORB> detector;
 }
 
@@ -83,7 +83,7 @@
         
         detector = cv::ORB::create(100);
         
-        lastImage = NULL;
+//        lastImage = NULL;
         
         self.everyDominantColor = [NSMutableArray new];
 
@@ -146,12 +146,12 @@
     
 }
 
-- (cv::Mat) imageFromBaseAddress:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
+- (cv::UMat) imageFromBaseAddress:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
     size_t extendedWidth = bytesPerRow / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits
 
     cv::Mat bgraImage = cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
-    return bgraImage;
+    return  bgraImage.getUMat(cv::ACCESS_FAST);
 }
 
 
@@ -167,7 +167,7 @@
     }
     else
     {
-        cv::Mat currentBGRAImage = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
+        cv::UMat currentBGRAImage = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
         
         // Half width/height image -
         // TODO: Maybe this becomes part of a quality preference?
@@ -208,7 +208,7 @@
     
 }
 
-- (NSDictionary*) averageColorForCVMat:(cv::Mat)image
+- (NSDictionary*) averageColorForCVMat:(cv::UMat)image
 {
     // Our Mutable Metadata Dictionary:
     NSMutableDictionary* metadata = [NSMutableDictionary new];
@@ -270,38 +270,40 @@
     return closestLABColor;
 }
 
-- (cv::Mat) nearestColorMinMaxLoc:(cv::Mat)color inFrame:(cv::Mat)frame
+- (cv::Mat) nearestColorMinMaxLoc:(cv::Mat)color inFrame:(cv::UMat)frame
 {
     //  find our nearest *actual* LAB pixel in the frame, not from the median cut..
     // Split image into channels
-    cv::Mat frameChannels[3];
+    std::vector<cv::UMat> frameChannels;
     cv::split(frame, frameChannels);
     
     cv::Vec3f colorVec = color.at<cv::Vec3f>(0,0);
     
     // Find absolute differences for each channel
-    cv::Mat diff_L;
-    cv::absdiff(frameChannels[2], colorVec[2], diff_L);
-    cv::Mat diff_A;
+    cv::UMat diff_L;
+    cv::absdiff(frameChannels[0], colorVec[2], diff_L);
+    cv::UMat diff_A;
     cv::absdiff(frameChannels[1], colorVec[1], diff_A);
-    cv::Mat diff_B;
+    cv::UMat diff_B;
     cv::absdiff(frameChannels[0], colorVec[0], diff_B);
     
-    // Calculate L1 distance
-    cv::Mat dist = diff_L + diff_A + diff_B;
+    // Calculate L1 distance (diff_L + diff_A + diff_B)
+    cv::UMat dist;
+    cv::add(diff_L, diff_A, dist);
+    cv::add(dist, diff_B, dist);
     
     // Find the location of pixel with minimum color distance
     cv::Point minLoc;
     cv::minMaxLoc(dist, 0, 0, &minLoc);
 
     // get pixel value
-    cv::Vec3f closestColor = frame.at<cv::Vec3f>(minLoc);
+    cv::Vec3f closestColor = frame.getMat(cv::ACCESS_READ).at<cv::Vec3f>(minLoc);
     cv::Mat closestColorPixel(1,1, CV_32FC3, closestColor);
 
     return closestColorPixel;
 }
 
-- (NSDictionary*) dominantColorForCVMat:(cv::Mat)image
+- (NSDictionary*) dominantColorForCVMat:(cv::UMat)image
 {
 
     // Our Mutable Metadata Dictionary:
@@ -319,14 +321,14 @@
     // 0 to 1 for CV_32F images
     
     // Convert to Float for maximum color fidelity
-    cv::Mat quarterResBGRAFloat;
+    cv::UMat quarterResBGRAFloat;
     
     image.copyTo(quarterResBGRAFloat);
     
     quarterResBGRAFloat.convertTo(quarterResBGRAFloat, CV_32FC4, 1.0/255.0);
     
-    cv::Mat quarterResBGR(quarterResBGRAFloat.size(), CV_32FC3);
-    cv::Mat quarterResLAB(quarterResBGRAFloat.size(), CV_32FC3);
+    cv::UMat quarterResBGR(quarterResBGRAFloat.size(), CV_32FC3);
+    cv::UMat quarterResLAB(quarterResBGRAFloat.size(), CV_32FC3);
     
     cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
     cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Luv);
@@ -342,13 +344,22 @@
     
     int sourceColorCount = 0;
     
+    
+    // TODO: Optimize Median Cut for OpenCL somehow? Is that even possible?
+    // Use some different OpenCV method?
+    
+    // Get a MAT from our UMat quarterResLAB
+    
+    cv::Mat quarterResLABMAT = quarterResLAB.getMat(cv::ACCESS_READ);
+    
+    
     // Populate Median Cut Points by color values;
-    for(int i = 0;  i < quarterResLAB.rows; i++)
+    for(int i = 0;  i < quarterResLABMAT.rows; i++)
     {
-        for(int j = 0; j < quarterResLAB.cols; j++)
+        for(int j = 0; j < quarterResLABMAT.cols; j++)
         {
             // You can now access the pixel value with cv::Vec3 (or 4 for if BGRA)
-            cv::Vec3f labColor = quarterResLAB.at<cv::Vec3f>(i, j);
+            cv::Vec3f labColor = quarterResLABMAT.at<cv::Vec3f>(i, j);
             
             //                    NSLog(@"Color: %f %f %f", labColor[0], labColor[1], labColor[2]);
             
@@ -359,6 +370,9 @@
             sourceColorCount++;
         }
     }
+    
+    // Clear our cv::Mat backed by our OpenCL buffer
+    quarterResLABMAT.release();
     
     auto palette = MedianCut::medianCut(points.get(), numPixels, k);
     
@@ -531,7 +545,7 @@
         
 #pragma mark - Feature Detection
 
-- (NSDictionary*) detectFeaturesCVMat:(cv::Mat)image
+- (NSDictionary*) detectFeaturesCVMat:(cv::UMat)image
 {
 //    dispatch_async(dispatch_get_main_queue(), ^{
 //        cv::imshow("OpenCV Debug", image);
@@ -564,7 +578,7 @@
 
 #pragma mark - Frame Difference Motion
 
-- (NSDictionary*) detectMotionInCVMat:(cv::Mat)image
+- (NSDictionary*) detectMotionInCVMat:(cv::UMat)image
 {
     NSMutableDictionary* metadata = [NSMutableDictionary new];
 
@@ -575,12 +589,12 @@
     {
         
         // Convert to greyscale
-        cv::Mat currentGreyImage;
-        cv::Mat lastGreyImage;
+        cv::UMat currentGreyImage;
+        cv::UMat lastGreyImage;
         cv::cvtColor(image, currentGreyImage, cv::COLOR_BGRA2GRAY);
         cv::cvtColor(self->lastImage, lastGreyImage, cv::COLOR_BGRA2GRAY);
         
-        cv::Mat diff;
+        cv::UMat diff;
         cv::subtract(currentGreyImage, lastGreyImage, diff);
         
         // Average the difference:
