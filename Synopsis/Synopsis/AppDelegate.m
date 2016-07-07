@@ -96,36 +96,43 @@
     {
         for(NSString* possiblePlugin in possiblePlugins)
         {
-            NSBundle* pluginBundle = [NSBundle bundleWithPath:possiblePlugin];
+            NSBundle* pluginBundle = [NSBundle bundleWithPath:[pluginsPath stringByAppendingPathComponent:possiblePlugin]];
             
-            NSError* loadError = nil;
-            if([pluginBundle preflightAndReturnError:&loadError])
+            if(pluginBundle)
             {
-                if([pluginBundle loadAndReturnError:&loadError])
+                NSError* loadError = nil;
+                if([pluginBundle preflightAndReturnError:&loadError])
                 {
-                    // Weve sucessfully loaded our bundle, time to cache our class name so we can initialize a plugin per operation
-                    // See (AnalysisAndTranscodeOperation
-                    Class pluginClass = pluginBundle.principalClass;
-                    NSString* classString = NSStringFromClass(pluginClass);
-                    
-                    if(classString)
+                    if([pluginBundle loadAndReturnError:&loadError])
                     {
-                        [self.analyzerPlugins addObject:classString];
+                        // Weve sucessfully loaded our bundle, time to cache our class name so we can initialize a plugin per operation
+                        // See (AnalysisAndTranscodeOperation
+                        Class pluginClass = pluginBundle.principalClass;
+                        NSString* classString = NSStringFromClass(pluginClass);
                         
-                        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Loaded Plugin: %@", classString, nil]];
-                        
-                        [self.prefsAnalyzerArrayController addObject:[[pluginClass alloc] init]];
-                        
+                        if(classString)
+                        {
+                            [self.analyzerPlugins addObject:classString];
+                            
+                            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Loaded Plugin: %@", classString, nil]];
+                            
+                            [self.prefsAnalyzerArrayController addObject:[[pluginClass alloc] init]];
+                        }
+                    }
+                    else
+                    {
+                        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Loading Plugin : %@ : %@ %@", possiblePlugin, pluginsPath, loadError.description, nil]];
                     }
                 }
                 else
                 {
-                    [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Loading Plugin : %@ : %@ %@", possiblePlugin, pluginsPath, loadError, nil]];
+                    [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Preflighting Plugin : %@ : %@ %@ %@", possiblePlugin, pluginsPath,  pluginBundle, loadError.description, nil]];
                 }
             }
             else
             {
-                [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Preflighting Plugin : %@ : %@ %@", possiblePlugin, pluginsPath,  loadError, nil]];
+                [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Creating Plugin : %@ : %@ %@", possiblePlugin, pluginsPath,  pluginBundle, nil]];
+
             }
         }
     }
