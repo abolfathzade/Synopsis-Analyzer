@@ -66,6 +66,9 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
     {
         if(self.completionBlock)
         {
+            [self setVideoProgress:1.0];
+            [self setAudioProgress:1.0];
+            
             self.completionBlock();
 
             // Clear so we dont run twice, fucko
