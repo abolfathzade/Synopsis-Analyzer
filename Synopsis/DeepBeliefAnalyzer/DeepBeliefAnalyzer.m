@@ -114,11 +114,9 @@
         
         free(destData);
     }
-
 }
 
-
-    - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error;
+- (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
     if(cnnInput)
     {
@@ -128,7 +126,6 @@
         int predictionsLabelsLength;
         
         jpcnn_classify_image(network, cnnInput, JPCNN_RANDOM_SAMPLE, 0, &predictions, &predictionsLength, &predictionsLabels, &predictionsLabelsLength);
-
 
         NSMutableDictionary* newValues = [NSMutableDictionary dictionary];
         for (int index = 0; index < predictionsLength; index += 1)
