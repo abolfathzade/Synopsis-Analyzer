@@ -120,12 +120,12 @@
                 }
                 else
                 {
-                    [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Loading Plugin : %@ : %@", [pluginsPath lastPathComponent], loadError, nil]];
+                    [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Loading Plugin : %@ : %@ %@", possiblePlugin, pluginsPath, loadError, nil]];
                 }
             }
             else
             {
-                [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Preflighting Plugin : %@ : %@", [pluginsPath lastPathComponent], loadError, nil]];
+                [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Preflighting Plugin : %@ : %@ %@", possiblePlugin, pluginsPath,  loadError, nil]];
             }
         }
     }
