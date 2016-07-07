@@ -302,7 +302,7 @@
     // For every Analyzer, begin an new Analysis Session
     for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
     {
-        [analyzer beginMetadataAnalysisSessionWithQuality:SynopsisAnalysisQualityHintHigh];
+        [analyzer beginMetadataAnalysisSessionWithQuality:SynopsisAnalysisQualityHintMedium];
     }
     
     return error;
@@ -1032,24 +1032,41 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
     
     BOOL flip = CVImageBufferIsFlipped(pixelBuffer);
     
+    CGSize original = (CGSize) { width, height };
+    
+//    CGRect lowQuality = (CGRect) { 0, 0, 80, 60 };
+    CGRect lowQuality = (CGRect) { 0, 0, 160, 120 };
+    CGRect mediumQuality = (CGRect) { 0, 0, 320, 240 };
+    CGRect highQuality = (CGRect) { 0, 0, 640, 480 };
+
     switch (quality)
     {
         case SynopsisAnalysisQualityHintLow:
         {
-            width = floorf((float)width * 0.2);
-            height = floorf((float)height * 0.2);
+            CGRect result = AVMakeRectWithAspectRatioInsideRect(original, lowQuality);
+            width = result.size.width;
+            height = result.size.height;
+//            width = floorf((float)width * 0.2);
+//            height = floorf((float)height * 0.2);
             break;
         }
         case SynopsisAnalysisQualityHintMedium:
         {
-            width = floorf((float)width * 0.5);
-            height = floorf((float)height * 0.5);
+            CGRect result = AVMakeRectWithAspectRatioInsideRect(original, mediumQuality);
+            width = result.size.width;
+            height = result.size.height;
+//            width = floorf((float)width * 0.5);
+//            height = floorf((float)height * 0.5);
             break;
         }
         case SynopsisAnalysisQualityHintHigh:
         {
-            width = floorf((float)width * 0.8);
-            height = floorf((float)height * 0.8);
+            CGRect result = AVMakeRectWithAspectRatioInsideRect(original, highQuality);
+            width = result.size.width;
+            height = result.size.height;
+
+//            width = floorf((float)width * 0.8);
+//            height = floorf((float)height * 0.8);
             break;
         }
         case SynopsisAnalysisQualityHintOriginal:
