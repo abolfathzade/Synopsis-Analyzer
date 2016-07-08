@@ -56,11 +56,11 @@
     {
         // Serial transcode queue
         self.transcodeQueue = [[NSOperationQueue alloc] init];
-        self.transcodeQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
+        self.transcodeQueue.maxConcurrentOperationCount = 2;//[[NSProcessInfo processInfo] activeProcessorCount] / 2; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
         
         // Serial metadata / passthrough writing queue
         self.metadataQueue = [[NSOperationQueue alloc] init];
-        self.metadataQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
+        self.metadataQueue.maxConcurrentOperationCount = 2;//[[NSProcessInfo processInfo] activeProcessorCount] / 2; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
         
         self.analyzerPlugins = [NSMutableArray new];
         self.analyzerPluginsInitializedForPrefs = [NSMutableArray new];
