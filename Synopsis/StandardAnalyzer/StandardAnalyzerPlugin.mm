@@ -332,11 +332,11 @@
     
     // Find absolute differences for each channel
     matType diff_L;
-    cv::absdiff(frameChannels[0], colorVec[2], diff_L);
+    cv::absdiff(frameChannels[0], colorVec[0], diff_L);
     matType diff_A;
     cv::absdiff(frameChannels[1], colorVec[1], diff_A);
     matType diff_B;
-    cv::absdiff(frameChannels[0], colorVec[0], diff_B);
+    cv::absdiff(frameChannels[2], colorVec[2], diff_B);
     
     // Calculate L1 distance (diff_L + diff_A + diff_B)
     matType dist;
