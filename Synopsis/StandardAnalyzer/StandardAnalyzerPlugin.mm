@@ -270,14 +270,11 @@
 
 #pragma mark - Dominant Colors / Median Cut Method
 
-- (cv::Mat) nearestColorCIEDE2000:(cv::Mat)labColor inFrame:(cv::Mat)frame
+- (cv::Mat) nearestColorCIEDE2000:(cv::Vec3f)labColorVec3f inFrame:(matType)frame
 {
-
     CIEDE2000::LAB deltaEColor;
     CIEDE2000::LAB closestDeltaEColor;
     CIEDE2000::LAB frameDeltaEColor;
-
-    cv::Vec3f labColorVec3f = labColor.at<cv::Vec3f>(0,0);
 
     deltaEColor.l = labColorVec3f[0];
     deltaEColor.a = labColorVec3f[1];
@@ -288,14 +285,21 @@
     // iterate every pixel in our frame, and generate an CIEDE2000::LAB color from it
     // test the delta, and test if our pixel is our min
     
+#if USE_OPENCL
+    // Get a MAT from our UMat
+    cv::Mat frameMAT = frame.getMat(cv::ACCESS_READ);
+#else
+    cv::Mat frameMAT = frame;
+#endif
+    
     // Populate Median Cut Points by color values;
-    for(int i = 0;  i < frame.rows; i++)
+    for(int i = 0;  i < frameMAT.rows; i++)
     {
-        for(int j = 0; j < frame.cols; j++)
+        for(int j = 0; j < frameMAT.cols; j++)
         {
-            // You can now access the pixel value with cv::Vec3 (or 4 for if BGRA)
-            cv::Vec3f frameLABColor = frame.at<cv::Vec3f>(i, j);
-            
+            // get pixel value
+            cv::Vec3f frameLABColor = frameMAT.at<cv::Vec3f>(i, j);
+
             frameDeltaEColor.l = frameLABColor[0];
             frameDeltaEColor.a = frameLABColor[1];
             frameDeltaEColor.b = frameLABColor[2];
@@ -309,6 +313,11 @@
             }
         }
     }
+    
+#if USE_OPENCL
+    // Free Mat which unlocks our UMAT if we have it
+    frameMAT.release();
+#endif
     
     cv::Mat closestLABColor(1,1, CV_32FC3, cv::Vec3f(closestDeltaEColor.l, closestDeltaEColor.a, closestDeltaEColor.b));
     return closestLABColor;
