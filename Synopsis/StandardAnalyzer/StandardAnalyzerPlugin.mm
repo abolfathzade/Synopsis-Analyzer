@@ -144,89 +144,16 @@
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
 {
-//    switch (qualityHint) {
-//        case SynopsisAnalysisQualityHintLow:
-//            <#statements#>
-//            break;
-//            
-//        default:
-//            break;
-//    }
-    
-    // setup OpenCV to use OpenCL and a specific device
-    cv::setUseOptimized(true);
-    
-#if USE_OPENCL
-    if(cv::ocl::haveOpenCL())
-    {
-        cv::ocl::setUseOpenCL(true);
-        
-        cv::ocl::Context context;
-        if (!context.create(cv::ocl::Device::TYPE_DGPU))
-        {
-            NSLog(@"Unable to create Discrete GPU OpenCL Context");
-        }
-        
-//        cout << context.ndevices() << " GPU devices are detected." << endl; //This bit provides an overview of the OpenCL devices you have in your computer
-        
-        for (int i = 0; i < context.ndevices(); i++)
-        {
-            cv::ocl::Device device = context.device(i);
-            NSLog(@"Device Name: %s", device.name().c_str());
-            NSLog(@"Available: %i", device.available());
-            NSLog(@"imageSupport: %i", device.imageSupport());
-            NSLog(@"OpenCL_C_Version: %s", device.OpenCL_C_Version().c_str());
-        }
-        
-        cv::ocl::Device(context.device(0)); //Here is where you change which GPU to use (e.g. 0 or 1)
-        
-        
-//        //OpenCL: Platform Info
-//        std::vector<cv::ocl::PlatformInfo> platforms;
-//        cv::ocl::getPlatfomsInfo(platforms);
-//        
-//        //OpenCL Platforms
-//        for (size_t i = 0; i < platforms.size(); i++)
-//        {
-//            //Access to Platform
-//            const cv::ocl::PlatformInfo* platform = &platforms[i];
-//            
-//            //Platform Name
-//            std::cout << "Platform Name: " << platform->name().c_str() << "\n";
-//            
-//            //Access Device within Platform
-//            cv::ocl::Device current_device;
-//            for (int j = 0; j < platform->deviceNumber(); j++)
-//            {
-//                //Access Device
-//                platform->getDevice(current_device, j);
-//                
-//                //Device Type
-//                int deviceType = current_device.type();
-//                
-//                if(deviceType == cv::ocl::Device::TYPE_GPU)
-//                {
-//                    // set our device
-//                    cv::ocl::Device(current_device);
-//                    
-//                    break;
-//                }
-//                
-//            }
-//        }
-    }
-    
-#else 
-    cv::ocl::setUseOpenCL(false);
-#endif
-    
-    
-    
-//    cv::namedWindow("OpenCV Debug", CV_WINDOW_NORMAL);
 }
 
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
+    // We enable / disable OpenCL per thread here
+    // since we may be called on a dispatch queue whose underlying thread differs from our last call.
+    // isnt this fun?
+    
+    [self setOpenCLEnabled:USE_OPENCL];
+    
     cv::Mat image = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
     
     // This needs to be refactored - ideally we can median cut straight from a cv::Mat
@@ -266,6 +193,25 @@
     size_t extendedWidth = bytesPerRow / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits
 
     return cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
+}
+
+- (void) setOpenCLEnabled:(BOOL)enable
+{
+    if(enable)
+    {
+        if(cv::ocl::haveOpenCL())
+        {
+            cv::ocl::setUseOpenCL(true);
+        }
+        else
+        {
+            NSLog(@"Unable to Enable OpenCL - No OpenCL Devices detected");
+        }
+    }
+    else
+    {
+        cv::ocl::setUseOpenCL(false);
+    }
 }
 
 - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
