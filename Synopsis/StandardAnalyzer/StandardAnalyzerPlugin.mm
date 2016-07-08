@@ -26,8 +26,10 @@
 
 #define TO_PERCEPTUAL cv::COLOR_BGR2Luv
 #define FROM_PERCEPTUAL cv::COLOR_Luv2BGR
+//#define TO_PERCEPTUAL cv::COLOR_BGR2Lab
+//#define FROM_PERCEPTUAL cv::COLOR_Lab2BGR
 
-#define USE_OPENCL 0
+#define USE_OPENCL 1
 
 #if USE_OPENCL
 #define matType cv::UMat
@@ -95,11 +97,12 @@
         self.hasModules = YES;
         
         self.moduleNames  = @[@"Average Color",
-                                    @"Dominant Colors",
-                                    @"Features",
-                                    @"Motion",
-                                    ];
+                              @"Dominant Colors",
+                              @"Features",
+                              @"Motion",
+                              ];
         
+        cv::setUseOptimized(true);
         
         // Default parameters of ORB
         int nfeatures=100;
@@ -139,7 +142,6 @@
     currentBGRImage.release();
     currentPerceptualImage.release();
     lastImage.release();
-
 }
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
@@ -170,7 +172,6 @@
     // Convert our 8 Bit BGRA to Gray
     cv::cvtColor(image, currentGray8u3Image, cv::COLOR_BGRA2GRAY);
 
-    
     // Convert to Float for maximum color fidelity
     matType quarterResBGRAFloat = matType();
     
@@ -218,36 +219,35 @@
 {
     NSDictionary* result = nil;
     
-        switch (moduleIndex)
+    switch (moduleIndex)
+    {
+        case 0:
         {
-            case 0:
-            {
-                result = [self averageColorForCVMat:currentBGRImage];
-                break;
-            }
-            case 1:
-            {
-                result = [self dominantColorForCVMatMedianCut:currentPerceptualImage];
-//                result = [self dominantColorForCVMatKMeans:currentPerceptualImage];
-                break;
-            }
-            case 2:
-            {
-                result = [self detectFeaturesCVMat:currentGray8u3Image];
-                break;
-            }
-            case 3:
-            {
-                result = [self detectMotionInCVMat:currentBGRImage];
-                break;
-            }
-                
-            default:
-                return nil;
+            result = [self averageColorForCVMat:currentBGRImage];
+            break;
         }
+        case 1:
+        {
+            result = [self dominantColorForCVMatMedianCut:currentPerceptualImage];
+            //                result = [self dominantColorForCVMatKMeans:currentPerceptualImage];
+            break;
+        }
+        case 2:
+        {
+            result = [self detectFeaturesCVMat:currentGray8u3Image];
+            break;
+        }
+        case 3:
+        {
+            result = [self detectMotionInCVMat:currentBGRImage];
+            break;
+        }
+            
+        default:
+            return nil;
+    }
     
     return result;
-
 }
 
 - (NSDictionary*) averageColorForCVMat:(matType)image
