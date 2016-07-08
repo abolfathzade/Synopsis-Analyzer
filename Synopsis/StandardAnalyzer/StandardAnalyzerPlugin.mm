@@ -418,7 +418,7 @@
         cv::Vec3f labColorVec3F = cv::Vec3f(labColorPoint.x[0], labColorPoint.x[1], labColorPoint.x[2]);
         
         cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColorVec3F inFrame:currentPerceptualImage];
-//        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColor inFrame:currentPerceptualImage];
+//        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColorVec3F inFrame:currentPerceptualImage];
         
         // convert to BGR
         cv::Mat bgr(1,1, CV_32FC3);
@@ -426,7 +426,6 @@
         
         cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
 
-        
         NSArray* color = @[@(bgrColor[2]), // / 255.0), // R
                            @(bgrColor[1]), // / 255.0), // G
                            @(bgrColor[0]), // / 255.0), // B
