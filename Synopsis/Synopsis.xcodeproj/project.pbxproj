@@ -37,7 +37,6 @@
 		1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */; };
 		1B61BCEE1ACF0E210013418D /* FrameCounterAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCE11ACF06A70013418D /* FrameCounterAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */; };
-		1B61BD051ACF28710013418D /* StandardAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B61BD061ACF371A0013418D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1B61BD081ACF371A0013418D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
 		1B61BD091ACF37200013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
@@ -52,6 +51,7 @@
 		1B805E3C1B01488D005D7354 /* ProgressTableViewCellRevealController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3A1B01488D005D7354 /* ProgressTableViewCellRevealController.m */; };
 		1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */; };
 		1B805E401B028BB6005D7354 /* LogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3F1B028BB6005D7354 /* LogController.m */; };
+		1B8673981D2EAC470064BECF /* StandardAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B9E10771D2DD99E004523A9 /* libopencv_calib3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B9E10421D2DD98B004523A9 /* libopencv_calib3d.a */; };
 		1B9E10781D2DD99E004523A9 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B9E10431D2DD98B004523A9 /* libopencv_core.a */; };
 		1B9E10791D2DD99E004523A9 /* libopencv_features2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B9E10441D2DD98B004523A9 /* libopencv_features2d.a */; };
@@ -81,7 +81,6 @@
 		1BA8F8451C138C250066BDDB /* DeepBeliefAnalyzer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA8F8441C138C250066BDDB /* DeepBeliefAnalyzer.m */; };
 		1BA8F8491C138D440066BDDB /* DeepBelief.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8481C138D440066BDDB /* DeepBelief.framework */; };
 		1BA8F84B1C138FDD0066BDDB /* jetpac.ntwk in Resources */ = {isa = PBXBuildFile; fileRef = 1BA8F84A1C138FDD0066BDDB /* jetpac.ntwk */; };
-		1BA8F84C1C1395F10066BDDB /* DeepBeliefAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA8F83B1C138B330066BDDB /* DeepBeliefAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1BA8F84F1C13968E0066BDDB /* DeepBelief.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA8F8481C138D440066BDDB /* DeepBelief.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1BD4292F1D2D691E00870D2F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
@@ -114,7 +113,7 @@
 			remoteGlobalIDString = 1B61BCF81ACF26710013418D;
 			remoteInfo = OpenCVAnalyzerPlugin;
 		};
-		1BA8F8461C138D2C0066BDDB /* PBXContainerItemProxy */ = {
+		1B9E108C1D2E8A2F004523A9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1BEA4D111ACB2BCC00AB57C1 /* Project object */;
 			proxyType = 1;
@@ -149,8 +148,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				1BA8F84C1C1395F10066BDDB /* DeepBeliefAnalyzer.plugin in CopyFiles */,
-				1B61BD051ACF28710013418D /* StandardAnalyzer.plugin in CopyFiles */,
+				1B8673981D2EAC470064BECF /* StandardAnalyzer.plugin in CopyFiles */,
 				1B61BCEE1ACF0E210013418D /* FrameCounterAnalyzer.plugin in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2136,10 +2134,10 @@
 			buildRules = (
 			);
 			dependencies = (
-				1BA8F8471C138D2C0066BDDB /* PBXTargetDependency */,
 				1B61BD041ACF28660013418D /* PBXTargetDependency */,
 				1B61BCEC1ACF0DFC0013418D /* PBXTargetDependency */,
 				1B007ECD1B4D7D0900DE6E98 /* PBXTargetDependency */,
+				1B9E108D1D2E8A2F004523A9 /* PBXTargetDependency */,
 			);
 			name = Synopsis;
 			productName = MetadataTranscoderTestHarness;
@@ -2166,6 +2164,7 @@
 					};
 					1BA8F83A1C138B330066BDDB = {
 						CreatedOnToolsVersion = 6.4;
+						DevelopmentTeam = SHG3AW6YV7;
 					};
 					1BEA4D181ACB2BCC00AB57C1 = {
 						CreatedOnToolsVersion = 6.2;
@@ -2357,10 +2356,10 @@
 			target = 1B61BCF81ACF26710013418D /* StandardAnalyzer */;
 			targetProxy = 1B61BD031ACF28660013418D /* PBXContainerItemProxy */;
 		};
-		1BA8F8471C138D2C0066BDDB /* PBXTargetDependency */ = {
+		1B9E108D1D2E8A2F004523A9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1BA8F83A1C138B330066BDDB /* DeepBeliefAnalyzer */;
-			targetProxy = 1BA8F8461C138D2C0066BDDB /* PBXContainerItemProxy */;
+			targetProxy = 1B9E108C1D2E8A2F004523A9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2441,7 +2440,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = FrameCounterPlugin/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2456,7 +2455,7 @@
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = FrameCounterPlugin/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2479,7 +2478,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = StandardAnalyzer/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/lib",
@@ -2504,7 +2503,7 @@
 				GCC_GENERATE_TEST_COVERAGE_FILES = YES;
 				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = YES;
 				INFOPLIST_FILE = StandardAnalyzer/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/lib",
@@ -2522,6 +2521,7 @@
 		1BA8F8401C138B330066BDDB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2534,7 +2534,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2546,6 +2546,7 @@
 		1BA8F8411C138B330066BDDB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2553,7 +2554,7 @@
 				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2643,7 +2644,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -2657,7 +2657,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
