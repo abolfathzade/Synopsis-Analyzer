@@ -8,10 +8,12 @@
 
 // Include OpenCV before anything else because FUCK C++
 //#import "highgui.hpp"
+
 #import "opencv.hpp"
 #import "ocl.hpp"
 #import "types_c.h"
 #import "features2d.hpp"
+#import "utility.hpp"
 
 #import <AVFoundation/AVFoundation.h>
 #import <CoreVideo/CoreVideo.h>
@@ -22,11 +24,31 @@
 #import "MedianCut.h"
 #import "CIEDE2000.h"
 
+#define TO_PERCEPTUAL cv::COLOR_BGR2Luv
+#define FROM_PERCEPTUAL cv::COLOR_Luv2BGR
+//#define TO_PERCEPTUAL cv::COLOR_BGR2Lab
+//#define FROM_PERCEPTUAL cv::COLOR_Lab2BGR
+
+#define USE_OPENCL 1
+
+#if USE_OPENCL
+#define matType cv::UMat
+#else
+#define matType cv::Mat
+#endif
 
 @interface StandardAnalyzerPlugin ()
 {
-    cv::Mat lastImage;
+    matType currentBGRImage;
+    matType currentPerceptualImage;
+    matType currentGray8u3Image;
+    
+    matType lastImage;
     cv::Ptr<cv::ORB> detector;
+    
+    // for kMeans
+    matType bestLables;
+    matType centers;
 }
 
 @property (atomic, readwrite, strong) NSString* pluginName;
@@ -75,17 +97,36 @@
         self.hasModules = YES;
         
         self.moduleNames  = @[@"Average Color",
-                                    @"Dominant Colors",
-                                    @"Features",
-                                    @"Motion",
-                                    ];
+                              @"Dominant Colors",
+                              @"Features",
+                              @"Motion",
+                              ];
+        
+        cv::setUseOptimized(true);
+        
+        // Default parameters of ORB
+        int nfeatures=100;
+        float scaleFactor=1.2f;
+        int nlevels=8;
+        int edgeThreshold=20; // Changed default (31);
+        int firstLevel=0;
+        int WTA_K=2;
+        int scoreType=cv::ORB::HARRIS_SCORE;
+        int patchSize=31;
+        int fastThreshold=20;
+        
+        detector = cv::ORB::create(nfeatures,
+                                   scaleFactor,
+                                   nlevels,
+                                   edgeThreshold,
+                                   firstLevel,
+                                   WTA_K,
+                                   scoreType,
+                                   patchSize,
+                                   fastThreshold );
         
         
-        
-        detector = cv::ORB::create(100);
-        
-        
-        lastImage = NULL;
+//        lastImage = NULL;
         
         self.everyDominantColor = [NSMutableArray new];
 
@@ -97,127 +138,131 @@
 - (void) dealloc
 {
     detector.release();
+    
+    currentBGRImage.release();
+    currentPerceptualImage.release();
+    lastImage.release();
 }
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint forModuleIndex:(SynopsisModuleIndex)moduleIndex
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
 {
-    // setup OpenCV to use OpenCL and a specific device
-    if(cv::ocl::haveOpenCL())
-    {
-        cv::ocl::setUseOpenCL(true);
-        
-        //OpenCL: Platform Info
-        std::vector<cv::ocl::PlatformInfo> platforms;
-        cv::ocl::getPlatfomsInfo(platforms);
-        
-        //OpenCL Platforms
-        for (size_t i = 0; i < platforms.size(); i++)
-        {
-            //Access to Platform
-            const cv::ocl::PlatformInfo* platform = &platforms[i];
-            
-            //Platform Name
-            std::cout << "Platform Name: " << platform->name().c_str() << "\n";
-            
-            //Access Device within Platform
-            cv::ocl::Device current_device;
-            for (int j = 0; j < platform->deviceNumber(); j++)
-            {
-                //Access Device
-                platform->getDevice(current_device, j);
-                
-                //Device Type
-                int deviceType = current_device.type();
-                
-                if(deviceType == cv::ocl::Device::TYPE_GPU)
-                {
-                    // set our device
-                    cv::ocl::Device(current_device);
-                    
-                    break;
-                }
-                
-            }
-        }
-    }
-    cv::namedWindow("OpenCV Debug", CV_WINDOW_NORMAL);
+}
 
+- (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
+{
+    // We enable / disable OpenCL per thread here
+    // since we may be called on a dispatch queue whose underlying thread differs from our last call.
+    // isnt this fun?
     
+    [self setOpenCLEnabled:USE_OPENCL];
+    
+    cv::Mat image = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
+    
+    // This needs to be refactored - ideally we can median cut straight from a cv::Mat
+    // But whatever, Kmeans is so goddamned slow anyway
+    
+    // Convert img BGRA to CIE_LAB or LCh - Float 32 for color calulation fidelity
+    // Note floating point assumtions:
+    // http://docs.opencv.org/2.4.11/modules/imgproc/doc/miscellaneous_transformations.html
+    // The conventional ranges for R, G, and B channel values are:
+    // 0 to 255 for CV_8U images
+    // 0 to 65535 for CV_16U images
+    // 0 to 1 for CV_32F images
+    
+    // Convert our 8 Bit BGRA to Gray
+    cv::cvtColor(image, currentGray8u3Image, cv::COLOR_BGRA2GRAY);
+
+    // Convert to Float for maximum color fidelity
+    matType quarterResBGRAFloat = matType();
+    
+    image.copyTo(quarterResBGRAFloat);
+    
+    quarterResBGRAFloat.convertTo(quarterResBGRAFloat, CV_32FC4, 1.0/255.0);
+    
+    matType quarterResBGR = currentPerceptualImage = matType(quarterResBGRAFloat.size(), CV_32FC3);
+    matType quarterResLAB = currentBGRImage = matType(quarterResBGRAFloat.size(), CV_32FC3);
+    
+    cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
+    cv::cvtColor(quarterResBGR, quarterResLAB, TO_PERCEPTUAL);
+    
+    currentPerceptualImage = quarterResLAB;
+    currentBGRImage = quarterResBGR;
 }
 
 - (cv::Mat) imageFromBaseAddress:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
     size_t extendedWidth = bytesPerRow / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits
 
-    cv::Mat bgraImage = cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
-    return bgraImage;
+    return cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
 }
 
-
-- (NSDictionary*) analyzedMetadataDictionaryForVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error;
+- (void) setOpenCLEnabled:(BOOL)enable
 {
-    if(baseAddress == NULL)
+    if(enable)
     {
-        if (error != NULL)
+        if(cv::ocl::haveOpenCL())
         {
-            *error = [[NSError alloc] initWithDomain:@"Synopsis.noSampleBuffer" code:-6666 userInfo:nil];
+            cv::ocl::setUseOpenCL(true);
         }
-        return nil;
+        else
+        {
+            NSLog(@"Unable to Enable OpenCL - No OpenCL Devices detected");
+        }
     }
     else
     {
-        cv::Mat currentBGRAImage = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
-        
-        // Half width/height image -
-        // TODO: Maybe this becomes part of a quality preference?
-//        cv::Size quaterSize(currentBGRAImage.size().width * 0.2, currentBGRAImage.size().height * 0.2);
-        
-//        cv::Mat quarterResBGRA(quaterSize, CV_8UC4);
-//        
-//        cv::resize(currentBGRAImage,
-//                   quarterResBGRA,
-//                   quaterSize,
-//                   0,
-//                   0,
-//                   cv::INTER_AREA); // INTER_AREA resize gives cleaner downsample results vs INTER_LINEAR.
-        
-        switch (moduleIndex)
-        {
-            case 0:
-            {
-                return [self averageColorForCVMat:currentBGRAImage];
-            }
-            case 1:
-            {
-                return [self dominantColorForCVMat:currentBGRAImage];
-            }
-            case 2:
-            {
-                return [self detectFeaturesCVMat:currentBGRAImage];
-            }
-            case 3:
-            {
-                return [self detectMotionInCVMat:currentBGRAImage];
-            }
-                
-            default:
-                return nil;
-        }
+        cv::ocl::setUseOpenCL(false);
     }
-    
 }
 
-- (NSDictionary*) averageColorForCVMat:(cv::Mat)image
+- (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
+{
+    NSDictionary* result = nil;
+    
+    switch (moduleIndex)
+    {
+        case 0:
+        {
+            result = [self averageColorForCVMat:currentBGRImage];
+            break;
+        }
+        case 1:
+        {
+            result = [self dominantColorForCVMatMedianCut:currentPerceptualImage];
+            //                result = [self dominantColorForCVMatKMeans:currentPerceptualImage];
+            break;
+        }
+        case 2:
+        {
+            result = [self detectFeaturesCVMat:currentGray8u3Image];
+            break;
+        }
+        case 3:
+        {
+            result = [self detectMotionInCVMat:currentBGRImage];
+            break;
+        }
+            
+        default:
+            return nil;
+    }
+    
+    return result;
+}
+
+- (NSDictionary*) averageColorForCVMat:(matType)image
 {
     // Our Mutable Metadata Dictionary:
     NSMutableDictionary* metadata = [NSMutableDictionary new];
     
     cv::Scalar avgPixelIntensity = cv::mean(image);
     
+    
+    
     // Add to metadata - normalize to float
-    metadata[@"AverageColor"] = @[@(avgPixelIntensity.val[2] / 255.0), // R
-                                  @(avgPixelIntensity.val[1] / 255.0), // G
-                                  @(avgPixelIntensity.val[0] / 255.0), // B
+    metadata[@"AverageColor"] = @[@(avgPixelIntensity.val[2]), // R
+                                  @(avgPixelIntensity.val[1]), // G
+                                  @(avgPixelIntensity.val[0]), // B
                                   ];
     
     return metadata;
@@ -225,14 +270,11 @@
 
 #pragma mark - Dominant Colors / Median Cut Method
 
-- (cv::Mat) nearestColorCIEDE2000:(cv::Mat)labColor inFrame:(cv::Mat)frame
+- (cv::Mat) nearestColorCIEDE2000:(cv::Vec3f)labColorVec3f inFrame:(matType)frame
 {
-
     CIEDE2000::LAB deltaEColor;
     CIEDE2000::LAB closestDeltaEColor;
     CIEDE2000::LAB frameDeltaEColor;
-
-    cv::Vec3f labColorVec3f = labColor.at<cv::Vec3f>(0,0);
 
     deltaEColor.l = labColorVec3f[0];
     deltaEColor.a = labColorVec3f[1];
@@ -243,14 +285,21 @@
     // iterate every pixel in our frame, and generate an CIEDE2000::LAB color from it
     // test the delta, and test if our pixel is our min
     
+#if USE_OPENCL
+    // Get a MAT from our UMat
+    cv::Mat frameMAT = frame.getMat(cv::ACCESS_READ);
+#else
+    cv::Mat frameMAT = frame;
+#endif
+    
     // Populate Median Cut Points by color values;
-    for(int i = 0;  i < frame.rows; i++)
+    for(int i = 0;  i < frameMAT.rows; i++)
     {
-        for(int j = 0; j < frame.cols; j++)
+        for(int j = 0; j < frameMAT.cols; j++)
         {
-            // You can now access the pixel value with cv::Vec3 (or 4 for if BGRA)
-            cv::Vec3f frameLABColor = frame.at<cv::Vec3f>(i, j);
-            
+            // get pixel value
+            cv::Vec3f frameLABColor = frameMAT.at<cv::Vec3f>(i, j);
+
             frameDeltaEColor.l = frameLABColor[0];
             frameDeltaEColor.a = frameLABColor[1];
             frameDeltaEColor.b = frameLABColor[2];
@@ -265,74 +314,59 @@
         }
     }
     
+#if USE_OPENCL
+    // Free Mat which unlocks our UMAT if we have it
+    frameMAT.release();
+#endif
+    
     cv::Mat closestLABColor(1,1, CV_32FC3, cv::Vec3f(closestDeltaEColor.l, closestDeltaEColor.a, closestDeltaEColor.b));
     return closestLABColor;
 }
 
-- (cv::Mat) nearestColorMinMaxLoc:(cv::Mat)color inFrame:(cv::Mat)frame
+- (cv::Mat) nearestColorMinMaxLoc:(cv::Vec3f)colorVec inFrame:(matType)frame
 {
     //  find our nearest *actual* LAB pixel in the frame, not from the median cut..
     // Split image into channels
-    cv::Mat frameChannels[3];
+    std::vector<matType> frameChannels;
     cv::split(frame, frameChannels);
     
-    cv::Vec3f colorVec = color.at<cv::Vec3f>(0,0);
-    
     // Find absolute differences for each channel
-    cv::Mat diff_L;
-    cv::absdiff(frameChannels[2], colorVec[2], diff_L);
-    cv::Mat diff_A;
+    matType diff_L;
+    cv::absdiff(frameChannels[0], colorVec[0], diff_L);
+    matType diff_A;
     cv::absdiff(frameChannels[1], colorVec[1], diff_A);
-    cv::Mat diff_B;
-    cv::absdiff(frameChannels[0], colorVec[0], diff_B);
+    matType diff_B;
+    cv::absdiff(frameChannels[2], colorVec[2], diff_B);
     
-    // Calculate L1 distance
-    cv::Mat dist = diff_L + diff_A + diff_B;
+    // Calculate L1 distance (diff_L + diff_A + diff_B)
+    matType dist;
+    cv::add(diff_L, diff_A, dist);
+    cv::add(dist, diff_B, dist);
     
     // Find the location of pixel with minimum color distance
     cv::Point minLoc;
     cv::minMaxLoc(dist, 0, 0, &minLoc);
 
     // get pixel value
+#if USE_OPENCL
+    cv::Vec3f closestColor = frame.getMat(cv::ACCESS_READ).at<cv::Vec3f>(minLoc);
+#else
     cv::Vec3f closestColor = frame.at<cv::Vec3f>(minLoc);
+#endif
+    
     cv::Mat closestColorPixel(1,1, CV_32FC3, closestColor);
 
     return closestColorPixel;
 }
 
-- (NSDictionary*) dominantColorForCVMat:(cv::Mat)image
+- (NSDictionary*) dominantColorForCVMatMedianCut:(matType)image
 {
-
     // Our Mutable Metadata Dictionary:
     NSMutableDictionary* metadata = [NSMutableDictionary new];
     
-    // This needs to be refactored - ideally we can median cut straight from a cv::Mat
-    // But whatever, Kmeans is so goddamned slow anyway
-    
-    // Convert img BGRA to CIE_LAB or LCh - Float 32 for color calulation fidelity
-    // Note floating point assumtions:
-    // http://docs.opencv.org/2.4.11/modules/imgproc/doc/miscellaneous_transformations.html
-    // The conventional ranges for R, G, and B channel values are:
-    // 0 to 255 for CV_8U images
-    // 0 to 65535 for CV_16U images
-    // 0 to 1 for CV_32F images
-    
-    // Convert to Float for maximum color fidelity
-    cv::Mat quarterResBGRAFloat;
-    
-    image.copyTo(quarterResBGRAFloat);
-    
-    quarterResBGRAFloat.convertTo(quarterResBGRAFloat, CV_32FC4, 1.0/255.0);
-    
-    cv::Mat quarterResBGR(quarterResBGRAFloat.size(), CV_32FC3);
-    cv::Mat quarterResLAB(quarterResBGRAFloat.size(), CV_32FC3);
-    
-    cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
-    cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
-    
     // Also this code is heavilly borrowed so yea.
     int k = 5;
-    int numPixels = quarterResLAB.rows * quarterResLAB.cols;
+    int numPixels =  currentPerceptualImage.rows * currentPerceptualImage.cols;
     
     // Walk through the pixels and store colours.
     // Let's be fancy and make a smart pointer. Unfortunately shared_ptr doesn't automatically know how to delete a C++ array, so we have to write a [] lambda (aka 'block' in Obj-C) to clean up the object.
@@ -341,15 +375,23 @@
     
     int sourceColorCount = 0;
     
+    // TODO: Optimize Median Cut for OpenCL somehow? Is that even possible?
+    // Use some different OpenCV method?
+    
+#if USE_OPENCL
+    // Get a MAT from our UMat
+    cv::Mat currentPerceptualImageMAT = currentPerceptualImage.getMat(cv::ACCESS_READ);
+#else
+    cv::Mat currentPerceptualImageMAT = currentPerceptualImage;
+#endif
+    
     // Populate Median Cut Points by color values;
-    for(int i = 0;  i < quarterResLAB.rows; i++)
+    for(int i = 0;  i < currentPerceptualImageMAT.rows; i++)
     {
-        for(int j = 0; j < quarterResLAB.cols; j++)
+        for(int j = 0; j < currentPerceptualImageMAT.cols; j++)
         {
             // You can now access the pixel value with cv::Vec3 (or 4 for if BGRA)
-            cv::Vec3f labColor = quarterResLAB.at<cv::Vec3f>(i, j);
-            
-            //                    NSLog(@"Color: %f %f %f", labColor[0], labColor[1], labColor[2]);
+            cv::Vec3f labColor = currentPerceptualImageMAT.at<cv::Vec3f>(i, j);
             
             points.get()[sourceColorCount].x[0] = labColor[0]; // B L
             points.get()[sourceColorCount].x[1] = labColor[1]; // G A
@@ -359,6 +401,11 @@
         }
     }
     
+#if USE_OPENCL
+    // Clear our cv::Mat backed by our OpenCL buffer
+    currentPerceptualImageMAT.release();
+#endif
+    
     auto palette = MedianCut::medianCut(points.get(), numPixels, k);
     
     NSMutableArray* dominantColors = [NSMutableArray new];
@@ -367,17 +414,84 @@
     {
         // convert from LAB to BGR
         const MedianCut::Point& labColorPoint = colorCountPair.first;
-        cv::Mat labColor(1,1, CV_32FC3, cv::Vec3f(labColorPoint.x[0], labColorPoint.x[1], labColorPoint.x[2]));
+       
+        cv::Vec3f labColorVec3F = cv::Vec3f(labColorPoint.x[0], labColorPoint.x[1], labColorPoint.x[2]);
         
-        cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColor inFrame:quarterResLAB];
-//        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColor inFrame:quarterResLAB];
+        cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColorVec3F inFrame:currentPerceptualImage];
+//        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColorVec3F inFrame:currentPerceptualImage];
         
         // convert to BGR
         cv::Mat bgr(1,1, CV_32FC3);
-        cv::cvtColor(closestLABPixel, bgr, cv::COLOR_Lab2BGR);
+        cv::cvtColor(closestLABPixel, bgr, FROM_PERCEPTUAL);
         
         cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
 
+        NSArray* color = @[@(bgrColor[2]), // / 255.0), // R
+                           @(bgrColor[1]), // / 255.0), // G
+                           @(bgrColor[0]), // / 255.0), // B
+                           ];
+        
+        [dominantColors addObject:color];
+        
+        // We will process this in finalize
+        [self.everyDominantColor addObject:color];
+    }
+    
+    metadata[@"DominantColors"] = dominantColors;
+ 
+    return metadata;
+}
+- (NSDictionary*) dominantColorForCVMatKMeans:(matType)image
+{
+    // Our Mutable Metadata Dictionary:
+    NSMutableDictionary* metadata = [NSMutableDictionary new];
+    
+    // We choose k = 5 to match Adobe Kuler because whatever.
+    int k = 5;
+    int n = currentPerceptualImage.rows * currentPerceptualImage.cols;
+    
+    std::vector<matType> imgSplit;
+    cv::split(currentPerceptualImage,imgSplit);
+    
+    matType img3xN(n,3,CV_32F);
+    
+    for(int i = 0; i != 3; ++i)
+    {
+        imgSplit[i].reshape(1,n).copyTo(img3xN.col(i));
+    }
+    
+//    img3xN.convertTo(img3xN,CV_32F);
+    
+    
+    // TODO: figure out what the fuck makes sense here.
+    cv::kmeans(img3xN,
+               k,
+               bestLables,
+//               cv::TermCriteria(),
+               cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 5.0, 1.0),
+               5,
+               cv::KMEANS_PP_CENTERS,
+               centers);
+    
+    NSMutableArray* dominantColors = [NSMutableArray new];
+    
+    //            cv::imshow("OpenCV Debug", quarterResLAB);
+    
+    for(int i = 0; i < centers.rows; i++)
+    {
+        // 0 1 or 0 - 255 .0 ?
+#if USE_OPENCL
+        cv::Vec3f labColor = centers.getMat(cv::ACCESS_READ).at<cv::Vec3f>(i, 0);
+#else
+        cv::Vec3f labColor = centers.at<cv::Vec3f>(i, 0);
+#endif
+        cv::Mat lab(1,1, CV_32FC3, cv::Vec3f(labColor[0], labColor[1], labColor[2]));
+        
+        cv::Mat bgr(1,1, CV_32FC3);
+        
+        cv::cvtColor(lab, bgr, FROM_PERCEPTUAL);
+        
+        cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
         
         NSArray* color = @[@(bgrColor[2]), // / 255.0), // R
                            @(bgrColor[1]), // / 255.0), // G
@@ -390,83 +504,10 @@
         [self.everyDominantColor addObject:color];
     }
     
-    
     metadata[@"DominantColors"] = dominantColors;
     
-#pragma mark - Dominant Colors / kMeans
-//
-//            // We choose k = 5 to match Adobe Kuler because whatever.
-//            int k = 5;
-//            int n = quarterResBGRA.rows * quarterResBGRA.cols;
-//
-//            // Convert to Float for maximum color fidelity
-//            cv::Mat quarterResBGRAFloat;
-//            quarterResBGRA.convertTo(quarterResBGRAFloat, CV_32FC4, 1.0/255.0);
-//            
-//            cv::Mat quarterResBGR(quarterResBGRAFloat.size(), CV_32FC3);
-//            cv::Mat quarterResLAB(quarterResBGRAFloat.size(), CV_32FC3);
-//            
-//            cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
-//            cv::cvtColor(quarterResBGR, quarterResLAB, cv::COLOR_BGR2Lab);
-//            
-//            std::vector<cv::Mat> imgSplit;
-//            cv::split(quarterResBGRAFloat,imgSplit);
-//            
-//            cv::Mat img3xN(n,3,CV_32F);
-//            
-//            for(int i = 0; i != 3; ++i)
-//            {
-//                imgSplit[i].reshape(1,n).copyTo(img3xN.col(i));
-//            }
-//            
-//            img3xN.convertTo(img3xN,CV_32F);
-//            
-//            cv::Mat bestLables;
-//            cv::Mat centers;
-//            
-//            // TODO: figure out what the fuck makes sense here.
-//            cv::kmeans(img3xN,
-//                       k,
-//                       bestLables,
-//                       cv::TermCriteria(),
-////                       cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 5.0, 1.0),
-//                       1,
-//                       cv::KMEANS_PP_CENTERS,
-//                       centers);
-//            
-//            NSMutableArray* dominantColors = [NSMutableArray new];
-//            
-////            cv::imshow("OpenCV Debug", quarterResLAB);
-//
-//            for(int i = 0; i < centers.rows; i++)
-//            {
-//                // 0 1 or 0 - 255 .0 ?
-//                cv::Vec3f labColor = centers.at<cv::Vec3f>(i, 0);
-//                
-//                cv::Mat lab(1,1, CV_32FC3, cv::Vec3f(labColor[0], labColor[1], labColor[2]));
-//                
-//                cv::Mat bgr(1,1, CV_32FC3);
-//                
-//                cv::cvtColor(lab, bgr, cv::COLOR_Lab2BGR);
-//                
-//                cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
-//                
-//                [dominantColors addObject: @[@(bgrColor[2]), // / 255.0), // R
-//                                             @(bgrColor[1]), // / 255.0), // G
-//                                             @(bgrColor[0]), // / 255.0), // B
-//                                             ]];
-//                
-////                [dominantColors addObject: @[@(colorBGR.val[2] / 255.0), // R
-////                                             @(colorBGR.val[1] / 255.0), // G
-////                                             @(colorBGR.val[0] / 255.0), // B
-////                                            ]];
-//            }
-//            
-//            metadata[@"DominantColors"] = dominantColors;
-        
     return metadata;
 }
-
 
 #pragma mark - Histogram Calculation
 
@@ -475,9 +516,9 @@
 //            int lbins = 256;
 //            int abins = 256;
 //            int bbins = 256;
-//            
+//
 //            int histSize[] = {lbins, abins};// bbins};
-//            
+//
 //            float range[] = { 0.0, 1.0 };
 //            const float* ranges[] = { range, range};//, range };
 //            
@@ -530,13 +571,12 @@
         
 #pragma mark - Feature Detection
 
-- (NSDictionary*) detectFeaturesCVMat:(cv::Mat)image
+- (NSDictionary*) detectFeaturesCVMat:(matType)image
 {
 //    dispatch_async(dispatch_get_main_queue(), ^{
 //        cv::imshow("OpenCV Debug", image);
 //    });
  
-    
     NSMutableDictionary* metadata = [NSMutableDictionary new];
     
     std::vector<cv::KeyPoint> keypoints;
@@ -544,7 +584,7 @@
     
     NSMutableArray* keyPointsArray = [NSMutableArray new];
     
-    for(std::vector<cv::KeyPoint>::iterator keyPoint = keypoints.begin(); keyPoint != keypoints.end(); ++keyPoint)
+    for(std::vector<cv::KeyPoint>::iterator keyPoint = keypoints.begin(); keyPoint != keypoints.end(); keyPoint++)
     {
         CGPoint point = CGPointZero;
         {
@@ -557,13 +597,13 @@
     
     // Add Features to metadata
     metadata[@"Features"] = keyPointsArray;
-    
+        
     return metadata;
 }
 
 #pragma mark - Frame Difference Motion
 
-- (NSDictionary*) detectMotionInCVMat:(cv::Mat)image
+- (NSDictionary*) detectMotionInCVMat:(matType)image
 {
     NSMutableDictionary* metadata = [NSMutableDictionary new];
 
@@ -572,32 +612,33 @@
     // otherwise it wouldnt be set as last.
     if(!lastImage.empty())
     {
-        
         // Convert to greyscale
-        cv::Mat currentGreyImage;
-        cv::Mat lastGreyImage;
-        cv::cvtColor(image, currentGreyImage, cv::COLOR_BGRA2GRAY);
-        cv::cvtColor(self->lastImage, lastGreyImage, cv::COLOR_BGRA2GRAY);
+        matType currentGreyImage;
+        matType lastGreyImage;
+        cv::cvtColor(image, currentGreyImage, cv::COLOR_BGR2GRAY);
+        cv::cvtColor(self->lastImage, lastGreyImage, cv::COLOR_BGR2GRAY);
         
-        cv::Mat diff;
+        matType diff;
         cv::subtract(currentGreyImage, lastGreyImage, diff);
         
         // Average the difference:
         cv::Scalar avgMotion = cv::mean(diff);
         
         // Normalize to float
-        metadata[@"Motion"] = @(avgMotion.val[0] / 255.0);
+        metadata[@"Motion"] = @(avgMotion.val[0]);
     }
-    
     
     // If we have our old last sample buffer, free it
-    if(!lastImage.empty())
-    {
-        lastImage.release();
-    }
-    
+//    if(!lastImage.empty())
+//    {
+//        lastImage.release();
+//    }
+//    
     // set a new one
+    // TODO:: Asign? 
     image.copyTo(self->lastImage);
+
+//    lastImage.addref();
     
     return metadata;
 }

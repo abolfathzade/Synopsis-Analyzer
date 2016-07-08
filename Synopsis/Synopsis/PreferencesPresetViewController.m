@@ -90,7 +90,7 @@ const NSString* value = @"Value";
         PresetVideoSettings* appleIntermediateLinearPCMVS = [[PresetVideoSettings alloc] init];
         appleIntermediateLinearPCMVS.settingsDictionary = @{AVVideoCodecKey:@"icod"};
         
-        PresetObject* appleIntermediateLinearPCM = [[PresetObject alloc] initWithTitle:@"Apple Intermediate Only"
+        PresetObject* appleIntermediateLinearPCM = [[PresetObject alloc] initWithTitle:@"Apple Intermediate Video Only"
                                                                          audioSettings:[PresetAudioSettings none]
                                                                          videoSettings:appleIntermediateLinearPCMVS
                                                                       analyzerSettings:[PresetAnalysisSettings none]
@@ -98,11 +98,24 @@ const NSString* value = @"Value";
                                                                               useVideo:YES
                                                                            useAnalysis:YES
                                                                               editable:NO];
+
+        PresetVideoSettings* appleProRes422LinearPCMVS = [[PresetVideoSettings alloc] init];
+        appleProRes422LinearPCMVS.settingsDictionary = @{AVVideoCodecKey:AVVideoCodecAppleProRes422};
+        
+        PresetObject* appleProRes422LinearPCM = [[PresetObject alloc] initWithTitle:@"Apple Pro Res 422 Video Only"
+                                                                         audioSettings:[PresetAudioSettings none]
+                                                                         videoSettings:appleProRes422LinearPCMVS
+                                                                      analyzerSettings:[PresetAnalysisSettings none]
+                                                                              useAudio:NO
+                                                                              useVideo:YES
+                                                                           useAnalysis:YES
+                                                                              editable:NO];
+
         
         PresetGroup* passthroughGroup = [[PresetGroup alloc] initWithTitle:@"Passthrough" editable:NO];
         passthroughGroup.children = @[passthrough, passthroughNoAudio];
         
-        self.standardPresets.children = @[passthroughGroup, appleIntermediateLinearPCM];
+        self.standardPresets.children = @[passthroughGroup, appleIntermediateLinearPCM, appleProRes422LinearPCM];
 
         self.selectedPresetGroup = self.customPresets;
         

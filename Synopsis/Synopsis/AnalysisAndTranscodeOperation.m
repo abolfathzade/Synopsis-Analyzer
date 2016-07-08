@@ -170,9 +170,15 @@
     {
         AVAssetTrack* firstVideoTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual][0];
         
+        NSDictionary* HDProperties =  @{AVVideoColorPrimariesKey : AVVideoColorPrimaries_ITU_R_709_2, AVVideoTransferFunctionKey : AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey : AVVideoYCbCrMatrix_ITU_R_709_2 };
+
+        NSDictionary* SDProperties =  @{AVVideoColorPrimariesKey : AVVideoColorPrimaries_SMPTE_C, AVVideoTransferFunctionKey : AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey : AVVideoYCbCrMatrix_ITU_R_601_4 };
+
         self.transcodeAssetReaderVideo = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
                                                                                     outputSettings:@{(NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
-                                                                                                      }];
+//                                                                                                     AVVideoColorPropertiesKey : HDProperties
+                                                                                                     }];
+        
         self.transcodeAssetReaderVideo.alwaysCopiesSampleData = NO;
         prefferedTrackTransform = firstVideoTrack.preferredTransform;
         nativeSize = firstVideoTrack.naturalSize;
@@ -296,7 +302,7 @@
     // For every Analyzer, begin an new Analysis Session
     for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
     {
-        [analyzer beginMetadataAnalysisSessionWithQuality:SynopsisAnalysisQualityHintHigh forModuleIndex:SynopsisModuleIndexNone];
+        [analyzer beginMetadataAnalysisSessionWithQuality:SynopsisAnalysisQualityHintMedium];
     }
     
     return error;
@@ -532,28 +538,27 @@
                             // Run an analysis pass on each plugin
                             for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
-                                if([analyzer hasModules])
-                                {
-                                    // dont overwrite the keys. we have one entry for the  plugin, and then many entries for the ley
-                                    NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                    NSMutableDictionary* newMetadataValue = [NSMutableDictionary new];
-                                    
-                                    for(NSInteger moduleIndex = 0; moduleIndex < [analyzer moduleNames].count; moduleIndex++)
+                                // enter our group.
+                                dispatch_group_enter(analysisGroup);
+
+                                // dispatch our analysis plugin
+                                dispatch_async(concurrentVideoAnalysisQueue, ^{
+
+                                    [analyzer submitAndCacheCurrentVideoBuffer:CVPixelBufferGetBaseAddress(transformedPixelBuffer)
+                                                                         width:CVPixelBufferGetWidth(transformedPixelBuffer)
+                                                                        height:CVPixelBufferGetHeight(transformedPixelBuffer)
+                                                                   bytesPerRow:CVPixelBufferGetBytesPerRow(transformedPixelBuffer)];
+
+                                    if([analyzer hasModules])
                                     {
-                                        // enter our group.
-                                        dispatch_group_enter(analysisGroup);
+                                        // dont overwrite the keys. we have one entry for the  plugin, and then many entries for the ley
+                                        NSString* newMetadataKey = [analyzer pluginIdentifier];
+                                        NSMutableDictionary* newMetadataValue = [NSMutableDictionary new];
                                         
-                                        
-                                        // dispatch a single module
-                                        dispatch_async(concurrentVideoAnalysisQueue, ^{
-                                                                                        
-                                            NSDictionary* newModuleValue = [analyzer analyzedMetadataDictionaryForVideoBuffer:CVPixelBufferGetBaseAddress(transformedPixelBuffer)
-                                                                                                                          width:CVPixelBufferGetWidth(transformedPixelBuffer)
-                                                                                                                         height:CVPixelBufferGetHeight(transformedPixelBuffer)
-                                                                                                                    bytesPerRow:CVPixelBufferGetBytesPerRow(transformedPixelBuffer)
-                                                                                                                 forModuleIndex:moduleIndex
-                                                                                                                          error:&analyzerError];
-                                            
+                                        for(NSInteger moduleIndex = 0; moduleIndex < [analyzer moduleNames].count; moduleIndex++)
+                                        {
+                                            NSDictionary* newModuleValue = [analyzer analyzeMetadataDictionaryForModuleIndex:moduleIndex
+                                                                                                                       error:&analyzerError];
                                             if(analyzerError)
                                             {
                                                 NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
@@ -563,37 +568,22 @@
                                             [dictionaryLock lock];
                                             [newMetadataValue addEntriesFromDictionary:newModuleValue];
                                             [dictionaryLock unlock];
-                                            
-                                            dispatch_group_leave(analysisGroup);
-                                        });
+                                        }
+                                        
+                                        if(newMetadataValue)
+                                        {
+                                            // provide some thread safety to our now async fetches.
+                                            [dictionaryLock lock];
+                                            [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+                                            [dictionaryLock unlock];
+                                        }
                                     }
-                                    
-                                    if(newMetadataValue)
+                                    else
                                     {
-                                        // provide some thread safety to our now async fetches.
-                                        [dictionaryLock lock];
-                                        [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
-                                        [dictionaryLock unlock];
-                                    }
-
-                                }
-                                
-                                // otherwise we dispatch once and run the
-                                else
-                                {
-                                    // enter our group.
-                                    dispatch_group_enter(analysisGroup);
-
-                                    dispatch_async(concurrentVideoAnalysisQueue, ^{
-                                        
                                         NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                        NSDictionary* newMetadataValue = [analyzer analyzedMetadataDictionaryForVideoBuffer:CVPixelBufferGetBaseAddress(transformedPixelBuffer)
-                                                                                                                      width:CVPixelBufferGetWidth(transformedPixelBuffer)
-                                                                                                                     height:CVPixelBufferGetHeight(transformedPixelBuffer)
-                                                                                                                bytesPerRow:CVPixelBufferGetBytesPerRow(transformedPixelBuffer)
-                                                                                                             forModuleIndex:SynopsisModuleIndexNone
-                                                                                                                      error:&analyzerError];
                                         
+                                        NSDictionary* newMetadataValue = [analyzer analyzeMetadataDictionaryForModuleIndex:SynopsisModuleIndexNone
+                                                                                                                     error:&analyzerError];
                                         if(analyzerError)
                                         {
                                             NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
@@ -607,17 +597,16 @@
                                             [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
                                             [dictionaryLock unlock];
                                         }
-
-                                        dispatch_group_leave(analysisGroup);
-                                    });
-                                }
+                                    }
+                                    
+                                    dispatch_group_leave(analysisGroup);
+                                });
                                 
                                 dispatch_group_wait(analysisGroup, DISPATCH_TIME_FOREVER);
                                 
                                 // if we had an analyzer error, bail.
                                 if(analyzerError)
                                 {
-//                                    CVPixelBufferLockBaseAddress(transformedPixelBuffer, kCVPixelBufferLock_ReadOnly);
                                     break;
                                 }
                             }
@@ -645,7 +634,6 @@
                             // Todo: Move Analysis Finalization here
                             break;
                         }
-                        
                     }
                 }
 
@@ -1035,34 +1023,49 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
     size_t height = CVPixelBufferGetHeight(pixelBuffer);
  
     CGSize originalSize = {width, height};
-
-    BOOL resize = YES;
     
     BOOL flip = CVImageBufferIsFlipped(pixelBuffer);
     
+    CGSize original = (CGSize) { width, height };
+    
+//    CGRect lowQuality = (CGRect) { 0, 0, 80, 60 };
+    CGRect lowQuality = (CGRect) { 0, 0, 160, 120 };
+    CGRect mediumQuality = (CGRect) { 0, 0, 320, 240 };
+    CGRect highQuality = (CGRect) { 0, 0, 640, 480 };
+
     switch (quality)
     {
+        case SynopsisAnalysisQualityHintOriginal:
+            return pixelBuffer;
+
         case SynopsisAnalysisQualityHintLow:
         {
-            width = floorf((float)width * 0.2);
-            height = floorf((float)height * 0.2);
+            CGRect result = AVMakeRectWithAspectRatioInsideRect(original, lowQuality);
+            width = result.size.width;
+            height = result.size.height;
+//            width = floorf((float)width * 0.2);
+//            height = floorf((float)height * 0.2);
             break;
         }
         case SynopsisAnalysisQualityHintMedium:
         {
-            width = floorf((float)width * 0.5);
-            height = floorf((float)height * 0.5);
+            CGRect result = AVMakeRectWithAspectRatioInsideRect(original, mediumQuality);
+            width = result.size.width;
+            height = result.size.height;
+//            width = floorf((float)width * 0.5);
+//            height = floorf((float)height * 0.5);
             break;
         }
         case SynopsisAnalysisQualityHintHigh:
         {
-            width = floorf((float)width * 0.8);
-            height = floorf((float)height * 0.8);
+            CGRect result = AVMakeRectWithAspectRatioInsideRect(original, highQuality);
+            width = result.size.width;
+            height = result.size.height;
+
+//            width = floorf((float)width * 0.8);
+//            height = floorf((float)height * 0.8);
             break;
         }
-        case SynopsisAnalysisQualityHintOriginal:
-            resize = NO;
-            break;
     }
     
     CGSize scaledSize = {width, height};
@@ -1102,44 +1105,69 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
     scaledSize.width = fabs(scaledSize.width);
     scaledSize.height = fabs(scaledSize.height);
 
-    vImage_CGAffineTransform affineTransform;
-    affineTransform.a = transform.a;
-    affineTransform.b = transform.b;
-    affineTransform.c = transform.c;
-    affineTransform.d = transform.d;
-    affineTransform.tx = transform.tx;
-    affineTransform.ty = transform.ty;
+    if(!CGAffineTransformEqualToTransform(transform, CGAffineTransformIdentity))
+    {
+        vImage_CGAffineTransform affineTransform;
+        affineTransform.a = transform.a;
+        affineTransform.b = transform.b;
+        affineTransform.c = transform.c;
+        affineTransform.d = transform.d;
+        affineTransform.tx = transform.tx;
+        affineTransform.ty = transform.ty;
+        
+        unsigned char *transformBytes= (unsigned char*)malloc(4 * originalSize.width * originalSize.height);
+        vImage_Buffer transformed = {transformBytes, originalSize.height, originalSize.width, 4 * originalSize.width};
+        
+        uint8_t backColor[4] = {0};
+        
+        vImage_Error err = vImageAffineWarpCG_ARGB8888(&inBuff, &transformed, NULL, &affineTransform, backColor, kvImageBackgroundColorFill);
+        if (err != kvImageNoError)
+            NSLog(@" error %ld", err);
+        
+        CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
+        
+        // Scale
+        unsigned char *resizedBytes= (unsigned char*)malloc(4 * scaledSize.width * scaledSize.height);
+        vImage_Buffer resized = {resizedBytes, scaledSize.height, scaledSize.width, 4 * scaledSize.width};
+        
+        err = vImageScale_ARGB8888(&transformed, &resized, NULL, 0);
+        if (err != kvImageNoError)
+            NSLog(@" error %ld", err);
+        
+        // Free Transform
+        free(transformed.data);
+        transformed.data = NULL;
+        
+        CVPixelBufferRef finalOut = NULL;
+        CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, scaledSize.width, scaledSize.height, kCVPixelFormatType_32BGRA, resized.data, resized.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
+        
+        if(ret != kCVReturnSuccess)
+            NSLog(@" error %d", ret);
+        
+        return finalOut;
+    }
+    else {
+        
+        // Scale
+        unsigned char *resizedBytes= (unsigned char*)malloc(4 * scaledSize.width * scaledSize.height);
+        vImage_Buffer resized = {resizedBytes, scaledSize.height, scaledSize.width, 4 * scaledSize.width};
+        
+        vImage_Error err = vImageScale_ARGB8888(&inBuff, &resized, NULL, 0);
+        if (err != kvImageNoError)
+            NSLog(@" error %ld", err);
+        
+        CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
+        
+        CVPixelBufferRef finalOut = NULL;
+        CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, scaledSize.width, scaledSize.height, kCVPixelFormatType_32BGRA, resized.data, resized.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
+        
+        if(ret != kCVReturnSuccess)
+            NSLog(@" error %d", ret);
+        
+        return finalOut;
 
-    unsigned char *transformBytes= (unsigned char*)malloc(4 * originalSize.width * originalSize.height);
-    vImage_Buffer transformed = {transformBytes, originalSize.height, originalSize.width, 4 * originalSize.width};
-    
-    uint8_t backColor[4] = {0};
-    
-    vImage_Error err = vImageAffineWarpCG_ARGB8888(&inBuff, &transformed, NULL, &affineTransform, backColor, kvImageBackgroundColorFill);
-    if (err != kvImageNoError)
-        NSLog(@" error %ld", err);
+    }
 
-    CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
-    
-    // Scale
-    unsigned char *resizedBytes= (unsigned char*)malloc(4 * scaledSize.width * scaledSize.height);
-    vImage_Buffer resized = {resizedBytes, scaledSize.height, scaledSize.width, 4 * scaledSize.width};
-    
-    err = vImageScale_ARGB8888(&transformed, &resized, NULL, 0);
-    if (err != kvImageNoError)
-        NSLog(@" error %ld", err);
-
-    // Free Transform
-    free(transformed.data);
-    transformed.data = NULL;
-    
-    CVPixelBufferRef finalOut = NULL;
-    CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, scaledSize.width, scaledSize.height, kCVPixelFormatType_32BGRA, resized.data, resized.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
-    
-    if(ret != kCVReturnSuccess)
-        NSLog(@" error %d", ret);
-    
-    return finalOut;
 }
 
 #pragma mark - Metadata Helper
