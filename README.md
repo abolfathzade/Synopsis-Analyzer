@@ -14,23 +14,23 @@ Synopsis Analysis is plugin based, allowing developers to easily extend and expe
 
 Currently, Synopsis can analysize video and embed the following metadata:
 
-• Per Frame Average Color (via OpenCV)
-• Per Frame Dominant Color (via OpenCV)
-• Per Frame Tracked Points (via OpenCV)
-• Per Frame Motion Amount (via OpenCV)
-• Per Frame Image Description (via DeepBelief)
+* Per Frame Average Color (via OpenCV)
+* Per Frame Dominant Color (via OpenCV)
+* Per Frame Tracked Points (via OpenCV)
+* Per Frame Motion Amount (via OpenCV)
+* Per Frame Image Description (via DeepBelief)
 
-• Global Average Color (via OpenCV)
-• Global Dominant Colors (via OpenCV)
+* Global Average Color (via OpenCV)
+* Global Dominant Colors (via OpenCV)
 
 Currently In Development:
 
-• Per Frame Motion Direction (via OpenCV Optical Flow)
-• Global Motion Direction (via OpenCV Optical Flow)
+* Per Frame Motion Direction (via OpenCV Optical Flow)
+* Global Motion Direction (via OpenCV Optical Flow)
 
-• Per Frame Image Description via Inception (via Tensorflow)
-• Global Image Description via Inception (via Tensorflow)
-• Per Frame Image Style Description (via Tensorflow)
-• Global Image Style Description (via Tensorflow)
+* Per Frame Image Description via Inception (via Tensorflow)
+* Global Image Description via Inception (via Tensorflow)
+* Per Frame Image Style Description (via Tensorflow)
+* Global Image Style Description (via Tensorflow)
 
 See the DesignDiscussion wiki for more information about possible modules and direction of development.
