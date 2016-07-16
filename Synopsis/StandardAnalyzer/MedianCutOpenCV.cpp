@@ -67,19 +67,23 @@ namespace MedianCutOpenCV
 
         if(useCIEDE2000)
         {
+            double lastMinDelta = DBL_MAX;
+            double lastMaxDelta = DBL_MIN;
             for(int i = 1; i < numColors; i++ )
             {
                 double mindelta = CIEDE2000::CIEDE2000(minColor, colors[i]);
                 double maxdelta = CIEDE2000::CIEDE2000(maxColor, colors[i]);
                 
-                if( mindelta < 0)
+                if( mindelta < lastMinDelta)
                 {
                     minColor = colors[i];
+                    lastMinDelta = mindelta;
                 }
                 
-                if( maxdelta > 0)
+                if( maxdelta > lastMaxDelta)
                 {
                     maxColor = colors[i];
+                    lastMaxDelta = maxdelta;
                 }
             }
         }
@@ -94,7 +98,6 @@ namespace MedianCutOpenCV
                 }
             }
         }
-
     }
     
     // Call Shrink prior to this having
@@ -228,7 +231,27 @@ namespace MedianCutOpenCV
                 averagePoint[j] = (float)(sum[j] / currentColorCube.numColors);
             }
             
-            result.push_back( std::make_pair( averagePoint, currentColorCube.numColors ) );
+            if(useCIEDE2000)
+            {
+                // find closest color in the color cube to our average;
+                double delta = DBL_MAX;
+                cv::Vec3f closestColor;
+                for(int i = 0; i < currentColorCube.numColors; i++)
+                {
+                    double currentDelta = CIEDE2000::CIEDE2000(averagePoint, currentColorCube.colors[i]);
+                    if(currentDelta < delta)
+                    {
+                        delta = currentDelta;
+                        closestColor = currentColorCube.colors[i];
+                    }
+                }
+                
+                result.push_back( std::make_pair( closestColor, currentColorCube.numColors ) );
+            }
+            else
+            {
+                result.push_back( std::make_pair( averagePoint, currentColorCube.numColors ) );
+            }
         }
         
         return result;
