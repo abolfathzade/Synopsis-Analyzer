@@ -182,10 +182,6 @@ namespace MedianCutOpenCV
             
             long half = (numColors + 1) / 2;
             
-//            cv::Vec3f firstColor = currentColor.colors[0];
-//            cv::Vec3f middleColor = currentColor.colors[half];
-//            cv::Vec3f lastColor = currentColor.colors[ numColors - 1];
-
             auto firstColor = currentColor.colors;
             auto middleColor = currentColor.colors + half;
             auto lastColor = currentColor.colors + numColors;
@@ -211,10 +207,6 @@ namespace MedianCutOpenCV
         {
             ColorCube currentColorCube = colorCubeQueue.top();
             colorCubeQueue.pop();
-
-        
-            //int volume = block.volume();
-            //cout<<"block "<<result.size()<<": volume "<<volume<<" longest side "<<block.longestSideLength()<<" count "<<block.numPoints()<<endl;
             
             float sum[3] = {0};
             for(int i = 0; i < currentColorCube.numColors; i++)

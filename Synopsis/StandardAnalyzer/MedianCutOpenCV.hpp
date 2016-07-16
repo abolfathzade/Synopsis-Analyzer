@@ -47,7 +47,6 @@ namespace MedianCutOpenCV
         
         // Reclaculate our min and max colors
         void shrink();
-
     };
 
     
@@ -60,7 +59,7 @@ namespace MedianCutOpenCV
             return left[index] < right[index];
         }
     };
-
+    
     /// calculate a median cut of the input image and return pairs of (median colour,point count)
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::UMat image, unsigned int desiredSize, bool useCIEDE2000);
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::Mat image, unsigned int desiredSize, bool useCIEDE2000);
