@@ -1035,9 +1035,6 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
 
     switch (quality)
     {
-        case SynopsisAnalysisQualityHintOriginal:
-            return pixelBuffer;
-
         case SynopsisAnalysisQualityHintLow:
         {
             CGRect result = AVMakeRectWithAspectRatioInsideRect(original, lowQuality);
@@ -1066,6 +1063,9 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
 //            height = floorf((float)height * 0.8);
             break;
         }
+        case SynopsisAnalysisQualityHintOriginal:
+            break;
+
     }
     
     CGSize scaledSize = {width, height};
@@ -1105,69 +1105,44 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
     scaledSize.width = fabs(scaledSize.width);
     scaledSize.height = fabs(scaledSize.height);
 
-    if(!CGAffineTransformEqualToTransform(transform, CGAffineTransformIdentity))
-    {
-        vImage_CGAffineTransform affineTransform;
-        affineTransform.a = transform.a;
-        affineTransform.b = transform.b;
-        affineTransform.c = transform.c;
-        affineTransform.d = transform.d;
-        affineTransform.tx = transform.tx;
-        affineTransform.ty = transform.ty;
-        
-        unsigned char *transformBytes= (unsigned char*)malloc(4 * originalSize.width * originalSize.height);
-        vImage_Buffer transformed = {transformBytes, originalSize.height, originalSize.width, 4 * originalSize.width};
-        
-        uint8_t backColor[4] = {0};
-        
-        vImage_Error err = vImageAffineWarpCG_ARGB8888(&inBuff, &transformed, NULL, &affineTransform, backColor, kvImageBackgroundColorFill);
-        if (err != kvImageNoError)
-            NSLog(@" error %ld", err);
-        
-        CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
-        
-        // Scale
-        unsigned char *resizedBytes= (unsigned char*)malloc(4 * scaledSize.width * scaledSize.height);
-        vImage_Buffer resized = {resizedBytes, scaledSize.height, scaledSize.width, 4 * scaledSize.width};
-        
-        err = vImageScale_ARGB8888(&transformed, &resized, NULL, 0);
-        if (err != kvImageNoError)
-            NSLog(@" error %ld", err);
-        
-        // Free Transform
-        free(transformed.data);
-        transformed.data = NULL;
-        
-        CVPixelBufferRef finalOut = NULL;
-        CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, scaledSize.width, scaledSize.height, kCVPixelFormatType_32BGRA, resized.data, resized.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
-        
-        if(ret != kCVReturnSuccess)
-            NSLog(@" error %d", ret);
-        
-        return finalOut;
-    }
-    else {
-        
-        // Scale
-        unsigned char *resizedBytes= (unsigned char*)malloc(4 * scaledSize.width * scaledSize.height);
-        vImage_Buffer resized = {resizedBytes, scaledSize.height, scaledSize.width, 4 * scaledSize.width};
-        
-        vImage_Error err = vImageScale_ARGB8888(&inBuff, &resized, NULL, 0);
-        if (err != kvImageNoError)
-            NSLog(@" error %ld", err);
-        
-        CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
-        
-        CVPixelBufferRef finalOut = NULL;
-        CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, scaledSize.width, scaledSize.height, kCVPixelFormatType_32BGRA, resized.data, resized.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
-        
-        if(ret != kCVReturnSuccess)
-            NSLog(@" error %d", ret);
-        
-        return finalOut;
-
-    }
-
+    vImage_CGAffineTransform affineTransform;
+    affineTransform.a = transform.a;
+    affineTransform.b = transform.b;
+    affineTransform.c = transform.c;
+    affineTransform.d = transform.d;
+    affineTransform.tx = transform.tx;
+    affineTransform.ty = transform.ty;
+    
+    unsigned char *transformBytes= (unsigned char*)malloc(4 * originalSize.width * originalSize.height);
+    vImage_Buffer transformed = {transformBytes, originalSize.height, originalSize.width, 4 * originalSize.width};
+    
+    uint8_t backColor[4] = {0};
+    
+    vImage_Error err = vImageAffineWarpCG_ARGB8888(&inBuff, &transformed, NULL, &affineTransform, backColor, kvImageBackgroundColorFill);
+    if (err != kvImageNoError)
+        NSLog(@" error %ld", err);
+    
+    CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
+    
+    // Scale
+    unsigned char *resizedBytes= (unsigned char*)malloc(4 * scaledSize.width * scaledSize.height);
+    vImage_Buffer resized = {resizedBytes, scaledSize.height, scaledSize.width, 4 * scaledSize.width};
+    
+    err = vImageScale_ARGB8888(&transformed, &resized, NULL, 0);
+    if (err != kvImageNoError)
+        NSLog(@" error %ld", err);
+    
+    // Free Transform
+    free(transformed.data);
+    transformed.data = NULL;
+    
+    CVPixelBufferRef finalOut = NULL;
+    CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, scaledSize.width, scaledSize.height, kCVPixelFormatType_32BGRA, resized.data, resized.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
+    
+    if(ret != kCVReturnSuccess)
+        NSLog(@" error %d", ret);
+    
+    return finalOut;
 }
 
 #pragma mark - Metadata Helper

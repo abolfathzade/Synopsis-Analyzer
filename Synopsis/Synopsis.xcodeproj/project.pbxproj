@@ -82,6 +82,7 @@
 		1BA8F8491C138D440066BDDB /* DeepBelief.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8481C138D440066BDDB /* DeepBelief.framework */; };
 		1BA8F84B1C138FDD0066BDDB /* jetpac.ntwk in Resources */ = {isa = PBXBuildFile; fileRef = 1BA8F84A1C138FDD0066BDDB /* jetpac.ntwk */; };
 		1BA8F84F1C13968E0066BDDB /* DeepBelief.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1BA8F8481C138D440066BDDB /* DeepBelief.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1BAF36311D3958D200EAF37E /* MedianCutOpenCV.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1BAF362F1D3958D200EAF37E /* MedianCutOpenCV.cpp */; };
 		1BD4292F1D2D691E00870D2F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
@@ -720,6 +721,8 @@
 		1BA8F8441C138C250066BDDB /* DeepBeliefAnalyzer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DeepBeliefAnalyzer.m; path = DeepBeliefAnalyzer/DeepBeliefAnalyzer.m; sourceTree = "<group>"; };
 		1BA8F8481C138D440066BDDB /* DeepBelief.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeepBelief.framework; path = DeepBeliefAnalyzer/DeepBelief.framework; sourceTree = "<group>"; };
 		1BA8F84A1C138FDD0066BDDB /* jetpac.ntwk */ = {isa = PBXFileReference; lastKnownFileType = file; path = jetpac.ntwk; sourceTree = "<group>"; };
+		1BAF362F1D3958D200EAF37E /* MedianCutOpenCV.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MedianCutOpenCV.cpp; sourceTree = "<group>"; };
+		1BAF36301D3958D200EAF37E /* MedianCutOpenCV.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MedianCutOpenCV.hpp; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Synopsis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -1387,6 +1390,8 @@
 				1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */,
 				1B5FE5091B25F44F00EED2A1 /* MedianCut.h */,
 				1B61BCFB1ACF26710013418D /* Supporting Files */,
+				1BAF362F1D3958D200EAF37E /* MedianCutOpenCV.cpp */,
+				1BAF36301D3958D200EAF37E /* MedianCutOpenCV.hpp */,
 			);
 			path = StandardAnalyzer;
 			sourceTree = "<group>";
@@ -2295,6 +2300,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */,
+				1BAF36311D3958D200EAF37E /* MedianCutOpenCV.cpp in Sources */,
 				1B02B7581D2AE03200A4430F /* CIEDE2000.cpp in Sources */,
 				1B49BD9E1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm in Sources */,
 			);
