@@ -45,22 +45,7 @@ namespace MedianCutOpenCV
         // unroll the image and then make a vector of colors from it
         numColors = image.rows * image.cols;
         
-        imageReshaped = image.reshape(1, numColors);
-  
-        colors = imageReshaped.ptr<cv::Vec3f>(0);
-
-//        for(int i = 0; i < imageReshaped.rows; i++)
-//        {
-//            float l = imageReshaped.at<float>(i,0);
-//            float a = imageReshaped.at<float>(i,1);
-//            float b = imageReshaped.at<float>(i,2);
-//            
-//            cv::Vec3f color = cv::Vec3f(l, a, b);
-//
-//            colors.push_back( color );
-//        }
-        
-        imageReshaped.release();
+        colors = image.ptr<cv::Vec3f>(0);
         
         float min = std::numeric_limits<float>::min();
         float max = std::numeric_limits<float>::max();
