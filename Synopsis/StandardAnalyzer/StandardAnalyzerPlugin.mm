@@ -25,6 +25,8 @@
 #import "MedianCutOpenCV.hpp"
 #import "CIEDE2000.h"
 
+//#define TO_PERCEPTUAL cv::COLOR_BGR2HLS
+//#define FROM_PERCEPTUAL cv::COLOR_HLS2BGR
 //#define TO_PERCEPTUAL cv::COLOR_BGR2Luv
 //#define FROM_PERCEPTUAL cv::COLOR_Luv2BGR
 #define TO_PERCEPTUAL cv::COLOR_BGR2Lab
@@ -239,7 +241,7 @@
             //result = [self dominantColorForCVMatKMeans:currentPerceptualImage];
 
             // Uses MedianCut but without OpenCV primitives
-            //result = [self dominantColorForCVMatMedianCut:currentPerceptualImage];
+//            result = [self dominantColorForCVMatMedianCut:currentPerceptualImage];
             
             result = [self dominantColorForCVMatMedianCutCV:currentPerceptualImage];
             break;
@@ -462,8 +464,9 @@
         // convert from LAB to BGR
         const cv::Vec3f& labColor = colorCountPair.first;
         
+//        cv::Mat closestLABPixel = cv::Mat(1,1, CV_32FC3, labColor);
         cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColor inFrame:image];
-        //cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColor inFrame:image];
+//        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColor inFrame:image];
         
         // convert to BGR
         cv::Mat bgr(1,1, CV_32FC3);
