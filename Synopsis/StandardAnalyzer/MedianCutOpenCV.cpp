@@ -17,12 +17,14 @@
 
 namespace MedianCutOpenCV
 {
-    ColorCube::ColorCube(std::vector<cv::Vec3f> vecOfcolors, bool useCIEDE2000)
+    ColorCube::ColorCube(std::vector<cv::Vec3f> vecOfcolors, bool useDeltaE)
     {
+        useCIEDE2000 = useDeltaE;
+
         colors = vecOfcolors;
         minColor = cv::Vec3f(std::numeric_limits<float>::min());
         maxColor = cv::Vec3f(std::numeric_limits<float>::max());
-        
+
         shrink();
 
     }
