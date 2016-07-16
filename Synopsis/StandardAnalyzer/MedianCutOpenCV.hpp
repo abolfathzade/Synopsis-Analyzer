@@ -27,9 +27,11 @@ namespace MedianCutOpenCV
     public:
         ColorCube(cv::Mat image, bool useCIEDE2000);
         ColorCube(cv::UMat image, bool useCIEDE2000);
-        ColorCube(std::vector<cv::Vec3f> colors, bool useCIEDE2000);
+        ColorCube(cv::Vec3f* colors, int nColors, bool useCIEDE2000);
 
-        std::vector<cv::Vec3f> colors;
+        cv::Vec3f* colors;
+        int numColors;
+        
         cv::Vec3f minColor;
         cv::Vec3f maxColor;
         

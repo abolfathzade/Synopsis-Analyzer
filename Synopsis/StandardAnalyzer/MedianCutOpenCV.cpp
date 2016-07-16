@@ -17,13 +17,17 @@
 
 namespace MedianCutOpenCV
 {
-    ColorCube::ColorCube(std::vector<cv::Vec3f> vecOfcolors, bool useDeltaE)
+    ColorCube::ColorCube(cv::Vec3f* vecOfcolors,int nColors, bool useDeltaE)
     {
         useCIEDE2000 = useDeltaE;
+        
+        numColors = nColors;
 
         colors = vecOfcolors;
-        minColor = cv::Vec3f(std::numeric_limits<float>::min());
-        maxColor = cv::Vec3f(std::numeric_limits<float>::max());
+        float min = std::numeric_limits<float>::min();
+        float max = std::numeric_limits<float>::max();
+        minColor = cv::Vec3f(min, min, min);
+        maxColor = cv::Vec3f(max, max, max);
 
         shrink();
 
@@ -31,28 +35,37 @@ namespace MedianCutOpenCV
 
     ColorCube::ColorCube(cv::Mat image, bool useDeltaE)
     {
+        // todo:: assert depth = 3 or whatever...
+        // todo:: assert colorspace is LAB if we use CIEDE2000?
+        
         useCIEDE2000 = useDeltaE;
         
         cv::Mat imageReshaped;
         
         // unroll the image and then make a vector of colors from it
-        imageReshaped = image.reshape(1, image.rows * image.cols);
+        numColors = image.rows * image.cols;
         
-        for(int i = 0; i < imageReshaped.rows; i++)
-        {
-            float l = imageReshaped.at<float>(i,0);
-            float a = imageReshaped.at<float>(i,1);
-            float b = imageReshaped.at<float>(i,2);
-            
-            cv::Vec3f color = cv::Vec3f(l, a, b);
+        imageReshaped = image.reshape(1, numColors);
+  
+        colors = imageReshaped.ptr<cv::Vec3f>(0);
 
-            colors.push_back( color );
-        }
+//        for(int i = 0; i < imageReshaped.rows; i++)
+//        {
+//            float l = imageReshaped.at<float>(i,0);
+//            float a = imageReshaped.at<float>(i,1);
+//            float b = imageReshaped.at<float>(i,2);
+//            
+//            cv::Vec3f color = cv::Vec3f(l, a, b);
+//
+//            colors.push_back( color );
+//        }
         
         imageReshaped.release();
         
-        minColor = cv::Vec3f(std::numeric_limits<float>::min());
-        maxColor = cv::Vec3f(std::numeric_limits<float>::max());
+        float min = std::numeric_limits<float>::min();
+        float max = std::numeric_limits<float>::max();
+        minColor = cv::Vec3f(min, min, min);
+        maxColor = cv::Vec3f(max, max, max);
         
         shrink();
     }
@@ -69,7 +82,7 @@ namespace MedianCutOpenCV
 
         if(useCIEDE2000)
         {
-            for(int i = 1; i < colors.size(); i++ )
+            for(int i = 1; i < numColors; i++ )
             {
                 double mindelta = CIEDE2000::CIEDE2000(minColor, colors[i]);
                 double maxdelta = CIEDE2000::CIEDE2000(maxColor, colors[i]);
@@ -87,7 +100,7 @@ namespace MedianCutOpenCV
         }
         else
         {
-            for(int i = 1; i < colors.size(); i++ )
+            for(int i = 1; i < numColors; i++ )
             {
                 for(int j = 0; j < 3; j++ )
                 {
@@ -169,7 +182,7 @@ namespace MedianCutOpenCV
         
         colorCubeQueue.push(initialColorCube);
         
-        while (colorCubeQueue.size() < desiredSize && colorCubeQueue.top().colors.size() > 1)
+        while (colorCubeQueue.size() < desiredSize && colorCubeQueue.top().numColors > 1)
         {
             // Pop our first color cube off the stack
             ColorCube currentColor = colorCubeQueue.top();
@@ -177,7 +190,7 @@ namespace MedianCutOpenCV
             colorCubeQueue.pop();
 
             // number of colors we have
-            long numColors = currentColor.colors.size();
+            long numColors = currentColor.numColors;
             
             long half = (numColors + 1) / 2;
             
@@ -185,9 +198,9 @@ namespace MedianCutOpenCV
 //            cv::Vec3f middleColor = currentColor.colors[half];
 //            cv::Vec3f lastColor = currentColor.colors[ numColors - 1];
 
-            auto firstColor = currentColor.colors.begin();
-            auto middleColor = currentColor.colors.begin() + half;
-            auto lastColor = currentColor.colors.end();
+            auto firstColor = currentColor.colors;
+            auto middleColor = currentColor.colors + half;
+            auto lastColor = currentColor.colors + numColors;
             
             // Euclidean ?
             switch(currentColor.longestSideIndex())
@@ -197,11 +210,9 @@ namespace MedianCutOpenCV
                 case 2: std::nth_element(firstColor, middleColor, lastColor, CoordinateColorComparator<2>()); break;
             }
             
-            std::vector<cv::Vec3f> lowerColorsVec(currentColor.colors.begin(), currentColor.colors.begin() + half);
-            std::vector<cv::Vec3f> upperColorsVec(currentColor.colors.begin() + half, currentColor.colors.end());
 
-            ColorCube lowerColors(lowerColorsVec, useCIEDE2000);
-            ColorCube higherColors(upperColorsVec, useCIEDE2000);
+            ColorCube lowerColors(firstColor, (int)(middleColor - firstColor), useCIEDE2000);
+            ColorCube higherColors(middleColor, (int)(lastColor - middleColor), useCIEDE2000);
 
             colorCubeQueue.push(lowerColors);
             colorCubeQueue.push(higherColors);
@@ -218,7 +229,7 @@ namespace MedianCutOpenCV
             //cout<<"block "<<result.size()<<": volume "<<volume<<" longest side "<<block.longestSideLength()<<" count "<<block.numPoints()<<endl;
             
             float sum[3] = {0};
-            for(int i = 0; i < currentColorCube.colors.size(); i++)
+            for(int i = 0; i < currentColorCube.numColors; i++)
             {
                 for(int j=0; j < 3; j++)
                 {
@@ -229,10 +240,10 @@ namespace MedianCutOpenCV
             cv::Vec3f averagePoint;
             for(int j=0; j < 3; j++)
             {
-                averagePoint[j] = (float)(sum[j] / currentColorCube.colors.size());
+                averagePoint[j] = (float)(sum[j] / currentColorCube.numColors);
             }
             
-            result.push_back(std::make_pair(averagePoint, currentColorCube.colors.size()));
+            result.push_back( std::make_pair( averagePoint, currentColorCube.numColors ) );
         }
         
         return result;
