@@ -21,7 +21,6 @@
 
 #import "StandardAnalyzerPlugin.h"
 
-#import "MedianCut.h"
 #import "MedianCutOpenCV.hpp"
 #import "CIEDE2000.h"
 
@@ -33,6 +32,7 @@
 #define FROM_PERCEPTUAL cv::COLOR_Lab2BGR
 
 #define USE_OPENCL 0
+#define USE_CIEDE2000 0
 
 #if USE_OPENCL
 #define matType cv::UMat
@@ -240,10 +240,8 @@
             // KMeans is slow as hell
             //result = [self dominantColorForCVMatKMeans:currentPerceptualImage];
 
-            // Uses MedianCut but without OpenCV primitives
-//            result = [self dominantColorForCVMatMedianCut:currentPerceptualImage];
-            
             result = [self dominantColorForCVMatMedianCutCV:currentPerceptualImage];
+
             break;
         }
         case 2:
@@ -363,89 +361,6 @@
     return closestColorPixel;
 }
 
-- (NSDictionary*) dominantColorForCVMatMedianCut:(matType)image
-{
-    // Our Mutable Metadata Dictionary:
-    NSMutableDictionary* metadata = [NSMutableDictionary new];
-    
-    // Also this code is heavilly borrowed so yea.
-    int k = 5;
-    int numPixels =  currentPerceptualImage.rows * currentPerceptualImage.cols;
-    
-    // Walk through the pixels and store colours.
-    // Let's be fancy and make a smart pointer. Unfortunately shared_ptr doesn't automatically know how to delete a C++ array, so we have to write a [] lambda (aka 'block' in Obj-C) to clean up the object.
-    std::shared_ptr<MedianCut::Point> points(new MedianCut::Point[numPixels],
-                                             []( MedianCut::Point* p ) { delete[] p; } );
-    
-    int sourceColorCount = 0;
-    
-    // TODO: Optimize Median Cut for OpenCL somehow? Is that even possible?
-    // Use some different OpenCV method?
-    
-#if USE_OPENCL
-    // Get a MAT from our UMat
-    cv::Mat currentPerceptualImageMAT = currentPerceptualImage.getMat(cv::ACCESS_READ);
-#else
-    cv::Mat currentPerceptualImageMAT = currentPerceptualImage;
-#endif
-    
-    // Populate Median Cut Points by color values;
-    for(int i = 0;  i < currentPerceptualImageMAT.rows; i++)
-    {
-        for(int j = 0; j < currentPerceptualImageMAT.cols; j++)
-        {
-            // You can now access the pixel value with cv::Vec3 (or 4 for if BGRA)
-            cv::Vec3f labColor = currentPerceptualImageMAT.at<cv::Vec3f>(i, j);
-            
-            points.get()[sourceColorCount].x[0] = labColor[0]; // B L
-            points.get()[sourceColorCount].x[1] = labColor[1]; // G A
-            points.get()[sourceColorCount].x[2] = labColor[2]; // R B
-            
-            sourceColorCount++;
-        }
-    }
-    
-#if USE_OPENCL
-    // Clear our cv::Mat backed by our OpenCL buffer
-    currentPerceptualImageMAT.release();
-#endif
-    
-    auto palette = MedianCut::medianCut(points.get(), numPixels, k);
-    
-    NSMutableArray* dominantColors = [NSMutableArray new];
-    
-    for ( auto colorCountPair: palette )
-    {
-        // convert from LAB to BGR
-        const MedianCut::Point& labColorPoint = colorCountPair.first;
-       
-        cv::Vec3f labColorVec3F = cv::Vec3f(labColorPoint.x[0], labColorPoint.x[1], labColorPoint.x[2]);
-        
-        cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColorVec3F inFrame:image];
-//        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColorVec3F inFrame:image];
-        
-        // convert to BGR
-        cv::Mat bgr(1,1, CV_32FC3);
-        cv::cvtColor(closestLABPixel, bgr, FROM_PERCEPTUAL);
-        
-        cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
-
-        NSArray* color = @[@(bgrColor[2]), // / 255.0), // R
-                           @(bgrColor[1]), // / 255.0), // G
-                           @(bgrColor[0]), // / 255.0), // B
-                           ];
-        
-        [dominantColors addObject:color];
-        
-        // We will process this in finalize
-        [self.everyDominantColor addObject:color];
-    }
-    
-    metadata[@"DominantColors"] = dominantColors;
- 
-    return metadata;
-}
-
 - (NSDictionary*) dominantColorForCVMatMedianCutCV:(matType)image
 {
     // Our Mutable Metadata Dictionary:
@@ -454,7 +369,7 @@
     // Also this code is heavilly borrowed so yea.
     int k = 5;
     
-    bool useCIEDE2000 = false;
+    bool useCIEDE2000 = USE_CIEDE2000;
     auto palette = MedianCutOpenCV::medianCut(image, k, useCIEDE2000);
 
     NSMutableArray* dominantColors = [NSMutableArray new];
@@ -479,10 +394,15 @@
                            @(bgrColor[0]), // / 255.0), // B
                            ];
         
+        NSArray* lColor = @[ @(labColor[0]), // L
+                             @(labColor[1]), // A
+                             @(labColor[2]), // B
+                             ];
+        
         [dominantColors addObject:color];
         
         // We will process this in finalize
-        [self.everyDominantColor addObject:color];
+        [self.everyDominantColor addObject:lColor];
     }
     
     metadata[@"DominantColors"] = dominantColors;
@@ -548,10 +468,15 @@
                            @(bgrColor[0]), // / 255.0), // B
                            ];
         
+        NSArray* lColor = @[ @(labColor[0]), // L
+                             @(labColor[1]), // A
+                             @(labColor[2]), // B
+                             ];
+
         [dominantColors addObject:color];
         
         // We will process this in finalize
-        [self.everyDominantColor addObject:color];
+        [self.everyDominantColor addObject:lColor];
     }
     
     metadata[@"DominantColors"] = dominantColors;
@@ -951,37 +876,42 @@
     
     // Walk through the pixels and store colours.
     // Let's be fancy and make a smart pointer. Unfortunately shared_ptr doesn't automatically know how to delete a C++ array, so we have to write a [] lambda (aka 'block' in Obj-C) to clean up the object.
-    std::shared_ptr<MedianCut::Point> points(new MedianCut::Point[numPixels],
-                                             []( MedianCut::Point* p ) { delete[] p; } );
+    std::shared_ptr<cv::Vec3f> points(new cv::Vec3f[numPixels],
+                                             []( cv::Vec3f* p ) { delete[] p; } );
     
     int sourceColorCount = 0;
     
     // Populate Median Cut Points by color values;
     for(NSArray* dominantColorsArray in self.everyDominantColor)
     {
-            points.get()[sourceColorCount].x[0] = [dominantColorsArray[0] floatValue];
-            points.get()[sourceColorCount].x[1] = [dominantColorsArray[1] floatValue];
-            points.get()[sourceColorCount].x[2] = [dominantColorsArray[2] floatValue];
-            
-            sourceColorCount++;
+        points.get()[sourceColorCount][0] = [dominantColorsArray[0] floatValue];
+        points.get()[sourceColorCount][1] = [dominantColorsArray[1] floatValue];
+        points.get()[sourceColorCount][2] = [dominantColorsArray[2] floatValue];
+        
+        sourceColorCount++;
     }
     
-    auto palette = MedianCut::medianCut(points.get(), numPixels, k);
+    bool useCIEDE2000 = USE_CIEDE2000;
+    MedianCutOpenCV::ColorCube allColorCube(points.get(), numPixels, useCIEDE2000);
+    
+    auto palette = MedianCutOpenCV::medianCut(allColorCube, k, useCIEDE2000);
     
     NSMutableArray* dominantColors = [NSMutableArray new];
     
     for ( auto colorCountPair: palette )
     {
         // convert from LAB to BGR
-        const MedianCut::Point& labColor = colorCountPair.first;
+        const cv::Vec3f& labColor = colorCountPair.first;
         
-        cv::Mat rgb(1,1, CV_32FC3, cv::Vec3f(labColor.x[0], labColor.x[1], labColor.x[2]));
+        cv::Mat closestLABPixel = cv::Mat(1,1, CV_32FC3, labColor);
+        cv::Mat bgr(1,1, CV_32FC3);
+        cv::cvtColor(closestLABPixel, bgr, FROM_PERCEPTUAL);
         
-        cv::Vec3f rgbColor = rgb.at<cv::Vec3f>(0,0);
+        cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
         
-        [dominantColors addObject: @[@(rgbColor[0]),
-                                     @(rgbColor[1]),
-                                     @(rgbColor[2]),
+        [dominantColors addObject: @[@(bgrColor[2]),
+                                     @(bgrColor[1]),
+                                     @(bgrColor[0]),
                                      ]];
     }
     

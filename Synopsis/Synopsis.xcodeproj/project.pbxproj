@@ -32,7 +32,6 @@
 		1B3233DC1C31F8F200C9CF5E /* PresetGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233DB1C31F8F200C9CF5E /* PresetGroup.m */; };
 		1B49BD9E1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
-		1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */; };
 		1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BCD91ACB90850013418D /* VideoToolbox.framework */; };
 		1B61BCEA1ACF090E0013418D /* FrameCounterPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B61BCE91ACF090E0013418D /* FrameCounterPlugin.m */; };
 		1B61BCEE1ACF0E210013418D /* FrameCounterAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCE11ACF06A70013418D /* FrameCounterAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -427,8 +426,6 @@
 		1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = StandardAnalyzerPlugin.mm; sourceTree = "<group>"; };
 		1B578C3F1B02F37E00D76F62 /* DropFilesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropFilesView.h; sourceTree = "<group>"; };
 		1B578C401B02F37E00D76F62 /* DropFilesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropFilesView.m; sourceTree = "<group>"; };
-		1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MedianCut.cpp; sourceTree = "<group>"; };
-		1B5FE5091B25F44F00EED2A1 /* MedianCut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MedianCut.h; sourceTree = "<group>"; };
 		1B61BCD91ACB90850013418D /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		1B61BCDC1ACEFEEE0013418D /* AnalyzerPluginProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnalyzerPluginProtocol.h; sourceTree = "<group>"; };
 		1B61BCE11ACF06A70013418D /* FrameCounterAnalyzer.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FrameCounterAnalyzer.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -440,7 +437,6 @@
 		1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StandardAnalyzer.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B61BCFC1ACF26710013418D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1B61BD001ACF27740013418D /* StandardAnalyzerPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StandardAnalyzerPlugin.h; sourceTree = "<group>"; };
-		1B61BD011ACF27740013418D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1B61BD071ACF371A0013418D /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		1B805E2A1B0114D0005D7354 /* ProgressTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTableViewController.h; sourceTree = "<group>"; };
 		1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTableViewController.m; sourceTree = "<group>"; };
@@ -1386,9 +1382,6 @@
 				1B02B7501D2AE02900A4430F /* CIEDE2000 */,
 				1B61BD001ACF27740013418D /* StandardAnalyzerPlugin.h */,
 				1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */,
-				1B61BD011ACF27740013418D /* Info.plist */,
-				1B5FE5081B25F44F00EED2A1 /* MedianCut.cpp */,
-				1B5FE5091B25F44F00EED2A1 /* MedianCut.h */,
 				1B61BCFB1ACF26710013418D /* Supporting Files */,
 				1BAF362F1D3958D200EAF37E /* MedianCutOpenCV.cpp */,
 				1BAF36301D3958D200EAF37E /* MedianCutOpenCV.hpp */,
@@ -2299,7 +2292,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1B5FE50A1B25F44F00EED2A1 /* MedianCut.cpp in Sources */,
 				1BAF36311D3958D200EAF37E /* MedianCutOpenCV.cpp in Sources */,
 				1B02B7581D2AE03200A4430F /* CIEDE2000.cpp in Sources */,
 				1B49BD9E1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm in Sources */,

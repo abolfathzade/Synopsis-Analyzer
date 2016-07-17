@@ -142,7 +142,6 @@ namespace MedianCutOpenCV
         return volume;
     }
 
-    
     bool ColorCube::operator < (const ColorCube& other) const
     {
         // Euclidiean?
@@ -154,9 +153,8 @@ namespace MedianCutOpenCV
         }
         else
             return ( longestSideLength() < other.longestSideLength() );
-
     }
-
+    
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::UMat image, unsigned int desiredSize, bool useCIEDE2000)
     {
         return medianCut(image.getMat(cv::ACCESS_READ), desiredSize, useCIEDE2000);
@@ -164,9 +162,14 @@ namespace MedianCutOpenCV
     
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::Mat image, unsigned int desiredSize, bool useCIEDE2000)
     {
-        std::priority_queue<ColorCube> colorCubeQueue;
-
         ColorCube initialColorCube(image, useCIEDE2000);
+        
+        return medianCut(initialColorCube, desiredSize, useCIEDE2000);
+    }
+
+    std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(ColorCube initialColorCube, unsigned int desiredSize, bool useCIEDE2000)
+    {
+        std::priority_queue<ColorCube> colorCubeQueue;
         
         colorCubeQueue.push(initialColorCube);
         
@@ -193,7 +196,6 @@ namespace MedianCutOpenCV
                 case 1: std::nth_element(firstColor, middleColor, lastColor, CoordinateColorComparator<1>()); break;
                 case 2: std::nth_element(firstColor, middleColor, lastColor, CoordinateColorComparator<2>()); break;
             }
-            
 
             ColorCube lowerColors(firstColor, (int)(middleColor - firstColor), useCIEDE2000);
             ColorCube higherColors(middleColor, (int)(lastColor - middleColor), useCIEDE2000);
@@ -249,7 +251,8 @@ namespace MedianCutOpenCV
         return result;
 
     }
-
+    
+   
     
 
 }

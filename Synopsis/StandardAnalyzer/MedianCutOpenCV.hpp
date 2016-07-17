@@ -64,6 +64,8 @@ namespace MedianCutOpenCV
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::UMat image, unsigned int desiredSize, bool useCIEDE2000);
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::Mat image, unsigned int desiredSize, bool useCIEDE2000);
     
+    std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(ColorCube initialColorCube, unsigned int desiredSize, bool useCIEDE2000);
+
 } // End Name Space
 
 #endif /* MedianCutOpenCV_hpp */
