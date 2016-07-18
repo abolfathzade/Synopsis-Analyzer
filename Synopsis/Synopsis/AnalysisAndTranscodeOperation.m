@@ -19,6 +19,9 @@
 
 @interface AnalysisAndTranscodeOperation ()
 {
+    // We use this pixel buffer pool to handle memory for our resized pixel buffers
+    CVPixelBufferPoolRef transformPixelBufferPool;
+    CVPixelBufferPoolRef scaledPixelBufferPool;
 }
 
 // Prerequisites
@@ -131,9 +134,29 @@
         self.inFlightVideoSampleBufferMetadata = [NSMutableArray new];
         self.inFlightAudioSampleBufferMetadata = [NSMutableArray new];
         
+        // Lazy init of our pixel buffers once we know our target size
+        // See pixelBuffer:withTransform:forQuality:
+        transformPixelBufferPool = NULL;
+        scaledPixelBufferPool = NULL;
+        
         [self setupTranscodeShitSucessfullyOrDontWhatverMan];
     }
     return self;
+}
+
+- (void) dealloc
+{
+    if(transformPixelBufferPool != NULL)
+    {
+        CVPixelBufferPoolRelease(transformPixelBufferPool);
+        transformPixelBufferPool = NULL;
+    }
+    
+    if(scaledPixelBufferPool != NULL)
+    {
+        CVPixelBufferPoolRelease(scaledPixelBufferPool);
+        scaledPixelBufferPool = NULL;
+    }
 }
 
 - (NSString*) description
@@ -1040,8 +1063,6 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
             CGRect result = AVMakeRectWithAspectRatioInsideRect(original, lowQuality);
             width = result.size.width;
             height = result.size.height;
-//            width = floorf((float)width * 0.2);
-//            height = floorf((float)height * 0.2);
             break;
         }
         case SynopsisAnalysisQualityHintMedium:
@@ -1049,8 +1070,6 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
             CGRect result = AVMakeRectWithAspectRatioInsideRect(original, mediumQuality);
             width = result.size.width;
             height = result.size.height;
-//            width = floorf((float)width * 0.5);
-//            height = floorf((float)height * 0.5);
             break;
         }
         case SynopsisAnalysisQualityHintHigh:
@@ -1058,14 +1077,10 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
             CGRect result = AVMakeRectWithAspectRatioInsideRect(original, highQuality);
             width = result.size.width;
             height = result.size.height;
-
-//            width = floorf((float)width * 0.8);
-//            height = floorf((float)height * 0.8);
             break;
         }
         case SynopsisAnalysisQualityHintOriginal:
             break;
-
     }
     
     CGSize scaledSize = {width, height};
@@ -1095,7 +1110,6 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
         transform = CGAffineTransformConcat(transform, flip);
     }
     
-    
     originalSize = CGSizeApplyAffineTransform(originalSize, transform);
     scaledSize = CGSizeApplyAffineTransform(scaledSize, transform);
 
@@ -1113,8 +1127,41 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
     affineTransform.tx = transform.tx;
     affineTransform.ty = transform.ty;
     
-    unsigned char *transformBytes= (unsigned char*)malloc(4 * originalSize.width * originalSize.height);
-    vImage_Buffer transformed = {transformBytes, originalSize.height, originalSize.width, 4 * originalSize.width};
+    // Create our pixel buffer pool for our scaled size
+    if(transformPixelBufferPool == NULL)
+    {
+        NSDictionary* poolAttributes = @{ (NSString*)kCVPixelBufferWidthKey : @(originalSize.width),
+                                          (NSString*)kCVPixelBufferHeightKey : @(originalSize.height),
+                                          (NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
+                                        };
+        CVReturn err = CVPixelBufferPoolCreate(kCFAllocatorDefault, NULL, (__bridge CFDictionaryRef _Nullable)(poolAttributes), &transformPixelBufferPool);
+        if(err != kCVReturnSuccess)
+        {
+            NSLog(@"Error : %i", err);
+        }
+    }
+    
+    if(scaledPixelBufferPool == NULL)
+    {
+        NSDictionary* poolAttributes = @{ (NSString*)kCVPixelBufferWidthKey : @(scaledSize.width),
+                                          (NSString*)kCVPixelBufferHeightKey : @(scaledSize.height),
+                                          (NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
+                                          };
+        CVReturn err = CVPixelBufferPoolCreate(kCFAllocatorDefault, NULL, (__bridge CFDictionaryRef _Nullable)(poolAttributes), &scaledPixelBufferPool);
+        if(err != kCVReturnSuccess)
+        {
+            NSLog(@"Error : %i", err);
+        }
+    }
+    
+
+    CVPixelBufferRef transformedBuffer;
+    CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, transformPixelBufferPool, &transformedBuffer);
+    
+    CVPixelBufferLockBaseAddress(transformedBuffer, 0);
+    unsigned char *transformBytes = CVPixelBufferGetBaseAddress(transformedBuffer);
+    
+    vImage_Buffer transformed = {transformBytes, CVPixelBufferGetHeight(transformedBuffer), CVPixelBufferGetWidth(transformedBuffer), CVPixelBufferGetBytesPerRow(transformedBuffer)};
     
     uint8_t backColor[4] = {0};
     
@@ -1122,27 +1169,37 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
     if (err != kvImageNoError)
         NSLog(@" error %ld", err);
     
+    // Finished with our input pixel buffer
     CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
     
-    // Scale
-    unsigned char *resizedBytes= (unsigned char*)malloc(4 * scaledSize.width * scaledSize.height);
-    vImage_Buffer resized = {resizedBytes, scaledSize.height, scaledSize.width, 4 * scaledSize.width};
+    
+    // Scale our transformmed buffer
+    CVPixelBufferRef scaledBuffer;
+    CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, scaledPixelBufferPool, &scaledBuffer);
+    
+    CVPixelBufferLockBaseAddress(scaledBuffer, 0);
+    unsigned char *resizedBytes = CVPixelBufferGetBaseAddress(scaledBuffer);
+
+    vImage_Buffer resized = {resizedBytes, CVPixelBufferGetHeight(scaledBuffer), CVPixelBufferGetWidth(scaledBuffer), CVPixelBufferGetBytesPerRow(scaledBuffer)};
     
     err = vImageScale_ARGB8888(&transformed, &resized, NULL, 0);
     if (err != kvImageNoError)
         NSLog(@" error %ld", err);
     
     // Free Transform
-    free(transformed.data);
+    CVPixelBufferUnlockBaseAddress(transformedBuffer, 0);
+    CVPixelBufferRelease(transformedBuffer);
     transformed.data = NULL;
+
+    CVPixelBufferUnlockBaseAddress(scaledBuffer, 0);
     
-    CVPixelBufferRef finalOut = NULL;
-    CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, scaledSize.width, scaledSize.height, kCVPixelFormatType_32BGRA, resized.data, resized.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
     
-    if(ret != kCVReturnSuccess)
-        NSLog(@" error %d", ret);
+//    CVPixelBufferRef finalOut = NULL;
+//    CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, scaledSize.width, scaledSize.height, kCVPixelFormatType_32BGRA, resized.data, resized.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
+//    if(ret != kCVReturnSuccess)
+//        NSLog(@" error %d", ret);
     
-    return finalOut;
+    return scaledBuffer;
 }
 
 #pragma mark - Metadata Helper
