@@ -1029,8 +1029,14 @@
     else
     {
         [[LogController sharedLogController] appendErrorLog:@"Unable to start transcode:"];
-        [[LogController sharedLogController] appendErrorLog:[@"Read Error" stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
-        [[LogController sharedLogController] appendErrorLog:[@"Write Error" stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
+        if(self.transcodeAssetReader.error)
+        {
+            [[LogController sharedLogController] appendErrorLog:[@"Read Error" stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+        }
+        if(self.transcodeAssetWriter.error)
+        {
+            [[LogController sharedLogController] appendErrorLog:[@"Write Error" stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
+        }
     }
 }
 
