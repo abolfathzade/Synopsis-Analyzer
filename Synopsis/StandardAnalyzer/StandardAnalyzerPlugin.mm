@@ -42,13 +42,18 @@
 
 @interface StandardAnalyzerPlugin ()
 {
-    matType currentBGRImage;
+    matType currentBGR8UC3Image;
+    matType currentBGR32FC3Image;
     matType currentPerceptualImage;
-    matType currentGray8u3Image;
+    matType currentGray8UC1Image;
     
     matType lastImage;
     cv::Ptr<cv::ORB> detector;
     
+    matType accumulatedHist0;
+    matType accumulatedHist1;
+    matType accumulatedHist2;
+
     // for kMeans
     matType bestLables;
     matType centers;
@@ -103,6 +108,7 @@
                               @"Dominant Colors",
                               @"Features",
                               @"Motion",
+                              @"Histogram",
                               ];
         
         cv::setUseOptimized(true);
@@ -142,7 +148,10 @@
 {
     detector.release();
     
-    currentBGRImage.release();
+    currentBGR32FC3Image.release();
+    currentBGR8UC3Image.release();
+    currentGray8UC1Image.release();
+    
     currentPerceptualImage.release();
     lastImage.release();
 }
@@ -175,24 +184,17 @@
     // 0 to 65535 for CV_16U images
     // 0 to 1 for CV_32F images
     
-    // Convert our 8 Bit BGRA to Gray
-    cv::cvtColor(image, currentGray8u3Image, cv::COLOR_BGRA2GRAY);
+    // Convert our 8 Bit BGRA to BGR
+    cv::cvtColor(image, currentBGR8UC3Image, cv::COLOR_BGRA2BGR);
 
-    // Convert to Float for maximum color fidelity
-    matType quarterResBGRAFloat = matType();
+    // Convert 8 bit BGR to Grey
+    cv::cvtColor(currentBGR8UC3Image, currentGray8UC1Image, cv::COLOR_BGR2GRAY);
     
-    image.copyTo(quarterResBGRAFloat);
+    // Convert 8 Bit BGR to Float BGR
+    currentBGR8UC3Image.convertTo(currentBGR32FC3Image, CV_32FC3, 1.0/255.0);
     
-    quarterResBGRAFloat.convertTo(quarterResBGRAFloat, CV_32FC4, 1.0/255.0);
-    
-    matType quarterResBGR = currentPerceptualImage = matType(quarterResBGRAFloat.size(), CV_32FC3);
-    matType quarterResLAB = currentBGRImage = matType(quarterResBGRAFloat.size(), CV_32FC3);
-    
-    cv::cvtColor(quarterResBGRAFloat, quarterResBGR, cv::COLOR_BGRA2BGR);
-    cv::cvtColor(quarterResBGR, quarterResLAB, TO_PERCEPTUAL);
-    
-    currentPerceptualImage = quarterResLAB;
-    currentBGRImage = quarterResBGR;
+    // Convert Float BGR to Float Perceptual
+    cv::cvtColor(currentBGR32FC3Image, currentPerceptualImage, TO_PERCEPTUAL);
 }
 
 - (cv::Mat) imageFromBaseAddress:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
@@ -224,12 +226,28 @@
 - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
     NSDictionary* result = nil;
+
+    
+#define SHOWIMAGE 0
+    
+#if SHOWIMAGE
+    
+    cv::Mat flipped;
+    cv::flip(currentBGRImage, flipped, 0);
+
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        
+
+        cv::imshow("Image", flipped);
+    });
+
+#endif
     
     switch (moduleIndex)
     {
         case 0:
         {
-            result = [self averageColorForCVMat:currentBGRImage];
+            result = [self averageColorForCVMat:currentBGR32FC3Image];
             break;
         }
         case 1:
@@ -246,12 +264,18 @@
         }
         case 2:
         {
-            result = [self detectFeaturesCVMat:currentGray8u3Image];
+            result = [self detectFeaturesCVMat:currentGray8UC1Image];
             break;
         }
         case 3:
         {
-            result = [self detectMotionInCVMat:currentBGRImage];
+            result = [self detectMotionInCVMatAVG:currentGray8UC1Image];
+//            result = [self detectMotionInCVMatOpticalFlow:currentGray8UC1Image];
+            break;
+        }
+        case 4:
+        {
+            result = [self detectHistogramInCVMat:currentBGR8UC3Image];
             break;
         }
             
@@ -268,7 +292,6 @@
     NSMutableDictionary* metadata = [NSMutableDictionary new];
     
     cv::Scalar avgPixelIntensity = cv::mean(image);
-    
     
     
     // Add to metadata - normalize to float
@@ -813,11 +836,13 @@
         CGPoint point = CGPointZero;
         {
             point = CGPointMake((float)keyPoint->pt.x / (float)image.size().width,
-                                1.0f - (float)keyPoint->pt.y / (float)image.size().height);
+                                (float)keyPoint->pt.y / (float)image.size().height);
         }
         
         [keyPointsArray addObject:@[ @(point.x), @(point.y)]];
     }
+    
+//    cv::goodFeaturesToTrack(<#InputArray image#>, <#OutputArray corners#>, <#int maxCorners#>, <#double qualityLevel#>, <#double minDistance#>)
     
     // Add Features to metadata
     metadata[@"Features"] = keyPointsArray;
@@ -827,7 +852,7 @@
 
 #pragma mark - Frame Difference Motion
 
-- (NSDictionary*) detectMotionInCVMat:(matType)image
+- (NSDictionary*) detectMotionInCVMatAVG:(matType)image
 {
     NSMutableDictionary* metadata = [NSMutableDictionary new];
     
@@ -835,14 +860,8 @@
     // otherwise it wouldnt be set as last.
     if(!lastImage.empty())
     {
-        // Convert to greyscale
-        matType currentGreyImage;
-        matType lastGreyImage;
-        cv::cvtColor(image, currentGreyImage, cv::COLOR_BGR2GRAY);
-        cv::cvtColor(self->lastImage, lastGreyImage, cv::COLOR_BGR2GRAY);
-        
         matType diff;
-        cv::subtract(currentGreyImage, lastGreyImage, diff);
+        cv::subtract(image, lastImage, diff);
         
         // Average the difference:
         cv::Scalar avgMotion = cv::mean(diff);
@@ -850,25 +869,157 @@
         // Normalize to float
         metadata[@"Motion"] = @(avgMotion.val[0]);
     }
+    else {
+        metadata[@"Motion"] = @(0);
+    }
     
-    // If we have our old last sample buffer, free it
-//    if(!lastImage.empty())
-//    {
-//        lastImage.release();
-//    }
-//    
-    // set a new one
-    // TODO:: Asign? 
     image.copyTo(self->lastImage);
+    
+    return metadata;
+}
 
-//    lastImage.addref();
+//- (NSDictionary*) detectMotionInCVMatOpticalFlow:(matType)image
+//{
+//    NSMutableDictionary* metadata = [NSMutableDictionary new];
+//
+//}
+//
+
+#pragma mark - Histogram
+
+- (NSDictionary*) detectHistogramInCVMat:(matType)image
+{
+    // Our Mutable Metadata Dictionary:
+    NSMutableDictionary* metadata = [NSMutableDictionary new];
+    
+    // Split image into channels
+    std::vector<cv::Mat> imageChannels(3);
+    cv::split(image, imageChannels);
+    
+    cv::Mat histMat0, histMat1, histMat2;
+    
+#if USE_OPENCL
+    cv::Mat imageMat = image.getMat(cv::ACCESS_READ);
+#else
+    cv::Mat imageMat = image;
+#endif
+    
+    int numBins = 256;
+    int histSize[] = {numBins};
+    
+    float range[] = { 0, 256 };
+    const float* ranges[] = { range };
+
+    // we compute the histogram from these channels
+    int channels[] = {0};
+    
+    // TODO : use Accumulation of histogram to average over all frames ?
+    
+    calcHist(&imageChannels[0], // image
+             1, // image count
+             channels, // channel mapping
+             cv::Mat(), // do not use mask
+             histMat0,
+             1, // dimensions
+             histSize,
+             ranges,
+             true, // the histogram is uniform
+             false );
+    
+    calcHist(&imageChannels[1], // image
+             1, // image count
+             channels, // channel mapping
+             cv::Mat(), // do not use mask
+             histMat1,
+             1, // dimensions
+             histSize,
+             ranges,
+             true, // the histogram is uniform
+             false );
+    
+    calcHist(&imageChannels[2], // image
+             1, // image count
+             channels, // channel mapping
+             cv::Mat(), // do not use mask
+             histMat2,
+             1, // dimensions
+             histSize,
+             ranges,
+             true, // the histogram is uniform
+             false );
+    
+    // We are going to accumulate our histogram to get an average histogram for every frame of the movie
+    if(accumulatedHist0.empty())
+    {
+        histMat0.copyTo(accumulatedHist0);
+    }
+    else
+    {
+        cv::add(accumulatedHist0, histMat0, accumulatedHist0);
+    }
+
+    if(accumulatedHist1.empty())
+    {
+        histMat1.copyTo(accumulatedHist1);
+    }
+    else
+    {
+        cv::add(accumulatedHist1, histMat1, accumulatedHist1);
+    }
+
+    if(accumulatedHist2.empty())
+    {
+        histMat2.copyTo(accumulatedHist2);
+    }
+    else
+    {
+        cv::add(accumulatedHist2, histMat2, accumulatedHist2);
+    }
+    
+    // Normalize the result
+    normalize(histMat0, histMat0, 0.0, 256, cv::NORM_MINMAX, -1, cv::Mat() );
+    normalize(histMat1, histMat1, 0.0, 256, cv::NORM_MINMAX, -1, cv::Mat() );
+    normalize(histMat2, histMat2, 0.0, 256, cv::NORM_MINMAX, -1, cv::Mat() );
+    
+    NSMutableArray* histogramValues = [NSMutableArray arrayWithCapacity:histMat0.rows];
+    
+    for(int i = 0; i < histMat0.rows; i++)
+    {
+        NSArray* channelValuesForRow = @[ @( histMat2.at<float>(i, 0) / 255.0 ), // R
+                                          @( histMat1.at<float>(i, 0) / 255.0 ), // G
+                                          @( histMat0.at<float>(i, 0) / 255.0 ), // B
+                                          ];
+        
+        histogramValues[i] = channelValuesForRow;
+        
+    }
+    
+    metadata[@"Histogram"] = histogramValues;
     
     return metadata;
 }
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
 {
-    // analyzed
+    // Histogram:
+    
+    // Normalize the result
+    normalize(accumulatedHist0, accumulatedHist0, 0.0, 256, cv::NORM_MINMAX, -1, cv::Mat() ); // B
+    normalize(accumulatedHist1, accumulatedHist1, 0.0, 256, cv::NORM_MINMAX, -1, cv::Mat() ); // G
+    normalize(accumulatedHist2, accumulatedHist2, 0.0, 256, cv::NORM_MINMAX, -1, cv::Mat() ); // R
+    
+    NSMutableArray* histogramValues = [NSMutableArray arrayWithCapacity:accumulatedHist0.rows];
+    
+    for(int i = 0; i < accumulatedHist0.rows; i++)
+    {
+        NSArray* channelValuesForRow = @[ @( accumulatedHist2.at<float>(i, 0) / 255.0 ), // R
+                                          @( accumulatedHist1.at<float>(i, 0) / 255.0 ), // G
+                                          @( accumulatedHist0.at<float>(i, 0) / 255.0 ), // B
+                                          ];
+        
+        histogramValues[i] = channelValuesForRow;
+    }
+    
     
     // Also this code is heavilly borrowed so yea.
     int k = 5;
@@ -919,7 +1070,8 @@
     
     lastImage.release();
     
-    return  @{@"DominantColors" : dominantColors};
+    return  @{@"DominantColors" : dominantColors,
+              @"Histogram" : histogramValues};
 }
 
 @end
