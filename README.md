@@ -3,26 +3,36 @@
 
 ![alt tag](https://github.com/Synopsis/Synopsis/blob/master/Synopsis/Synopsis/Icon-512.png)
 
+###Overview
 
 Synopsis is video analysis and transcoding tool, as well as a metadata format for embeddeding advanced analyzed metadata withing MOV and MP4 video files. 
 
 Synopsis is aimed at Interactive, Realtime, Performance and Installation advertising, arts and technologies.
 
+###Workflow Opporunities:
+
+* #### Archival: Analyze archived media and run spotlight (
+
+
 This repository hosts a Synopsis Multimedia Analyser and Transcoder implementation written for Mac OS X.
 
 Synopsis Analysis is plugin based, allowing developers to easily extend and experiment analyzing video and caching results for future use.
 
-###Currently, Synopsis can analysize video and embed the following metadata:
+Synopsis can analysize video and embed the following:
+
+###Metadata:
 
 * Per Frame Average Color (via OpenCV)
 * Per Frame Dominant Color (via OpenCV)
 * Per Frame Tracked Points (via OpenCV)
 * Per Frame Motion Amount (via OpenCV)
+* Per Frame Histogram (via OpenCV)
 * Per Frame Image Description (via DeepBelief)
 * Global Average Color (via OpenCV)
 * Global Dominant Colors (via OpenCV)
+* Global Accumulated Histogram (via OpenCV)
 
-###Currently In Development:
+###In Development:
 
 * Per Frame Motion Direction (via OpenCV Optical Flow)
 * Global Motion Direction (via OpenCV Optical Flow)
