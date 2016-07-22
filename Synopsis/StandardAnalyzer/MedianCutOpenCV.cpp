@@ -118,7 +118,7 @@ namespace MedianCutOpenCV
         return maxIndex;
     }
     
-    int ColorCube::longestSideLength() const
+    float ColorCube::longestSideLength() const
     {
         int i = longestSideIndex();
         return maxColor[i] - minColor[i];

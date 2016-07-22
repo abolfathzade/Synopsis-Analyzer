@@ -36,7 +36,7 @@ namespace MedianCutOpenCV
         cv::Vec3f maxColor;
         
         int longestSideIndex() const;
-        int longestSideLength() const;
+        float longestSideLength() const;
         int volume() const;
         
         bool operator < (const ColorCube& other) const;
