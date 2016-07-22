@@ -209,11 +209,11 @@
     NSString* lastPath2 = [lastPath stringByAppendingString:@"_analyzed"];
     
     NSURL* destinationURL = [fileURL URLByDeletingLastPathComponent];
-    destinationURL = [destinationURL URLByDeletingPathExtension];
+//    destinationURL = [destinationURL URLByDeletingPathExtension];
     destinationURL = [[destinationURL URLByAppendingPathComponent:lastPath] URLByAppendingPathExtension:lastPathExtention];
     
     NSURL* destinationURL2 = [fileURL URLByDeletingLastPathComponent];
-    destinationURL2 = [destinationURL2 URLByDeletingPathExtension];
+//    destinationURL2 = [destinationURL2 URLByDeletingPathExtension];
     destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPath2] URLByAppendingPathExtension:lastPathExtention];
     
     // Pass 1 is our analysis pass, and our decode pass
