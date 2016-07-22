@@ -54,7 +54,7 @@ namespace MedianCutOpenCV
     class CoordinateColorComparator
     {
     public:
-        bool operator()(cv::Vec3f left, cv::Vec3f right)
+        bool operator()(const cv::Vec3f left, const cv::Vec3f right)
         {
             return left[index] < right[index];
         }
@@ -63,7 +63,6 @@ namespace MedianCutOpenCV
     /// calculate a median cut of the input image and return pairs of (median colour,point count)
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::UMat image, unsigned int desiredSize, bool useCIEDE2000);
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::Mat image, unsigned int desiredSize, bool useCIEDE2000);
-    
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(ColorCube initialColorCube, unsigned int desiredSize, bool useCIEDE2000);
 
 } // End Name Space
