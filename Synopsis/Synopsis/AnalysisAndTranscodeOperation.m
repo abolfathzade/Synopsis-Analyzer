@@ -1159,7 +1159,6 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
             NSLog(@"Error : %i", err);
         }
     }
-    
 
     CVPixelBufferRef transformedBuffer;
     CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, transformPixelBufferPool, &transformedBuffer);
@@ -1167,17 +1166,30 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
     CVPixelBufferLockBaseAddress(transformedBuffer, 0);
     unsigned char *transformBytes = CVPixelBufferGetBaseAddress(transformedBuffer);
     
+    const CGFloat backColorF[4] = {0};
+    const uint8_t backColorU[4] = {0};
+    
+//    vImage_CGImageFormat desiredFormat;
+//    desiredFormat.bitsPerComponent = 8;
+//    desiredFormat.bitsPerPixel = 32;
+//    desiredFormat.colorSpace = NULL;
+//    desiredFormat.bitmapInfo = (CGBitmapInfo)(kCGImageAlphaFirst | kCGImageAlphaPremultipliedFirst| kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little);
+//    desiredFormat.version = 0;
+//    desiredFormat.decode = NULL;
+//    desiredFormat.renderingIntent = kCGRenderingIntentDefault;
+    
     vImage_Buffer transformed = {transformBytes, CVPixelBufferGetHeight(transformedBuffer), CVPixelBufferGetWidth(transformedBuffer), CVPixelBufferGetBytesPerRow(transformedBuffer)};
+    vImage_Error err;
+//    err = vImageBuffer_InitWithCVPixelBuffer(&transformed, &desiredFormat, transformedBuffer, NULL, backColorF, kvImageNoFlags);
+//    if (err != kvImageNoError)
+//        NSLog(@" error %ld", err);
     
-    uint8_t backColor[4] = {0};
-    
-    vImage_Error err = vImageAffineWarpCG_ARGB8888(&inBuff, &transformed, NULL, &affineTransform, backColor, kvImageBackgroundColorFill);
+    err = vImageAffineWarpCG_ARGB8888(&inBuff, &transformed, NULL, &affineTransform, backColorU, kvImageLeaveAlphaUnchanged | kvImageBackgroundColorFill | kvImageDoNotTile);
     if (err != kvImageNoError)
         NSLog(@" error %ld", err);
     
     // Finished with our input pixel buffer
     CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
-    
     
     // Scale our transformmed buffer
     CVPixelBufferRef scaledBuffer;
@@ -1187,8 +1199,11 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
     unsigned char *resizedBytes = CVPixelBufferGetBaseAddress(scaledBuffer);
 
     vImage_Buffer resized = {resizedBytes, CVPixelBufferGetHeight(scaledBuffer), CVPixelBufferGetWidth(scaledBuffer), CVPixelBufferGetBytesPerRow(scaledBuffer)};
-    
-    err = vImageScale_ARGB8888(&transformed, &resized, NULL, 0);
+//    err = vImageBuffer_InitWithCVPixelBuffer(&resized, &desiredFormat, scaledBuffer, NULL, backColorF, kvImageNoFlags);
+//    if (err != kvImageNoError)
+//        NSLog(@" error %ld", err);
+
+    err = vImageScale_ARGB8888(&transformed, &resized, NULL, kvImageDoNotTile);
     if (err != kvImageNoError)
         NSLog(@" error %ld", err);
     
@@ -1199,11 +1214,6 @@ static void myReleaseCallback( void *releaseRefCon, const void *baseAddress )
 
     CVPixelBufferUnlockBaseAddress(scaledBuffer, 0);
     
-    
-//    CVPixelBufferRef finalOut = NULL;
-//    CVReturn ret = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, scaledSize.width, scaledSize.height, kCVPixelFormatType_32BGRA, resized.data, resized.rowBytes, myReleaseCallback, NULL, NULL, &finalOut);
-//    if(ret != kCVReturnSuccess)
-//        NSLog(@" error %d", ret);
     
     return scaledBuffer;
 }
