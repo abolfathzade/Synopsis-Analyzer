@@ -31,7 +31,7 @@
 #define TO_PERCEPTUAL cv::COLOR_BGR2Lab
 #define FROM_PERCEPTUAL cv::COLOR_Lab2BGR
 
-#define USE_OPENCL 0
+#define USE_OPENCL 1
 #define USE_CIEDE2000 0
 
 #if USE_OPENCL
@@ -50,9 +50,10 @@
     matType lastImage;
     cv::Ptr<cv::ORB> detector;
     
-    matType accumulatedHist0;
-    matType accumulatedHist1;
-    matType accumulatedHist2;
+    // No need for OpenCL for these
+    cv::Mat accumulatedHist0;
+    cv::Mat accumulatedHist1;
+    cv::Mat accumulatedHist2;
 
     // for kMeans
     matType bestLables;
@@ -264,7 +265,8 @@
         }
         case 2:
         {
-            result = [self detectFeaturesCVMat:currentGray8UC1Image];
+            result = [self detectFeaturesORBCVMat:currentGray8UC1Image];
+//            result = [self detectFeaturesFlowCVMat:currentGray8UC1Image];
             break;
         }
         case 3:
@@ -453,9 +455,6 @@
         imgSplit[i].reshape(1,n).copyTo(img3xN.col(i));
     }
     
-//    img3xN.convertTo(img3xN,CV_32F);
-    
-    
     // TODO: figure out what the fuck makes sense here.
     cv::kmeans(img3xN,
                k,
@@ -507,323 +506,10 @@
     return metadata;
 }
 
-- (NSDictionary*) dominantColorForCVHistogram:(matType)image
-{
-#define RANGE 256 // 1.0
-#define RANGE_MULTIPLIER 1.0 // 256
-#define NUMCLUSTERS 5
-    // Our Mutable Metadata Dictionary:
-    NSMutableDictionary* metadata = [NSMutableDictionary new];
-    
-    // Split image into channels
-    std::vector<cv::Mat> imageChannels(3);
-    cv::split(image, imageChannels);
-
-    // SparseMat can't hold Zeros.
-    // TODO: What happens when we try find a histogram on a pure black image?
-    
-//    cv::SparseMat Lhist, Ahist, Bhist;
-    cv::Mat histMat0, histMat1, histMat2;
-    
-#if USE_OPENCL
-    cv::Mat imageMat = image.getMat(cv::ACCESS_READ);
-#else
-    cv::Mat imageMat = image;
-#endif
-    
-    int lbins = 256;
-    int histSize[] = {lbins};//, abins, bbins};
-    
-    float range[] = { 0, RANGE };
-    const float* ranges[] = { range } ;//, range, range };
-    // we compute the histogram from these channels
-    int channels[] = {0};//, 1, 2};
-
-    // TODO : use Accumulation of histogram to average over all frames ?
-    
-    calcHist(&imageChannels[0], // image
-             1, // image count
-             channels, // channel mapping
-             cv::Mat(), // do not use mask
-             histMat0,
-             1, // dimensions
-             histSize,
-             ranges,
-             true, // the histogram is uniform
-             false );
-    
-    calcHist(&imageChannels[1], // image
-             1, // image count
-             channels, // channel mapping
-             cv::Mat(), // do not use mask
-             histMat1,
-             1, // dimensions
-             histSize,
-             ranges,
-             true, // the histogram is uniform
-             false );
-    
-    calcHist(&imageChannels[2], // image
-             1, // image count
-             channels, // channel mapping
-             cv::Mat(), // do not use mask
-             histMat2,
-             1, // dimensions
-             histSize,
-             ranges,
-             true, // the histogram is uniform
-             false );
-    
-    /// Normalize the result to [ 0, histImage.rows ]
-    normalize(histMat0, histMat0, 0.0, RANGE, cv::NORM_MINMAX, -1, cv::Mat() );
-    normalize(histMat1, histMat1, 0.0, RANGE, cv::NORM_MINMAX, -1, cv::Mat() );
-    normalize(histMat2, histMat2, 0.0, RANGE, cv::NORM_MINMAX, -1, cv::Mat() );
-
-    // Merge to a single 3 channel hist
-    std::vector<cv::Mat> histVec;
-    histVec.push_back(histMat0);
-    histVec.push_back(histMat1);
-    histVec.push_back(histMat2);
-    
-    cv::Mat hist;
-    cv::merge(histVec, hist);
-    
-    cv::Mat flipped;
-    cv::flip(image, flipped, 0);
-    
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        
-        int hist_w = 256; int hist_h = 256;
-        int bin_w = 1;//cvRound( (double) hist_w/lbins );
-        
-        cv::Mat histImage( hist_h, hist_w, CV_8UC3, cv::Scalar( 0,0,0) );
-
-        for( int i = 1; i < lbins; i++ )
-        {
-            line( histImage,
-                 cv::Point( bin_w*(i-1), hist_h - cvRound(histMat0.at<float>(i-1) * RANGE_MULTIPLIER ) ) ,
-                 cv::Point( bin_w*(i), hist_h - cvRound(histMat0.at<float>(i) * RANGE_MULTIPLIER ) ),
-                 cv::Scalar( 255, 0, 0), 2, cv::LineTypes::LINE_8, 0  );
-            line( histImage,
-                 cv::Point( bin_w*(i-1), hist_h - cvRound(histMat1.at<float>(i-1) * RANGE_MULTIPLIER ) ) ,
-                 cv::Point( bin_w*(i), hist_h - cvRound(histMat1.at<float>(i) * RANGE_MULTIPLIER ) ),
-                 cv::Scalar( 0, 255, 0), 2, cv::LineTypes::LINE_8, 0  );
-            line( histImage,
-                 cv::Point( bin_w*(i-1), hist_h - cvRound(histMat2.at<float>(i-1) * RANGE_MULTIPLIER ) ) ,
-                 cv::Point( bin_w*(i), hist_h - cvRound(histMat2.at<float>(i) * RANGE_MULTIPLIER) ),
-                 cv::Scalar( 0, 0, 255), 2, cv::LineTypes::LINE_8, 0  );
-        }
-        cv::imshow("Hist", histImage);
-        
-        cv::imshow("Image", flipped);
-    });
-    
-    
-    
-    // Blur Histogram because I have no idea why not
-//    matType blurredHist;
-//    cv::GaussianBlur(hist, blurredHist,cv::Size(7,1), 0, 0);
-    
-//    matType resizedHist;
-//    cv::resize(hist, resizedHist, cv::Size(5, 1), 0, 0, cv::INTER_AREA);
-    
-#if USE_OPENCL
-    // Get a MAT from our UMat
-//    cv::Mat histMAT =  hist;//blurredHist.getMat(cv::ACCESS_READ);
-#else
-    cv::Mat histMAT = hist;//blurredHist;
-#endif
-    
-    // TODO: figure out what the fuck makes sense here.
-    std::vector<int> labels0, labels1, labels2;
-    cv::Mat centers0, centers1, centers2;
-    double result = cv::kmeans(histMAT,
-                               NUMCLUSTERS,
-                               labels0,
-                               //               cv::TermCriteria(),
-                               cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 10000.0, 0.00001),
-                               5,
-                               cv::KMEANS_PP_CENTERS,
-                               centers0);
-    
-//    // TODO: figure out what the fuck makes sense here.
-//    std::vector<int> labels0, labels1, labels2;
-//    cv::Mat centers0, centers1, centers2;
-//    double result = cv::kmeans(histMat0,
-//                               NUMCLUSTERS,
-//                               labels0,
-//                               //               cv::TermCriteria(),
-//                               cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 10000.0, 0.00001),
-//                               5,
-//                               cv::KMEANS_PP_CENTERS,
-//                               centers0);
-//    
-//     result = cv::kmeans(histMat1,
-//                               NUMCLUSTERS,
-//                               labels1,
-//                               //               cv::TermCriteria(),
-//                               cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 10000.0, 0.00001),
-//                               5,
-//                               cv::KMEANS_PP_CENTERS,
-//                               centers1);
-//    
-//    result = cv::kmeans(histMat2,
-//                        NUMCLUSTERS,
-//                        labels2,
-//                        //               cv::TermCriteria(),
-//                        cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 10000.0, 0.00001),
-//                        5,
-//                        cv::KMEANS_PP_CENTERS,
-//                        centers2);
-    
-//    int max = 0, indx= 0, id = 0;
-//    std::vector<int> clusters(NUMCLUSTERS,0);
-//    
-//    for (size_t i = 0; i < blabels.size(); i++)
-//    {
-//        id = blabels[i];
-//        clusters[id]++;
-//        
-//        if (clusters[id] > max)
-//        {
-//            max = clusters[id];
-//            indx = id;
-//        }
-//    }
-//    
-//    /* save largest cluster */
-//    int cluster = indx;
-    
-    NSMutableArray* dominantColors = [NSMutableArray new];
-
-    // We have a cluster label for each color now
-    // To begin we average each cluster together
-    // I think this should match our centroid but...
-    
-    std::vector<cv::Vec3f> clusterAverages(NUMCLUSTERS);
-    
-    for(int i = 0; i < labels0.size(); i++)
-    {
-        int index = labels0[i];
-        
-        cv::Vec3f color = histMAT.at<cv::Vec3f>(i);
-        cv::Vec3f clusterColorAvg = clusterAverages[index];
-        
-        cv::add(clusterColorAvg,  color, clusterColorAvg);
-
-        cv::multiply(clusterColorAvg, cv::Vec3f(0.5, 0.5, 0.5), clusterColorAvg);
-        
-        clusterAverages[index] = clusterColorAvg;
-        
-//        NSLog(@"Index: %i, color: %f %f %f", index, color[2], color[1], color[0]);
-
-    }
-    
-    for(int i = 0; i < clusterAverages.size(); i++)
-    {
-        cv::Vec3f bgrColor = clusterAverages[i];
-        
-        NSArray* color = @[@(bgrColor[2] / 255.0), // / 255.0), // R
-                           @(bgrColor[1] / 255.0), // / 255.0), // G
-                           @(bgrColor[0] / 255.0), // / 255.0), // B
-                           ];
-        
-        NSLog(@"Color: %@", color);
-        
-        [dominantColors addObject:color];
-        
-        // We will process this in finalize
-        [self.everyDominantColor addObject:color];
-    }
-    
-//    NSLog(@"New Frame");
-//    for(int i = 0; i < centers0.rows; i++)
-//    {
-////#if USE_OPENCL
-////        cv::Vec3f center = kCenters.getMat(cv::ACCESS_READ).at<cv::Vec3f>(i, 0);
-////#else
-////        float center0 = centers0.row(i).at<float>(0);
-////        float center1 = centers1.row(i).at<float>(0);
-////        float center2 = centers2.row(i).at<float>(0);
-////#endif
-////        double center = kCenters.row(1)
-//
-////        cv::Mat labRow = kCenters.row(i);
-////        cv::Vec3f labVec = cv::Vec3f(labRow.at<float>(0, 0), labRow.at<float>(0,1), labRow.at<float>(0, 2));
-//        
-//        cv::Vec3f center = centers0.at<cv::Vec3f>(i, 0);
-//        
-//        NSLog(@"Center: %f %f %f", center[2] / RANGE, center[1] / RANGE, center[0] / RANGE);
-//        
-//        // find the location in our histogram that containsthe center
-//        
-////        cv::Mat lab(1,1, CV_32FC3);
-////        lab.at<cv::Vec3f>(0, 0) = labVec;
-////        
-////        cv::Mat bgr(1,1, CV_32FC3);
-////        
-////        cv::cvtColor(lab, bgr, FROM_PERCEPTUAL);
-////        
-////        cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
-//        
-//        // Unsure why we have to subtract 1
-//
-//        NSArray* color = @[@(center[2] / RANGE), // R
-//                           @(center[1] / RANGE), // G
-//                           @(center[0] / RANGE), // B
-//                           ];
-//        
-//        [dominantColors addObject:color];
-//        
-//        // We will process this in finalize
-//        [self.everyDominantColor addObject:color];
-//    }
-
-    
-//    for(int i = 0;  i < resizedHistMAT.rows; i++)
-//    {
-//        for(int j = 0; j < resizedHistMAT.cols; j++)
-//        {
-//            cv::Vec3f labColor = resizedHistMAT.at<cv::Vec3f>(i, j);
-//
-//            cv::Mat lab(1,1, CV_32FC3, cv::Vec3f(labColor[0], labColor[1] , labColor[2]));
-//            
-//            cv::Mat bgr(1,1, CV_32FC3);
-//            
-//            cv::cvtColor(lab, bgr, FROM_PERCEPTUAL);
-//            
-//            cv::Vec3f bgrColor = bgr.at<cv::Vec3f>(0,0);
-//            
-//            NSArray* color = @[@(bgrColor[2]), // / 255.0), // R
-//                               @(bgrColor[1]), // / 255.0), // G
-//                               @(bgrColor[0]), // / 255.0), // B
-//                               ];
-//            
-//            [dominantColors addObject:color];
-//            
-//            // We will process this in finalize
-//            [self.everyDominantColor addObject:color];
-//        }
-//    }
-    
-#if USE_OPENCL
-    imageMat.release();
-    resizedHistMAT.release();
-#endif
-
-    metadata[@"DominantColors"] = dominantColors;
-    
-        return metadata;
-}
-
 #pragma mark - Feature Detection
 
-- (NSDictionary*) detectFeaturesCVMat:(matType)image
+- (NSDictionary*) detectFeaturesORBCVMat:(matType)image
 {
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        cv::imshow("OpenCV Debug", image);
-//    });
- 
     NSMutableDictionary* metadata = [NSMutableDictionary new];
     
     std::vector<cv::KeyPoint> keypoints;
@@ -850,6 +536,28 @@
     return metadata;
 }
 
+- (NSDictionary*) detectFeaturesFLowCVMat:(matType)image
+{
+    NSMutableDictionary* metadata = [NSMutableDictionary new];
+    
+    cv::Mat corners;
+    cv::goodFeaturesToTrack(image, corners, 200, 1.0, 0.1);
+    
+    
+    for(int i = 0; i < corners.rows; i++)
+    {
+        cv::Vec2f corner = corners.at<cv::Vec2f>(i, 0);
+        
+    }
+    
+    // Add Features to metadata
+//    metadata[@"Features"] = keyPointsArray;
+    
+    return metadata;
+}
+
+
+
 #pragma mark - Frame Difference Motion
 
 - (NSDictionary*) detectMotionInCVMatAVG:(matType)image
@@ -867,7 +575,7 @@
         cv::Scalar avgMotion = cv::mean(diff);
         
         // Normalize to float
-        metadata[@"Motion"] = @(avgMotion.val[0]);
+        metadata[@"Motion"] = @(avgMotion.val[0] / 255.0);
     }
     else {
         metadata[@"Motion"] = @(0);
