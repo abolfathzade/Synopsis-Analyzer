@@ -6,7 +6,7 @@
 
 ###Overview
 
-Synopsis is video analysis and transcoding tool, as well as a metadata format for embeddeding advanced analyzed metadata withing .MOV and (in testing) .MP4 video files. 
+Synopsis is video analysis and transcoding tool, as well as a metadata format for embeddeding advanced analyzed metadata within .MOV and (in testing) .MP4 video files. 
 
 This repository hosts a Synopsis Multimedia Analyser and Transcoder implementation written for Mac OS X.
 
@@ -15,7 +15,7 @@ This repository hosts a Synopsis Multimedia Analyser and Transcoder implementati
 **Archival**: 
 * Analyze your media archive, optionally transcoding to an appropriate archival video format like H.264.
 * Run spotlight queries locally by hand, or programatically to find media based on analyzed features.
-* Export analyzed metadata to your SQL database, to run queries on your on the web.
+* Export analyzed metadata to your SQL database, to run queries on your own database schema on the web.
 
 **Design & Branding**:
 * Analyze content and optionally transcode to an appropriate playback video format like ProRes, MotionJpeg or Apple Intermediate.
