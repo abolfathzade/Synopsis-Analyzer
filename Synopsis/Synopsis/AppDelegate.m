@@ -18,6 +18,8 @@
 #import "PreferencesViewController.h"
 #import "PresetObject.h"
 
+static NSTimeInterval start;
+
 @interface AppDelegate ()
 
 @property (weak) IBOutlet NSWindow *window;
@@ -56,11 +58,11 @@
     {
         // Serial transcode queue
         self.transcodeQueue = [[NSOperationQueue alloc] init];
-        self.transcodeQueue.maxConcurrentOperationCount = 2;//[[NSProcessInfo processInfo] activeProcessorCount] / 2; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
+        self.transcodeQueue.maxConcurrentOperationCount = [[NSProcessInfo processInfo] activeProcessorCount] / 2; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
         
         // Serial metadata / passthrough writing queue
         self.metadataQueue = [[NSOperationQueue alloc] init];
-        self.metadataQueue.maxConcurrentOperationCount = 2;//[[NSProcessInfo processInfo] activeProcessorCount] / 2; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
+        self.metadataQueue.maxConcurrentOperationCount = [[NSProcessInfo processInfo] activeProcessorCount] / 2; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
         
         self.analyzerPlugins = [NSMutableArray new];
         self.analyzerPluginsInitializedForPrefs = [NSMutableArray new];
@@ -282,10 +284,23 @@
 
 - (void) handleDropedFiles:(NSArray *)fileURLArray
 {
+    start = [NSDate timeIntervalSinceReferenceDate];
+    
     for(NSURL* url in fileURLArray)
     {
         [self enqueueFileForTranscode:url];
     }
+    
+    NSBlockOperation* blockOp = [NSBlockOperation blockOperationWithBlock:^{
+        NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
+        
+        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Batch Took : %f seconds", delta]];
+
+    }];
+    
+    [blockOp addDependency:[self.transcodeQueue.operations lastObject]];
+    
+    [self.transcodeQueue addOperation:blockOp];
 }
 
 #pragma mark - Toolbar
