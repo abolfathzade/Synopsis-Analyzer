@@ -1,7 +1,8 @@
 
 #Synopsis Analyzer/Transcoder
 
-![alt tag](https://github.com/Synopsis/Synopsis/blob/master/Synopsis/Synopsis/Icon-512.png)
+![alt tag](https://dl.dropboxusercontent.com/u/42612525/SynopsisRTF/MainUI.png)
+
 
 ###Overview
 
