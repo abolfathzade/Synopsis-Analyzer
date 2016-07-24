@@ -857,7 +857,7 @@
 //    NSUInteger numberMatches = 0;
     
     // Longest distance from any float color component
-    CGFloat distance = sqrt(1.0 + 1.0 + 1.0);
+    CGFloat distance = CGFLOAT_MAX;
     
     for(NSColor* namedColor in knownColors)
     {
