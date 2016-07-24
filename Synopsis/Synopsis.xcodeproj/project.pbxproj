@@ -46,6 +46,7 @@
 		1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */; };
 		1B805E401B028BB6005D7354 /* LogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3F1B028BB6005D7354 /* LogController.m */; };
 		1B8673981D2EAC470064BECF /* StandardAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1B9873E71D42DB7A0015E54C /* DispatchQueueManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B9873E61D42DB7A0015E54C /* DispatchQueueManager.m */; };
 		1B9E10771D2DD99E004523A9 /* libopencv_calib3d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B9E10421D2DD98B004523A9 /* libopencv_calib3d.a */; };
 		1B9E10781D2DD99E004523A9 /* libopencv_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B9E10431D2DD98B004523A9 /* libopencv_core.a */; };
 		1B9E10791D2DD99E004523A9 /* libopencv_features2d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B9E10441D2DD98B004523A9 /* libopencv_features2d.a */; };
@@ -434,6 +435,8 @@
 		1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProgressTableViewCellReveal.xib; sourceTree = "<group>"; };
 		1B805E3E1B028BB6005D7354 /* LogController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogController.h; sourceTree = "<group>"; };
 		1B805E3F1B028BB6005D7354 /* LogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogController.m; sourceTree = "<group>"; };
+		1B9873E51D42DB7A0015E54C /* DispatchQueueManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DispatchQueueManager.h; sourceTree = "<group>"; };
+		1B9873E61D42DB7A0015E54C /* DispatchQueueManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DispatchQueueManager.m; sourceTree = "<group>"; };
 		1B9E0F641D2DD98B004523A9 /* cv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cv.h; sourceTree = "<group>"; };
 		1B9E0F651D2DD98B004523A9 /* cv.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cv.hpp; sourceTree = "<group>"; };
 		1B9E0F661D2DD98B004523A9 /* cvaux.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cvaux.h; sourceTree = "<group>"; };
@@ -1332,6 +1335,8 @@
 				1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */,
 				1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */,
 				1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */,
+				1B9873E51D42DB7A0015E54C /* DispatchQueueManager.h */,
+				1B9873E61D42DB7A0015E54C /* DispatchQueueManager.m */,
 			);
 			name = "Transcode & Analysis Operations";
 			sourceTree = "<group>";
@@ -2132,6 +2137,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1B3233CB1C2EFDC500C9CF5E /* PreferencesPresetViewController.m in Sources */,
+				1B9873E71D42DB7A0015E54C /* DispatchQueueManager.m in Sources */,
 				1BEA4D421ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m in Sources */,
 				1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */,
 				1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */,
