@@ -245,46 +245,83 @@
 
 #endif
     
+    // See inline notes for thoughts / considerations on each standard module.
+    
+    // Due to nuances with OpenCV's OpenCL (or maybe my own misunderstanding of OpenCL)
+    // We cannot run this analysis in parallel for the OpenCL case.
+    // We need to look into that...
+    
     switch (moduleIndex)
     {
         case 0:
         {
+            // This seems stupid and useless ?
             result = [self averageColorForCVMat:currentBGR32FC3Image];
             break;
         }
         case 1:
         {
-            // Histogram technique is fundamentally flawed
-            // result = [self dominantColorForCVHistogram:currentBGRImage];
-            
-            // KMeans is slow as hell
-            //result = [self dominantColorForCVMatKMeans:currentPerceptualImage];
+            // KMeans is slow as hell and also stochastic - same image run 2x gets slightly different results.
+            // Median Cut is not particularly accurate ? Maybe I have a subtle bug due to averaging / scaling?
+            // Dominant colors still average absed on centroid, even though we attempt to look up the closest
+            // real color value near the centroid.
 
+            // This needs some looking at.
+            
+            // result = [self dominantColorForCVMatKMeans:currentPerceptualImage];
             result = [self dominantColorForCVMatMedianCutCV:currentPerceptualImage];
 
             break;
         }
         case 2:
         {
+            // TODO: Experiment on Optical Flow techniques for features + motion amount + direction flow.
+            // Can maybe lose the motion pass below.
+            
             result = [self detectFeaturesORBCVMat:currentGray8UC1Image];
-//            result = [self detectFeaturesFlowCVMat:currentGray8UC1Image];
+            
+            // Todo: Implement Optical Flow:
+            // result = [self detectFeaturesFlowCVMat:currentGray8UC1Image];
             break;
         }
         case 3:
         {
             result = [self detectMotionInCVMatAVG:currentGray8UC1Image];
-//            result = [self detectMotionInCVMatOpticalFlow:currentGray8UC1Image];
             break;
         }
         case 4:
         {
+            // Do we need this per frame?
+            // Do we need this at all?
+            // Does histogram similarity give us anything easily searchable?
+            // Does histogram per frame give us anything to leverage for effects per frame?
+            // Does a global accumulated histogram actually do anything for us at all
+            
             result = [self detectHistogramInCVMat:currentBGR8UC3Image];
             break;
         }
         case 5:
         {
-            result = [self differenceHashInCVMat:currentGray8UC1Image];
-            break;
+            // Its unclear if RGB hashing is of any benefit, since generally
+            // speaking (and some testing confirms) that the GRADIENT's in
+            // the RGB channels are similar, even if the values are different.
+            // The resulting hashes tend to confirm this.
+            
+            // We should test to see if in fact searching / accuracy is worth
+            // Storing the triple hash versis just one?
+            // I imagine the only times RGB will be
+            
+            // We also need to deduce a method to average the hash, or to compute
+            // some sort of average image to hash.
+            // My gut says literally averaging the image wont really result a useful difference
+            // gradient, as we are just kind of making each frame more like the other
+            // the opposite of a difference gradient.
+            
+            // Perhaps difference each frame with the last ?
+            
+            // result = [self differenceHashRGBInCVMat:currentBGR8UC3Image];
+            result = [self differenceHashGreyInCVMat:currentGray8UC1Image];
+          break;
         }
             
         default:
@@ -714,7 +751,53 @@
     return metadata;
 }
 
-- (NSDictionary*) differenceHashInCVMat:(matType)image
+- (NSDictionary*) differenceHashRGBInCVMat:(matType)image
+{
+    
+    // resize greyscale to 8x8
+    matType eightByEight;
+    cv::resize(image, eightByEight, cv::Size(8,8));
+    
+#if USE_OPENCL
+    cv::Mat imageMat = eightByEight.getMat(cv::ACCESS_READ);
+#else
+    cv::Mat imageMat = eightByEight;
+#endif
+    
+    unsigned long long differenceHashR = 0;
+    unsigned long long differenceHashG = 0;
+    unsigned long long differenceHashB = 0;
+
+    cv::Vec3b lastValue;
+
+    for(int i = 0;  i < imageMat.rows; i++)
+    {
+        for(int j = 0; j < imageMat.cols; j++)
+        {
+            differenceHashR <<= 1;
+            differenceHashG <<= 1;
+            differenceHashB <<= 1;
+
+            // get pixel value
+            cv::Vec3b value = imageMat.at<cv::Vec3b>(i, j);
+            
+            differenceHashR |=  1 * ( value[2] >= lastValue[2]);
+            differenceHashG |=  1 * ( value[1] >= lastValue[1]);
+            differenceHashB |=  1 * ( value[0] >= lastValue[0]);
+            
+            lastValue = value;
+        }
+    }
+    
+    imageMat.release();
+    
+    return @{@"Hash R" : [NSString stringWithFormat:@"%llx", differenceHashR],
+             @"Hash G" : [NSString stringWithFormat:@"%llx", differenceHashG],
+             @"Hash B" : [NSString stringWithFormat:@"%llx", differenceHashB],
+             };
+}
+
+- (NSDictionary*) differenceHashGreyInCVMat:(matType)image
 {
     
     // resize greyscale to 8x8
@@ -729,28 +812,27 @@
     
     unsigned long long differenceHash = 0;
     unsigned char lastValue = 0;
-    // Populate Median Cut Points by color values;
+
     for(int i = 0;  i < imageMat.rows; i++)
     {
         for(int j = 0; j < imageMat.cols; j++)
         {
             differenceHash <<= 1;
-
+            
             // get pixel value
             unsigned char value = imageMat.at<unsigned char>(i, j);
             
+            //cv::Vec3i
             differenceHash |=  1 * ( value >= lastValue);
             
             lastValue = value;
         }
     }
     
-    
     imageMat.release();
     
-    
-    return @{@"Hash" : @(differenceHash)};
-
+    return @{@"Hash" : [NSString stringWithFormat:@"%llx", differenceHash],
+             };
 }
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
