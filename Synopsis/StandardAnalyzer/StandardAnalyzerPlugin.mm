@@ -110,6 +110,7 @@
                               @"Features",
                               @"Motion",
                               @"Histogram",
+                              @"Hash",
                               ];
         
         cv::setUseOptimized(true);
@@ -278,6 +279,11 @@
         case 4:
         {
             result = [self detectHistogramInCVMat:currentBGR8UC3Image];
+            break;
+        }
+        case 5:
+        {
+            result = [self differenceHashInCVMat:currentGray8UC1Image];
             break;
         }
             
@@ -702,9 +708,49 @@
         
     }
     
+    
     metadata[@"Histogram"] = histogramValues;
     
     return metadata;
+}
+
+- (NSDictionary*) differenceHashInCVMat:(matType)image
+{
+    
+    // resize greyscale to 8x8
+    matType eightByEight;
+    cv::resize(image, eightByEight, cv::Size(8,8));
+    
+#if USE_OPENCL
+    cv::Mat imageMat = eightByEight.getMat(cv::ACCESS_READ);
+#else
+    cv::Mat imageMat = eightByEight;
+#endif
+    
+    unsigned long long differenceHash = 0;
+    unsigned char lastValue = 0;
+    // Populate Median Cut Points by color values;
+    for(int i = 0;  i < imageMat.rows; i++)
+    {
+        for(int j = 0; j < imageMat.cols; j++)
+        {
+            differenceHash <<= 1;
+
+            // get pixel value
+            unsigned char value = imageMat.at<unsigned char>(i, j);
+            
+            differenceHash |=  1 * ( value >= lastValue);
+            
+            lastValue = value;
+        }
+    }
+    
+    
+    imageMat.release();
+    
+    
+    return @{@"Hash" : @(differenceHash)};
+
 }
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
