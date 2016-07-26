@@ -58,6 +58,11 @@
     // for kMeans
     matType bestLables;
     matType centers;
+    
+    // For "Accumulated' DHas
+    cv::Mat averageImageForHash;
+    unsigned long long differenceHashAccumulated;
+
 }
 
 @property (atomic, readwrite, strong) NSString* pluginName;
@@ -136,10 +141,14 @@
                                    patchSize,
                                    fastThreshold );
         
+        averageImageForHash = cv::Mat(8, 8, CV_8UC1);
+        averageImageForHash.zeros(8, 8, CV_8UC1);
         
 //        lastImage = NULL;
         
         self.everyDominantColor = [NSMutableArray new];
+        
+        differenceHashAccumulated = 0;
 
     }
     
@@ -600,7 +609,6 @@
 }
 
 
-
 #pragma mark - Frame Difference Motion
 
 - (NSDictionary*) detectMotionInCVMatAVG:(matType)image
@@ -829,7 +837,13 @@
         }
     }
     
+    // average our running average with our imageMat
+    cv::addWeighted(imageMat, 0.5, averageImageForHash, 0.5, 0.0, averageImageForHash);
+    
     imageMat.release();
+    
+    // Experiment with different accumulation strategies for our Hash?
+    differenceHashAccumulated = differenceHashAccumulated ^ differenceHash;
     
     return @{@"Hash" : [NSString stringWithFormat:@"%llx", differenceHash],
              };
@@ -902,12 +916,36 @@
                                      ]];
     }
     
-    // If we have our old last sample buffer, free it
+    unsigned long long differenceHash = 0;
+    unsigned char lastValue = 0;
     
+
+    // Calculate Hash from running average image
+    for(int i = 0;  i < averageImageForHash.rows; i++)
+    {
+        for(int j = 0; j < averageImageForHash.cols; j++)
+        {
+            differenceHash <<= 1;
+            
+            // get pixel value
+            unsigned char value = averageImageForHash.at<unsigned char>(i, j);
+            
+            //cv::Vec3i
+            differenceHash |=  1 * ( value >= lastValue);
+            
+            lastValue = value;
+        }
+    }
+    
+    // If we have our old last sample buffer, free it
     lastImage.release();
+    averageImageForHash.release();
     
     return  @{@"DominantColors" : dominantColors,
-              @"Histogram" : histogramValues};
+              @"Histogram" : histogramValues,
+              @"Hash" : [NSString stringWithFormat:@"%llx", differenceHash],
+        
+              };
 }
 
 @end
