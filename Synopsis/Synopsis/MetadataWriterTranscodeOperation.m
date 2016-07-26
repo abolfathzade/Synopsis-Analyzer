@@ -733,19 +733,30 @@
             // Lets get our global 'summary' metadata - we get this from our standard analyzer
             NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[@"info.v002.Synopsis.OpenCVAnalyzer"];
             
+            NSString* dHash = standardAnalyzerOutputs[@"Hash"];
             NSArray* dominantColors = standardAnalyzerOutputs[@"DominantColors"];
             NSArray* matchedNamedColors = [self matchColorNamesToColors:dominantColors];
 
+            NSMutableArray* allHumanSearchableDescriptors = [NSMutableArray new];
+            
+            // Append all decriptors to our descriptor array
+            [allHumanSearchableDescriptors addObjectsFromArray:matchedNamedColors];
+            
             // write out our XATTR's
-            if(matchedNamedColors.count)
+            if(allHumanSearchableDescriptors.count)
             {
                 // make PList out of our array
-                [self xattrsetPlist:matchedNamedColors forKey:@"info_v002_synopsis_dominant_color_name"];
+                [self xattrsetPlist:allHumanSearchableDescriptors forKey:@"info_v002_synopsis_descriptors"];
             }
             
             if(dominantColors.count)
             {
                 [self xattrsetPlist:dominantColors forKey:@"info_v002_synopsis_dominant_color_values"];
+            }
+            
+            if(dHash)
+            {
+                [self xattrsetPlist:dHash forKey:@"info_v002_synopsis_perceptual_hash"];
             }
             
             dispatch_semaphore_signal(waitForWriting);
@@ -789,7 +800,6 @@
         const char *keyUTF8 = [[self xAttrStringFromString:key] fileSystemRepresentation];
         
         int returnVal = setxattr(pathUTF8, keyUTF8, [plistData bytes], [plistData length], 0, XATTR_NOFOLLOW);
-        
         
         if(returnVal >= 0)
             return YES;

@@ -142,7 +142,6 @@
                                    fastThreshold );
         
         averageImageForHash = cv::Mat(8, 8, CV_8UC1);
-        averageImageForHash.zeros(8, 8, CV_8UC1);
         
 //        lastImage = NULL;
         
@@ -807,7 +806,6 @@
 
 - (NSDictionary*) differenceHashGreyInCVMat:(matType)image
 {
-    
     // resize greyscale to 8x8
     matType eightByEight;
     cv::resize(image, eightByEight, cv::Size(8,8));
@@ -819,7 +817,7 @@
 #endif
     
     unsigned long long differenceHash = 0;
-    unsigned char lastValue = 0;
+    unsigned char lastValue = 127;
 
     for(int i = 0;  i < imageMat.rows; i++)
     {
@@ -830,7 +828,6 @@
             // get pixel value
             unsigned char value = imageMat.at<unsigned char>(i, j);
             
-            //cv::Vec3i
             differenceHash |=  1 * ( value >= lastValue);
             
             lastValue = value;
@@ -838,15 +835,23 @@
     }
     
     // average our running average with our imageMat
-    cv::addWeighted(imageMat, 0.5, averageImageForHash, 0.5, 0.0, averageImageForHash);
+    if(averageImageForHash.empty())
+    {
+        averageImageForHash = imageMat.clone();
+    }
+    else
+    {
+        cv::addWeighted(imageMat, 0.5, averageImageForHash, 0.5, 0.0, averageImageForHash);
+    }
     
     imageMat.release();
     
     // Experiment with different accumulation strategies for our Hash?
     differenceHashAccumulated = differenceHashAccumulated ^ differenceHash;
     
-    return @{@"Hash" : [NSString stringWithFormat:@"%llx", differenceHash],
-             };
+    return @{
+             @"Hash" : [NSString stringWithFormat:@"%llx", differenceHash],
+            };
 }
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
