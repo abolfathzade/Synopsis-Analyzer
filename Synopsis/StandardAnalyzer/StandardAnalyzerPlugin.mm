@@ -88,6 +88,7 @@
 @property (atomic, readwrite, strong) NSArray* moduleNames;
 
 @property (atomic, readwrite, strong) NSMutableArray* everyDominantColor;
+@property (atomic, readwrite, strong) NSMutableArray* everyHash;
 
 @end
 
@@ -146,6 +147,7 @@
 //        lastImage = NULL;
         
         self.everyDominantColor = [NSMutableArray new];
+        self.everyHash = [NSMutableArray new];
         
         differenceHashAccumulated = 0;
 
@@ -328,7 +330,8 @@
             // Perhaps difference each frame with the last ?
             
             // result = [self differenceHashRGBInCVMat:currentBGR8UC3Image];
-            result = [self differenceHashGreyInCVMat:currentGray8UC1Image];
+//            result = [self differenceHashGreyInCVMat:currentGray8UC1Image];
+            result = [self perceptualHashGreyInCVMat:currentGray8UC1Image];
           break;
         }
             
@@ -758,6 +761,8 @@
     return metadata;
 }
 
+#pragma mark - Hashing
+
 - (NSDictionary*) differenceHashRGBInCVMat:(matType)image
 {
     
@@ -854,6 +859,64 @@
             };
 }
 
+
+- (NSDictionary*) perceptualHashGreyInCVMat:(matType)image
+{
+    // resize greyscale to 8x8
+    matType thirtyTwo;
+    cv::resize(image, thirtyTwo, cv::Size(32,32));
+
+    thirtyTwo.convertTo(thirtyTwo, CV_32FC1);
+    
+    // calculate DCT on our float image
+    matType dct;
+    
+    cv::dct(thirtyTwo, dct);
+    
+#if USE_OPENCL
+    cv::Mat dctMat = dct.getMat(cv::ACCESS_READ);
+#else
+    cv::Mat dctMat = dct;
+#endif
+    
+    // sample only the top left to get lowest frequency components in an 8x8
+    // Setup a rectangle to define your region of interest
+    cv::Rect roi(0, 0, 8, 8);
+
+    cv::Mat dctEight = dctMat(roi);
+    
+    cv::Scalar mean = cv::mean(dctEight);
+    float meanD = mean[0];
+    
+    unsigned long long differenceHash = 0;
+    
+    for(int i = 0;  i < dctEight.rows; i++)
+    {
+        for(int j = 0; j < dctEight.cols; j++)
+        {
+            differenceHash <<= 1;
+            
+            // get pixel value
+            float value = dctEight.at<float>(i, j);
+            
+            differenceHash |=  1 * ( value >= meanD);
+        }
+    }
+
+    NSString* hashString = [NSString stringWithFormat:@"%llx", differenceHash];
+
+    [self.everyHash addObject:hashString];
+    
+    dctMat.release();
+    
+    return @{
+             @"Hash" : hashString,
+             };
+}
+
+
+#pragma mark - Finalization
+
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
 {
     // Histogram:
@@ -921,26 +984,30 @@
                                      ]];
     }
     
-    unsigned long long differenceHash = 0;
-    unsigned char lastValue = 0;
+    NSString* firstHash = self.everyHash[0];
+    NSString* lastHash = [self.everyHash lastObject];
+    NSString* firstQuarterHash = self.everyHash[self.everyHash.count/4];
+    NSString* lastQuarterHash = self.everyHash[self.everyHash.count/4 + self.everyHash.count/2];
     
-
-    // Calculate Hash from running average image
-    for(int i = 0;  i < averageImageForHash.rows; i++)
-    {
-        for(int j = 0; j < averageImageForHash.cols; j++)
-        {
-            differenceHash <<= 1;
-            
-            // get pixel value
-            unsigned char value = averageImageForHash.at<unsigned char>(i, j);
-            
-            //cv::Vec3i
-            differenceHash |=  1 * ( value >= lastValue);
-            
-            lastValue = value;
-        }
-    }
+//    unsigned long long differenceHash = 0;
+//    unsigned char lastValue = 0;
+//    
+//    // Calculate Hash from running average image
+//    for(int i = 0;  i < averageImageForHash.rows; i++)
+//    {
+//        for(int j = 0; j < averageImageForHash.cols; j++)
+//        {
+//            differenceHash <<= 1;
+//            
+//            // get pixel value
+//            unsigned char value = averageImageForHash.at<unsigned char>(i, j);
+//            
+//            //cv::Vec3i
+//            differenceHash |=  1 * ( value >= lastValue);
+//            
+//            lastValue = value;
+//        }
+//    }
     
     // If we have our old last sample buffer, free it
     lastImage.release();
@@ -948,8 +1015,7 @@
     
     return  @{@"DominantColors" : dominantColors,
               @"Histogram" : histogramValues,
-              @"Hash" : [NSString stringWithFormat:@"%llx", differenceHash],
-        
+              @"Hash" : [NSString stringWithFormat:@"%@-%@-%@-%@", firstHash,firstQuarterHash,lastQuarterHash, lastHash],
               };
 }
 
