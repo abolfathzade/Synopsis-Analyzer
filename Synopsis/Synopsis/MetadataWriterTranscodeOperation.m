@@ -734,6 +734,7 @@
             NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[@"info.v002.Synopsis.OpenCVAnalyzer"];
             
             NSString* dHash = standardAnalyzerOutputs[@"Hash"];
+            NSArray* histogram = standardAnalyzerOutputs[@"Histogram"];
             NSArray* dominantColors = standardAnalyzerOutputs[@"DominantColors"];
             NSArray* matchedNamedColors = [self matchColorNamesToColors:dominantColors];
 
@@ -753,7 +754,12 @@
             {
                 [self xattrsetPlist:dominantColors forKey:@"info_v002_synopsis_dominant_color_values"];
             }
-            
+
+            if(histogram.count)
+            {
+                [self xattrsetPlist:histogram forKey:@"info_v002_synopsis_histogram"];
+            }
+
             if(dHash)
             {
                 [self xattrsetPlist:dHash forKey:@"info_v002_synopsis_perceptual_hash"];
@@ -806,6 +812,7 @@
         
         return NO;
     }
+    
 
     return NO;
 }
