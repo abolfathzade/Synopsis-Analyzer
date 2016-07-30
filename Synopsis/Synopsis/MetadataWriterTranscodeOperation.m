@@ -937,7 +937,7 @@
     }
     else if ([knownColor isEqual:[NSColor orangeColor]])
     {
-        return @"Organge";
+        return @"Orange";
     }
     else if ([knownColor isEqual:[NSColor yellowColor]])
     {
