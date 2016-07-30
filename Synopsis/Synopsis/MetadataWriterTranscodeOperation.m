@@ -739,7 +739,7 @@
             NSArray* matchedNamedColors = [self matchColorNamesToColors:dominantColors];
 
             NSMutableArray* allHumanSearchableDescriptors = [NSMutableArray new];
-            
+                        
             // Append all decriptors to our descriptor array
             [allHumanSearchableDescriptors addObjectsFromArray:matchedNamedColors];
             
@@ -752,12 +752,34 @@
             
             if(dominantColors.count)
             {
-                [self xattrsetPlist:dominantColors forKey:@"info_v002_synopsis_dominant_color_values"];
+                // Because xattr's cannot hold array's of arrays, we are forced to 'unroll' our colors
+                NSMutableArray* unrolledDominantColors = [NSMutableArray new];
+                
+                for(NSArray* color in dominantColors)
+                {
+                    for(NSNumber* channel in color)
+                    {
+                        [unrolledDominantColors addObject:channel];
+                    }
+                }
+
+                [self xattrsetPlist:unrolledDominantColors forKey:@"info_v002_synopsis_dominant_colors"];
             }
 
             if(histogram.count)
             {
-                [self xattrsetPlist:histogram forKey:@"info_v002_synopsis_histogram"];
+                // Because xattr's cannot hold array's of arrays, we are forced to 'unroll' our histogram
+                NSMutableArray* unrolledHistogram = [NSMutableArray new];
+                
+                for(NSArray* binTuplet in histogram)
+                {
+                    for(NSNumber* channel in binTuplet)
+                    {
+                        [unrolledHistogram addObject:channel];
+                    }
+                }
+
+                [self xattrsetPlist:unrolledHistogram forKey:@"info_v002_synopsis_histogram"];
             }
 
             if(dHash)
@@ -786,34 +808,50 @@
    return [@"com.apple.metadata:" stringByAppendingString:string];
 }
 
+- (BOOL) setResource:(id)plist forKey:(NSString*)key
+{
+
+    NSError* error = nil;
+
+    if(![self.destinationURL setResourceValue:plist forKey:[self xAttrStringFromString:key] error:&error])
+    {
+        NSLog(@"Unable to set resource %@", error);
+        return NO;
+    }
+    
+    return YES;
+}
+
 - (BOOL)xattrsetPlist:(id)plist forKey:(NSString*)key
 {
 //    if(![plist isKindOfClass:[NSArray class]] || ![plist isKindOfClass:[NSDictionary class]])
 //    {
 //        return NO;
 //    }
-//    
-    NSError* error = nil;
-    NSData* plistData = [NSPropertyListSerialization dataWithPropertyList:plist
-                                                                   format:NSPropertyListBinaryFormat_v1_0
-                                                                  options:0
-                                                                    error:&error];
-    if(!error && plistData)
+//
+    BOOL valid = [NSPropertyListSerialization propertyList:plist isValidForFormat:NSPropertyListBinaryFormat_v1_0];
+    
+    if(valid)
     {
-        NSString* destinationPath = [self.destinationURL path];
-        
-        const char *pathUTF8 = [destinationPath fileSystemRepresentation];
-        const char *keyUTF8 = [[self xAttrStringFromString:key] fileSystemRepresentation];
-        
-        int returnVal = setxattr(pathUTF8, keyUTF8, [plistData bytes], [plistData length], 0, XATTR_NOFOLLOW);
-        
-        if(returnVal >= 0)
+        NSError* error = nil;
+        NSData* plistData = [NSPropertyListSerialization dataWithPropertyList:plist
+                                                                       format:NSPropertyListBinaryFormat_v1_0
+                                                                      options:0
+                                                                        error:&error];
+        if(!error && plistData)
+        {
+            int returnVal = setxattr([self.destinationURL fileSystemRepresentation], [[self xAttrStringFromString:key] UTF8String], [plistData bytes], [plistData length], 0, XATTR_NOFOLLOW);
+            
+            if(returnVal != 0)
+            {
+                NSLog(@"Unable to setxattr: %i", returnVal);
+                return NO;
+            }
+            
             return YES;
-        
-        return NO;
+        }
     }
     
-
     return NO;
 }
 
@@ -821,7 +859,6 @@
 
 -(NSArray*) matchColorNamesToColors:(NSArray*)colorArray
 {
-    
     NSMutableArray* dominantNSColors = [NSMutableArray arrayWithCapacity:colorArray.count];
 
     for(NSArray* color in colorArray)
