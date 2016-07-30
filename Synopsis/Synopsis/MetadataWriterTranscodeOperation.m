@@ -867,7 +867,7 @@
                               [NSColor orangeColor],
                               [NSColor yellowColor],
                               [NSColor cyanColor],
-                              [NSColor brownColor],
+//                              [NSColor brownColor],
                               ];
 
 
@@ -893,7 +893,7 @@
             break;
         }
         
-        CGFloat newDistance = sqrt( pow(namedRed - red, 2.0) + pow(namedGreen - green, 2.0) + pow(namedBlue - blue, 2.0));
+        CGFloat newDistance = sqrt( pow( fabs(namedRed - red), 2.0) + pow( fabs(namedGreen - green), 2.0) + pow(fabs(namedBlue - blue), 2.0));
         
         if(newDistance < distance)
         {
@@ -947,10 +947,10 @@
     {
         return @"Cyan";
     }
-    else if ([knownColor isEqual:[NSColor brownColor]])
-    {
-        return @"Brown";
-    }
+//    else if ([knownColor isEqual:[NSColor brownColor]])
+//    {
+//        return @"Brown";
+//    }
     
     return nil;
 }
