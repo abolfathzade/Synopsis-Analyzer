@@ -70,7 +70,6 @@
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addTranscodeAndAnalysisOperation:) name:kSynopsisNewTranscodeOperationAvailable object:nil];
     });
-    
 }
 
 - (void)addTranscodeAndAnalysisOperation:(NSNotification*)notification
@@ -207,7 +206,6 @@
             });
         };
     }
-
     
     return result;
 }
