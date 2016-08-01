@@ -824,11 +824,6 @@
 
 - (BOOL)xattrsetPlist:(id)plist forKey:(NSString*)key
 {
-//    if(![plist isKindOfClass:[NSArray class]] || ![plist isKindOfClass:[NSDictionary class]])
-//    {
-//        return NO;
-//    }
-//
     BOOL valid = [NSPropertyListSerialization propertyList:plist isValidForFormat:NSPropertyListBinaryFormat_v1_0];
     
     if(valid)
@@ -892,7 +887,7 @@
 {
     NSColor* matchedColor = nil;
 
-    // White, Grey, Black all are 'calibrated' white color spaces so you cant fetch color components from them
+    // White, Grey, Black all are 'calibrated white' color spaces so you cant fetch color components from them
     // because no one at apple has seen a fucking prism.
     NSArray* knownColors = @[ [NSColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:1.0], // White
                               [NSColor colorWithRed:0.0 green:0.0 blue:0 alpha:1.0], // Black
@@ -904,7 +899,7 @@
                               [NSColor orangeColor],
                               [NSColor yellowColor],
                               [NSColor cyanColor],
-//                              [NSColor brownColor],
+                              [NSColor purpleColor],
                               ];
 
 
@@ -984,10 +979,10 @@
     {
         return @"Cyan";
     }
-//    else if ([knownColor isEqual:[NSColor brownColor]])
-//    {
-//        return @"Brown";
-//    }
+    else if ([knownColor isEqual:[NSColor purpleColor]])
+    {
+        return @"Purple";
+    }
     
     return nil;
 }
