@@ -733,8 +733,8 @@
             // Lets get our global 'summary' metadata - we get this from our standard analyzer
             NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[@"info.v002.Synopsis.OpenCVAnalyzer"];
             
-            NSString* dHash = standardAnalyzerOutputs[@"Hash"];
-            NSArray* histogram = standardAnalyzerOutputs[@"Histogram"];
+//            NSString* dHash = standardAnalyzerOutputs[@"Hash"];
+//            NSArray* histogram = standardAnalyzerOutputs[@"Histogram"];
             NSArray* dominantColors = standardAnalyzerOutputs[@"DominantColors"];
             NSArray* matchedNamedColors = [self matchColorNamesToColors:dominantColors];
 
@@ -750,42 +750,42 @@
                 [self xattrsetPlist:allHumanSearchableDescriptors forKey:@"info_v002_synopsis_descriptors"];
             }
             
-            if(dominantColors.count)
-            {
-                // Because xattr's cannot hold array's of arrays, we are forced to 'unroll' our colors
-                NSMutableArray* unrolledDominantColors = [NSMutableArray new];
-                
-                for(NSArray* color in dominantColors)
-                {
-                    for(NSNumber* channel in color)
-                    {
-                        [unrolledDominantColors addObject:channel];
-                    }
-                }
-
-                [self xattrsetPlist:unrolledDominantColors forKey:@"info_v002_synopsis_dominant_colors"];
-            }
-
-            if(histogram.count)
-            {
-                // Because xattr's cannot hold array's of arrays, we are forced to 'unroll' our histogram
-                NSMutableArray* unrolledHistogram = [NSMutableArray new];
-                
-                for(NSArray* binTuplet in histogram)
-                {
-                    for(NSNumber* channel in binTuplet)
-                    {
-                        [unrolledHistogram addObject:channel];
-                    }
-                }
-
-                [self xattrsetPlist:unrolledHistogram forKey:@"info_v002_synopsis_histogram"];
-            }
-
-            if(dHash)
-            {
-                [self xattrsetPlist:dHash forKey:@"info_v002_synopsis_perceptual_hash"];
-            }
+//            if(dominantColors.count)
+//            {
+//                // Because xattr's cannot hold array's of arrays, we are forced to 'unroll' our colors
+//                NSMutableArray* unrolledDominantColors = [NSMutableArray new];
+//                
+//                for(NSArray* color in dominantColors)
+//                {
+//                    for(NSNumber* channel in color)
+//                    {
+//                        [unrolledDominantColors addObject:channel];
+//                    }
+//                }
+//
+//                [self xattrsetPlist:unrolledDominantColors forKey:@"info_v002_synopsis_dominant_colors"];
+//            }
+//
+//            if(histogram.count)
+//            {
+//                // Because xattr's cannot hold array's of arrays, we are forced to 'unroll' our histogram
+//                NSMutableArray* unrolledHistogram = [NSMutableArray new];
+//                
+//                for(NSArray* binTuplet in histogram)
+//                {
+//                    for(NSNumber* channel in binTuplet)
+//                    {
+//                        [unrolledHistogram addObject:channel];
+//                    }
+//                }
+//
+//                [self xattrsetPlist:unrolledHistogram forKey:@"info_v002_synopsis_histogram"];
+//            }
+//
+//            if(dHash)
+//            {
+//                [self xattrsetPlist:dHash forKey:@"info_v002_synopsis_perceptual_hash"];
+//            }
             
             dispatch_semaphore_signal(waitForWriting);
         }];
