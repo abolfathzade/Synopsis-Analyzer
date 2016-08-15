@@ -18,6 +18,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreVideo/CoreVideo.h>
 #import <CoreGraphics/CoreGraphics.h>
+#import <OpenCL/opencl.h>
 
 #import "StandardAnalyzerPlugin.h"
 
@@ -42,6 +43,11 @@
 
 @interface StandardAnalyzerPlugin ()
 {
+    // Custom OpenCL handling
+    cv::ocl::Context* mainContext;
+    cv::ocl::Queue* mainCommandQueue;
+    
+    // Reused OpenCV Resources
     matType currentBGR8UC3Image;
     matType currentBGR32FC3Image;
     matType currentPerceptualImage;
@@ -119,7 +125,38 @@
                               @"Hash",
                               ];
         
+        
+        const std::string info = cv::getBuildInformation();
+        NSLog(@"OpenCV Build Info: %@", [NSString stringWithCString:info.c_str() encoding:NSUTF8StringEncoding]);
+        
         cv::setUseOptimized(true);
+        
+        if(cv::ocl::haveOpenCL())
+        {
+            cv::ocl::setUseOpenCL(true);
+            
+            mainContext = new cv::ocl::Context();
+            
+            if (!mainContext->create(cv::ocl::Device::TYPE_DGPU))
+            {
+                NSLog(@"Unable to create Integrated GPU OpenCL Context");
+            }
+            
+            for (int i = 0; i < mainContext->ndevices(); i++)
+            {
+                cv::ocl::Device device = mainContext->device(i);
+                NSLog(@"Device Name: %s", device.name().c_str());
+                NSLog(@"Available: %i", device.available());
+                NSLog(@"imageSupport: %i", device.imageSupport());
+                NSLog(@"OpenCL_C_Version: %s", device.OpenCL_C_Version().c_str());
+            }
+            
+            cv::ocl::Device(mainContext->device(0)); //Here is where you change which GPU to use (e.g. 0 or 1)
+        }
+
+        // We dont need our own queue unless we submit our own kernels it seems
+//        mainCommandQueue = new cv::ocl::Queue(*(mainContext), mainContext->device(0));
+
         
         // Default parameters of ORB
         int nfeatures=100;
@@ -166,13 +203,20 @@
     
     currentPerceptualImage.release();
     lastImage.release();
+
+    if(mainCommandQueue != nullptr)
+    	delete mainCommandQueue;
+
+    if(mainContext != nullptr)
+        delete mainContext;
+    
 }
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        cv::namedWindow("OpenCV Debug", CV_WINDOW_NORMAL);
-    });
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//        cv::namedWindow("OpenCV Debug", CV_WINDOW_NORMAL);
+//    });
 }
 
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
@@ -181,12 +225,9 @@
     // since we may be called on a dispatch queue whose underlying thread differs from our last call.
     // isnt this fun?
     
-    [self setOpenCLEnabled:USE_OPENCL];
+    cv::ocl::Device(mainContext->device(0));
     
     cv::Mat image = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
-    
-    // This needs to be refactored - ideally we can median cut straight from a cv::Mat
-    // But whatever, Kmeans is so goddamned slow anyway
     
     // Convert img BGRA to CIE_LAB or LCh - Float 32 for color calulation fidelity
     // Note floating point assumtions:
