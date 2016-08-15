@@ -336,7 +336,7 @@
 {
     CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
     
-    if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading])
+    if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading] && !self.isCancelled)
     {
         [self.transcodeAssetWriter startSessionAtSourceTime:kCMTimeZero];
     
@@ -418,7 +418,7 @@
                 
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Passthrough Video"];
                 
-                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
+                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading && !self.isCancelled)
                 {
                     @autoreleasepool
                     {
@@ -468,7 +468,7 @@
                 
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Passthrough Audio"];
                 
-                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
+                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading && !self.isCancelled)
                 {
                     @autoreleasepool
                     {
@@ -515,7 +515,7 @@
                 
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
                 
-                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
+                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading && !self.isCancelled)
                 {
                     @autoreleasepool
                     {
@@ -682,7 +682,7 @@
             
             [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Audio"];
             
-            while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
+            while(self.transcodeAssetReader.status == AVAssetReaderStatusReading && !self.isCancelled)
             {
                 @autoreleasepool
                 {
@@ -792,10 +792,10 @@
             {
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Video"];
                 
-                while([self.transcodeAssetWriterVideo isReadyForMoreMediaData])
+                while([self.transcodeAssetWriterVideo isReadyForMoreMediaData] )
                 {
                     // Are we done reading,
-                    if(finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo)
+                    if( (finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo) || self.isCancelled)
                     {
                         NSLog(@"Finished Reading waiting to empty queue...");
                         dispatch_semaphore_signal(videoDequeueSemaphore);
@@ -866,7 +866,7 @@
                 }
                 
                 // some debug code to see 
-                if(finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo)
+                if( (finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo) || self.isCancelled)
                 {
                     if(!CMBufferQueueIsEmpty(videoPassthroughBufferQueue) || !CMBufferQueueIsEmpty(videoUncompressedBufferQueue))
                     {
@@ -897,7 +897,7 @@
                  while([self.transcodeAssetWriterAudio isReadyForMoreMediaData])
                  {
                      // Are we done reading,
-                     if(finishedReadingAllPassthroughAudio && finishedReadingAllUncompressedAudio)
+                     if( (finishedReadingAllPassthroughAudio && finishedReadingAllUncompressedAudio) || self.isCancelled)
                      {
                          NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(audioDequeueSemaphore);
@@ -968,7 +968,7 @@
                  }
                  
                  // some debug code to see
-                 if(finishedReadingAllPassthroughAudio && finishedReadingAllUncompressedAudio)
+                 if( (finishedReadingAllPassthroughAudio && finishedReadingAllUncompressedAudio) || self.isCancelled)
                  {
                      if(!CMBufferQueueIsEmpty(audioPassthroughBufferQueue) || !CMBufferQueueIsEmpty(audioUncompressedBufferQueue))
                      {

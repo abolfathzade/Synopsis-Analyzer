@@ -334,7 +334,7 @@
         }
     }
     
-    if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading])
+    if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading] && !self.isCancelled)
     {
         [self.transcodeAssetWriter startSessionAtSourceTime:kCMTimeZero];
         
@@ -393,7 +393,7 @@
                 // read sample buffers from our video reader - and append them to the queue.
                 // only read while we have samples, and while our buffer queue isnt full
                 
-                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
+                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading && !self.isCancelled)
                 {
                     @autoreleasepool
                     {
@@ -434,7 +434,7 @@
                 // read sample buffers from our video reader - and append them to the queue.
                 // only read while we have samples, and while our buffer queue isnt full
                 
-                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading)
+                while(self.transcodeAssetReader.status == AVAssetReaderStatusReading && !self.isCancelled)
                 {
                     @autoreleasepool
                     {
@@ -476,7 +476,7 @@
                        && [self.transcodeAssetWriterMetadata isReadyForMoreMediaData])
                  {
                      // Are we done reading,
-                     if(finishedReadingAllPassthroughVideo)
+                     if(finishedReadingAllPassthroughVideo || self.isCancelled)
                      {
                          NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(videoDequeueSemaphore);
@@ -603,7 +603,7 @@
                      
                  {
                      // Are we done reading,
-                     if(finishedReadingAllPassthroughAudio)
+                     if(finishedReadingAllPassthroughAudio || self.isCancelled)
                      {
                          NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(audioDequeueSemaphore);
@@ -901,7 +901,6 @@
                               [NSColor cyanColor],
                               [NSColor purpleColor],
                               ];
-
 
 //    NSUInteger numberMatches = 0;
     

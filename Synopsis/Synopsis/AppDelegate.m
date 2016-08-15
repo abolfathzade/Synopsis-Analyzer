@@ -149,11 +149,13 @@ static NSTimeInterval start;
     for (NSOperation* op in [self.transcodeQueue operations])
     {
         [op cancel];
+        op.completionBlock = nil;
     }
     
     for (NSOperation* op in [self.metadataQueue operations])
     {
         [op cancel];
+        op.completionBlock = nil;
     }
     
     //clean bail.
@@ -292,11 +294,6 @@ static NSTimeInterval start;
     
     
     [self.transcodeQueue addOperation:analysis];
-}
-
-
-- (void)applicationWillTerminate:(NSNotification *)aNotification {
-    // Insert code here to tear down your application
 }
 
 #pragma mark - Drop File Helper
