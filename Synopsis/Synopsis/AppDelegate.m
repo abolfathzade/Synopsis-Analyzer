@@ -142,6 +142,26 @@ static NSTimeInterval start;
 //    [self initPrefs];
 }
 
+- (void) applicationWillTerminate:(NSNotification *)notification
+{
+    // Cancel all operations and wait for completion.
+    
+    for (NSOperation* op in [self.transcodeQueue operations])
+    {
+        [op cancel];
+    }
+    
+    for (NSOperation* op in [self.metadataQueue operations])
+    {
+        [op cancel];
+    }
+    
+    //clean bail.
+
+    [self.transcodeQueue waitUntilAllOperationsAreFinished];
+    [self.metadataQueue waitUntilAllOperationsAreFinished];
+}
+
 #pragma mark - Prefs
 
 - (void) initSpotlight
