@@ -462,22 +462,25 @@
     
     // Calculate L1 distance (diff_L + diff_A + diff_B)
     matType dist;
+    matType dist2;
     cv::add(diff_L, diff_A, dist);
-    cv::add(dist, diff_B, dist);
+    cv::add(dist, diff_B, dist2);
     
     // Find the location of pixel with minimum color distance
     cv::Point minLoc;
-    cv::minMaxLoc(dist, 0, 0, &minLoc);
+    cv::minMaxLoc(dist2, 0, 0, &minLoc);
 
     // get pixel value
 #if USE_OPENCL
-    cv::Vec3f closestColor = frame.getMat(cv::ACCESS_READ).at<cv::Vec3f>(minLoc);
+    cv::Mat frameMat = frame.getMat(cv::ACCESS_READ);
+    cv::Vec3f closestColor = frameMat.at<cv::Vec3f>(minLoc);
+    frameMat.release();
 #else
     cv::Vec3f closestColor = frame.at<cv::Vec3f>(minLoc);
 #endif
     
     cv::Mat closestColorPixel(1,1, CV_32FC3, closestColor);
-
+    
     return closestColorPixel;
 }
 
@@ -568,10 +571,13 @@
     {
         // 0 1 or 0 - 255 .0 ?
 #if USE_OPENCL
-        cv::Vec3f labColor = centers.getMat(cv::ACCESS_READ).at<cv::Vec3f>(i, 0);
+        cv::Mat centersMat = centers.getMat(cv::ACCESS_READ);
+        cv::Vec3f labColor = centersMat.at<cv::Vec3f>(i, 0);
+        centersMat.release();
 #else
         cv::Vec3f labColor = centers.at<cv::Vec3f>(i, 0);
 #endif
+        
         cv::Mat lab(1,1, CV_32FC3, cv::Vec3f(labColor[0], labColor[1], labColor[2]));
         
         cv::Mat bgr(1,1, CV_32FC3);
@@ -699,12 +705,6 @@
     cv::split(image, imageChannels);
     
     cv::Mat histMat0, histMat1, histMat2;
-    
-#if USE_OPENCL
-    cv::Mat imageMat = image.getMat(cv::ACCESS_READ);
-#else
-    cv::Mat imageMat = image;
-#endif
     
     int numBins = 256;
     int histSize[] = {numBins};
@@ -841,8 +841,10 @@
             lastValue = value;
         }
     }
-    
+
+#if USE_OPENCL
     imageMat.release();
+#endif
     
     return @{@"Hash R" : [NSString stringWithFormat:@"%llx", differenceHashR],
              @"Hash G" : [NSString stringWithFormat:@"%llx", differenceHashG],
@@ -890,7 +892,9 @@
         cv::addWeighted(imageMat, 0.5, averageImageForHash, 0.5, 0.0, averageImageForHash);
     }
     
+#if USE_OPENCL
     imageMat.release();
+#endif
     
     // Experiment with different accumulation strategies for our Hash?
     differenceHashAccumulated = differenceHashAccumulated ^ differenceHash;
@@ -948,7 +952,9 @@
 
     [self.everyHash addObject:hashString];
     
+#if USE_OPENCL
     dctMat.release();
+#endif
     
     return @{
              @"Hash" : hashString,
