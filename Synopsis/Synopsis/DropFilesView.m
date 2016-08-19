@@ -120,7 +120,7 @@
 
     NSArray* urls = [[sender draggingPasteboard] readObjectsForClasses:classArray options:searchOptions];
 
-    if(self.dragDelegate)
+    if(self.dragDelegate && [urls count])
     {
         if([self.dragDelegate respondsToSelector:@selector(handleDropedFiles:)])
         {

@@ -228,16 +228,37 @@ static NSTimeInterval start;
 {
     NSString* lastPath = [fileURL lastPathComponent];
     NSString* lastPathExtention = [fileURL pathExtension];
-    lastPath = [lastPath stringByAppendingString:@"_transcoded"];
-    NSString* lastPath2 = [lastPath stringByAppendingString:@"_analyzed"];
+    
+    // Some file's may not have an extension but rely on mime type.
+    if(lastPathExtention == nil || [lastPathExtention isEqualToString:@""])
+    {
+        NSError* error = nil;
+        NSString* type = [[NSWorkspace sharedWorkspace] typeOfFile:[fileURL path] error:&error];
+        if(error == nil)
+        {
+            lastPathExtention = [[NSWorkspace sharedWorkspace] preferredFilenameExtensionForType:type];
+        }
+        else
+        {
+            // Take a guess?
+            lastPathExtention = @"mov";
+        }
+    }
+    
+    // delete our file extension
+    lastPath = [lastPath stringByDeletingPathExtension];
+    
+    NSString* firstPassFilePath = [lastPath stringByAppendingString:@"_temp"];
+    NSString* lastPassFilePath = [lastPath stringByAppendingString:@"_analyzed"];
     
     NSURL* destinationURL = [fileURL URLByDeletingLastPathComponent];
-//    destinationURL = [destinationURL URLByDeletingPathExtension];
-    destinationURL = [[destinationURL URLByAppendingPathComponent:lastPath] URLByAppendingPathExtension:lastPathExtention];
+    destinationURL = [[destinationURL URLByAppendingPathComponent:firstPassFilePath] URLByAppendingPathExtension:lastPathExtention];
     
     NSURL* destinationURL2 = [fileURL URLByDeletingLastPathComponent];
-//    destinationURL2 = [destinationURL2 URLByDeletingPathExtension];
-    destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPath2] URLByAppendingPathExtension:lastPathExtention];
+    destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPassFilePath] URLByAppendingPathExtension:lastPathExtention];
+
+    // check to see if our destination URLs already exist. If so - we re-number them for now.
+    
     
     // Pass 1 is our analysis pass, and our decode pass
 
@@ -275,7 +296,16 @@ static NSTimeInterval start;
                                     
                                     pass2.completionBlock = (^(void)
                                                              {
-                                                                 [[LogController sharedLogController] appendSuccessLog:@"Finished Transcode and Analysis"];
+                                                                 [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis"];
+                                                                 
+                                                                 // Clean up
+                                                                 NSError* error;
+                                                                 if(![[NSFileManager defaultManager] removeItemAtURL:destinationURL error:&error])
+                                                                 {
+                                                                     [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
+                                                                 }
+                                                                 
+                                                                 
                                                              });
                                     
                                     dispatch_async(dispatch_get_main_queue(), ^{
@@ -300,23 +330,26 @@ static NSTimeInterval start;
 
 - (void) handleDropedFiles:(NSArray *)fileURLArray
 {
-    start = [NSDate timeIntervalSinceReferenceDate];
-    
-    for(NSURL* url in fileURLArray)
+    if(fileURLArray)
     {
-        [self enqueueFileForTranscode:url];
-    }
-    
-    NSBlockOperation* blockOp = [NSBlockOperation blockOperationWithBlock:^{
-        NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
+        start = [NSDate timeIntervalSinceReferenceDate];
         
-        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Batch Took : %f seconds", delta]];
-
-    }];
-    
-    [blockOp addDependency:[self.transcodeQueue.operations lastObject]];
-    
-    [self.transcodeQueue addOperation:blockOp];
+        for(NSURL* url in fileURLArray)
+        {
+            [self enqueueFileForTranscode:url];
+        }
+        
+        NSBlockOperation* blockOp = [NSBlockOperation blockOperationWithBlock:^{
+            NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
+            
+            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Batch Took : %f seconds", delta]];
+            
+        }];
+        
+        [blockOp addDependency:[self.transcodeQueue.operations lastObject]];
+        
+        [self.transcodeQueue addOperation:blockOp];
+    }
 }
 
 #pragma mark - Toolbar
