@@ -926,25 +926,27 @@
     
     // sample only the top left to get lowest frequency components in an 8x8
     // Setup a rectangle to define your region of interest
-    cv::Rect roi(0, 0, 8, 8);
+    cv::Rect roi(1, 1, 8, 8);
 
     cv::Mat dctEight = dctMat(roi);
     
     cv::Scalar mean = cv::mean(dctEight);
     float meanD = mean[0];
     
-    unsigned long long differenceHash = 0;
+    unsigned long long differenceHash = 0x0000000000000000;
+    unsigned long long one = 0x0000000000000001;
     
     for(int i = 0;  i < dctEight.rows; i++)
     {
         for(int j = 0; j < dctEight.cols; j++)
         {
-            differenceHash <<= 1;
-            
             // get pixel value
             float value = dctEight.at<float>(i, j);
+            if( value >= meanD)
+                differenceHash |=  one;
             
-            differenceHash |=  1 * ( value >= meanD);
+            one = one << 1;
+ 
         }
     }
 
