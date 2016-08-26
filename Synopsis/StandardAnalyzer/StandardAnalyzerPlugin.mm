@@ -1002,9 +1002,9 @@
     // Populate Median Cut Points by color values;
     for(NSArray* dominantColorsArray in self.everyDominantColor)
     {
-        points.get()[sourceColorCount][0] = [dominantColorsArray[0] floatValue];
-        points.get()[sourceColorCount][1] = [dominantColorsArray[1] floatValue];
-        points.get()[sourceColorCount][2] = [dominantColorsArray[2] floatValue];
+        points.get()[sourceColorCount][0] = [dominantColorsArray[0] floatValue]; //L
+        points.get()[sourceColorCount][1] = [dominantColorsArray[1] floatValue]; //A
+        points.get()[sourceColorCount][2] = [dominantColorsArray[2] floatValue]; //B
         
         sourceColorCount++;
     }
@@ -1065,7 +1065,118 @@
     return  @{@"DominantColors" : dominantColors,
               @"Histogram" : histogramValues,
               @"Hash" : [NSString stringWithFormat:@"%@-%@-%@-%@", firstHash,firstQuarterHash,lastQuarterHash, lastHash],
+              @"Description" : [self matchColorNamesToColors:dominantColors],
               };
+}
+
+
+#pragma mark - Color Helpers
+
+-(NSArray*) matchColorNamesToColors:(NSArray*)colorArray
+{
+    CGColorSpaceRef linear = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
+    NSColorSpace* colorspace = [[NSColorSpace alloc] initWithCGColorSpace:linear];
+    CGColorSpaceRelease(linear);
+
+    NSMutableArray* dominantNSColors = [NSMutableArray arrayWithCapacity:colorArray.count];
+    
+    for(NSArray* color in colorArray)
+    {
+        CGFloat alpha = 1.0;
+        if(color.count > 3)
+            alpha = [color[3] floatValue];
+        
+        NSColor* domColor = [[NSColor colorWithRed:[color[0] floatValue]
+                                            green:[color[1] floatValue]
+                                             blue:[color[2] floatValue]
+                                            alpha:alpha] colorUsingColorSpace:colorspace];
+        
+        [dominantNSColors addObject:domColor];
+    }
+    
+    NSMutableSet* matchedNamedColors = [NSMutableSet setWithCapacity:dominantNSColors.count];
+    
+    for(NSColor* color in dominantNSColors)
+    {
+        NSString* namedColor = [self closestNamedColorForColor:color];
+        NSLog(@"Found Color %@", namedColor);
+        if(namedColor)
+            [matchedNamedColors addObject:namedColor];
+    }
+    
+    return matchedNamedColors.allObjects;
+}
+
+- (NSString*) closestNamedColorForColor:(NSColor*)color
+{
+    NSColor* matchedColor = nil;
+    
+    // White, Grey, Black all are 'calibrated white' color spaces so you cant fetch color components from them
+    // because no one at apple has seen a fucking prism.
+    CGColorSpaceRef linear = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
+    NSColorSpace* colorspace = [[NSColorSpace alloc] initWithCGColorSpace:linear];
+    CGColorSpaceRelease(linear);
+    
+    CGFloat white[4] = {1.0, 1.0, 1.0, 1.0};
+    CGFloat black[4] = {0.0, 0.0, 0.0, 1.0};
+    CGFloat gray[4] = {0.5, 0.5, 0.5, 1.0};
+
+    CGFloat red[4] = {1.0, 0.0, 0.0, 1.0};
+    CGFloat green[4] = {0.0, 1.0, 0.0, 1.0};
+    CGFloat blue[4] = {0.0, 0.0, 1.0, 1.0};
+
+    CGFloat cyan[4] = {0.0, 1.0, 1.0, 1.0};
+    CGFloat magenta[4] = {1.0, 0.0, 1.0, 1.0};
+    CGFloat yellow[4] = {1.0, 1.0, 0.0, 1.0};
+
+    CGFloat orange[4] = {1.0, 0.5, 0.0, 1.0};
+    CGFloat purple[4] = {1.0, 0.0, 1.0, 1.0};
+
+    NSDictionary* knownColors = @{ @"White" : [NSColor colorWithColorSpace:colorspace components:white count:4], // White
+                                   @"Black" : [NSColor colorWithColorSpace:colorspace components:black count:4], // Black
+                                   @"Gray" : [NSColor colorWithColorSpace:colorspace components:gray count:4], // Gray
+                                   @"Red" : [NSColor colorWithColorSpace:colorspace components:red count:4],
+                                   @"Green" : [NSColor colorWithColorSpace:colorspace components:green count:4],
+                                   @"Blue" : [NSColor colorWithColorSpace:colorspace components:blue count:4],
+                                   @"Cyan" : [NSColor colorWithColorSpace:colorspace components:cyan count:4],
+                                   @"Magenta" : [NSColor colorWithColorSpace:colorspace components:magenta count:4],
+                                   @"Yellow" : [NSColor colorWithColorSpace:colorspace components:yellow count:4],
+                                   @"Orange" : [NSColor colorWithColorSpace:colorspace components:orange count:4],
+                                   @"Purple" : [NSColor colorWithColorSpace:colorspace components:purple count:4],
+                                   };
+    
+    //    NSUInteger numberMatches = 0;
+    
+    // Longest distance from any float color component
+    CGFloat distance = CGFLOAT_MAX;
+    
+    for(NSColor* namedColor in [knownColors allValues])
+    {
+        CGFloat namedRed = [namedColor hueComponent];
+        CGFloat namedGreen = [namedColor saturationComponent];
+        CGFloat namedBlue = [namedColor brightnessComponent];
+        
+        CGFloat red = [color hueComponent];
+        CGFloat green = [color saturationComponent];
+        CGFloat blue = [color brightnessComponent];
+        
+        // Early bail
+        if( red == namedRed && green == namedGreen && blue == namedBlue)
+        {
+            matchedColor = namedColor;
+            break;
+        }
+        
+        CGFloat newDistance = sqrt( pow( fabs(namedRed - red), 2.0) + pow( fabs(namedGreen - green), 2.0) + pow(fabs(namedBlue - blue), 2.0));
+        
+        if(newDistance < distance)
+        {
+            distance = newDistance;
+            matchedColor = namedColor;
+        }
+    }
+    
+    return [[knownColors allKeysForObject:matchedColor] firstObject];
 }
 
 @end
