@@ -126,8 +126,8 @@
                               ];
         
         
-        const std::string info = cv::getBuildInformation();
-        NSLog(@"OpenCV Build Info: %@", [NSString stringWithCString:info.c_str() encoding:NSUTF8StringEncoding]);
+//        const std::string info = cv::getBuildInformation();
+//        NSLog(@"OpenCV Build Info: %@", [NSString stringWithCString:info.c_str() encoding:NSUTF8StringEncoding]);
         
         cv::setUseOptimized(true);
         
@@ -137,7 +137,7 @@
             
             mainContext = new cv::ocl::Context();
             
-            if (!mainContext->create(cv::ocl::Device::TYPE_DGPU))
+            if (!mainContext->create(cv::ocl::Device::TYPE_IGPU))
             {
                 NSLog(@"Unable to create Integrated GPU OpenCL Context");
             }
@@ -904,7 +904,6 @@
             };
 }
 
-
 - (NSDictionary*) perceptualHashGreyInCVMat:(matType)image
 {
     // resize greyscale to 8x8
@@ -926,15 +925,16 @@
     
     // sample only the top left to get lowest frequency components in an 8x8
     // Setup a rectangle to define your region of interest
-    cv::Rect roi(1, 1, 8, 8);
+    cv::Rect roi(0, 0, 8, 8);
 
     cv::Mat dctEight = dctMat(roi);
+    dctEight.at<float>(0, 0) = 0;
     
     cv::Scalar mean = cv::mean(dctEight);
     float meanD = mean[0];
     
-    unsigned long long differenceHash = 0x0000000000000000;
-    unsigned long long one = 0x0000000000000001;
+    uint64_t differenceHash = 0x0000000000000000;
+    uint64_t one = 0x0000000000000001;
     
     for(int i = 0;  i < dctEight.rows; i++)
     {
