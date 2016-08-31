@@ -406,6 +406,7 @@
 		1B3233DA1C31F8F200C9CF5E /* PresetGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PresetGroup.h; sourceTree = "<group>"; };
 		1B3233DB1C31F8F200C9CF5E /* PresetGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PresetGroup.m; sourceTree = "<group>"; };
 		1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = StandardAnalyzerPlugin.mm; sourceTree = "<group>"; };
+		1B55AA791D7720FD006CC9EC /* Defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Defines.h; sourceTree = "<group>"; };
 		1B578C3F1B02F37E00D76F62 /* DropFilesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropFilesView.h; sourceTree = "<group>"; };
 		1B578C401B02F37E00D76F62 /* DropFilesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropFilesView.m; sourceTree = "<group>"; };
 		1B61BCD91ACB90850013418D /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
@@ -1290,11 +1291,12 @@
 			children = (
 				1B02B8391D2B06B600A4430F /* OpenCV */,
 				1B02B7501D2AE02900A4430F /* CIEDE2000 */,
+				1B55AA791D7720FD006CC9EC /* Defines.h */,
 				1B61BD001ACF27740013418D /* StandardAnalyzerPlugin.h */,
 				1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */,
-				1B61BCFB1ACF26710013418D /* Supporting Files */,
-				1BAF362F1D3958D200EAF37E /* MedianCutOpenCV.cpp */,
 				1BAF36301D3958D200EAF37E /* MedianCutOpenCV.hpp */,
+				1BAF362F1D3958D200EAF37E /* MedianCutOpenCV.cpp */,
+				1B61BCFB1ACF26710013418D /* Supporting Files */,
 			);
 			path = StandardAnalyzer;
 			sourceTree = "<group>";

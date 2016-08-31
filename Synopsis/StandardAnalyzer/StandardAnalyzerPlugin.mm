@@ -32,14 +32,7 @@
 #define TO_PERCEPTUAL cv::COLOR_BGR2Lab
 #define FROM_PERCEPTUAL cv::COLOR_Lab2BGR
 
-#define USE_OPENCL 1
-#define USE_CIEDE2000 0
-
-#if USE_OPENCL
-#define matType cv::UMat
-#else
-#define matType cv::Mat
-#endif
+#import "Defines.h"
 
 @interface StandardAnalyzerPlugin ()
 {
@@ -321,7 +314,6 @@
             
             // result = [self dominantColorForCVMatKMeans:currentPerceptualImage];
             result = [self dominantColorForCVMatMedianCutCV:currentPerceptualImage];
-
             break;
         }
         case 2:
@@ -445,6 +437,7 @@
     return closestLABColor;
 }
 
+// This doesnt appear to do anything.
 - (cv::Mat) nearestColorMinMaxLoc:(cv::Vec3f)colorVec inFrame:(matType)frame
 {
     //  find our nearest *actual* LAB pixel in the frame, not from the median cut..
@@ -493,8 +486,20 @@
     int k = 5;
     
     bool useCIEDE2000 = USE_CIEDE2000;
-    auto palette = MedianCutOpenCV::medianCut(image, k, useCIEDE2000);
+    
+    #if USE_OPENCL
+        cv::Mat imageMat = image.getMat(cv::ACCESS_READ);
+    #else
+        cv::Mat imageMat = image;
+    #endif
+    
+    auto palette = MedianCutOpenCV::medianCut(imageMat, k, useCIEDE2000);
 
+    #if USE_OPENCL
+        imageMat.release();
+    #endif
+
+    
     NSMutableArray* dominantColors = [NSMutableArray new];
     
     for ( auto colorCountPair: palette )
@@ -502,8 +507,10 @@
         // convert from LAB to BGR
         const cv::Vec3f& labColor = colorCountPair.first;
         
-//        cv::Mat closestLABPixel = cv::Mat(1,1, CV_32FC3, labColor);
-        cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColor inFrame:image];
+        cv::Mat closestLABPixel = cv::Mat(1,1, CV_32FC3, labColor);
+
+        // Looking at inspector output, its not clear that nearestColorMinMaxLoc is effective at all
+//        cv::Mat closestLABPixel = [self nearestColorMinMaxLoc:labColor inFrame:image];
 //        cv::Mat closestLABPixel = [self nearestColorCIEDE2000:labColor inFrame:image];
         
         // convert to BGR
@@ -992,25 +999,20 @@
     int k = 5;
     int numPixels = (int)self.everyDominantColor.count;
     
-    // Walk through the pixels and store colours.
-    // Let's be fancy and make a smart pointer. Unfortunately shared_ptr doesn't automatically know how to delete a C++ array, so we have to write a [] lambda (aka 'block' in Obj-C) to clean up the object.
-    std::shared_ptr<cv::Vec3f> points(new cv::Vec3f[numPixels],
-                                             []( cv::Vec3f* p ) { delete[] p; } );
-    
     int sourceColorCount = 0;
-    
+
+    cv::Mat allDomColors = cv::Mat(1, numPixels, CV_32FC3);
+
     // Populate Median Cut Points by color values;
     for(NSArray* dominantColorsArray in self.everyDominantColor)
     {
-        points.get()[sourceColorCount][0] = [dominantColorsArray[0] floatValue]; //L
-        points.get()[sourceColorCount][1] = [dominantColorsArray[1] floatValue]; //A
-        points.get()[sourceColorCount][2] = [dominantColorsArray[2] floatValue]; //B
-        
+        allDomColors.at<cv::Vec3f>(0, sourceColorCount) = cv::Vec3f([dominantColorsArray[0] floatValue], [dominantColorsArray[1] floatValue], [dominantColorsArray[2] floatValue]);
         sourceColorCount++;
     }
     
     bool useCIEDE2000 = USE_CIEDE2000;
-    MedianCutOpenCV::ColorCube allColorCube(points.get(), numPixels, useCIEDE2000);
+    
+    MedianCutOpenCV::ColorCube allColorCube(allDomColors, useCIEDE2000);
     
     auto palette = MedianCutOpenCV::medianCut(allColorCube, k, useCIEDE2000);
     

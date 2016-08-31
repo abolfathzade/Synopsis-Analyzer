@@ -14,38 +14,19 @@
 #include "CIEDE2000.h"
 
 
-
 namespace MedianCutOpenCV
 {
-    ColorCube::ColorCube(cv::Vec3f* vecOfcolors,int nColors, bool useDeltaE)
-    {
-        useCIEDE2000 = useDeltaE;
-        
-        numColors = nColors;
-
-        colors = vecOfcolors;
-        float min = std::numeric_limits<float>::min();
-        float max = std::numeric_limits<float>::max();
-        minColor = cv::Vec3f(min, min, min);
-        maxColor = cv::Vec3f(max, max, max);
-
-        shrink();
-
-    }
-
-    ColorCube::ColorCube(cv::Mat image, bool useDeltaE)
+    ColorCube::ColorCube(cv::Mat mat, bool useDeltaE)
     {
         // todo:: assert depth = 3 or whatever...
         // todo:: assert colorspace is LAB if we use CIEDE2000?
-        
-        useCIEDE2000 = useDeltaE;
-        
-        cv::Mat imageReshaped;
-        
+
         // unroll the image and then make a vector of colors from it
-        numColors = image.rows * image.cols;
+        numColors = mat.rows * mat.cols;
         
-        colors = image.ptr<cv::Vec3f>(0);
+        // We reshape so we can use a 'linear' ROI
+        image = mat.reshape(3, numColors);
+        useCIEDE2000 = useDeltaE;
         
         float min = std::numeric_limits<float>::min();
         float max = std::numeric_limits<float>::max();
@@ -55,48 +36,44 @@ namespace MedianCutOpenCV
         shrink();
     }
     
-    ColorCube::ColorCube(cv::UMat image, bool useCIEDE2000)
-    {
-        ColorCube(image.getMat(cv::ACCESS_READ), useCIEDE2000);
-    }
-        
     // This is Euclidean based on color
     void ColorCube::shrink()
     {
-        minColor = maxColor = colors[0];
-
         if(useCIEDE2000)
         {
-            double lastMinDelta = DBL_MAX;
-            double lastMaxDelta = DBL_MIN;
-            for(int i = 1; i < numColors; i++ )
-            {
-                double mindelta = CIEDE2000::CIEDE2000(minColor, colors[i]);
-                double maxdelta = CIEDE2000::CIEDE2000(maxColor, colors[i]);
-                
-                if( mindelta < lastMinDelta)
-                {
-                    minColor = colors[i];
-                    lastMinDelta = mindelta;
-                }
-                
-                if( maxdelta > lastMaxDelta)
-                {
-                    maxColor = colors[i];
-                    lastMaxDelta = maxdelta;
-                }
-            }
+//            double lastMinDelta = DBL_MAX;
+//            double lastMaxDelta = DBL_MIN;
+//            for(int i = 1; i < numColors; i++ )
+//            {
+//                double mindelta = CIEDE2000::CIEDE2000(minColor, colors[i]);
+//                double maxdelta = CIEDE2000::CIEDE2000(maxColor, colors[i]);
+//                
+//                if( mindelta < lastMinDelta)
+//                {
+//                    minColor = colors[i];
+//                    lastMinDelta = mindelta;
+//                }
+//                
+//                if( maxdelta > lastMaxDelta)
+//                {
+//                    maxColor = colors[i];
+//                    lastMaxDelta = maxdelta;
+//                }
+//            }
         }
         else
         {
-            for(int i = 1; i < numColors; i++ )
-            {
-                for(int j = 0; j < 3; j++ )
-                {
-                    minColor[j] = fmin(minColor[j], colors[i][j]);
-                    maxColor[j] = fmax(maxColor[j], colors[i][j]);
-                }
-            }
+            std::vector<cv::Mat>channels;
+            cv::split(image, channels);
+            
+            double minR, maxR, minG, maxG, minB, maxB = 0;
+            cv::minMaxLoc(channels[0], &minR, &maxR);
+            cv::minMaxLoc(channels[1], &minG, &maxG);
+            cv::minMaxLoc(channels[2], &minB, &maxB);
+            
+            minColor = cv::Vec3f(minR, minG, minB);
+            maxColor = cv::Vec3f(maxR, maxG, maxB);
+            
         }
     }
     
@@ -105,7 +82,7 @@ namespace MedianCutOpenCV
     {
         int m = maxColor[0] - minColor[0];
         int maxIndex = 0;
-        for(int i=1; i < 3; i++)
+        for(int i = 1; i < 3; i++)
         {
             int diff = maxColor[i] - minColor[i];
             if (diff > m)
@@ -154,14 +131,9 @@ namespace MedianCutOpenCV
         else
             return ( longestSideLength() < other.longestSideLength() );
     }
-    
-    std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::UMat image, unsigned int desiredSize, bool useCIEDE2000)
-    {
-        return medianCut(image.getMat(cv::ACCESS_READ), desiredSize, useCIEDE2000);
-    }
-    
+        
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::Mat image, unsigned int desiredSize, bool useCIEDE2000)
-    {
+    {        
         ColorCube initialColorCube(image, useCIEDE2000);
         
         return medianCut(initialColorCube, desiredSize, useCIEDE2000);
@@ -180,25 +152,32 @@ namespace MedianCutOpenCV
 
             colorCubeQueue.pop();
 
-            // number of colors we have
-            long numColors = currentColor.numColors;
+            // number of colors we have and channel we use for sorting
+            int numColors = currentColor.numColors;
+            int longestSide = currentColor.longestSideIndex();
             
-            long half = (numColors + 1) / 2;
+            // Initial sorting and Region of Interest locations
+            int half = (numColors + 1) / 2;
+            int firstIndex = 0;
             
-            auto firstColor = currentColor.colors;
-            auto middleColor = currentColor.colors + half;
-            auto lastColor = currentColor.colors + numColors;
-            
-            // Euclidean ?
-            switch(currentColor.longestSideIndex())
-            {
-                case 0: std::nth_element(firstColor, middleColor, lastColor, CoordinateColorComparator<0>()); break;
-                case 1: std::nth_element(firstColor, middleColor, lastColor, CoordinateColorComparator<1>()); break;
-                case 2: std::nth_element(firstColor, middleColor, lastColor, CoordinateColorComparator<2>()); break;
-            }
+            // Pull out channel and partially sort it
+            std::vector<cv::Mat>channels;
+            cv::split(currentColor.image,channels);
 
-            ColorCube lowerColors(firstColor, (int)(middleColor - firstColor), useCIEDE2000);
-            ColorCube higherColors(middleColor, (int)(lastColor - middleColor), useCIEDE2000);
+            cv::Mat channel = channels[longestSide];
+            
+            std::nth_element( channel.begin<float>(), channel.begin<float>() + half, channel.end<float>());
+
+            // put back our sorted channel
+            channels[longestSide] = channel;
+            cv::merge(channels, currentColor.image);
+
+            // subdivide via ROI
+            cv::Rect firstROI = cv::Rect(0, firstIndex,1, half);
+            cv::Rect lastROI = cv::Rect(0, half, 1, half - 1);
+
+            ColorCube lowerColors(currentColor.image(firstROI), useCIEDE2000);
+            ColorCube higherColors(currentColor.image(lastROI), useCIEDE2000);
 
             colorCubeQueue.push(lowerColors);
             colorCubeQueue.push(higherColors);
@@ -210,41 +189,28 @@ namespace MedianCutOpenCV
             ColorCube currentColorCube = colorCubeQueue.top();
             colorCubeQueue.pop();
             
-            float sum[3] = {0};
-            for(int i = 0; i < currentColorCube.numColors; i++)
-            {
-                for(int j=0; j < 3; j++)
-                {
-                    sum[j] += currentColorCube.colors[i][j];
-                }
-            }
-            
-            cv::Vec3f averagePoint;
-            for(int j=0; j < 3; j++)
-            {
-                averagePoint[j] = (float)(sum[j] / currentColorCube.numColors);
-            }
-            
+            cv::Scalar averagePoint = cv::mean(currentColorCube.image);
+
             if(useCIEDE2000)
             {
-                // find closest color in the color cube to our average;
-                double delta = DBL_MAX;
-                cv::Vec3f closestColor;
-                for(int i = 0; i < currentColorCube.numColors; i++)
-                {
-                    double currentDelta = CIEDE2000::CIEDE2000(averagePoint, currentColorCube.colors[i]);
-                    if(currentDelta < delta)
-                    {
-                        delta = currentDelta;
-                        closestColor = currentColorCube.colors[i];
-                    }
-                }
-                
-                result.push_back( std::make_pair( closestColor, currentColorCube.numColors ) );
+//                // find closest color in the color cube to our average;
+//                double delta = DBL_MAX;
+//                cv::Vec3f closestColor;
+//                for(int i = 0; i < currentColorCube.numColors; i++)
+//                {
+//                    double currentDelta = CIEDE2000::CIEDE2000(averagePoint, currentColorCube.colors[i]);
+//                    if(currentDelta < delta)
+//                    {
+//                        delta = currentDelta;
+//                        closestColor = currentColorCube.colors[i];
+//                    }
+//                }
+//                
+//                result.push_back( std::make_pair( closestColor, currentColorCube.numColors ) );
             }
             else
             {
-                result.push_back( std::make_pair( averagePoint, currentColorCube.numColors ) );
+                result.push_back( std::make_pair( cv::Vec3f(averagePoint[0], averagePoint[1], averagePoint[2]), currentColorCube.numColors ) );
             }
         }
         

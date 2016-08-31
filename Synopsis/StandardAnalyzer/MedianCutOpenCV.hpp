@@ -9,6 +9,8 @@
 #ifndef MedianCutOpenCV_hpp
 #define MedianCutOpenCV_hpp
 
+#include "Defines.h"
+
 #include <stdio.h>
 #include <list>
 #import "opencv.hpp"
@@ -17,8 +19,6 @@
 #import "features2d.hpp"
 #import "utility.hpp"
 
-
-
 namespace MedianCutOpenCV
 {
     class ColorCube
@@ -26,10 +26,8 @@ namespace MedianCutOpenCV
         
     public:
         ColorCube(cv::Mat image, bool useCIEDE2000);
-        ColorCube(cv::UMat image, bool useCIEDE2000);
-        ColorCube(cv::Vec3f* colors, int nColors, bool useCIEDE2000);
 
-        cv::Vec3f* colors;
+        cv::Mat image;
         int numColors;
         
         cv::Vec3f minColor;
@@ -61,7 +59,6 @@ namespace MedianCutOpenCV
     };
     
     /// calculate a median cut of the input image and return pairs of (median colour,point count)
-    std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::UMat image, unsigned int desiredSize, bool useCIEDE2000);
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(cv::Mat image, unsigned int desiredSize, bool useCIEDE2000);
     std::list< std::pair<cv::Vec3f,unsigned int> > medianCut(ColorCube initialColorCube, unsigned int desiredSize, bool useCIEDE2000);
 
