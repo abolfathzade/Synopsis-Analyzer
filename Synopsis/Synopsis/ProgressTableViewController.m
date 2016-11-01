@@ -81,9 +81,9 @@
     
     [self.tableView beginUpdates];
     
-    NSIndexSet* rowSet = [[NSIndexSet alloc] initWithIndex:[self numberOfRowsInTableView:self.tableView]];
+    NSIndexSet* rowSet = [[NSIndexSet alloc] initWithIndex:[self numberOfRowsInTableView:self.tableView] - 1];
 
-    [self.tableView insertRowsAtIndexes:rowSet withAnimation:NSTableViewAnimationEffectFade];
+    [self.tableView insertRowsAtIndexes:rowSet withAnimation:NSTableViewAnimationEffectNone];
     
     [self.tableView endUpdates];
 }
