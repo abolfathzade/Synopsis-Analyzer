@@ -133,7 +133,30 @@
             if (!mainContext->create(cv::ocl::Device::TYPE_IGPU))
             {
                 NSLog(@"Unable to create Integrated GPU OpenCL Context");
+                
+                if (!mainContext->create(cv::ocl::Device::TYPE_DGPU))
+                {
+                    NSLog(@"Unable to create Discrete GPU OpenCL Context");
+                    
+                    if (!mainContext->create(cv::ocl::Device::TYPE_CPU))
+                    {
+                        NSLog(@"Unable to create CPU OpenCL Context");
+                    }
+                    else
+                    {
+                        NSLog(@"Created CPU OpenCL Context");
+                    }
+                }
+                else
+                {
+                    NSLog(@"Created Discrete GPU OpenCL Context");
+                }
             }
+            else
+            {
+                NSLog(@"Created Integrated GPU OpenCL Context");
+            }
+            
             
             for (int i = 0; i < mainContext->ndevices(); i++)
             {
