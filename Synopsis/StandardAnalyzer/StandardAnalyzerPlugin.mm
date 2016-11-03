@@ -25,6 +25,8 @@
 #import "MedianCutOpenCV.hpp"
 #import "CIEDE2000.h"
 
+#import "LogController.h"
+
 //#define TO_PERCEPTUAL cv::COLOR_BGR2HLS
 //#define FROM_PERCEPTUAL cv::COLOR_HLS2BGR
 //#define TO_PERCEPTUAL cv::COLOR_BGR2Luv
@@ -134,63 +136,67 @@
         {
             cv::ocl::setUseOpenCL(true);
             
-//            cv::ocl::PlatformInfo* platInfo = new cv::ocl::PlatformInfo();
+////            cv::ocl::PlatformInfo* platInfo = new cv::ocl::PlatformInfo();
+////            
+////            platInfo->d
 //            
-//            platInfo->d
-            
-            openclIGPUContext = new cv::ocl::Context();
-            
-            if (!openclIGPUContext->create(cv::ocl::Device::TYPE_IGPU))
-            {
-                NSLog(@"Unable to create Integrated GPU OpenCL Context");
-            }
-            else
-            {
-                NSLog(@"Created Integrated GPU OpenCL Context");
-            }
-            
-            openclDGPUContext = new cv::ocl::Context();
-
-            if (!openclDGPUContext->create(cv::ocl::Device::TYPE_DGPU))
-            {
-                NSLog(@"Unable to create Discrete GPU OpenCL Context");
-            }
-            else
-            {
-                NSLog(@"Created Discrete GPU OpenCL Context");
-            }
-            
-            if(!openclIGPUContext->ndevices() && !openclDGPUContext->ndevices())
-            {
-                NSLog(@"No Integrated or Discreet OpenCL Devices exist, falling back to CPU Context");
-
-                openclCPUContext = new cv::ocl::Context();
-
-                if (!openclCPUContext->create(cv::ocl::Device::TYPE_CPU))
-                {
-                    NSLog(@"Unable to create CPU OpenCL Context");
-                }
-            }
-            
-            
-            for (int i = 0; i < openclIGPUContext->ndevices(); i++)
-            {
-                cv::ocl::Device device = openclIGPUContext->device(i);
-                NSLog(@"Device Name: %s", device.name().c_str());
-                NSLog(@"Available: %i", device.available());
-                NSLog(@"imageSupport: %i", device.imageSupport());
-                NSLog(@"OpenCL_C_Version: %s", device.OpenCL_C_Version().c_str());
-            }
-            
-            for (int i = 0; i < openclDGPUContext->ndevices(); i++)
-            {
-                cv::ocl::Device device = openclDGPUContext->device(i);
-                NSLog(@"Device Name: %s", device.name().c_str());
-                NSLog(@"Available: %s", device.available() ? "YES" : "NO");
-                NSLog(@"imageSupport: %s", device.imageSupport() ? "YES" : "NO");
-                NSLog(@"OpenCL_C_Version: %s", device.OpenCL_C_Version().c_str());
-            }
-
+//            openclIGPUContext = new cv::ocl::Context();
+//            
+//            if (!openclIGPUContext->create(cv::ocl::Device::TYPE_IGPU))
+//            {
+//                [[LogController sharedLogController] appendErrorLog:@"Unable to create Integrated GPU OpenCL Context"];
+//            }
+//            else
+//            {
+//                [[LogController sharedLogController] appendVerboseLog:@"Created Integrated GPU OpenCL Context"];
+//            }
+//            
+//            openclDGPUContext = new cv::ocl::Context();
+//
+//            if (!openclDGPUContext->create(cv::ocl::Device::TYPE_DGPU))
+//            {
+//                [[LogController sharedLogController] appendErrorLog:@"Unable to create Discrete GPU OpenCL Context"];
+//            }
+//            else
+//            {
+//               [[LogController sharedLogController] appendVerboseLog:@"Created Discrete GPU OpenCL Context"];
+//            }
+//            
+//            if(!openclIGPUContext->ndevices() && !openclDGPUContext->ndevices())
+//            {
+//               [[LogController sharedLogController] appendErrorLog:@"No Integrated or Discreet OpenCL Devices exist, falling back to CPU Context"];
+//
+//                openclCPUContext = new cv::ocl::Context();
+//
+//                if (!openclCPUContext->create(cv::ocl::Device::TYPE_CPU))
+//                {
+//                   [[LogController sharedLogController] appendErrorLog:@"Unable to create CPU OpenCL Context"];
+//                }
+//                else
+//                {
+//                    [[LogController sharedLogController] appendVerboseLog:@"Created CPU OpenCL Context"];
+//                }
+//            }
+//            
+//            
+//            for (int i = 0; i < openclIGPUContext->ndevices(); i++)
+//            {
+//                cv::ocl::Device device = openclIGPUContext->device(i);
+//                NSLog(@"Device Name: %s", device.name().c_str());
+//                NSLog(@"Available: %i", device.available());
+//                NSLog(@"imageSupport: %i", device.imageSupport());
+//                NSLog(@"OpenCL_C_Version: %s", device.OpenCL_C_Version().c_str());
+//            }
+//            
+//            for (int i = 0; i < openclDGPUContext->ndevices(); i++)
+//            {
+//                cv::ocl::Device device = openclDGPUContext->device(i);
+//                NSLog(@"Device Name: %s", device.name().c_str());
+//                NSLog(@"Available: %s", device.available() ? "YES" : "NO");
+//                NSLog(@"imageSupport: %s", device.imageSupport() ? "YES" : "NO");
+//                NSLog(@"OpenCL_C_Version: %s", device.OpenCL_C_Version().c_str());
+//            }
+//
             
         }
 
@@ -269,6 +275,7 @@ static int lastDevice = 0;
 
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
+    
 #if USE_OPENCL
     // We enable / disable OpenCL per thread here
     // since we may be called on a dispatch queue whose underlying thread differs from our last call.
@@ -284,30 +291,30 @@ static int lastDevice = 0;
     // Who knows! This is hard!
     
     // If we dont have an integrated GPU
-    if( !openclIGPUContext->ndevices() )
-    {
-        // If we have a discrete GPU
-        if( openclDGPUContext->ndevices() )
-        {
-            // Ping Pong between discreet GPUs
-            int currentDevice = (lastDevice + 1) % (openclDGPUContext->ndevices());
-            cv::ocl::Device(openclDGPUContext->device(currentDevice));
-            lastDevice = currentDevice;
-        }
-        else
-        {
-            // Use the only  OpenCL context we have
-            cv::ocl::Device(openclCPUContext->device(0));
-        }
-    }
-    else
-    {
-        // If we have a more than a single GPU (and an integrated)
+//    if( !openclIGPUContext->ndevices() )
+//    {
+//        // If we have a discrete GPU
 //        if( openclDGPUContext->ndevices() )
-
-        
-        cv::ocl::Device(openclIGPUContext->device(0));
-    }
+//        {
+//            // Ping Pong between discreet GPUs
+//            int currentDevice = (lastDevice + 1) % (openclDGPUContext->ndevices());
+//            cv::ocl::Device(openclDGPUContext->device(currentDevice));
+//            lastDevice = currentDevice;
+//        }
+//        else
+//        {
+//            // Use the only  OpenCL context we have
+//            cv::ocl::Device(openclCPUContext->device(0));
+//        }
+//    }
+//    else
+//    {
+//        // If we have a more than a single GPU (and an integrated)
+////        if( openclDGPUContext->ndevices() )
+//
+//        
+//        cv::ocl::Device(openclIGPUContext->device(0));
+//    }
     
     
 #endif
