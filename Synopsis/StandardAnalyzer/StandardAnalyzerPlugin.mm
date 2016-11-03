@@ -235,13 +235,22 @@
 //    });
 }
 
+
+static int lastDevice = 0;
+
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
     // We enable / disable OpenCL per thread here
     // since we may be called on a dispatch queue whose underlying thread differs from our last call.
     // isnt this fun?
     
+    // Simple round robin esque openCL device load bearing.
+//    int currentDevice = (lastDevice + 1) % (mainContext->ndevices());
+//    cv::ocl::Device(mainContext->device(currentDevice));
+//    lastDevice = currentDevice;
+    
     cv::ocl::Device(mainContext->device(0));
+
     
     cv::Mat image = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
     
@@ -375,7 +384,6 @@
             
             // We should test to see if in fact searching / accuracy is worth
             // Storing the triple hash versis just one?
-            // I imagine the only times RGB will be
             
             // We also need to deduce a method to average the hash, or to compute
             // some sort of average image to hash.
