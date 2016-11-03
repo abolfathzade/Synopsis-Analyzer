@@ -478,7 +478,7 @@
                      // Are we done reading,
                      if(finishedReadingAllPassthroughVideo || self.isCancelled)
                      {
-                         NSLog(@"Finished Reading waiting to empty queue...");
+//                         NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(videoDequeueSemaphore);
 
                          // if our video is done, were done. We dont care if we missed a single piece of metadata or not.
@@ -605,7 +605,7 @@
                      // Are we done reading,
                      if(finishedReadingAllPassthroughAudio || self.isCancelled)
                      {
-                         NSLog(@"Finished Reading waiting to empty queue...");
+//                         NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(audioDequeueSemaphore);
                          
                          // if our audio is done, were done. We dont care if we missed a single piece of metadata or not.
@@ -735,7 +735,7 @@
             
 //            NSString* dHash = standardAnalyzerOutputs[@"Hash"];
 //            NSArray* histogram = standardAnalyzerOutputs[@"Histogram"];
-            NSArray* dominantColors = standardAnalyzerOutputs[@"DominantColors"];
+//            NSArray* dominantColors = standardAnalyzerOutputs[@"DominantColors"];
             NSArray* matchedNamedColors = standardAnalyzerOutputs[@"Description"];
 
             NSMutableArray* allHumanSearchableDescriptors = [NSMutableArray new];
