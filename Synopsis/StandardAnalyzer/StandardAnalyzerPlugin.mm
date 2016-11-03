@@ -124,6 +124,8 @@
         
         cv::setUseOptimized(true);
         
+#if USE_OPENCL
+
         if(cv::ocl::haveOpenCL())
         {
             cv::ocl::setUseOpenCL(true);
@@ -173,6 +175,7 @@
         // We dont need our own queue unless we submit our own kernels it seems
 //        mainCommandQueue = new cv::ocl::Queue(*(mainContext), mainContext->device(0));
 
+#endif
         
         // Default parameters of ORB
         int nfeatures=100;
@@ -240,6 +243,7 @@ static int lastDevice = 0;
 
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
+#if USE_OPENCL
     // We enable / disable OpenCL per thread here
     // since we may be called on a dispatch queue whose underlying thread differs from our last call.
     // isnt this fun?
@@ -250,7 +254,7 @@ static int lastDevice = 0;
 //    lastDevice = currentDevice;
     
     cv::ocl::Device(mainContext->device(0));
-
+#endif
     
     cv::Mat image = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
     
