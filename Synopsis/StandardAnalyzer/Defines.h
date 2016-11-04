@@ -9,7 +9,7 @@
 #ifndef Defines_h
 #define Defines_h
 
-#define USE_OPENCL 1
+#define USE_OPENCL 0
 #define USE_CIEDE2000 0
 
 #if USE_OPENCL

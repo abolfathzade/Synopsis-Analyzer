@@ -39,10 +39,9 @@
 @interface StandardAnalyzerPlugin ()
 {
     // Custom OpenCL handling
-    cv::ocl::Context* openclIGPUContext;
-    cv::ocl::Context* openclDGPUContext;
-    cv::ocl::Context* openclCPUContext;
-
+//    cv::ocl::Context* openclIGPUContext;
+//    cv::ocl::Context* openclDGPUContext;
+//    cv::ocl::Context* openclCPUContext;
     
     //cv::ocl::Queue* mainCommandQueue;
     
@@ -136,10 +135,6 @@
         {
             cv::ocl::setUseOpenCL(true);
             
-////            cv::ocl::PlatformInfo* platInfo = new cv::ocl::PlatformInfo();
-////            
-////            platInfo->d
-//            
 //            openclIGPUContext = new cv::ocl::Context();
 //            
 //            if (!openclIGPUContext->create(cv::ocl::Device::TYPE_IGPU))
@@ -162,22 +157,16 @@
 //               [[LogController sharedLogController] appendVerboseLog:@"Created Discrete GPU OpenCL Context"];
 //            }
 //            
-//            if(!openclIGPUContext->ndevices() && !openclDGPUContext->ndevices())
-//            {
-//               [[LogController sharedLogController] appendErrorLog:@"No Integrated or Discreet OpenCL Devices exist, falling back to CPU Context"];
-//
-//                openclCPUContext = new cv::ocl::Context();
-//
-//                if (!openclCPUContext->create(cv::ocl::Device::TYPE_CPU))
-//                {
-//                   [[LogController sharedLogController] appendErrorLog:@"Unable to create CPU OpenCL Context"];
-//                }
-//                else
-//                {
-//                    [[LogController sharedLogController] appendVerboseLog:@"Created CPU OpenCL Context"];
-//                }
-//            }
+//            openclCPUContext = new cv::ocl::Context();
 //            
+//            if (!openclCPUContext->create(cv::ocl::Device::TYPE_CPU))
+//            {
+//                [[LogController sharedLogController] appendErrorLog:@"Unable to create CPU OpenCL Context"];
+//            }
+//            else
+//            {
+//                [[LogController sharedLogController] appendVerboseLog:@"Created CPU OpenCL Context"];
+//            }
 //            
 //            for (int i = 0; i < openclIGPUContext->ndevices(); i++)
 //            {
@@ -196,8 +185,6 @@
 //                NSLog(@"imageSupport: %s", device.imageSupport() ? "YES" : "NO");
 //                NSLog(@"OpenCL_C_Version: %s", device.OpenCL_C_Version().c_str());
 //            }
-//
-            
         }
 
         // We dont need our own queue unless we submit our own kernels it seems
@@ -253,14 +240,14 @@
 //    if(mainCommandQueue != nullptr)
 //    	delete mainCommandQueue;
 
-    if(openclIGPUContext != nullptr)
-        delete openclIGPUContext;
-
-    if(openclDGPUContext != nullptr)
-        delete openclDGPUContext;
-
-    if(openclCPUContext != nullptr)
-        delete openclCPUContext;
+//    if(openclIGPUContext != nullptr)
+//        delete openclIGPUContext;
+//
+//    if(openclDGPUContext != nullptr)
+//        delete openclDGPUContext;
+//
+//    if(openclCPUContext != nullptr)
+//        delete openclCPUContext;
 }
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
@@ -270,8 +257,7 @@
 //    });
 }
 
-
-static int lastDevice = 0;
+//static int lastDevice = 0;
 
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
@@ -294,14 +280,14 @@ static int lastDevice = 0;
 //    if( !openclIGPUContext->ndevices() )
 //    {
 //        // If we have a discrete GPU
-//        if( openclDGPUContext->ndevices() )
-//        {
-//            // Ping Pong between discreet GPUs
-//            int currentDevice = (lastDevice + 1) % (openclDGPUContext->ndevices());
-//            cv::ocl::Device(openclDGPUContext->device(currentDevice));
-//            lastDevice = currentDevice;
-//        }
-//        else
+////        if( openclDGPUContext->ndevices() )
+////        {
+////            // Ping Pong between discreet GPUs
+////            int currentDevice = (lastDevice + 1) % (openclDGPUContext->ndevices());
+////            cv::ocl::Device(openclDGPUContext->device(currentDevice));
+////            lastDevice = currentDevice;
+////        }
+////        else
 //        {
 //            // Use the only  OpenCL context we have
 //            cv::ocl::Device(openclCPUContext->device(0));
@@ -315,9 +301,11 @@ static int lastDevice = 0;
 //        
 //        cv::ocl::Device(openclIGPUContext->device(0));
 //    }
-    
+//    
     
 #endif
+    
+    cv::ocl::setUseOpenCL(USE_OPENCL);
     
     cv::Mat image = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
     
