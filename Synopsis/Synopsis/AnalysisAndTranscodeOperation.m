@@ -12,6 +12,7 @@
 #import <Accelerate/Accelerate.h>
 
 #import "AnalyzerPluginProtocol.h"
+#import "DispatchQueueManager.h"
 
 #import "NSDictionary+JSONString.h"
 #import "BSON/BSONSerialization.h"
@@ -365,23 +366,23 @@
         CMBufferQueueRef videoUncompressedBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &videoUncompressedBufferQueue);
 
-        dispatch_queue_t videoPassthrougDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+//        dispatch_queue_t videoPassthrougDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
-        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+//        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t videoUncompressedDecodeQueue = dispatch_queue_create("videoUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+//        dispatch_queue_t videoUncompressedDecodeQueue = dispatch_queue_create("videoUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
-        dispatch_queue_t concurrentVideoAnalysisQueue = dispatch_queue_create("concurrentVideoAnalysisQueue", DISPATCH_QUEUE_CONCURRENT_WITH_AUTORELEASE_POOL);
+//        dispatch_queue_t concurrentVideoAnalysisQueue = dispatch_queue_create("concurrentVideoAnalysisQueue", DISPATCH_QUEUE_CONCURRENT_WITH_AUTORELEASE_POOL);
         
 #pragma mark - Audio Requirements
         
@@ -392,16 +393,16 @@
         CMBufferQueueRef audioUncompressedBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &audioUncompressedBufferQueue);
 
-        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", 0);
+//        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", 0);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
-        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", 0);
+//        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", 0);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+//        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
@@ -417,7 +418,7 @@
         if(self.transcodeAssetHasVideo)
         {
             // Passthrough Video Read into our Buffer Queue
-            dispatch_async(videoPassthrougDecodeQueue, ^{
+            dispatch_async([DispatchQueueManager analysisManager].videoPassthroughDecodeQueue, ^{
                 
                 // read sample buffers from our video reader - and append them to the queue.
                 // only read while we have samples, and while our buffer queue isnt full
@@ -467,7 +468,7 @@
         if(self.transcodeAssetHasAudio)
         {
             // Passthrough Video Read into our Buffer Queue
-            dispatch_async(audioPassthroughDecodeQueue, ^{
+            dispatch_async([DispatchQueueManager analysisManager].audioPassthroughDecodeQueue, ^{
                 
                 // read sample buffers from our video reader - and append them to the queue.
                 // only read while we have samples, and while our buffer queue isnt full
@@ -517,7 +518,7 @@
         
         if(self.transcodeAssetHasVideo)
         {
-            dispatch_async(videoUncompressedDecodeQueue, ^{
+            dispatch_async([DispatchQueueManager analysisManager].videoUncompressedDecodeQueue, ^{
                 
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
                 
@@ -587,7 +588,7 @@
                                         
                                         
                                         // dispatch a single module
-                                        dispatch_async(concurrentVideoAnalysisQueue, ^{
+                                        dispatch_async([DispatchQueueManager analysisManager].concurrentVideoAnalysisQueue, ^{
                                             
                                             NSDictionary* newModuleValue = [analyzer analyzeMetadataDictionaryForModuleIndex:moduleIndex
                                                                                                                        error:&analyzerError];
@@ -622,7 +623,7 @@
                                     // enter our group.
                                     dispatch_group_enter(analysisGroup);
                                     
-                                    dispatch_async(concurrentVideoAnalysisQueue, ^{
+                                    dispatch_async([DispatchQueueManager analysisManager].concurrentVideoAnalysisQueue, ^{
                                         
                                         NSString* newMetadataKey = [analyzer pluginIdentifier];
                                         NSDictionary* newMetadataValue = [analyzer analyzeMetadataDictionaryForModuleIndex:SynopsisModuleIndexNone
@@ -699,7 +700,7 @@
         
         if(self.transcodeAssetHasAudio)
         {
-            dispatch_async(audioUncompressedDecodeQueue, ^{
+            dispatch_async([DispatchQueueManager analysisManager].audioUncompressedDecodeQueue, ^{
             
             [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Audio"];
             
@@ -809,7 +810,7 @@
         
         if(self.transcodeAssetHasVideo)
         {
-            [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
+            [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:[DispatchQueueManager analysisManager].videoPassthroughEncodeQueue usingBlock:^
             {
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Video"];
                 
@@ -911,7 +912,7 @@
         
         if(self.transcodeAssetHasAudio)
         {
-            [self.transcodeAssetWriterAudio requestMediaDataWhenReadyOnQueue:audioPassthroughEncodeQueue usingBlock:^
+            [self.transcodeAssetWriterAudio requestMediaDataWhenReadyOnQueue:[DispatchQueueManager analysisManager].audioPassthroughEncodeQueue usingBlock:^
              {
                  [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Audio"];
                  
@@ -1266,174 +1267,6 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     CVPixelBufferRelease(scaledPixelBuffer);
     
     return transformedPixelBuffer;
-}
-
-- (CVPixelBufferRef) old_pixelBuffer:(CVPixelBufferRef)pixelBuffer withTransform:(CGAffineTransform)transform forQuality:(SynopsisAnalysisQualityHint)quality
-{
-    size_t width = CVPixelBufferGetWidth(pixelBuffer);
-    size_t height = CVPixelBufferGetHeight(pixelBuffer);
- 
-    CGSize originalSize = {width, height};
-    
-    BOOL flip = CVImageBufferIsFlipped(pixelBuffer);
-    
-    CGSize original = (CGSize) { width, height };
-    
-
-    switch (quality)
-    {
-        case SynopsisAnalysisQualityHintLow:
-        {
-            CGRect result = AVMakeRectWithAspectRatioInsideRect(original, lowQuality);
-            width = result.size.width;
-            height = result.size.height;
-            break;
-        }
-        case SynopsisAnalysisQualityHintMedium:
-        {
-            CGRect result = AVMakeRectWithAspectRatioInsideRect(original, mediumQuality);
-            width = result.size.width;
-            height = result.size.height;
-            break;
-        }
-        case SynopsisAnalysisQualityHintHigh:
-        {
-            CGRect result = AVMakeRectWithAspectRatioInsideRect(original, highQuality);
-            width = result.size.width;
-            height = result.size.height;
-            break;
-        }
-        case SynopsisAnalysisQualityHintOriginal:
-            break;
-    }
-    
-    CGSize scaledSize = {width, height};
-
-    CVPixelBufferLockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
-    void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
-    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
-    
-    vImage_Buffer inBuff;
-    inBuff.height = CVPixelBufferGetHeight(pixelBuffer);
-    inBuff.width = CVPixelBufferGetWidth(pixelBuffer);
-    inBuff.rowBytes = bytesPerRow;
-    inBuff.data = baseAddress;
-    
-    // Transform:
-    if(flip)
-    {
-        CGSize flippedSize = CGSizeApplyAffineTransform(originalSize, transform);
-//        CGSize flippedSize = originalSize;
-        flippedSize.width = fabs(flippedSize.width);
-        flippedSize.height = fabs(flippedSize.height);
-
-        CGAffineTransform flip = CGAffineTransformMakeTranslation(flippedSize.width * 0.5, flippedSize.height * 0.5);
-        flip = CGAffineTransformScale(flip, 1, -1);
-        flip = CGAffineTransformTranslate(flip, -flippedSize.width * 0.5, -flippedSize.height * 0.5);
-
-        transform = CGAffineTransformConcat(transform, flip);
-    }
-    
-    originalSize = CGSizeApplyAffineTransform(originalSize, transform);
-    scaledSize = CGSizeApplyAffineTransform(scaledSize, transform);
-
-    originalSize.width = fabs(originalSize.width);
-    originalSize.height = fabs(originalSize.height);
-
-    scaledSize.width = fabs(scaledSize.width);
-    scaledSize.height = fabs(scaledSize.height);
-
-    vImage_CGAffineTransform affineTransform;
-    affineTransform.a = transform.a;
-    affineTransform.b = transform.b;
-    affineTransform.c = transform.c;
-    affineTransform.d = transform.d;
-    affineTransform.tx = transform.tx;
-    affineTransform.ty = transform.ty;
-    
-    // Create our pixel buffer pool for our scaled size
-    if(transformPixelBufferPool == NULL)
-    {
-        NSDictionary* poolAttributes = @{ (NSString*)kCVPixelBufferWidthKey : @(originalSize.width),
-                                          (NSString*)kCVPixelBufferHeightKey : @(originalSize.height),
-                                          (NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
-                                        };
-        CVReturn err = CVPixelBufferPoolCreate(kCFAllocatorDefault, NULL, (__bridge CFDictionaryRef _Nullable)(poolAttributes), &transformPixelBufferPool);
-        if(err != kCVReturnSuccess)
-        {
-            NSLog(@"Error : %i", err);
-        }
-    }
-    
-    if(scaledPixelBufferPool == NULL)
-    {
-        NSDictionary* poolAttributes = @{ (NSString*)kCVPixelBufferWidthKey : @(scaledSize.width),
-                                          (NSString*)kCVPixelBufferHeightKey : @(scaledSize.height),
-                                          (NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
-                                          };
-        CVReturn err = CVPixelBufferPoolCreate(kCFAllocatorDefault, NULL, (__bridge CFDictionaryRef _Nullable)(poolAttributes), &scaledPixelBufferPool);
-        if(err != kCVReturnSuccess)
-        {
-            NSLog(@"Error : %i", err);
-        }
-    }
-
-    CVPixelBufferRef transformedBuffer;
-    CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, transformPixelBufferPool, &transformedBuffer);
-    
-    CVPixelBufferLockBaseAddress(transformedBuffer, 0);
-    unsigned char *transformBytes = CVPixelBufferGetBaseAddress(transformedBuffer);
-    
-    const CGFloat backColorF[4] = {0};
-    const uint8_t backColorU[4] = {0};
-    
-//    vImage_CGImageFormat desiredFormat;
-//    desiredFormat.bitsPerComponent = 8;
-//    desiredFormat.bitsPerPixel = 32;
-//    desiredFormat.colorSpace = NULL;
-//    desiredFormat.bitmapInfo = (CGBitmapInfo)(kCGImageAlphaFirst | kCGImageAlphaPremultipliedFirst| kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little);
-//    desiredFormat.version = 0;
-//    desiredFormat.decode = NULL;
-//    desiredFormat.renderingIntent = kCGRenderingIntentDefault;
-    
-    vImage_Buffer transformed = {transformBytes, CVPixelBufferGetHeight(transformedBuffer), CVPixelBufferGetWidth(transformedBuffer), CVPixelBufferGetBytesPerRow(transformedBuffer)};
-    vImage_Error err;
-//    err = vImageBuffer_InitWithCVPixelBuffer(&transformed, &desiredFormat, transformedBuffer, NULL, backColorF, kvImageNoFlags);
-//    if (err != kvImageNoError)
-//        NSLog(@" error %ld", err);
-    
-    err = vImageAffineWarpCG_ARGB8888(&inBuff, &transformed, NULL, &affineTransform, backColorU, kvImageLeaveAlphaUnchanged | kvImageBackgroundColorFill | kvImageDoNotTile);
-    if (err != kvImageNoError)
-        NSLog(@" error %ld", err);
-    
-    // Finished with our input pixel buffer
-    CVPixelBufferUnlockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
-    
-    // Scale our transformmed buffer
-    CVPixelBufferRef scaledBuffer;
-    CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, scaledPixelBufferPool, &scaledBuffer);
-    
-    CVPixelBufferLockBaseAddress(scaledBuffer, 0);
-    unsigned char *resizedBytes = CVPixelBufferGetBaseAddress(scaledBuffer);
-
-    vImage_Buffer resized = {resizedBytes, CVPixelBufferGetHeight(scaledBuffer), CVPixelBufferGetWidth(scaledBuffer), CVPixelBufferGetBytesPerRow(scaledBuffer)};
-//    err = vImageBuffer_InitWithCVPixelBuffer(&resized, &desiredFormat, scaledBuffer, NULL, backColorF, kvImageNoFlags);
-//    if (err != kvImageNoError)
-//        NSLog(@" error %ld", err);
-
-    err = vImageScale_ARGB8888(&transformed, &resized, NULL, kvImageDoNotTile);
-    if (err != kvImageNoError)
-        NSLog(@" error %ld", err);
-    
-    // Free Transform
-    CVPixelBufferUnlockBaseAddress(transformedBuffer, 0);
-    CVPixelBufferRelease(transformedBuffer);
-    transformed.data = NULL;
-
-    CVPixelBufferUnlockBaseAddress(scaledBuffer, 0);
-    
-    
-    return scaledBuffer;
 }
 
 #pragma mark - Metadata Helper

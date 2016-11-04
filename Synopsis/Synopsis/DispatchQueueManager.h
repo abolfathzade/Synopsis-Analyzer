@@ -24,6 +24,8 @@
 @property (readonly) dispatch_queue_t concurrentVideoAnalysisQueue;
 @property (readonly) dispatch_queue_t concurrentAudioAnalysisQueue;
 
-+ (DispatchQueueManager*) sharedManager;
+
++ (DispatchQueueManager*) analysisManager;
++ (DispatchQueueManager*) metadataManager;
 
 @end
