@@ -38,12 +38,6 @@
 
 @interface StandardAnalyzerPlugin ()
 {
-    // Custom OpenCL handling
-//    cv::ocl::Context* openclIGPUContext;
-//    cv::ocl::Context* openclDGPUContext;
-//    cv::ocl::Context* openclCPUContext;
-    
-    //cv::ocl::Queue* mainCommandQueue;
     
     // Reused OpenCV Resources
     matType currentBGR8UC3Image;
@@ -123,74 +117,8 @@
                               @"Hash",
                               ];
         
-        
-//        const std::string info = cv::getBuildInformation();
-//        NSLog(@"OpenCV Build Info: %@", [NSString stringWithCString:info.c_str() encoding:NSUTF8StringEncoding]);
-        
         cv::setUseOptimized(true);
-        
-#if USE_OPENCL
-
-        if(cv::ocl::haveOpenCL())
-        {
-            cv::ocl::setUseOpenCL(true);
-            
-//            openclIGPUContext = new cv::ocl::Context();
-//            
-//            if (!openclIGPUContext->create(cv::ocl::Device::TYPE_IGPU))
-//            {
-//                [[LogController sharedLogController] appendErrorLog:@"Unable to create Integrated GPU OpenCL Context"];
-//            }
-//            else
-//            {
-//                [[LogController sharedLogController] appendVerboseLog:@"Created Integrated GPU OpenCL Context"];
-//            }
-//            
-//            openclDGPUContext = new cv::ocl::Context();
-//
-//            if (!openclDGPUContext->create(cv::ocl::Device::TYPE_DGPU))
-//            {
-//                [[LogController sharedLogController] appendErrorLog:@"Unable to create Discrete GPU OpenCL Context"];
-//            }
-//            else
-//            {
-//               [[LogController sharedLogController] appendVerboseLog:@"Created Discrete GPU OpenCL Context"];
-//            }
-//            
-//            openclCPUContext = new cv::ocl::Context();
-//            
-//            if (!openclCPUContext->create(cv::ocl::Device::TYPE_CPU))
-//            {
-//                [[LogController sharedLogController] appendErrorLog:@"Unable to create CPU OpenCL Context"];
-//            }
-//            else
-//            {
-//                [[LogController sharedLogController] appendVerboseLog:@"Created CPU OpenCL Context"];
-//            }
-//            
-//            for (int i = 0; i < openclIGPUContext->ndevices(); i++)
-//            {
-//                cv::ocl::Device device = openclIGPUContext->device(i);
-//                NSLog(@"Device Name: %s", device.name().c_str());
-//                NSLog(@"Available: %i", device.available());
-//                NSLog(@"imageSupport: %i", device.imageSupport());
-//                NSLog(@"OpenCL_C_Version: %s", device.OpenCL_C_Version().c_str());
-//            }
-//            
-//            for (int i = 0; i < openclDGPUContext->ndevices(); i++)
-//            {
-//                cv::ocl::Device device = openclDGPUContext->device(i);
-//                NSLog(@"Device Name: %s", device.name().c_str());
-//                NSLog(@"Available: %s", device.available() ? "YES" : "NO");
-//                NSLog(@"imageSupport: %s", device.imageSupport() ? "YES" : "NO");
-//                NSLog(@"OpenCL_C_Version: %s", device.OpenCL_C_Version().c_str());
-//            }
-        }
-
-        // We dont need our own queue unless we submit our own kernels it seems
-//        mainCommandQueue = new cv::ocl::Queue(*(mainContext), mainContext->device(0));
-
-#endif
+        [self setOpenCLEnabled:USE_OPENCL];
         
         // Default parameters of ORB
         int nfeatures=100;
@@ -237,17 +165,6 @@
     currentPerceptualImage.release();
     lastImage.release();
 
-//    if(mainCommandQueue != nullptr)
-//    	delete mainCommandQueue;
-
-//    if(openclIGPUContext != nullptr)
-//        delete openclIGPUContext;
-//
-//    if(openclDGPUContext != nullptr)
-//        delete openclDGPUContext;
-//
-//    if(openclCPUContext != nullptr)
-//        delete openclCPUContext;
 }
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
@@ -257,55 +174,9 @@
 //    });
 }
 
-//static int lastDevice = 0;
-
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
-    
-#if USE_OPENCL
-    // We enable / disable OpenCL per thread here
-    // since we may be called on a dispatch queue whose underlying thread differs from our last call.
-    // isnt this fun?
-    
-    // Simple round robin esque openCL device load bearing.
-    
-    // Idea is that since our OpenCL content is typically small
-    // We dont get streaming performance to DGPUs
-    // So we prefer Integrated
-    
-    // But maybe round robin between integrated and discreet is ok?
-    // Who knows! This is hard!
-    
-    // If we dont have an integrated GPU
-//    if( !openclIGPUContext->ndevices() )
-//    {
-//        // If we have a discrete GPU
-////        if( openclDGPUContext->ndevices() )
-////        {
-////            // Ping Pong between discreet GPUs
-////            int currentDevice = (lastDevice + 1) % (openclDGPUContext->ndevices());
-////            cv::ocl::Device(openclDGPUContext->device(currentDevice));
-////            lastDevice = currentDevice;
-////        }
-////        else
-//        {
-//            // Use the only  OpenCL context we have
-//            cv::ocl::Device(openclCPUContext->device(0));
-//        }
-//    }
-//    else
-//    {
-//        // If we have a more than a single GPU (and an integrated)
-////        if( openclDGPUContext->ndevices() )
-//
-//        
-//        cv::ocl::Device(openclIGPUContext->device(0));
-//    }
-//    
-    
-#endif
-    
-    cv::ocl::setUseOpenCL(USE_OPENCL);
+    [self setOpenCLEnabled:USE_OPENCL];
     
     cv::Mat image = [self imageFromBaseAddress:baseAddress width:width height:height bytesPerRow:bytesPerRow];
     
