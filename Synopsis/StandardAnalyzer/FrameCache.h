@@ -18,23 +18,14 @@
 
 #import "StandardAnalyzerDefines.h"
 
-
 @interface FrameCache : NSObject
 
 - (instancetype) initWithQualityHint:(SynopsisAnalysisQualityHint)qualityHint NS_DESIGNATED_INITIALIZER;
 
 - (void) cacheAndConvertBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow;
 
-// Current Frame Accessors
-@property (readonly) matType currentBGR_32FC3_Frame;
-@property (readonly) matType currentBGR_8UC3I_Frame;
-@property (readonly) matType currentGray_8UC1_Frame;
-@property (readonly) matType currentPerceptual_32FC3_Frame;
+- (matType) currentFrameForFormat:(FrameCacheFormat)format;
+- (matType) previousFrameForFormat:(FrameCacheFormat)format;
 
-// Last Frame Accessors
-@property (readonly) matType lastBGR_32FC3_Frame;
-@property (readonly) matType lastBGR_8UC3I_Frame;
-@property (readonly) matType lastGray_8UC1_Frame;
-@property (readonly) matType lastPerceptual_32FC3_Frame;
 
 @end

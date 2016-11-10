@@ -85,6 +85,42 @@
 
 }
 
+- (matType) currentFrameForFormat:(FrameCacheFormat)format
+{
+    switch(format)
+    {
+        case FrameCacheFormatBGR8:
+            return self.currentBGR_8UC3I_Frame;
+            
+        case FrameCacheFormatBGRF32:
+            return self.currentBGR_32FC3_Frame;
+        
+        case FrameCacheFormatGray8:
+            return self.currentGray_8UC1_Frame;
+            
+        case FrameCacheFormatPerceptual:
+            return self.currentPerceptual_32FC3_Frame;
+    }
+}
+
+- (matType) previousFrameForFormat:(FrameCacheFormat)format
+{
+    switch(format)
+    {
+        case FrameCacheFormatBGR8:
+            return self.lastBGR_8UC3I_Frame;
+            
+        case FrameCacheFormatBGRF32:
+            return self.lastBGR_32FC3_Frame;
+            
+        case FrameCacheFormatGray8:
+            return self.lastGray_8UC1_Frame;
+            
+        case FrameCacheFormatPerceptual:
+            return self.lastPerceptual_32FC3_Frame;
+    }
+}
+
 - (cv::Mat) imageFromBaseAddress:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
     size_t extendedWidth = bytesPerRow / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits

@@ -43,7 +43,17 @@
     return @"PerceptualHash";
 }
 
-- (NSDictionary*) analyzedMetadataForFrame:(matType)frame
+- (FrameCacheFormat) currentFrameFormat
+{
+    return FrameCacheFormatGray8;
+}
+
+- (FrameCacheFormat) previousFrameFormat
+{
+    return FrameCacheFormatGray8;
+}
+
+- (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame
 {
     // Its unclear if RGB hashing is of any benefit, since generally
     // speaking (and some testing confirms) that the GRADIENT's in

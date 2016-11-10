@@ -19,7 +19,7 @@
 
 @implementation HistogramModule
 
-- (NSDictionary*) analyzedMetadataForFrame:(matType)frame
+- (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame
 {
     return [self detectHistogramInCVMat:frame];
 }
@@ -29,6 +29,15 @@
     return @"Histogram";
 }
 
+- (FrameCacheFormat) currentFrameFormat
+{
+    return FrameCacheFormatBGR8;
+}
+
+- (FrameCacheFormat) previousFrameFormat
+{
+    return FrameCacheFormatBGR8;
+}
 
 - (NSDictionary*) finaledAnalysisMetadata
 {

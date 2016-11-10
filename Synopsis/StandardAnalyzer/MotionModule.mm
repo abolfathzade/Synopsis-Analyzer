@@ -8,19 +8,29 @@
 
 #import "MotionModule.h"
 
+#define OPTICAL_FLOW 0
+
 @interface MotionModule ()
 {
+#if OPTICAL_FLOW
+    std::vector<cv::Point> lastFrameFeatures;
+    std::vector<cv::Point> currentFrameFeatures;
+
+#else
     cv::Ptr<cv::ORB> detector;
+#endif
 }
 @end
 
 @implementation MotionModule
 
-
 - (instancetype) initWithQualityHint:(SynopsisAnalysisQualityHint)qualityHint
 {
     self = [super initWithQualityHint:qualityHint];
     {
+#if OPTICAL_FLOW
+#else
+   
         // TODO: Adjust based on Quality.
         // Default parameters of ORB
         int nfeatures=100;
@@ -42,27 +52,46 @@
                                    scoreType,
                                    patchSize,
                                    fastThreshold );
+#endif
     }
     return self;
 }
 
 - (void) dealloc
 {
+#if OPTICAL_FLOW
+#else
     detector.release();
+#endif
 }
 
-- (NSDictionary*) analyzedMetadataForFrame:(matType)frame  lastFrame:(matType)lastFrame
-{
-    NSMutableDictionary* metadata = [NSMutableDictionary new];
-    [metadata addEntriesFromDictionary:[self detectFeaturesORBCVMat:frame]];
-    [metadata addEntriesFromDictionary:[self detectMotionInCVMatAVG:frame lastImage:lastFrame]];
-    
-    return metadata;
-}
 
 - (NSString*) moduleName
 {
     return @"Motion";
+}
+
+- (FrameCacheFormat) currentFrameFormat
+{
+    return FrameCacheFormatGray8;
+}
+
+- (FrameCacheFormat) previousFrameFormat
+{
+    return FrameCacheFormatGray8;
+}
+
+- (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame
+{
+    NSMutableDictionary* metadata = [NSMutableDictionary new];
+
+#if OPTICAL_FLOW
+#else
+
+    [metadata addEntriesFromDictionary:[self detectFeaturesORBCVMat:frame]];
+    [metadata addEntriesFromDictionary:[self detectMotionInCVMatAVG:frame lastImage:lastFrame]];
+#endif
+    return metadata;
 }
 
 
@@ -70,6 +99,37 @@
 {
     return nil;
 }
+
+#pragma mark - Optical Flow
+
+#if OPTICAL_FLOW
+
+- (NSDictionary*) detectFeaturesFlow:(matType)image
+{
+    if(lastFrameFeatures.empty())
+    {
+        
+        cv::goodFeaturesToTrack(image, // the image
+                                currentFrameFeatures,   // the output detected features
+                                100,  // the maximum number of features
+                                8,     // quality level
+                                5     // min distance between two features
+                                );
+        
+    }
+    
+    if(!currentFrameFeatures.empty() && !lastFrameFeatures.empty() )
+    {
+        
+    }
+    
+    
+    // Switch up our last frame
+}
+
+#pragma mark - Old
+
+#else
 
 - (NSDictionary*) detectFeaturesORBCVMat:(matType)image
 {
@@ -90,8 +150,6 @@
         
         [keyPointsArray addObject:@[ @(point.x), @(point.y)]];
     }
-    
-    //    cv::goodFeaturesToTrack(<#InputArray image#>, <#OutputArray corners#>, <#int maxCorners#>, <#double qualityLevel#>, <#double minDistance#>)
     
     // Add Features to metadata
     metadata[@"Features"] = keyPointsArray;
@@ -145,7 +203,7 @@
     
     return metadata;
 }
-
+#endif
 
 
 @end

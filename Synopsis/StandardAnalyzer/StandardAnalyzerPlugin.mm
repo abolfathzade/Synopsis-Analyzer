@@ -56,13 +56,9 @@
 @property (readwrite) BOOL hasModules;
 @property (atomic, readwrite, strong) NSArray* moduleClasses;
 
-@property (readwrite, strong) FrameCache* frameCache;
+@property (atomic, readwrite, strong) NSMutableArray* modules;
 
-@property (readwrite, strong) AverageColor* averageColorModule;
-@property (readwrite, strong) DominantColorModule* dominantColorModule;
-@property (readwrite, strong) HistogramModule* histogramModule;
-@property (readwrite, strong) MotionModule* motionModule;
-@property (readwrite, strong) PerceptualHashModule* perceptualHashModule;
+@property (readwrite, strong) FrameCache* frameCache;
 
 @end
 
@@ -85,7 +81,8 @@
         
         self.hasModules = YES;
         
-        self.moduleClasses  = @[NSStringFromClass([AverageColor class]),
+        self.modules = [NSMutableArray new];
+        self.moduleClasses  = @[//NSStringFromClass([AverageColor class]),
                                 NSStringFromClass([DominantColorModule class]),
                                 NSStringFromClass([HistogramModule class]),
                                 NSStringFromClass([MotionModule class]),
@@ -108,11 +105,15 @@
     
     self.frameCache = [[FrameCache alloc] initWithQualityHint:qualityHint];
     
-    self.averageColorModule = [[AverageColor alloc] initWithQualityHint:qualityHint];
-    self.dominantColorModule = [[DominantColorModule alloc] initWithQualityHint:qualityHint];
-    self.histogramModule = [[HistogramModule alloc] initWithQualityHint:qualityHint];
-    self.perceptualHashModule = [[PerceptualHashModule alloc] initWithQualityHint:qualityHint];
-    self.motionModule = [[MotionModule alloc] initWithQualityHint:qualityHint];
+    for(NSString* classString in self.moduleClasses)
+    {
+        Class moduleClass = NSClassFromString(classString);
+        
+        Module* module = [(Module*)[moduleClass alloc] initWithQualityHint:qualityHint];
+        
+        [self.modules addObject:module];
+    }
+    
 }
 
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
@@ -174,46 +175,12 @@
     // We cannot run this analysis in parallel for the OpenCL case.
     // We need to look into that...
     
-    switch (moduleIndex)
-    {
-        case 0:
-        {
-            // This seems stupid and useless ?
-            result = [self.averageColorModule analyzedMetadataForFrame:self.frameCache.currentBGR_32FC3_Frame];
-            break;
-        }
-        case 1:
-        {
-            result = [self.dominantColorModule analyzedMetadataForFrame:self.frameCache.currentPerceptual_32FC3_Frame];
-            break;
-        }
-        case 2:
-        {
-            // Do we need this per frame?
-            // Do we need this at all?
-            // Does histogram similarity give us anything easily searchable?
-            // Does histogram per frame give us anything to leverage for effects per frame?
-            // Does a global accumulated histogram actually do anything for us at all
-            
-            result = [self.histogramModule analyzedMetadataForFrame:self.frameCache.currentBGR_8UC3I_Frame];
-            break;
-        }
-        case 3:
-        {
-            result = [self.motionModule analyzedMetadataForFrame:self.frameCache.currentGray_8UC1_Frame lastFrame:self.frameCache.lastGray_8UC1_Frame];
-            break;
-        }
-        case 4:
-        {
-            result = [self.perceptualHashModule analyzedMetadataForFrame:self.frameCache.currentGray_8UC1_Frame];
-            break;
-        }
-            
-        default:
-            return nil;
-    }
+    Module* module = self.modules[moduleIndex];
     
-    return result;
+    FrameCacheFormat currentFormat = [module currentFrameFormat];
+    FrameCacheFormat previousFormat = [module previousFrameFormat];
+    
+    return [module analyzedMetadataForCurrentFrame:[self.frameCache currentFrameForFormat:currentFormat] previousFrame:[self.frameCache previousFrameForFormat:previousFormat]];
 }
 
 #pragma mark - Finalization
@@ -221,10 +188,11 @@
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
 {
     NSMutableDictionary* finalized = [NSMutableDictionary new];
-    [finalized addEntriesFromDictionary:[self.dominantColorModule finaledAnalysisMetadata]];
-    [finalized addEntriesFromDictionary:[self.perceptualHashModule finaledAnalysisMetadata]];
-    [finalized addEntriesFromDictionary:[self.histogramModule finaledAnalysisMetadata]];
-    [finalized addEntriesFromDictionary:[self.motionModule finaledAnalysisMetadata]];
+    
+    for(Module* module in self.modules)
+    {
+        [finalized addEntriesFromDictionary:[module finaledAnalysisMetadata]];
+    }
 
     return finalized;
 }

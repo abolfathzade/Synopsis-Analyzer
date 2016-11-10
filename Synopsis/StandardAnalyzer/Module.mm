@@ -32,7 +32,19 @@
 }
 
 
-- (NSDictionary*) analyzedMetadataForFrame:(matType)frame
+- (FrameCacheFormat) currentFrameFormat
+{
+    [NSObject doesNotRecognizeSelector:_cmd];
+    return FrameCacheFormatBGR8;
+}
+
+- (FrameCacheFormat) previousFrameFormat
+{
+    [NSObject doesNotRecognizeSelector:_cmd];
+    return FrameCacheFormatBGR8;
+}
+
+- (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame
 {
     [NSObject doesNotRecognizeSelector:_cmd];
     return nil;

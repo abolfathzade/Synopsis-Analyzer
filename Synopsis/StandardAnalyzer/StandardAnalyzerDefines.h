@@ -25,5 +25,12 @@
 #define TO_PERCEPTUAL cv::COLOR_BGR2Lab
 #define FROM_PERCEPTUAL cv::COLOR_Lab2BGR
 
+typedef enum : unsigned int {
+    FrameCacheFormatBGR8 = 0,
+    FrameCacheFormatBGRF32,
+    FrameCacheFormatGray8,
+    FrameCacheFormatPerceptual
+} FrameCacheFormat;
+
 
 #endif /* Defines_h */

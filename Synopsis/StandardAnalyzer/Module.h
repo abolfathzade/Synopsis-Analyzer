@@ -18,8 +18,13 @@
 @interface Module : NSObject
 
 - (instancetype) initWithQualityHint:(SynopsisAnalysisQualityHint)qualityHint NS_DESIGNATED_INITIALIZER;
+
 - (NSString*) moduleName;
-- (NSDictionary*) analyzedMetadataForFrame:(matType)frame;
+- (FrameCacheFormat) currentFrameFormat;
+- (FrameCacheFormat) previousFrameFormat;
+
+- (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame;
 - (NSDictionary*) finaledAnalysisMetadata;
+
 
 @end

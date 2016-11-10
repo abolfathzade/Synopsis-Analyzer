@@ -15,7 +15,17 @@
     return @"AverageColor";
 }
 
-- (NSDictionary*) analyzedMetadataForFrame:(matType)frame
+- (FrameCacheFormat) currentFrameFormat
+{
+    return FrameCacheFormatBGR8;
+}
+
+- (FrameCacheFormat) previousFrameFormat
+{
+    return FrameCacheFormatBGR8;
+}
+
+- (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame
 {
     // Our Mutable Metadata Dictionary:
     NSMutableDictionary* metadata = [NSMutableDictionary new];

@@ -35,7 +35,17 @@
     return @"DominantColor";
 }
 
-- (NSDictionary*) analyzedMetadataForFrame:(matType)frame
+- (FrameCacheFormat) currentFrameFormat
+{
+    return FrameCacheFormatPerceptual;
+}
+
+- (FrameCacheFormat) previousFrameFormat
+{
+    return FrameCacheFormatPerceptual;
+}
+
+- (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame
 {
     // KMeans is slow as hell and also stochastic - same image run 2x gets slightly different results.
     // Median Cut is not particularly accurate ? Maybe I have a subtle bug due to averaging / scaling?
