@@ -140,7 +140,7 @@ typedef enum : NSUInteger {
 // A plugin may support multiple types modes of analysis - called modules
 // Each module may have overhead associated with it (processing time, etc), and end users may which to enable or disable modules
 
-@property (readonly) NSArray* moduleNames;
+@property (readonly) NSArray* moduleClasses;
 
 
 // Human Readable Description for the module in question

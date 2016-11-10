@@ -12,23 +12,22 @@
 
 @interface StandardAnalyzerPlugin : NSObject <AnalyzerPluginProtocol>
 
+#pragma mark - Plugin Protocol Requirements
+
 @property (readonly) NSString* pluginName;
 @property (readonly) NSString* pluginIdentifier;
-
 @property (readonly) NSArray* pluginAuthors;
 @property (readonly) NSString* pluginDescription;
-
 @property (readonly) NSUInteger pluginAPIVersionMajor;
 @property (readonly) NSUInteger pluginAPIVersionMinor;
-
 @property (readonly) NSUInteger pluginVersionMajor;
 @property (readonly) NSUInteger pluginVersionMinor;
-
 @property (readonly) NSDictionary* pluginReturnedMetadataKeysAndDataTypes;
-
 @property (readonly) NSString* pluginMediaType;
 
-@property (readonly) NSArray* moduleNames;
+#pragma mark -
+
+@property (readonly) NSArray* moduleClasses;
 
 @property (readonly) BOOL hasModules;
 

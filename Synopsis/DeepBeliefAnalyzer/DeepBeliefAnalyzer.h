@@ -27,7 +27,7 @@
 
 @property (readonly) NSString* pluginMediaType;
 
-@property (readonly) NSArray* pluginModuleNames;
+@property (readonly) NSArray* moduleClasses;
 
 @property (readonly) BOOL hasModules;
 
