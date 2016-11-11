@@ -18,9 +18,6 @@
 
 #include <sys/xattr.h>
 
-#include "DispatchQueueManager.h"
-
-
 //
 //  TranscodeOperation.m
 //  MetadataTranscoderTestHarness
@@ -357,11 +354,11 @@
         // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
         
-//        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
-//        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
@@ -373,11 +370,11 @@
         CMBufferQueueRef audioPassthroughBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &audioPassthroughBufferQueue);
         
-//        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
-//        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
@@ -390,7 +387,7 @@
         
         if(self.transcodeAssetHasVideo)
         {
-            dispatch_async([DispatchQueueManager metadataManager].videoPassthroughDecodeQueue, ^{
+            dispatch_async(videoPassthroughDecodeQueue, ^{
                 
                 // read sample buffers from our video reader - and append them to the queue.
                 // only read while we have samples, and while our buffer queue isnt full
@@ -431,7 +428,7 @@
         
         if(self.transcodeAssetHasAudio)
         {
-            dispatch_async([DispatchQueueManager metadataManager].audioPassthroughDecodeQueue, ^{
+            dispatch_async(audioPassthroughDecodeQueue, ^{
                 
                 // read sample buffers from our video reader - and append them to the queue.
                 // only read while we have samples, and while our buffer queue isnt full
@@ -471,7 +468,7 @@
         if(self.transcodeAssetHasVideo)
         {
             // Passthrough Video Write from Buffer Queue
-            [self.transcodeAssetWriterVideoPassthrough requestMediaDataWhenReadyOnQueue:[DispatchQueueManager metadataManager].videoPassthroughEncodeQueue usingBlock:^
+            [self.transcodeAssetWriterVideoPassthrough requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
              {
     //           NSLog(@"Started Requesting Media");
                  while([self.transcodeAssetWriterVideoPassthrough isReadyForMoreMediaData]
@@ -598,7 +595,7 @@
         if(self.transcodeAssetHasAudio)
         {
             // Passthrough Video Write from Buffer Queue
-            [self.transcodeAssetWriterAudioPassthrough requestMediaDataWhenReadyOnQueue:[DispatchQueueManager metadataManager].audioPassthroughEncodeQueue usingBlock:^
+            [self.transcodeAssetWriterAudioPassthrough requestMediaDataWhenReadyOnQueue:audioPassthroughEncodeQueue usingBlock:^
              {
                  while([self.transcodeAssetWriterAudioPassthrough isReadyForMoreMediaData])
                      // && audioMetadataWriter isReadyForMoreMediaData])

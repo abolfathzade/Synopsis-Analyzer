@@ -12,7 +12,6 @@
 #import <Accelerate/Accelerate.h>
 
 #import "AnalyzerPluginProtocol.h"
-#import "DispatchQueueManager.h"
 
 #import "NSDictionary+JSONString.h"
 #import "BSON/BSONSerialization.h"
@@ -366,23 +365,23 @@
         CMBufferQueueRef videoUncompressedBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &videoUncompressedBufferQueue);
 
-//        dispatch_queue_t videoPassthrougDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
-//        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-//        dispatch_queue_t videoUncompressedDecodeQueue = dispatch_queue_create("videoUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoUncompressedDecodeQueue = dispatch_queue_create("videoUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
-//        dispatch_queue_t concurrentVideoAnalysisQueue = dispatch_queue_create("concurrentVideoAnalysisQueue", DISPATCH_QUEUE_CONCURRENT_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t concurrentVideoAnalysisQueue = dispatch_queue_create("concurrentVideoAnalysisQueue", DISPATCH_QUEUE_CONCURRENT_WITH_AUTORELEASE_POOL);
         
 #pragma mark - Audio Requirements
         
@@ -393,16 +392,16 @@
         CMBufferQueueRef audioUncompressedBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &audioUncompressedBufferQueue);
 
-//        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", 0);
+        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", 0);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
-//        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", 0);
+        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", 0);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-//        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
@@ -418,7 +417,7 @@
         if(self.transcodeAssetHasVideo)
         {
             // Passthrough Video Read into our Buffer Queue
-            dispatch_async([DispatchQueueManager analysisManager].videoPassthroughDecodeQueue, ^{
+            dispatch_async(videoPassthroughDecodeQueue, ^{
                 
                 // read sample buffers from our video reader - and append them to the queue.
                 // only read while we have samples, and while our buffer queue isnt full
@@ -468,7 +467,7 @@
         if(self.transcodeAssetHasAudio)
         {
             // Passthrough Video Read into our Buffer Queue
-            dispatch_async([DispatchQueueManager analysisManager].audioPassthroughDecodeQueue, ^{
+            dispatch_async(audioPassthroughDecodeQueue, ^{
                 
                 // read sample buffers from our video reader - and append them to the queue.
                 // only read while we have samples, and while our buffer queue isnt full
@@ -518,7 +517,7 @@
         
         if(self.transcodeAssetHasVideo)
         {
-            dispatch_async([DispatchQueueManager analysisManager].videoUncompressedDecodeQueue, ^{
+            dispatch_async(videoUncompressedDecodeQueue, ^{
                 
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
                 
@@ -588,7 +587,7 @@
                                         
                                         
                                         // dispatch a single module
-                                        dispatch_async([DispatchQueueManager analysisManager].concurrentVideoAnalysisQueue, ^{
+                                        dispatch_async(concurrentVideoAnalysisQueue, ^{
                                             
                                             NSDictionary* newModuleValue = [analyzer analyzeMetadataDictionaryForModuleIndex:moduleIndex
                                                                                                                        error:&analyzerError];
@@ -623,7 +622,7 @@
                                     // enter our group.
                                     dispatch_group_enter(analysisGroup);
                                     
-                                    dispatch_async([DispatchQueueManager analysisManager].concurrentVideoAnalysisQueue, ^{
+                                    dispatch_async(concurrentVideoAnalysisQueue, ^{
                                         
                                         NSString* newMetadataKey = [analyzer pluginIdentifier];
                                         NSDictionary* newMetadataValue = [analyzer analyzeMetadataDictionaryForModuleIndex:SynopsisModuleIndexNone
@@ -700,7 +699,7 @@
         
         if(self.transcodeAssetHasAudio)
         {
-            dispatch_async([DispatchQueueManager analysisManager].audioUncompressedDecodeQueue, ^{
+            dispatch_async(audioUncompressedDecodeQueue, ^{
             
             [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Audio"];
             
@@ -810,7 +809,7 @@
         
         if(self.transcodeAssetHasVideo)
         {
-            [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:[DispatchQueueManager analysisManager].videoPassthroughEncodeQueue usingBlock:^
+            [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
             {
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Video"];
                 
@@ -912,7 +911,7 @@
         
         if(self.transcodeAssetHasAudio)
         {
-            [self.transcodeAssetWriterAudio requestMediaDataWhenReadyOnQueue:[DispatchQueueManager analysisManager].audioPassthroughEncodeQueue usingBlock:^
+            [self.transcodeAssetWriterAudio requestMediaDataWhenReadyOnQueue:audioPassthroughEncodeQueue usingBlock:^
              {
                  [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Audio"];
                  
