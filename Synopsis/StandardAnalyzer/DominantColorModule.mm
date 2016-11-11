@@ -32,7 +32,7 @@
 
 - (NSString*) moduleName
 {
-    return @"DominantColor";
+    return @"DominantColors";
 }
 
 - (FrameCacheFormat) currentFrameFormat
