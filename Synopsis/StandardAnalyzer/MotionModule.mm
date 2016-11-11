@@ -15,7 +15,10 @@
 @interface MotionModule ()
 {
 #if OPTICAL_FLOW
-    std::vector<cv::Point> frameFeatures[2];
+    std::vector<cv::Point2f> frameFeatures[2];
+    int numFeaturesToTrack;
+    CGPoint summedFullMotionVector;
+    CGPoint summedFrameMotionVector;
 #else
     cv::Ptr<cv::ORB> detector;
 #endif
@@ -29,6 +32,28 @@
     self = [super initWithQualityHint:qualityHint];
     {
 #if OPTICAL_FLOW
+        
+        summedFullMotionVector = CGPointZero;
+        summedFrameMotionVector = CGPointZero;
+        
+        switch (qualityHint) {
+            case SynopsisAnalysisQualityHintLow:
+                numFeaturesToTrack = 25;
+                break;
+            case SynopsisAnalysisQualityHintMedium:
+                numFeaturesToTrack = 50;
+                break;
+            case SynopsisAnalysisQualityHintHigh:
+                numFeaturesToTrack = 100;
+                break;
+            case SynopsisAnalysisQualityHintOriginal:
+                numFeaturesToTrack = 200;
+                break;
+                
+            default:
+                break;
+        }
+        
 #else
    
         // TODO: Adjust based on Quality.
@@ -105,19 +130,21 @@
 
 #if OPTICAL_FLOW
 
-static BOOL hasInitialized = false;
+BOOL hasInitialized = false;
+int tryCount = 0;
 - (NSDictionary*) detectFeaturesFlow:(matType)current previousImage:(matType) previous
 {
-    //
-    if(!hasInitialized)
-    {
-        cv::TermCriteria termcrit(cv::TermCriteria::COUNT|cv::TermCriteria::EPS,20,0.03);
+    cv::TermCriteria termcrit(cv::TermCriteria::COUNT|cv::TermCriteria::EPS,20,0.03);
+    std::vector<float> err;
+    std::vector<uchar> status;
 
+    if(!hasInitialized || (tryCount == 0) )
+    {
         cv::goodFeaturesToTrack(current, // the image
                                 frameFeatures[1],   // the output detected features
-                                100,  // the maximum number of features
+                                numFeaturesToTrack,  // the maximum number of features
                                 0.01,     // quality level
-                                10     // min distance between two features
+                                5     // min distance between two features
                                 );
         
         //cv::cornerSubPix(current, currentFrameFeatures, cv::Size(10, 10), cv::Size(-1,-1), termcrit);
@@ -126,45 +153,94 @@ static BOOL hasInitialized = false;
     
     else if( !frameFeatures[0].empty() )
     {
-        std::vector<uchar> status;
-        std::vector<float> err;
-
+        cv::Size optical_flow_window = cvSize(3,3);
         cv::calcOpticalFlowPyrLK(previous,
                                  current, // 2 consecutive images
                                  frameFeatures[0], // input point positions in first im
                                  frameFeatures[1], // output point positions in the 2nd
                                  status,    // tracking success
-                                 err      // tracking error
+                                 err,      // tracking error
+                                 optical_flow_window,
+                                 3,
+                                 termcrit
                                  );
-        
-        hasInitialized = true;
     }
-    else
-    {
-//        hasInitialized = false;
-    }
-    
     
 
+
     NSMutableArray* pointsArray = [NSMutableArray new];
-    for(std::vector<cv::Point>::iterator apoint = frameFeatures[1].begin(); apoint != frameFeatures[1].end(); apoint++)
+    int numAccumulatedFlowPoints = 0;
+    
+    for(int i = 0; i < frameFeatures[0].size(); i++)
     {
+        cv::Point prev = frameFeatures[0][i];
+        cv::Point curr = frameFeatures[1][i];
+        
         CGPoint point = CGPointZero;
         {
-            point = CGPointMake((float)apoint->x / (float)current.size().width,
-                                1.0 - (float)apoint->y / (float)current.size().height);
+            point = CGPointMake((float)curr.x / (float)current.size().width,
+                                1.0 - (float)curr.y / (float)current.size().height);
         }
         
         [pointsArray addObject:@[ @(point.x), @(point.y)]];
+        
+        // check to see we found flow for the tracking point so we can accumulate it.
+        if(status.size())
+        {
+            if(status[i])
+            {
+                float diffX = prev.x - curr.x;
+                float diffY = prev.y - curr.y;
+                
+                summedFrameMotionVector.x += diffX;
+                summedFrameMotionVector.y += diffY;
+                numAccumulatedFlowPoints++;
+            }
+        }
     }
+    
+    summedFrameMotionVector.x /= numAccumulatedFlowPoints;
+    summedFrameMotionVector.y /= numAccumulatedFlowPoints;
+
+    if( isnan(summedFrameMotionVector.x) || isinf(summedFrameMotionVector.x) )
+        summedFrameMotionVector.x = 0;
+
+    if( isnan(summedFrameMotionVector.y) || isinf(summedFrameMotionVector.y))
+        summedFrameMotionVector.y = 0;
+
+    float summedFrameMotionMagnitude = sqrtf( (summedFrameMotionVector.x * summedFrameMotionVector.x) + (summedFrameMotionVector.y + summedFrameMotionVector.y) );
+    
+    if( isnan(summedFrameMotionMagnitude) || isinf(summedFrameMotionMagnitude) )
+        summedFrameMotionMagnitude = 0;
+
+    summedFullMotionVector.x += summedFrameMotionVector.x;
+    summedFullMotionVector.y += summedFrameMotionVector.y;
+    
+    
+    
     
     // Add Features to metadata
     NSMutableDictionary* metadata = [NSMutableDictionary new];
     metadata[@"Features"] = pointsArray;
+    metadata[@"MotionVector"] = @[@(summedFrameMotionVector.x), @(summedFrameMotionVector.y)];
+    metadata[@"Motion"] = @(summedFrameMotionMagnitude);
 
     // Switch up our last frame
     std::swap(frameFeatures[1], frameFeatures[0]);
+    hasInitialized = true;
 
+    // If we havent found half of our tracking points, thats a problem
+    if(numAccumulatedFlowPoints < (numFeaturesToTrack / 2))
+    {
+        tryCount++;
+        
+        if(tryCount > 1)
+        {
+            tryCount = 0; // causes reset?
+            frameFeatures[0].clear();
+            frameFeatures[1].clear();
+        }
+    }
     
     return metadata;
 }
