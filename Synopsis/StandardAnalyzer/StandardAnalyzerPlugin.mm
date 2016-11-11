@@ -151,9 +151,6 @@
 
 - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
-    NSDictionary* result = nil;
-
-    
 #define SHOWIMAGE 0
     
 #if SHOWIMAGE

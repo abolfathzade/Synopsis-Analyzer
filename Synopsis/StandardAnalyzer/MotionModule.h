@@ -10,6 +10,4 @@
 
 @interface MotionModule : Module
 
-- (NSDictionary*) analyzedMetadataForFrame:(matType)frame lastFrame:(matType)lastFrame;
-
 @end
