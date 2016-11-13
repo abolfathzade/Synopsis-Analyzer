@@ -17,7 +17,7 @@
 
 @interface TrackerModule ()
 {
-    std::vector<cv::Point> frameFeatures[2];
+    std::vector<cv::Point2f> frameFeatures[2];
 
     cv::Ptr<cv::ORB> detector;
     
@@ -124,19 +124,21 @@
 #pragma mark - Optical Flow
 
 static BOOL hasInitialized = false;
+static int tryCount = 0;
 
 - (NSDictionary*) detectFeaturesFlow:(matType)current previousImage:(matType) previous
 {
-    //
-    if(!hasInitialized)
+    cv::TermCriteria termcrit(cv::TermCriteria::COUNT|cv::TermCriteria::EPS,20,0.03);
+    std::vector<float> err;
+    std::vector<uchar> status;
+    
+    if(!hasInitialized || (tryCount == 0) )
     {
-        cv::TermCriteria termcrit(cv::TermCriteria::COUNT|cv::TermCriteria::EPS,20,0.03);
-        
         cv::goodFeaturesToTrack(current, // the image
                                 frameFeatures[1],   // the output detected features
                                 numFeaturesToTrack,  // the maximum number of features
                                 0.01,     // quality level
-                                10     // min distance between two features
+                                5     // min distance between two features
                                 );
         
         //cv::cornerSubPix(current, currentFrameFeatures, cv::Size(10, 10), cv::Size(-1,-1), termcrit);
@@ -145,36 +147,44 @@ static BOOL hasInitialized = false;
     
     else if( !frameFeatures[0].empty() )
     {
-        std::vector<uchar> status;
-        std::vector<float> err;
-        
+        cv::Size optical_flow_window = cvSize(3,3);
         cv::calcOpticalFlowPyrLK(previous,
                                  current, // 2 consecutive images
                                  frameFeatures[0], // input point positions in first im
                                  frameFeatures[1], // output point positions in the 2nd
                                  status,    // tracking success
-                                 err      // tracking error
+                                 err,      // tracking error
+                                 optical_flow_window,
+                                 3,
+                                 termcrit
                                  );
-        
-        hasInitialized = true;
-    }
-    else
-    {
-        //        hasInitialized = false;
     }
     
     
     
     NSMutableArray* pointsArray = [NSMutableArray new];
-    for(std::vector<cv::Point>::iterator apoint = frameFeatures[1].begin(); apoint != frameFeatures[1].end(); apoint++)
+    int numAccumulatedFlowPoints = 0;
+    
+    for(int i = 0; i < frameFeatures[0].size(); i++)
     {
-        CGPoint point = CGPointZero;
+        if(status.size())
         {
-            point = CGPointMake((float)apoint->x / (float)current.size().width,
-                                1.0 - (float)apoint->y / (float)current.size().height);
+            if(status[i])
+            {
+                numAccumulatedFlowPoints++;
+                
+                cv::Point prev = frameFeatures[0][i];
+                cv::Point curr = frameFeatures[1][i];
+                
+                CGPoint point = CGPointZero;
+                {
+                    point = CGPointMake((float)curr.x / (float)current.size().width,
+                                        1.0 - (float)curr.y / (float)current.size().height);
+                }
+                
+                [pointsArray addObject:@[ @(point.x), @(point.y)]];
+            }
         }
-        
-        [pointsArray addObject:@[ @(point.x), @(point.y)]];
     }
     
     // Add Features to metadata
@@ -183,9 +193,23 @@ static BOOL hasInitialized = false;
     
     // Switch up our last frame
     std::swap(frameFeatures[1], frameFeatures[0]);
+    hasInitialized = true;
     
+    // If we havent found any points, thats a problem
+    if(numAccumulatedFlowPoints < (numFeaturesToTrack / 4))
+    {
+        tryCount++;
+        
+        if(tryCount > 1)
+        {
+            tryCount = 0; // causes reset?
+            frameFeatures[0].clear();
+            frameFeatures[1].clear();
+        }
+    }
     
     return metadata;
+
 }
 
 

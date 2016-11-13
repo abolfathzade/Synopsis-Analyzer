@@ -33,6 +33,7 @@
 #import "HistogramModule.h"
 #import "MotionModule.h"
 #import "PerceptualHashModule.h"
+#import "TrackerModule.h"
 
 @interface StandardAnalyzerPlugin ()
 {
@@ -87,6 +88,7 @@
                                 NSStringFromClass([HistogramModule class]),
                                 NSStringFromClass([MotionModule class]),
                                 NSStringFromClass([PerceptualHashModule class]),
+                                NSStringFromClass([TrackerModule class]),
                               ];
         
         cv::setUseOptimized(true);
