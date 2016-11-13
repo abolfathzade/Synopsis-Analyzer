@@ -12,8 +12,16 @@ NSString * const kSynopsisNewTranscodeOperationAvailable = @"kSynopsisNewTransco
 
 NSString * const kSynopsislMetadataIdentifier = @"mdta/info.v002.synopsis.metadata";
 
+// Pass 1
 NSString * const kSynopsisTranscodeVideoSettingsKey = @"kSynopsisVideoTranscodeSettings";
 NSString * const kSynopsisTranscodeAudioSettingsKey = @"kSynopsisAudioTranscodeSettings";
+NSString * const kSynopsisAnalysisSettingsKey = @"kSynopsisAnalysisSettings";
+NSString * const kSynopsisAnalysisSettingsQualityHintKey = @"kSynopsisAnalysisSettingsQualityHintKey";
+NSString * const kSynopsisAnalysisSettingsEnableConcurrencyKey = @"kSynopsisAnalysisSettingsEnableConcurrencyKey";
+NSString * const kSynopsisAnalysisSettingsEnabledPluginsKey = @"kSynopsisAnalysisSettingsEnabledPluginsKey";
+NSString * const kSynopsisAnalysisSettingsEnabledPluginModulesKey = @"kSynopsisAnalysisSettingsEnabledPluginModulesKey";
+
+// Pass 2
 NSString * const kSynopsisAnalyzedVideoSampleBufferMetadataKey = @"kSynopsisAnalyzedVideoSampleBufferMetadata";
 NSString * const kSynopsisAnalyzedAudioSampleBufferMetadataKey = @"kSynopsisAnalyzedAudioSampleBufferMetadata";
 NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalMetadata";

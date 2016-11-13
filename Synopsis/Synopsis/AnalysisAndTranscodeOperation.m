@@ -72,12 +72,14 @@
 
 @property (atomic, readwrite, strong) NSArray* requestedAnalyzers;
 
+@property (atomic, readwrite, assign) SynopsisAnalysisQualityHint analysisQualityHint;
+
 @end
 
 @implementation AnalysisAndTranscodeOperation
 
 
-- (instancetype) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions availableAnalyzers:(NSArray*)analyzers
+- (instancetype) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions
 {
     self = [super init];
     if(self)
@@ -108,11 +110,16 @@
             self.audioTranscodeSettings = self.transcodeOptions[kSynopsisTranscodeAudioSettingsKey];
             self.transcodingAudio = YES;
         }
+        
+        assert(self.transcodeOptions[kSynopsisAnalysisSettingsKey]);
 
+        NSDictionary* analysisOptions = self.transcodeOptions[kSynopsisAnalysisSettingsKey];
+        self.requestedAnalyzers = analysisOptions[kSynopsisAnalysisSettingsEnabledPluginsKey];
+        self.analysisQualityHint = [analysisOptions[kSynopsisAnalysisSettingsQualityHintKey] unsignedIntegerValue];
+        
+        
         self.sourceURL = sourceURL;
         self.destinationURL = destinationURL;
-        
-        self.requestedAnalyzers = analyzers;
         
         self.inFlightGlobalMetadata = [NSMutableDictionary new];
         self.inFlightVideoSampleBufferMetadata = [NSMutableArray new];
@@ -331,7 +338,7 @@
     // For every Analyzer, begin an new Analysis Session
     for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
     {
-        [analyzer beginMetadataAnalysisSessionWithQuality:SynopsisAnalysisQualityHintMedium];
+        [analyzer beginMetadataAnalysisSessionWithQuality:self.analysisQualityHint];
     }
     
     return error;
@@ -560,7 +567,7 @@
                             assert( kCVPixelFormatType_32BGRA == CVPixelBufferGetPixelFormatType(pixelBuffer));
                             
                             // resize and transform it to match expected raster
-                            CVPixelBufferRef transformedPixelBuffer = [self createPixelBuffer:pixelBuffer withTransform:self.transcodeAssetWriterVideo.transform forQuality:SynopsisAnalysisQualityHintMedium];
+                            CVPixelBufferRef transformedPixelBuffer = [self createPixelBuffer:pixelBuffer withTransform:self.transcodeAssetWriterVideo.transform forQuality:self.analysisQualityHint];
                             
                             CVPixelBufferLockBaseAddress(transformedPixelBuffer, kCVPixelBufferLock_ReadOnly);
                             
@@ -584,7 +591,6 @@
                                     {
                                         // enter our group.
                                         dispatch_group_enter(analysisGroup);
-                                        
                                         
                                         // dispatch a single module
                                         dispatch_async(concurrentVideoAnalysisQueue, ^{

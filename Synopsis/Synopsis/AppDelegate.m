@@ -266,16 +266,24 @@ static NSTimeInterval start;
     PresetObject* currentPreset = [self.prefsViewController defaultPreset];
     PresetVideoSettings* videoSettings = currentPreset.videoSettings;
     PresetAudioSettings* audioSettings = currentPreset.audioSettings;
+    PresetAnalysisSettings* analysisSettings = currentPreset.analyzerSettings;
+    
+    // TODO:
+    NSDictionary* placeholderAnalysisSettings = @{kSynopsisAnalysisSettingsQualityHintKey : @(SynopsisAnalysisQualityHintMedium),
+                                                  kSynopsisAnalysisSettingsEnabledPluginsKey : self.analyzerPlugins,
+                                                  kSynopsisAnalysisSettingsEnableConcurrencyKey : @TRUE,
+                                                  };
     
     NSDictionary* transcodeOptions = @{kSynopsisTranscodeVideoSettingsKey : (videoSettings.settingsDictionary) ? videoSettings.settingsDictionary : [NSNull null],
                                        kSynopsisTranscodeAudioSettingsKey : (audioSettings.settingsDictionary) ? audioSettings.settingsDictionary : [NSNull null],
+                                       kSynopsisAnalysisSettingsKey : (analysisSettings.settingsDictionary) ? analysisSettings.settingsDictionary : placeholderAnalysisSettings,
                                        };
     
     // TODO: Just pass a copy of the current Preset directly.
     AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL
                                                                                         destinationURL:destinationURL
                                                                                       transcodeOptions:transcodeOptions
-                                                                                    availableAnalyzers:self.analyzerPlugins];
+                                                                                    ];
     
     assert(analysis);
     

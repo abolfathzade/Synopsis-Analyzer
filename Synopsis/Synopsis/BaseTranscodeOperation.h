@@ -25,6 +25,7 @@ extern NSString* const kSynopsislMetadataIdentifier;
 // We then write a second pass which is "pass through" of either the original samples, or the new encoded samples to a new movie
 // With the appropriate metadata tracks written from pass 1.
 
+#pragma mark - Pass 1 Settings:
 
 // Key whose value is a dictionary appropriate for use with AVAssetWriterInput output settings. See AVVideoSettings.h
 // If this key is [NSNull null] it implies passthrough video encoding - sample buffers will not be re-encoded;
@@ -35,6 +36,24 @@ extern NSString* const kSynopsisTranscodeVideoSettingsKey;
 // If this key is [NSNull null] it implies passthrough video encoding - sample buffers will not be re-encoded;
 // Required
 extern NSString* const kSynopsisTranscodeAudioSettingsKey;
+
+// Key whose value is an NSDictionary with the following keys and values (see below)
+// Required
+extern NSString * const kSynopsisAnalysisSettingsKey;
+
+// Key whose value is an NSNumber wrapping a SynopsisAnalysisQualityHint to use for the analysis session.
+extern NSString * const kSynopsisAnalysisSettingsQualityHintKey;
+
+// Key whose value is an NSNumber wrapping a boolean to enable threaded / concurrent analysis for modules and plugins.
+extern NSString * const kSynopsisAnalysisSettingsEnableConcurrencyKey;
+
+// Key whose value is an NSArray of NSStrings which are classnames of enabled pluggins used for the analysis session
+extern NSString * const kSynopsisAnalysisSettingsEnabledPluginsKey;
+
+// Key whose value is an NSDictionary of key value pairs of Encoder class names and an array of NSStrings modules enabled.
+extern NSString * const kSynopsisAnalysisSettingsEnabledPluginModulesKey;
+
+#pragma mark - Pass 2 Settings:
 
 // Key whose value is an NSArray of metadata dictionaries (format TBD, we need to include time, maybe CMTimeRangeValues ?)
 // The existence of this key implies we will write a metadata track associated with our video track
