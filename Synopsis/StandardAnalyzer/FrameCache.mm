@@ -172,7 +172,6 @@
     
     // Convert Float BGR to Float Perceptual
     cv::cvtColor(self.currentBGR_32FC3_Frame, _currentPerceptual_32FC3_Frame, TO_PERCEPTUAL);
-
 }
 
 

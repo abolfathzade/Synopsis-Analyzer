@@ -82,6 +82,8 @@
 		1BABD3911DD5351700DB5A22 /* libopencv_video.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BABD3841DD5351700DB5A22 /* libopencv_video.a */; };
 		1BABD3921DD5351700DB5A22 /* libopencv_videostab.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BABD3851DD5351700DB5A22 /* libopencv_videostab.a */; };
 		1BAF36311D3958D200EAF37E /* MedianCutOpenCV.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1BAF362F1D3958D200EAF37E /* MedianCutOpenCV.cpp */; };
+		1BCB53241DD9119900403CDC /* TrackerModule.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1BCB53231DD9119900403CDC /* TrackerModule.mm */; };
+		1BCB53271DD911B100403CDC /* SaliencyModule.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1BCB53261DD911B100403CDC /* SaliencyModule.mm */; };
 		1BD4292F1D2D691E00870D2F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1BD710A81D615E9F007D61B9 /* AVASettingsTableViewCellController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */; };
 		1BD710AA1D615EC5007D61B9 /* AVASettingsTableViewCellController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */; };
@@ -695,6 +697,10 @@
 		1BABD3851DD5351700DB5A22 /* libopencv_videostab.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_videostab.a; sourceTree = "<group>"; };
 		1BAF362F1D3958D200EAF37E /* MedianCutOpenCV.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MedianCutOpenCV.cpp; sourceTree = "<group>"; };
 		1BAF36301D3958D200EAF37E /* MedianCutOpenCV.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MedianCutOpenCV.hpp; sourceTree = "<group>"; };
+		1BCB53221DD9119900403CDC /* TrackerModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrackerModule.h; sourceTree = "<group>"; };
+		1BCB53231DD9119900403CDC /* TrackerModule.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TrackerModule.mm; sourceTree = "<group>"; };
+		1BCB53251DD911B100403CDC /* SaliencyModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SaliencyModule.h; sourceTree = "<group>"; };
+		1BCB53261DD911B100403CDC /* SaliencyModule.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SaliencyModule.mm; sourceTree = "<group>"; };
 		1BD710A61D615E9F007D61B9 /* AVASettingsTableViewCellController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVASettingsTableViewCellController.h; sourceTree = "<group>"; };
 		1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVASettingsTableViewCellController.m; sourceTree = "<group>"; };
 		1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AVASettingsTableViewCellController.xib; sourceTree = "<group>"; };
@@ -1880,6 +1886,10 @@
 				1BABD3771DD5069800DB5A22 /* MotionModule.mm */,
 				1BABD3701DD4FC0E00DB5A22 /* PerceptualHashModule.h */,
 				1BABD3711DD4FC0E00DB5A22 /* PerceptualHashModule.mm */,
+				1BCB53251DD911B100403CDC /* SaliencyModule.h */,
+				1BCB53261DD911B100403CDC /* SaliencyModule.mm */,
+				1BCB53221DD9119900403CDC /* TrackerModule.h */,
+				1BCB53231DD9119900403CDC /* TrackerModule.mm */,
 			);
 			name = "Analyzer Modules";
 			sourceTree = "<group>";
@@ -2165,6 +2175,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BCB53241DD9119900403CDC /* TrackerModule.mm in Sources */,
 				1B4073701DCBDD4C00AB8A53 /* LogController.m in Sources */,
 				1BABD3781DD5069800DB5A22 /* MotionModule.mm in Sources */,
 				1BABD36F1DD4EE8E00DB5A22 /* Module.mm in Sources */,
@@ -2173,6 +2184,7 @@
 				1BABD3721DD4FC0E00DB5A22 /* PerceptualHashModule.mm in Sources */,
 				1BABD3691DD4E54100DB5A22 /* AverageColor.mm in Sources */,
 				1BABD3751DD4FEF100DB5A22 /* HistogramModule.mm in Sources */,
+				1BCB53271DD911B100403CDC /* SaliencyModule.mm in Sources */,
 				1BABD36C1DD4EE5C00DB5A22 /* DominantColorModule.mm in Sources */,
 				1B02B7581D2AE03200A4430F /* CIEDE2000.cpp in Sources */,
 				1B49BD9E1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm in Sources */,
@@ -2281,7 +2293,7 @@
 				INFOPLIST_FILE = SpotlightImporter/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/Library/Spotlight";
 				LIBRARY_STYLE = BUNDLE;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2298,7 +2310,7 @@
 				INFOPLIST_FILE = SpotlightImporter/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/Library/Spotlight";
 				LIBRARY_STYLE = BUNDLE;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2327,7 +2339,7 @@
 					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/lib",
 					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/share/OpenCV/3rdparty/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2353,7 +2365,7 @@
 					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/lib",
 					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/share/OpenCV/3rdparty/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2380,7 +2392,7 @@
 				);
 				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2401,7 +2413,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2500,7 +2512,7 @@
 				GCC_UNROLL_LOOPS = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -2514,7 +2526,7 @@
 				GCC_UNROLL_LOOPS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
