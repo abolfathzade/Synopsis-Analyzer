@@ -34,6 +34,7 @@
 #import "MotionModule.h"
 #import "PerceptualHashModule.h"
 #import "TrackerModule.h"
+#import "SaliencyModule.h"
 
 @interface StandardAnalyzerPlugin ()
 {
@@ -89,47 +90,13 @@
                                 NSStringFromClass([MotionModule class]),
                                 NSStringFromClass([PerceptualHashModule class]),
                                 NSStringFromClass([TrackerModule class]),
+                                NSStringFromClass([SaliencyModule class]),
                               ];
         
-        cv::setUseOptimized(true);
-        [self setOpenCLEnabled:USE_OPENCL];
-        
+        cv::setUseOptimized(true);        
     }
     
     return self;
-}
-
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
-{
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        cv::namedWindow("OpenCV Debug", CV_WINDOW_NORMAL);
-//    });
-    
-    self.frameCache = [[FrameCache alloc] initWithQualityHint:qualityHint];
-    
-    for(NSString* classString in self.moduleClasses)
-    {
-        Class moduleClass = NSClassFromString(classString);
-        
-        Module* module = [(Module*)[moduleClass alloc] initWithQualityHint:qualityHint];
-        
-        [self.modules addObject:module];
-    }
-    
-}
-
-- (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
-{
-    [self setOpenCLEnabled:USE_OPENCL];
-    
-    [self.frameCache cacheAndConvertBuffer:baseAddress width:width height:height bytesPerRow:bytesPerRow];
-}
-
-- (cv::Mat) imageFromBaseAddress:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
-{
-    size_t extendedWidth = bytesPerRow / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits
-
-    return cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
 }
 
 - (void) setOpenCLEnabled:(BOOL)enable
@@ -150,6 +117,42 @@
         cv::ocl::setUseOpenCL(false);
     }
 }
+
+
+- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
+{
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//        cv::namedWindow("OpenCV Debug", CV_WINDOW_NORMAL);
+//    });
+    
+    [self setOpenCLEnabled:USE_OPENCL];
+    
+    self.frameCache = [[FrameCache alloc] initWithQualityHint:qualityHint];
+    
+    for(NSString* classString in self.moduleClasses)
+    {
+        Class moduleClass = NSClassFromString(classString);
+        
+        Module* module = [(Module*)[moduleClass alloc] initWithQualityHint:qualityHint];
+        
+        [self.modules addObject:module];
+    }
+}
+
+- (cv::Mat) imageFromBaseAddress:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
+{
+    size_t extendedWidth = bytesPerRow / sizeof( uint32_t ); // each pixel is 4 bytes/32 bits
+    
+    return cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
+}
+
+- (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
+{
+    [self setOpenCLEnabled:USE_OPENCL];
+    
+    [self.frameCache cacheAndConvertBuffer:baseAddress width:width height:height bytesPerRow:bytesPerRow];
+}
+
 
 - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
@@ -173,6 +176,8 @@
     // Due to nuances with OpenCV's OpenCL (or maybe my own misunderstanding of OpenCL)
     // We cannot run this analysis in parallel for the OpenCL case.
     // We need to look into that...
+    
+    [self setOpenCLEnabled:USE_OPENCL];
     
     Module* module = self.modules[moduleIndex];
     

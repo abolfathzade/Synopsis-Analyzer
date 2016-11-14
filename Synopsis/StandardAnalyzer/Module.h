@@ -19,6 +19,8 @@
 
 - (instancetype) initWithQualityHint:(SynopsisAnalysisQualityHint)qualityHint NS_DESIGNATED_INITIALIZER;
 
+@property (readonly) SynopsisAnalysisQualityHint qualityHint;
+
 - (NSString*) moduleName;
 - (FrameCacheFormat) currentFrameFormat;
 - (FrameCacheFormat) previousFrameFormat;

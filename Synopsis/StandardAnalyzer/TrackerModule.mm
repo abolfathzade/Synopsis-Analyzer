@@ -85,7 +85,6 @@
 #endif
 }
 
-
 - (NSString*) moduleName
 {
     return @"Tracker";
@@ -110,7 +109,6 @@
 #else
     
     [metadata addEntriesFromDictionary:[self detectFeaturesORBCVMat:frame]];
-    [metadata addEntriesFromDictionary:[self detectMotionInCVMatAVG:frame lastImage:lastFrame]];
 #endif
     return metadata;
 }
@@ -132,6 +130,9 @@ static int tryCount = 0;
     std::vector<float> err;
     std::vector<uchar> status;
     
+    NSMutableArray* pointsArray = [NSMutableArray new];
+    int numAccumulatedFlowPoints = 0;
+
     if(!hasInitialized || (tryCount == 0) )
     {
         cv::goodFeaturesToTrack(current, // the image
@@ -158,32 +159,43 @@ static int tryCount = 0;
                                  3,
                                  termcrit
                                  );
-    }
-    
-    
-    
-    NSMutableArray* pointsArray = [NSMutableArray new];
-    int numAccumulatedFlowPoints = 0;
-    
-    for(int i = 0; i < frameFeatures[0].size(); i++)
-    {
-        if(status.size())
+        
+        for(int i = 0; i < frameFeatures[0].size(); i++)
         {
-            if(status[i])
+            if(status.size())
             {
-                numAccumulatedFlowPoints++;
-                
-                cv::Point prev = frameFeatures[0][i];
-                cv::Point curr = frameFeatures[1][i];
-                
-                CGPoint point = CGPointZero;
+                if(status[i])
                 {
-                    point = CGPointMake((float)curr.x / (float)current.size().width,
-                                        1.0 - (float)curr.y / (float)current.size().height);
+                    numAccumulatedFlowPoints++;
+                    
+                    cv::Point curr = frameFeatures[0][i];
+                    
+                    CGPoint point = CGPointZero;
+                    {
+                        point = CGPointMake((float)curr.x / (float)current.size().width,
+                                            1.0 - (float)curr.y / (float)current.size().height);
+                    }
+                    
+                    [pointsArray addObject:@[ @(point.x), @(point.y)]];
                 }
-                
-                [pointsArray addObject:@[ @(point.x), @(point.y)]];
             }
+        }
+    }
+    else
+    {
+        for(int i = 0; i < frameFeatures[1].size(); i++)
+        {
+            numAccumulatedFlowPoints++;
+            
+            cv::Point curr = frameFeatures[1][i];
+            
+            CGPoint point = CGPointZero;
+            {
+                point = CGPointMake((float)curr.x / (float)current.size().width,
+                                    1.0 - (float)curr.y / (float)current.size().height);
+            }
+            
+            [pointsArray addObject:@[ @(point.x), @(point.y)]];
         }
     }
     
@@ -198,14 +210,9 @@ static int tryCount = 0;
     // If we havent found any points, thats a problem
     if(numAccumulatedFlowPoints < (numFeaturesToTrack / 4))
     {
-        tryCount++;
-        
-        if(tryCount > 1)
-        {
             tryCount = 0; // causes reset?
             frameFeatures[0].clear();
             frameFeatures[1].clear();
-        }
     }
     
     return metadata;

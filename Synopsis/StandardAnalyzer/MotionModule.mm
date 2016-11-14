@@ -15,8 +15,6 @@
 @interface MotionModule ()
 {
     std::vector<cv::Point2f> frameFeatures[2];
-    CGPoint summedFullMotionVector;
-    CGPoint summedFrameMotionVector;
 }
 @end
 
@@ -26,8 +24,6 @@
 {
     self = [super initWithQualityHint:qualityHint];
     {
-        summedFullMotionVector = CGPointZero;
-        summedFrameMotionVector = CGPointZero;
     }
     return self;
 }
@@ -77,8 +73,8 @@
     // Avg entire flow field
     cv::Scalar avgMotion = cv::mean(flow);
     
-    float xMotion = avgMotion[0] / current.size().width;
-    float yMotion = -avgMotion[1] / current.size().height;
+    float xMotion = -avgMotion[0] / current.size().width;
+    float yMotion = avgMotion[1] / current.size().height;
     
     float avgVectorMagnitude = sqrtf(  (xMotion * xMotion)
                                      + (yMotion * yMotion)

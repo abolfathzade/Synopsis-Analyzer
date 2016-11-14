@@ -8,13 +8,17 @@
 
 #import "Module.h"
 
+@interface Module ()
+@property (readwrite) SynopsisAnalysisQualityHint qualityHint;
+@end
+
 @implementation Module
 
 - (instancetype) initWithQualityHint:(SynopsisAnalysisQualityHint)qualityHint
 {
     self = [super init];
     {
-        
+        self.qualityHint = qualityHint;
     }
     return self;
 }
