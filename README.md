@@ -41,20 +41,14 @@ Synopsis can analysize video and embed the following:
 
 ###Metadata:
 
-* Per Frame Average Color (via OpenCV)
-* Per Frame Dominant Color (via OpenCV)
-* Per Frame Tracked Points (via OpenCV)
-* Per Frame Motion Amount (via OpenCV)
-* Per Frame Histogram (via OpenCV)
-* Per Frame Image Description (via DeepBelief)
-* Global Average Color (via OpenCV)
-* Global Dominant Colors (via OpenCV)
-* Global Accumulated Histogram (via OpenCV)
+* Dominant Color and Histograms for every frame, and globally for color similarity and sorting,
+* Perceptual hashing for perceptual similarity searching / sorting
+* Visual Saliency (areas of visual interest)
+* Motion amount, direction, and smoothness for every frame, and globally, for similarity and sorting.
+* Automatic feature tracking 
 
 ###In Development:
 
-* Per Frame Motion Direction (via OpenCV Optical Flow)
-* Global Motion Direction (via OpenCV Optical Flow)
 * Per Frame Image Description via Inception (via Tensorflow)
 * Global Image Description via Inception (via Tensorflow)
 * Per Frame Image Style Description (via Tensorflow)
