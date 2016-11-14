@@ -10,6 +10,14 @@ Synopsis is video analysis and transcoding tool, as well as a metadata format fo
 
 This repository hosts a Synopsis Multimedia Analyser and Transcoder implementation written for Mac OS X.
 
+Synopsis can analysize video and embed the following metadata:
+
+* Dominant Color and Histograms for every frame, and globally for color similarity and sorting,
+* Perceptual hashing for perceptual similarity searching / sorting
+* Visual Saliency (areas of visual interest)
+* Motion amount, direction, and smoothness for every frame, and globally, for similarity and sorting.
+* Automatic feature tracking 
+
 ###Workflow Opporunities:
 
 **Archival**: 
@@ -36,16 +44,6 @@ This repository hosts a Synopsis Multimedia Analyser and Transcoder implementati
 ###Extending Features:
 
 Synopsis Analysis is plugin based, allowing developers to easily extend and experiment analyzing video and caching results for future use.
-
-Synopsis can analysize video and embed the following:
-
-###Metadata:
-
-* Dominant Color and Histograms for every frame, and globally for color similarity and sorting,
-* Perceptual hashing for perceptual similarity searching / sorting
-* Visual Saliency (areas of visual interest)
-* Motion amount, direction, and smoothness for every frame, and globally, for similarity and sorting.
-* Automatic feature tracking 
 
 ###In Development:
 
