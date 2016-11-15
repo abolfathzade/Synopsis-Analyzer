@@ -8449,12 +8449,14 @@
 		1B0A02B21DDAE4DD00F542F7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = TensorFlowAnalyzer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				LIBRARY_SEARCH_PATHS = (
@@ -8465,7 +8467,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = info.synopsis.TensorFlowAnalyzer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/TensorFlowAnalyzer/includes/";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/TensorFlowAnalyzer/includes";
 				WRAPPER_EXTENSION = plugin;
 			};
 			name = Debug;
@@ -8473,11 +8475,13 @@
 		1B0A02B31DDAE4DD00F542F7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
+				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = TensorFlowAnalyzer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				LIBRARY_SEARCH_PATHS = (
@@ -8488,7 +8492,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = info.synopsis.TensorFlowAnalyzer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/TensorFlowAnalyzer/includes/";
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/TensorFlowAnalyzer/includes";
 				WRAPPER_EXTENSION = plugin;
 			};
 			name = Release;
@@ -8496,7 +8500,7 @@
 		1B61BCFE1ACF26710013418D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
@@ -8507,6 +8511,7 @@
 					"$(inherited)",
 				);
 				GCC_UNROLL_LOOPS = NO;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
 				INFOPLIST_FILE = StandardAnalyzer/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				LIBRARY_SEARCH_PATHS = (
@@ -8518,7 +8523,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis.StandardAnalyzer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = plugin;
 			};
 			name = Debug;
@@ -8526,13 +8531,14 @@
 		1B61BCFF1ACF26710013418D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_GENERATE_TEST_COVERAGE_FILES = YES;
 				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = YES;
 				GCC_UNROLL_LOOPS = YES;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
 				INFOPLIST_FILE = StandardAnalyzer/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				LIBRARY_SEARCH_PATHS = (
@@ -8544,7 +8550,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis.StandardAnalyzer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = plugin;
 			};
 			name = Release;
