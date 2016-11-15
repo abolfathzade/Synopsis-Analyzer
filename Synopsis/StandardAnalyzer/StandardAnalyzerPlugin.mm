@@ -153,7 +153,6 @@
     [self.frameCache cacheAndConvertBuffer:baseAddress width:width height:height bytesPerRow:bytesPerRow];
 }
 
-
 - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
 #define SHOWIMAGE 0
@@ -164,8 +163,6 @@
     cv::flip(currentBGRImage, flipped, 0);
 
     dispatch_sync(dispatch_get_main_queue(), ^{
-        
-
         cv::imshow("Image", flipped);
     });
 
