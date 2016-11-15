@@ -36,6 +36,8 @@ using namespace tensorflow;
 {
     // TensorFlow
     std::unique_ptr<tensorflow::Session> session;
+    GraphDef tfInceptionGraphDef;
+
 }
 // Plugin API requirements
 @property (atomic, readwrite, strong) NSString* pluginName;
@@ -72,8 +74,19 @@ using namespace tensorflow;
         self.pluginMediaType = AVMediaTypeVideo;
         self.hasModules = NO;
         
-        self.inception2015GraphName = @"tensorflow_inception_graph.pb";
+        self.inception2015GraphName = @"tensorflow_inception_graph";
         self.inception2015LabelName = @"imagenet_comp_graph_label_strings.txt";
+        
+        tensorflow::port::InitMain(NULL, NULL, NULL);
+
+        NSString* inception2015GraphPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015GraphName ofType:@"pb"];
+        
+        Status load_graph_status = ReadBinaryProto(Env::Default(), [inception2015GraphPath cStringUsingEncoding:NSASCIIStringEncoding], &tfInceptionGraphDef);
+        if (!load_graph_status.ok())
+        {
+            NSLog(@"Unable to load graph");
+        }
+
     }
     
     return self;
@@ -85,20 +98,10 @@ using namespace tensorflow;
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
 {
-    NSArray* args = [[NSProcessInfo processInfo] arguments];
-    
-    //tensorflow::port::InitMain([args[0] cStringUsingEncoding:NSASCIIStringEncoding], NULL, NULL);
+
 
     session = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
 
-    NSString* inception2015GraphPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"tensorflow_inception_graph" ofType:@"pb"];
-    
-    GraphDef tfInceptionGraphDef;
-    Status load_graph_status = ReadBinaryProto(Env::Default(), [inception2015GraphPath cStringUsingEncoding:NSASCIIStringEncoding], &tfInceptionGraphDef);
-    if (!load_graph_status.ok())
-    {
-        NSLog(@"Unable to load graph");
-    }
     
     Status session_create_status = session->Create(tfInceptionGraphDef);
     

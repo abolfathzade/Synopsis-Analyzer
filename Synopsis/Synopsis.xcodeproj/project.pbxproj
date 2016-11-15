@@ -17,7 +17,7 @@
 		1B02BA481D2B07C700A4430F /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B02BA471D2B07C700A4430F /* OpenCL.framework */; };
 		1B02BA4A1D2B07D100A4430F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B02BA491D2B07D100A4430F /* Cocoa.framework */; };
 		1B0A02B71DDAE58000F542F7 /* TensorFlowAnalyzer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1B0A02B61DDAE58000F542F7 /* TensorFlowAnalyzer.mm */; };
-		1B0A02C21DDAE8CB00F542F7 /* libtensorflow_cc.so in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B0A02C11DDAE8CB00F542F7 /* libtensorflow_cc.so */; };
+		1B0A02C21DDAE8CB00F542F7 /* libtensorflow_cc.so in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B0A02C11DDAE8CB00F542F7 /* libtensorflow_cc.so */; settings = {ATTRIBUTES = (Required, ); }; };
 		1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
 		1B190E4C1D06806F00728443 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1B190E501D06819900728443 /* libpython.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4F1D06819900728443 /* libpython.tbd */; };
@@ -106,6 +106,9 @@
 		1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
 		1BEA4D421ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */; };
 		1BEC6BC91DDB028C00F77397 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
+		1BEC6BCC1DDB03AD00F77397 /* tensorflow_inception_graph.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC6BCB1DDB03AD00F77397 /* tensorflow_inception_graph.pb */; };
+		1BEC6BCD1DDB03F500F77397 /* TensorFlowAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B0A02AE1DDAE4DD00F542F7 /* TensorFlowAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1BEC6BD01DDB07E000F77397 /* libtensorflow_cc.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B0A02C11DDAE8CB00F542F7 /* libtensorflow_cc.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -166,6 +169,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				1B8673981D2EAC470064BECF /* StandardAnalyzer.plugin in CopyFiles */,
+				1BEC6BCD1DDB03F500F77397 /* TensorFlowAnalyzer.plugin in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -176,6 +180,16 @@
 			dstSubfolderSpec = 10;
 			files = (
 				1BA8F84F1C13968E0066BDDB /* DeepBelief.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1BEC6BCF1DDB07C500F77397 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1BEC6BD01DDB07E000F77397 /* libtensorflow_cc.so in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -423,7 +437,6 @@
 		1B0A02B01DDAE4DD00F542F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1B0A02B51DDAE57F00F542F7 /* TensorFlowAnalyzer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TensorFlowAnalyzer.h; sourceTree = "<group>"; };
 		1B0A02B61DDAE58000F542F7 /* TensorFlowAnalyzer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TensorFlowAnalyzer.mm; sourceTree = "<group>"; };
-		1B0A02BC1DDAE60A00F542F7 /* tensorflow_inception_graph.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph.pb; sourceTree = "<group>"; };
 		1B0A02C11DDAE8CB00F542F7 /* libtensorflow_cc.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libtensorflow_cc.so; sourceTree = "<group>"; };
 		1B190E4B1D06806F00728443 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		1B190E4F1D06819900728443 /* libpython.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libpython.tbd; path = usr/lib/libpython.tbd; sourceTree = SDKROOT; };
@@ -753,6 +766,7 @@
 		1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnalysisAndTranscodeOperation.h; sourceTree = "<group>"; };
 		1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnalysisAndTranscodeOperation.m; sourceTree = "<group>"; };
+		1BEC6BCB1DDB03AD00F77397 /* tensorflow_inception_graph.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph.pb; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1363,7 +1377,7 @@
 		1B0A02B91DDAE60A00F542F7 /* inception2015 */ = {
 			isa = PBXGroup;
 			children = (
-				1B0A02BC1DDAE60A00F542F7 /* tensorflow_inception_graph.pb */,
+				1BEC6BCB1DDB03AD00F77397 /* tensorflow_inception_graph.pb */,
 			);
 			path = inception2015;
 			sourceTree = "<group>";
@@ -2114,6 +2128,8 @@
 				1B0A02AA1DDAE4DD00F542F7 /* Sources */,
 				1B0A02AB1DDAE4DD00F542F7 /* Frameworks */,
 				1B0A02AC1DDAE4DD00F542F7 /* Resources */,
+				1BEC6BCE1DDB069B00F77397 /* ShellScript */,
+				1BEC6BCF1DDB07C500F77397 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -2249,6 +2265,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BEC6BCC1DDB03AD00F77397 /* tensorflow_inception_graph.pb in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2312,6 +2329,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "install_name_tool -change \"@executable_path/../Frameworks/DeepBelief.framework/Versions/A/DeepBelief\" \"@loader_path/../Frameworks/DeepBelief.framework/Versions/A/DeepBelief\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/MacOS/$PRODUCT_NAME\"\n";
+		};
+		1BEC6BCE1DDB069B00F77397 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "install_name_tool -change \"bazel-out/local-opt/bin/tensorflow/libtensorflow_cc.so\" @loader_path/../Frameworks/libtensorflow_cc.so \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/MacOS/$PRODUCT_NAME\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
