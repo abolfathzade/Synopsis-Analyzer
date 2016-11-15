@@ -10,11 +10,15 @@
 #include "opencv2/video/tracking.hpp"
 #import "MotionModule.h"
 
-#define OPTICAL_FLOW 1
-
 @interface MotionModule ()
 {
     std::vector<cv::Point2f> frameFeatures[2];
+    
+    unsigned int frameCount;
+    
+    float avgVectorMagnitude;
+    float avgVectorX;
+    float avgVectorY;
 }
 @end
 
@@ -24,6 +28,9 @@
 {
     self = [super initWithQualityHint:qualityHint];
     {
+        avgVectorX = 0.0;
+        avgVectorY = 0.0;
+        avgVectorMagnitude = 0.0;
     }
     return self;
 }
@@ -43,26 +50,7 @@
     return FrameCacheFormatGray8;
 }
 
-- (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame
-{
-    NSMutableDictionary* metadata = [NSMutableDictionary new];
-
-#if OPTICAL_FLOW
-    [metadata addEntriesFromDictionary:[self detectFeaturesFlow:frame previousImage:lastFrame]];
-#else
-
-    [metadata addEntriesFromDictionary:[self detectFeaturesORBCVMat:frame]];
-    [metadata addEntriesFromDictionary:[self detectMotionInCVMatAVG:frame lastImage:lastFrame]];
-#endif
-    return metadata;
-}
-
-- (NSDictionary*) finaledAnalysisMetadata
-{
-    return nil;
-}
-
-- (NSDictionary*) detectFeaturesFlow:(matType)current previousImage:(matType) previous
+- (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)current previousFrame:(matType)previous
 {
     // Empty mat - will be zeros
     cv::Mat flow;
@@ -76,16 +64,34 @@
     float xMotion = -avgMotion[0] / current.size().width;
     float yMotion = avgMotion[1] / current.size().height;
     
-    float avgVectorMagnitude = sqrtf(  (xMotion * xMotion)
-                                     + (yMotion * yMotion)
-                                     );
+    float frameVectorMagnitude = sqrtf(  (xMotion * xMotion)
+                                          + (yMotion * yMotion)
+                                          );
     
     // Add Features to metadata
     NSMutableDictionary* metadata = [NSMutableDictionary new];
     metadata[@"MotionVector"] = @[@(xMotion), @(yMotion)];
-    metadata[@"Motion"] = @(avgVectorMagnitude);
+    metadata[@"Motion"] = @(frameVectorMagnitude);
     
+    // sum Direction and speed of aggregate frames
+    avgVectorMagnitude += frameVectorMagnitude;
+    avgVectorX += xMotion;
+    avgVectorY += yMotion;
     
+    frameCount++;
+    
+    return metadata;
+}
+
+- (NSDictionary*) finaledAnalysisMetadata
+{
+    NSMutableDictionary* metadata = [NSMutableDictionary new];
+
+    float frameCountf = (float) frameCount;
+    
+    metadata[@"MotionVector"] = @[@(avgVectorX / frameCountf ), @(avgVectorY / frameCountf)];
+    metadata[@"Motion"] = @(avgVectorMagnitude / frameCountf);
+
     return metadata;
 }
 
