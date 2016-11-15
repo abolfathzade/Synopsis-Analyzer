@@ -40,14 +40,13 @@
 
 - (FrameCacheFormat) currentFrameFormat
 {
-    return FrameCacheFormatPerceptual;
+    return FrameCacheFormatBGR8;
 }
 
 - (FrameCacheFormat) previousFrameFormat
 {
-    return FrameCacheFormatPerceptual;
+    return FrameCacheFormatBGR8;
 }
-
 
 - (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame
 {

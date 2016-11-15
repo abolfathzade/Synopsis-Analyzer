@@ -12,7 +12,7 @@
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
     "A7A7D73BE0D478A6B7BF50EC87E41BFF64BD43C2" : "Synopsis\/Synopsis\/CIEDE2000\/",
     "FD621B61612EAE3F6614DE4F9F1FD281F3D57D52" : "Synopsis\/Synopsis\/mp4v2\/",
-    "696275204D6ACFB4CED91D2B4AC4227F459209A0" : "Synopsis"
+    "696275204D6ACFB4CED91D2B4AC4227F459209A0" : "Synopsis\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "Synopsis",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,
