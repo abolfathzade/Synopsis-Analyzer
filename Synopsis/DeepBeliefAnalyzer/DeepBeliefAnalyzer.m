@@ -41,7 +41,7 @@
     if(self)
     {
         self.pluginName = @"Deep Belief";
-        self.pluginIdentifier = @"info.v002.Synopsis.DeepBeliefAnalyzer";
+        self.pluginIdentifier = @"info.Synopsis.DeepBeliefAnalyzer";
         self.pluginAuthors = @[@"Anton Marini"];
         self.pluginDescription = @"Deep Belief Object Identification Plugin";
         self.pluginAPIVersionMajor = 0;

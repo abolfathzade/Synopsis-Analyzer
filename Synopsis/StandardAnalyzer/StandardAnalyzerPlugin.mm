@@ -72,7 +72,7 @@
     if(self)
     {
         self.pluginName = @"OpenCV Analyzer";
-        self.pluginIdentifier = @"info.v002.Synopsis.OpenCVAnalyzer";
+        self.pluginIdentifier = @"info.Synopsis.OpenCVAnalyzer";
         self.pluginAuthors = @[@"Anton Marini"];
         self.pluginDescription = @"OpenCV analysis for color, motion, features and more.";
         self.pluginAPIVersionMajor = 0;
