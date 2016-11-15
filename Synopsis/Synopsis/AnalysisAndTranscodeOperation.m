@@ -166,6 +166,11 @@
         
         if([[pluginInstance pluginMediaType] isEqualToString:AVMediaTypeVideo])
         {
+            pluginInstance.successLog = ^void(NSString* log){[[LogController sharedLogController] appendSuccessLog:log];};
+            pluginInstance.warningLog = ^void(NSString* log){[[LogController sharedLogController] appendWarningLog:log];};
+            pluginInstance.verboseLog = ^void(NSString* log){[[LogController sharedLogController] appendVerboseLog:log];};
+            pluginInstance.errorLog = ^void(NSString* log){[[LogController sharedLogController] appendErrorLog:log];};
+            
             [initializedAnalyzers addObject:pluginInstance];
         }
         else

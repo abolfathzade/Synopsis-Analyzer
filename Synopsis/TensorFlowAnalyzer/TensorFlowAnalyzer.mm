@@ -28,9 +28,7 @@
 #import "tensorflow/core/public/session.h"
 #import "tensorflow/core/util/command_line_flags.h"
 
-
 using namespace tensorflow;
-
 
 @interface TensorFlowAnalyzer ()
 {
@@ -75,18 +73,35 @@ using namespace tensorflow;
         self.hasModules = NO;
         
         self.inception2015GraphName = @"tensorflow_inception_graph";
-        self.inception2015LabelName = @"imagenet_comp_graph_label_strings.txt";
+        self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
         
         tensorflow::port::InitMain(NULL, NULL, NULL);
 
         NSString* inception2015GraphPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015GraphName ofType:@"pb"];
         
         Status load_graph_status = ReadBinaryProto(Env::Default(), [inception2015GraphPath cStringUsingEncoding:NSASCIIStringEncoding], &tfInceptionGraphDef);
+       
         if (!load_graph_status.ok())
         {
-            NSLog(@"Unable to load graph");
+            NSLog(@"Tensorflow:Unable to Load Graph");
+        }
+        else
+        {
+            NSLog(@"Tensorflow: Loaded Graph");
         }
 
+        session = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
+        
+        Status session_create_status = session->Create(tfInceptionGraphDef);
+        
+        if (!session_create_status.ok())
+        {
+            NSLog(@"Tensorflow: Unable to create session");
+        }
+        else
+        {
+            NSLog(@"Tensorflow: Created Session");
+        }
     }
     
     return self;
@@ -94,20 +109,13 @@ using namespace tensorflow;
 
 - (void) dealloc
 {
+    
 }
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
 {
 
 
-    session = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
-
-    
-    Status session_create_status = session->Create(tfInceptionGraphDef);
-    
-    if (!session_create_status.ok()) {
-        NSLog(@"Unable to create session");
-    }
     
 }
 
@@ -125,6 +133,11 @@ using namespace tensorflow;
 {
     return nil;
 }
+
+
+#pragma mark - Utilities
+
+// Resize to expected tensor size - Models expect a specific size input tensor
 
 
 @end

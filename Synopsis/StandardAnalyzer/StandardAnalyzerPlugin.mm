@@ -22,8 +22,6 @@
 
 #import "StandardAnalyzerPlugin.h"
 
-#import "LogController.h"
-
 #import "StandardAnalyzerDefines.h"
 
 // Modules
@@ -106,10 +104,6 @@
         if(cv::ocl::haveOpenCL())
         {
             cv::ocl::setUseOpenCL(true);
-        }
-        else
-        {
-            NSLog(@"Unable to Enable OpenCL - No OpenCL Devices detected");
         }
     }
     else

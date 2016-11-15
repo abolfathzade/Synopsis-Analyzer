@@ -30,6 +30,13 @@
 
 @property (readonly) NSArray* pluginModuleNames;
 
+// Logging callbacks fo inclusion in the UI
+@property (copy) LogBlock errorLog;
+@property (copy) LogBlock successLog;
+@property (copy) LogBlock warningLog;
+@property (copy) LogBlock verboseLog;
+
+
 @property (readonly) BOOL hasModules;
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint;
