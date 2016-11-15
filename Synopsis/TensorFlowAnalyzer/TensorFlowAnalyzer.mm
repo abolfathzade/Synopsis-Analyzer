@@ -5,33 +5,37 @@
 //  Created by vade on 12/6/15.
 //  Copyright (c) 2015 metavisual. All rights reserved.
 //
-
-
-#include "tensorflow/cc/ops/const_op.h"
-#include "tensorflow/cc/ops/image_ops.h"
-#include "tensorflow/cc/ops/standard_ops.h"
-#include "tensorflow/core/framework/graph.pb.h"
-#include "tensorflow/core/framework/tensor.h"
-#include "tensorflow/core/graph/default_device.h"
-#include "tensorflow/core/graph/graph_def_builder.h"
-#include "tensorflow/core/lib/core/errors.h"
-#include "tensorflow/core/lib/core/stringpiece.h"
-#include "tensorflow/core/lib/core/threadpool.h"
-#include "tensorflow/core/lib/io/path.h"
-#include "tensorflow/core/lib/strings/stringprintf.h"
-#include "tensorflow/core/platform/init_main.h"
-#include "tensorflow/core/platform/logging.h"
-#include "tensorflow/core/platform/types.h"
-#include "tensorflow/core/public/session.h"
-#include "tensorflow/core/util/command_line_flags.h"
-
 #import "TensorFlowAnalyzer.h"
+
+#import <fstream>
+#import <vector>
+
+#import "tensorflow/cc/ops/const_op.h"
+#import "tensorflow/cc/ops/image_ops.h"
+#import "tensorflow/cc/ops/standard_ops.h"
+#import "tensorflow/core/framework/graph.pb.h"
+#import "tensorflow/core/framework/tensor.h"
+#import "tensorflow/core/graph/default_device.h"
+#import "tensorflow/core/graph/graph_def_builder.h"
+#import "tensorflow/core/lib/core/errors.h"
+#import "tensorflow/core/lib/core/stringpiece.h"
+#import "tensorflow/core/lib/core/threadpool.h"
+#import "tensorflow/core/lib/io/path.h"
+#import "tensorflow/core/lib/strings/stringprintf.h"
+#import "tensorflow/core/platform/init_main.h"
+#import "tensorflow/core/platform/logging.h"
+#import "tensorflow/core/platform/types.h"
+#import "tensorflow/core/public/session.h"
+#import "tensorflow/core/util/command_line_flags.h"
+
+
+using namespace tensorflow;
 
 
 @interface TensorFlowAnalyzer ()
 {
     // TensorFlow
-    tensorflow::Session* inceptionSession;
+    std::unique_ptr<tensorflow::Session> session;
 }
 // Plugin API requirements
 @property (atomic, readwrite, strong) NSString* pluginName;
@@ -51,8 +55,6 @@
 @end
 
 @implementation TensorFlowAnalyzer
-
-using namespace tensorflow;
 
 - (id) init
 {
@@ -87,7 +89,7 @@ using namespace tensorflow;
     
     //tensorflow::port::InitMain([args[0] cStringUsingEncoding:NSASCIIStringEncoding], NULL, NULL);
 
-    Status status = NewSession(SessionOptions(), &inceptionSession);
+    session = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
 
     NSString* inception2015GraphPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"tensorflow_inception_graph" ofType:@"pb"];
     
@@ -98,7 +100,7 @@ using namespace tensorflow;
         NSLog(@"Unable to load graph");
     }
     
-    Status session_create_status = inceptionSession->Create(tfInceptionGraphDef);
+    Status session_create_status = session->Create(tfInceptionGraphDef);
     
     if (!session_create_status.ok()) {
         NSLog(@"Unable to create session");

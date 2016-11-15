@@ -28,6 +28,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+// This file defines an Arena allocator for better allocation performance.
+
 #ifndef GOOGLE_PROTOBUF_ARENA_H__
 #define GOOGLE_PROTOBUF_ARENA_H__
 
@@ -56,6 +58,7 @@ using type_info = ::type_info;
 #include <google/protobuf/stubs/mutex.h>
 #include <google/protobuf/stubs/type_traits.h>
 
+
 namespace google {
 namespace protobuf {
 
@@ -77,7 +80,11 @@ template<typename T> void arena_delete_object(void* object) {
   delete reinterpret_cast<T*>(object);
 }
 inline void arena_free(void* object, size_t size) {
-  free(object);
+#if defined(__GXX_DELETE_WITH_SIZE__) || defined(__cpp_sized_deallocation)
+  ::operator delete(object, size);
+#else
+  ::operator delete(object);
+#endif
 }
 
 }  // namespace internal
@@ -141,7 +148,7 @@ struct ArenaOptions {
         max_block_size(kDefaultMaxBlockSize),
         initial_block(NULL),
         initial_block_size(0),
-        block_alloc(&malloc),
+        block_alloc(&::operator new),
         block_dealloc(&internal::arena_free),
         on_arena_init(NULL),
         on_arena_reset(NULL),
@@ -210,6 +217,9 @@ struct ArenaOptions {
 //
 // This protocol is implemented by all arena-enabled proto2 message classes as
 // well as RepeatedPtrField.
+//
+// Do NOT subclass Arena. This class will be marked as final when C++11 is
+// enabled.
 class LIBPROTOBUF_EXPORT Arena {
  public:
   // Arena constructor taking custom options. See ArenaOptions below for
@@ -446,6 +456,10 @@ class LIBPROTOBUF_EXPORT Arena {
   // As above, but does not include any free space in underlying blocks.
   GOOGLE_ATTRIBUTE_NOINLINE uint64 SpaceUsed() const;
 
+  // Combines SpaceAllocated and SpaceUsed. Returns a pair of
+  // <space_allocated, space_used>.
+  GOOGLE_ATTRIBUTE_NOINLINE std::pair<uint64, uint64> SpaceAllocatedAndUsed() const;
+
   // Frees all storage allocated by this arena after calling destructors
   // registered with OwnDestructor() and freeing objects registered with Own().
   // Any objects allocated on this arena are unusable after this call. It also
@@ -490,27 +504,28 @@ class LIBPROTOBUF_EXPORT Arena {
     return GetArenaInternal(value, static_cast<T*>(0));
   }
 
-  // Helper typetrait that indicates support for arenas in a type T at compile
-  // time. This is public only to allow construction of higher-level templated
-  // utilities. is_arena_constructable<T>::value is an instance of
-  // google::protobuf::internal::true_type if the message type T has arena support enabled, and
-  // google::protobuf::internal::false_type otherwise.
-  //
-  // This is inside Arena because only Arena has the friend relationships
-  // necessary to see the underlying generated code traits.
-  template<typename T>
-  struct is_arena_constructable {
+ private:
+  struct InternalIsArenaConstructableHelper {
     template<typename U>
     static char ArenaConstructable(
         const typename U::InternalArenaConstructable_*);
     template<typename U>
     static double ArenaConstructable(...);
+  };
 
-    // This will resolve to either google::protobuf::internal::true_type or google::protobuf::internal::false_type.
-    typedef google::protobuf::internal::integral_constant<bool,
-              sizeof(ArenaConstructable<const T>(static_cast<const T*>(0))) ==
-              sizeof(char)> type;
-    static const type value;
+ public:
+  // Helper typetrait that indicates support for arenas in a type T at compile
+  // time. This is public only to allow construction of higher-level templated
+  // utilities. is_arena_constructable<T>::value is true if the message type T
+  // has arena support enabled, and false otherwise.
+  //
+  // This is inside Arena because only Arena has the friend relationships
+  // necessary to see the underlying generated code traits.
+  template <typename T>
+  struct is_arena_constructable
+      : public google::protobuf::internal::integral_constant<
+            bool, sizeof(InternalIsArenaConstructableHelper::ArenaConstructable<
+                         const T>(static_cast<const T*>(0))) == sizeof(char)> {
   };
 
  private:
@@ -572,35 +587,32 @@ class LIBPROTOBUF_EXPORT Arena {
     return google::protobuf::internal::has_trivial_destructor<T>::value;
   }
 
-  // Helper typetrait that indicates whether the desctructor of type T should be
-  // called when arena is destroyed at compile time. This is only to allow
-  // construction of higher-level templated utilities.
-  // is_destructor_skippable<T>::value is an instance of google::protobuf::internal::true_type if the
-  // destructor of the message type T should not be called when arena is
-  // destroyed or google::protobuf::internal::has_trivial_destructor<T>::value == true, and
-  // google::protobuf::internal::false_type otherwise.
-  //
-  // This is inside Arena because only Arena has the friend relationships
-  // necessary to see the underlying generated code traits.
-  template<typename T>
-  struct is_destructor_skippable {
+ private:
+  struct InternalIsDestructorSkippableHelper {
     template<typename U>
     static char DestructorSkippable(
         const typename U::DestructorSkippable_*);
     template<typename U>
     static double DestructorSkippable(...);
-
-    // The raw_skippable_value const bool variable is separated from the typedef
-    // line below as a work-around of an NVCC 7.0 (and earlier) compiler bug.
-    static const bool raw_skippable_value =
-          sizeof(DestructorSkippable<const T>(static_cast<const T*>(0))) ==
-          sizeof(char) || google::protobuf::internal::has_trivial_destructor<T>::value == true;
-    // This will resolve to either google::protobuf::internal::true_type or google::protobuf::internal::false_type.
-    typedef google::protobuf::internal::integral_constant<bool, raw_skippable_value> type;
-    static const type value;
   };
 
+ public:
+  // Helper typetrait that indicates whether the desctructor of type T should be
+  // called when arena is destroyed at compile time. This is only to allow
+  // construction of higher-level templated utilities.
+  // is_destructor_skippable<T>::value is true if the destructor of the message
+  // type T should not be called when arena is destroyed or false otherwise.
+  // This is inside Arena because only Arena has the friend relationships
+  // necessary to see the underlying generated code traits.
+  template<typename T>
+  struct is_destructor_skippable
+      : public google::protobuf::internal::integral_constant<
+            bool,
+            sizeof(InternalIsDestructorSkippableHelper::DestructorSkippable<
+                   const T>(static_cast<const T*>(0))) == sizeof(char) ||
+                google::protobuf::internal::has_trivial_destructor<T>::value> {};
 
+ private:
   // CreateMessage<T> requires that T supports arenas, but this private method
   // works whether or not T supports arenas. These are not exposed to user code
   // as it can cause confusing API usages, and end up having double free in
@@ -780,8 +792,10 @@ class LIBPROTOBUF_EXPORT Arena {
   // which needs to declare google::protobuf::Map as friend of generated message.
   template <typename T>
   static void CreateInArenaStorage(T* ptr, Arena* arena) {
-    CreateInArenaStorageInternal(ptr, arena, is_arena_constructable<T>::value);
-    RegisterDestructorInternal(ptr, arena, is_destructor_skippable<T>::value);
+    CreateInArenaStorageInternal(ptr, arena,
+                                 typename is_arena_constructable<T>::type());
+    RegisterDestructorInternal(ptr, arena,
+                               typename is_destructor_skippable<T>::type());
   }
 
   template <typename T>
@@ -792,7 +806,7 @@ class LIBPROTOBUF_EXPORT Arena {
   template <typename T>
   static void CreateInArenaStorageInternal(
       T* ptr, Arena* arena, google::protobuf::internal::false_type) {
-    new (ptr) T;
+    new (ptr) T();
   }
 
   template <typename T>
@@ -909,16 +923,6 @@ class LIBPROTOBUF_EXPORT Arena {
 
 // Defined above for supporting environments without RTTI.
 #undef RTTI_TYPE_ID
-
-template<typename T>
-const typename Arena::is_arena_constructable<T>::type
-    Arena::is_arena_constructable<T>::value =
-        typename Arena::is_arena_constructable<T>::type();
-
-template<typename T>
-const typename Arena::is_destructor_skippable<T>::type
-    Arena::is_destructor_skippable<T>::value =
-        typename Arena::is_destructor_skippable<T>::type();
 
 }  // namespace protobuf
 
