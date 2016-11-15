@@ -76,32 +76,6 @@ using namespace tensorflow;
         self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
         
         tensorflow::port::InitMain(NULL, NULL, NULL);
-
-        NSString* inception2015GraphPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015GraphName ofType:@"pb"];
-        
-        Status load_graph_status = ReadBinaryProto(Env::Default(), [inception2015GraphPath cStringUsingEncoding:NSASCIIStringEncoding], &tfInceptionGraphDef);
-       
-        if (!load_graph_status.ok())
-        {
-            NSLog(@"Tensorflow:Unable to Load Graph");
-        }
-        else
-        {
-            NSLog(@"Tensorflow: Loaded Graph");
-        }
-
-        session = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
-        
-        Status session_create_status = session->Create(tfInceptionGraphDef);
-        
-        if (!session_create_status.ok())
-        {
-            NSLog(@"Tensorflow: Unable to create session");
-        }
-        else
-        {
-            NSLog(@"Tensorflow: Created Session");
-        }
     }
     
     return self;
@@ -114,9 +88,36 @@ using namespace tensorflow;
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
 {
-
-
+    NSString* inception2015GraphPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015GraphName ofType:@"pb"];
     
+    Status load_graph_status = ReadBinaryProto(Env::Default(), [inception2015GraphPath cStringUsingEncoding:NSASCIIStringEncoding], &tfInceptionGraphDef);
+    
+    if (!load_graph_status.ok())
+    {
+        if(self.errorLog)
+            self.errorLog(@"Tensorflow:Unable to Load Graph");
+    }
+    else
+    {
+        if(self.successLog)
+            self.successLog(@"Tensorflow: Loaded Graph");
+    }
+    
+    session = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
+    
+    Status session_create_status = session->Create(tfInceptionGraphDef);
+    
+    if (!session_create_status.ok())
+    {
+        if(self.errorLog)
+            self.errorLog(@"Tensorflow: Unable to create session");
+    }
+    else
+    {
+        if(self.successLog)
+            self.successLog(@"Tensorflow: Created Session");
+    }
+
 }
 
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow

@@ -129,7 +129,14 @@
         
         Module* module = [(Module*)[moduleClass alloc] initWithQualityHint:qualityHint];
         
-        [self.modules addObject:module];
+        if(module != nil)
+        {
+        
+            [self.modules addObject:module];
+            
+            if(self.successLog)
+                self.successLog([@"Loaded Module: " stringByAppendingString:classString]);
+        }
     }
 }
 
