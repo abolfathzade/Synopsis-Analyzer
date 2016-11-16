@@ -145,9 +145,31 @@
 
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
-    tensorflow::Tensor input = array_to_tensor(<#const T *in#>, <#tensorflow::Tensor &dst#>, <#bool do_memcpy#>)
     
-    std::vector<tensorflow::Tensor> resized_tensors = [self resizeAndNormalizeInputTensor:(tensorflow::ops::Input)]
+    // http://stackoverflow.com/questions/36044197/how-do-i-pass-an-opencv-mat-into-a-c-tensorflow-graph
+    
+    tensorflow::Tensor input_tensor(tensorflow::DT_UINT8,
+                                    tensorflow::TensorShape({1, static_cast<long long>(height), static_cast<long long>(width), 4}));
+    
+    auto input_tensor_mapped = input_tensor.tensor<unsigned char, 4>();
+
+    const unsigned char* source_data = (unsigned char*)baseAddress;
+    
+    for (int y = 0; y < height; ++y)
+    {
+        const unsigned char* source_row = source_data + (y * width * 4);
+        for (int x = 0; x < width; ++x)
+        {
+            const unsigned char* source_pixel = source_row + (x * 4);
+            for (int c = 0; c < 4; ++c)
+            {
+                const unsigned char* source_value = source_pixel + c;
+                input_tensor_mapped(0, y, x, c) = *source_value;
+            }
+        }
+    }
+    
+    std::vector<tensorflow::Tensor> resized_tensors = [self resizeAndNormalizeInputTensor:input_tensor];
     
     resized_tensor = resized_tensors[0];
 
@@ -189,7 +211,7 @@ template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, 
 // TODO: Keep out_tensors cached and re-use
 // TODO: Cache resizeAndNormalizeSession to re-use.
 
-- (std::vector<tensorflow::Tensor>) resizeAndNormalizeInputTensor:(tensorflow::ops::Input)inputTensor
+- (std::vector<tensorflow::Tensor>) resizeAndNormalizeInputTensor:(tensorflow::Tensor)inputTensor
 {
     auto root = tensorflow::Scope::NewRootScope();
 
