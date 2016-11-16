@@ -38,8 +38,14 @@
     // Cached resized tensor from our input buffer (image)
     tensorflow::Tensor resized_tensor;
     
+    // input image tensor
     std::string input_layer;
-    std::string output_layer;
+    
+    // Label / Score tensor
+    std::string final_layer;
+    
+    // Feature vector tensor
+    std::string feature_layer;
     
     // top scoring classes
     std::vector<int> top_label_indices;  // contains top n label indices for input image
@@ -88,7 +94,8 @@
         self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
         
         input_layer = "Mul";
-        output_layer = "softmax";
+        final_layer = "softmax";
+        feature_layer = "pool_3";
 
         
         tensorflow::port::InitMain(NULL, NULL, NULL);
@@ -145,7 +152,6 @@
 
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
-    
     // http://stackoverflow.com/questions/36044197/how-do-i-pass-an-opencv-mat-into-a-c-tensorflow-graph
     
     // So - were going to ditch the last channel
@@ -156,6 +162,7 @@
 
     const unsigned char* source_data = (unsigned char*)baseAddress;
     
+    // TODO: check that I am dropping the alpha channel correctly :X
     for (int y = 0; y < height; ++y)
     {
         const unsigned char* source_row = source_data + (y * width * 4);
@@ -180,14 +187,25 @@
 {
     // Actually run the image through the model.
     std::vector<tensorflow::Tensor> outputs;
-    tensorflow::Status run_status = session->Run({ {input_layer, resized_tensor} }, {output_layer}, {}, &outputs);
+    tensorflow::Status run_status = session->Run({ {input_layer, resized_tensor} }, {final_layer, feature_layer}, {}, &outputs);
     if (!run_status.ok()) {
         LOG(ERROR) << "Running model failed: " << run_status;
         return nil;
     }
 
+    NSDictionary* labelsAndScores = [self labelsFromOutput:outputs];
     
-    return [self labelsFromOutput:outputs];
+    tensorflow::DataType type = outputs[1].dtype();
+    int64_t numElements = outputs[1].NumElements();
+//
+//    Eigen::Tensor<float, 2048> t = outputs[1].tensor<float, 2048>()
+    
+    std::string summaryFeatureVec = outputs[1].SummarizeValue(2048);
+    
+    //    tensorflow::TensorBuffer =
+//    NSDictionary* featureVec = = @{
+    
+    return labelsAndScores ;
 }
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
