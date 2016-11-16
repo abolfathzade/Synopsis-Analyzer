@@ -108,7 +108,7 @@
 {
     // Cache labels
     NSString* inception2015LabelPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015GraphName ofType:@"txt"];
-    NSString* rawLabels = [NSString stringWithContentsOfFile:self.inception2015LabelName usedEncoding:nil error:nil];
+    NSString* rawLabels = [NSString stringWithContentsOfFile:inception2015LabelPath usedEncoding:nil error:nil];
     self.labelsArray = [rawLabels componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
     
     // Create Tensorflow graph and session
@@ -165,8 +165,7 @@
     }
 
     
-    
-    return nil;
+    return [self labelsFromOutput:outputs];
 }
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
@@ -234,7 +233,7 @@ template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, 
     return out_tensors;
 }
 
-- (NSDictionary*) labelsFromOutput:(const std::vector<tensorflow::Tensor>&)outputs file:(std::string) labels_file_name
+- (NSDictionary*) labelsFromOutput:(const std::vector<tensorflow::Tensor>&)outputs
 {
     const int numLabels = std::min(5, static_cast<int>(self.labelsArray.count));
 
