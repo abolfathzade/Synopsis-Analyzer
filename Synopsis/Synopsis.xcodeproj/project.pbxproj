@@ -109,6 +109,8 @@
 		1BEC6BCD1DDB03F500F77397 /* TensorFlowAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B0A02AE1DDAE4DD00F542F7 /* TensorFlowAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1BEC6BD01DDB07E000F77397 /* libtensorflow_cc.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B0A02C11DDAE8CB00F542F7 /* libtensorflow_cc.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1BEC6BD21DDB809800F77397 /* imagenet_comp_graph_label_strings.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC6BD11DDB809800F77397 /* imagenet_comp_graph_label_strings.txt */; };
+		1BEC6BD31DDBD25B00F77397 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C561AD26696003B3CE9 /* CoreVideo.framework */; };
+		1BEC6BD41DDBD26100F77397 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B3233D81C30C6CE00C9CF5E /* Accelerate.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -782,6 +784,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BEC6BD41DDBD26100F77397 /* Accelerate.framework in Frameworks */,
+				1BEC6BD31DDBD25B00F77397 /* CoreVideo.framework in Frameworks */,
 				1BEC6BC91DDB028C00F77397 /* AVFoundation.framework in Frameworks */,
 				1B7BCE081DDAF87500250692 /* libstdc++.tbd in Frameworks */,
 				1B7BCE061DDAF85600250692 /* CoreFoundation.framework in Frameworks */,

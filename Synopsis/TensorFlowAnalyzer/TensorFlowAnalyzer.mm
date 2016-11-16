@@ -28,15 +28,25 @@
 #import "tensorflow/core/public/session.h"
 #import "tensorflow/core/util/command_line_flags.h"
 
-using namespace tensorflow;
 
 @interface TensorFlowAnalyzer ()
 {
     // TensorFlow
     std::unique_ptr<tensorflow::Session> session;
-    GraphDef tfInceptionGraphDef;
+    tensorflow::GraphDef tfInceptionGraphDef;
 
+    // Cached resized tensor from our input buffer (image)
+    tensorflow::Tensor resized_tensor;
+    
+    std::string input_layer;
+    std::string output_layer;
+    
+    // top scoring classes
+    std::vector<int> top_label_indices;  // contains top n label indices for input image
+    std::vector<float> top_class_probs;  // contains top n probabilities for current input image
+    
 }
+
 // Plugin API requirements
 @property (atomic, readwrite, strong) NSString* pluginName;
 @property (atomic, readwrite, strong) NSString* pluginIdentifier;
@@ -49,8 +59,10 @@ using namespace tensorflow;
 @property (atomic, readwrite, strong) NSString* pluginMediaType;
 @property (readwrite) BOOL hasModules;
 
+//
 @property (atomic, readwrite, strong) NSString* inception2015GraphName;
 @property (atomic, readwrite, strong) NSString* inception2015LabelName;
+@property (atomic, readwrite, strong) NSArray* labelsArray;
 
 @end
 
@@ -75,6 +87,10 @@ using namespace tensorflow;
         self.inception2015GraphName = @"tensorflow_inception_graph";
         self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
         
+        input_layer = "Mul";
+        output_layer = "softmax";
+
+        
         tensorflow::port::InitMain(NULL, NULL, NULL);
     }
     
@@ -83,14 +99,22 @@ using namespace tensorflow;
 
 - (void) dealloc
 {
+    // TODO: Cleanup Tensorflow
+    session.reset();
     
 }
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
 {
+    // Cache labels
+    NSString* inception2015LabelPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015GraphName ofType:@"txt"];
+    NSString* rawLabels = [NSString stringWithContentsOfFile:self.inception2015LabelName usedEncoding:nil error:nil];
+    self.labelsArray = [rawLabels componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    
+    // Create Tensorflow graph and session
     NSString* inception2015GraphPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015GraphName ofType:@"pb"];
     
-    Status load_graph_status = ReadBinaryProto(Env::Default(), [inception2015GraphPath cStringUsingEncoding:NSASCIIStringEncoding], &tfInceptionGraphDef);
+    tensorflow::Status load_graph_status = ReadBinaryProto(tensorflow::Env::Default(), [inception2015GraphPath cStringUsingEncoding:NSASCIIStringEncoding], &tfInceptionGraphDef);
     
     if (!load_graph_status.ok())
     {
@@ -105,7 +129,7 @@ using namespace tensorflow;
     
     session = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
     
-    Status session_create_status = session->Create(tfInceptionGraphDef);
+    tensorflow::Status session_create_status = session->Create(tfInceptionGraphDef);
     
     if (!session_create_status.ok())
     {
@@ -117,16 +141,31 @@ using namespace tensorflow;
         if(self.successLog)
             self.successLog(@"Tensorflow: Created Session");
     }
-
 }
 
 - (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
 {
+    tensorflow::Tensor input = array_to_tensor(<#const T *in#>, <#tensorflow::Tensor &dst#>, <#bool do_memcpy#>)
     
+    std::vector<tensorflow::Tensor> resized_tensors = [self resizeAndNormalizeInputTensor:(tensorflow::ops::Input)]
+    
+    resized_tensor = resized_tensors[0];
+
 }
 
 - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
+    
+    // Actually run the image through the model.
+    std::vector<tensorflow::Tensor> outputs;
+    tensorflow::Status run_status = session->Run({ {input_layer, resized_tensor} }, {output_layer}, {}, &outputs);
+    if (!run_status.ok()) {
+        LOG(ERROR) << "Running model failed: " << run_status;
+        return nil;
+    }
+
+    
+    
     return nil;
 }
 
@@ -138,7 +177,109 @@ using namespace tensorflow;
 
 #pragma mark - Utilities
 
-// Resize to expected tensor size - Models expect a specific size input tensor
+// Construct Tensor from our base address image
+template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, bool do_memcpy) {
+    auto dst_data = dst.flat<T>().data();
+    long long n = dst.NumElements();
+    if(do_memcpy) memcpy(dst_data, in, n * sizeof(T));
+    else for(int i=0; i<n; i++) dst_data[i] = in[i];
+}
 
+
+// TODO: ensure we dont copy too much data around.
+// TODO: Keep out_tensors cached and re-use
+// TODO: Cache resizeAndNormalizeSession to re-use.
+
+- (std::vector<tensorflow::Tensor>) resizeAndNormalizeInputTensor:(tensorflow::ops::Input)inputTensor
+{
+    auto root = tensorflow::Scope::NewRootScope();
+
+    std::vector<tensorflow::Tensor> out_tensors;
+    
+    std::string input_name = "input"; // was file_reader
+    std::string output_name = "normalized";
+
+    const int input_height = 299;
+    const int input_width = 299;
+    const float input_mean = 128;
+    const float input_std = 128;
+    
+    // Now cast the image data to float so we can do normal math on it.
+    auto float_caster = tensorflow::ops::Cast(root.WithOpName("float_caster"), inputTensor, tensorflow::DT_FLOAT);
+    
+    // The convention for image ops in TensorFlow is that all images are expected
+    // to be in batches, so that they're four-dimensional arrays with indices of
+    // [batch, height, width, channel]. Because we only have a single image, we
+    // have to add a batch dimension of 1 to the start with ExpandDims().
+    auto dims_expander = tensorflow::ops::ExpandDims(root, float_caster, 0);
+    
+    // Bilinearly resize the image to fit the required dimensions.
+    auto resized = tensorflow::ops::ResizeBilinear(root, dims_expander, tensorflow::ops::Const(root.WithOpName("size"), {input_height, input_width}));
+    
+    // Subtract the mean and divide by the scale.
+    tensorflow::ops::Div(root.WithOpName(output_name), tensorflow::ops::Sub(root, resized, {input_mean}),
+        {input_std});
+    
+    // This runs the GraphDef network definition that we've just constructed, and
+    // returns the results in the output tensor.
+    tensorflow::GraphDef graph;
+    (root.ToGraphDef(&graph));
+    
+    std::unique_ptr<tensorflow::Session> resizeAndNormalizeSession(tensorflow::NewSession(tensorflow::SessionOptions()));
+
+    (resizeAndNormalizeSession->Create(graph));
+    
+    (resizeAndNormalizeSession->Run({}, {output_name}, {}, &out_tensors));
+
+    return out_tensors;
+}
+
+- (NSDictionary*) labelsFromOutput:(const std::vector<tensorflow::Tensor>&)outputs file:(std::string) labels_file_name
+{
+    const int numLabels = std::min(5, static_cast<int>(self.labelsArray.count));
+
+    tensorflow::Tensor indices;
+    tensorflow::Tensor scores;
+
+    auto root = tensorflow::Scope::NewRootScope();
+    using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
+    
+    std::string output_name = "top_k";
+    
+    tensorflow::ops::TopKV2(root.WithOpName(output_name), outputs[0], numLabels);
+
+    // This runs the GraphDef network definition that we've just constructed, and
+    // returns the results in the output tensors.
+    tensorflow::GraphDef graph;
+    root.ToGraphDef(&graph);
+    
+    std::unique_ptr<tensorflow::Session> topLabelsSession(tensorflow::NewSession(tensorflow::SessionOptions()));
+    topLabelsSession->Create(graph);
+    
+    // The TopK node returns two outputs, the scores and their original indices,
+    // so we have to append :0 and :1 to specify them both.
+    std::vector<tensorflow::Tensor> out_tensors;
+    (topLabelsSession->Run({}, {output_name + ":0", output_name + ":1"},
+                                    {}, &out_tensors));
+    scores = out_tensors[0];
+    indices = out_tensors[1];
+
+    
+    NSMutableArray* outputLabels = [NSMutableArray arrayWithCapacity:numLabels];
+    NSMutableArray* outputScores = [NSMutableArray arrayWithCapacity:numLabels];
+    
+    tensorflow::TTypes<float>::Flat scores_flat = scores.flat<float>();
+    tensorflow::TTypes<int32_t>::Flat indices_flat = indices.flat<int32_t>();
+    for (int pos = 0; pos < numLabels; ++pos) {
+        const int label_index = indices_flat(pos);
+        const float score = scores_flat(pos);
+
+        [outputLabels addObject:[self.labelsArray objectAtIndex:label_index]];
+        [outputScores addObject:@(score)];
+        
+    }
+    return @{ @"Labels" : outputLabels,
+              @"Scores" : outputScores};
+}
 
 @end
