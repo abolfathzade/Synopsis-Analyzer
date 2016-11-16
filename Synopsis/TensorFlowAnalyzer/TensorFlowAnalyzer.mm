@@ -107,7 +107,7 @@
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
 {
     // Cache labels
-    NSString* inception2015LabelPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015GraphName ofType:@"txt"];
+    NSString* inception2015LabelPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015LabelName ofType:@"txt"];
     NSString* rawLabels = [NSString stringWithContentsOfFile:inception2015LabelPath usedEncoding:nil error:nil];
     self.labelsArray = [rawLabels componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
     
@@ -148,8 +148,9 @@
     
     // http://stackoverflow.com/questions/36044197/how-do-i-pass-an-opencv-mat-into-a-c-tensorflow-graph
     
+    // So - were going to ditch the last channel
     tensorflow::Tensor input_tensor(tensorflow::DT_UINT8,
-                                    tensorflow::TensorShape({1, static_cast<long long>(height), static_cast<long long>(width), 4}));
+                                    tensorflow::TensorShape({1, static_cast<long long>(height), static_cast<long long>(width), 3})); // was 4
     
     auto input_tensor_mapped = input_tensor.tensor<unsigned char, 4>();
 
@@ -161,7 +162,7 @@
         for (int x = 0; x < width; ++x)
         {
             const unsigned char* source_pixel = source_row + (x * 4);
-            for (int c = 0; c < 4; ++c)
+            for (int c = 0; c < 3; ++c) // was 4
             {
                 const unsigned char* source_value = source_pixel + c;
                 input_tensor_mapped(0, y, x, c) = *source_value;
@@ -177,7 +178,6 @@
 
 - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
-    
     // Actually run the image through the model.
     std::vector<tensorflow::Tensor> outputs;
     tensorflow::Status run_status = session->Run({ {input_layer, resized_tensor} }, {output_layer}, {}, &outputs);
@@ -213,6 +213,7 @@ template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, 
 
 - (std::vector<tensorflow::Tensor>) resizeAndNormalizeInputTensor:(tensorflow::Tensor)inputTensor
 {
+    tensorflow::Status status;
     auto root = tensorflow::Scope::NewRootScope();
 
     std::vector<tensorflow::Tensor> out_tensors;
@@ -232,10 +233,10 @@ template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, 
     // to be in batches, so that they're four-dimensional arrays with indices of
     // [batch, height, width, channel]. Because we only have a single image, we
     // have to add a batch dimension of 1 to the start with ExpandDims().
-    auto dims_expander = tensorflow::ops::ExpandDims(root, float_caster, 0);
+    // auto dims_expander = tensorflow::ops::ExpandDims(root, float_caster, 0);
     
     // Bilinearly resize the image to fit the required dimensions.
-    auto resized = tensorflow::ops::ResizeBilinear(root, dims_expander, tensorflow::ops::Const(root.WithOpName("size"), {input_height, input_width}));
+    auto resized = tensorflow::ops::ResizeBilinear(root, float_caster, tensorflow::ops::Const(root.WithOpName("size"), {input_height, input_width}));
     
     // Subtract the mean and divide by the scale.
     tensorflow::ops::Div(root.WithOpName(output_name), tensorflow::ops::Sub(root, resized, {input_mean}),
@@ -244,14 +245,26 @@ template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, 
     // This runs the GraphDef network definition that we've just constructed, and
     // returns the results in the output tensor.
     tensorflow::GraphDef graph;
-    (root.ToGraphDef(&graph));
+    status = root.ToGraphDef(&graph);
     
-    std::unique_ptr<tensorflow::Session> resizeAndNormalizeSession(tensorflow::NewSession(tensorflow::SessionOptions()));
-
-    (resizeAndNormalizeSession->Create(graph));
+    if( status.ok() )
+    {
+        std::unique_ptr<tensorflow::Session> resizeAndNormalizeSession(tensorflow::NewSession(tensorflow::SessionOptions()));
+        
+        status = resizeAndNormalizeSession->Create(graph);
+        
+        if( status.ok() )
+        {
+            status = resizeAndNormalizeSession->Run({}, {output_name}, {}, &out_tensors);
+            if( status.ok() )
+                return out_tensors;
+        }
+    }
     
-    (resizeAndNormalizeSession->Run({}, {output_name}, {}, &out_tensors));
-
+    if(self.errorLog)
+        self.errorLog(@"Error resizing and normalizing Tensor");
+    
+    out_tensors.clear();
     return out_tensors;
 }
 
