@@ -54,9 +54,13 @@ Synopsis Analysis is plugin based, allowing developers to easily extend and expe
 
 See the DesignDiscussion wiki for more information about possible modules and direction of development.
 
+## Development Notes
 
-Tensorflow compiled with cuda 8.0 
+Tensorflow compiled with cuda 8.0 via XCode 7.3 command line tools, due to Cuda 8.0 SDK / Clang incompatibility.
 
-build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:build_pip_package
+sudo xcode-select --switch /Library/Developer/CommandLineTools
+bazel build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
-library 
+Tensorflow libtensorflow_cc.so compiled with
+bazel build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:build_pip_package
+
