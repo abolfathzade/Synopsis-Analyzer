@@ -69,6 +69,7 @@
 @property (atomic, readwrite, strong) NSString* inception2015GraphName;
 @property (atomic, readwrite, strong) NSString* inception2015LabelName;
 @property (atomic, readwrite, strong) NSArray* labelsArray;
+@property (atomic, readwrite, strong) NSMutableArray* averageFeatureVec;
 
 @end
 
@@ -97,8 +98,9 @@
         final_layer = "softmax";
         feature_layer = "pool_3";
 
-        
         tensorflow::port::InitMain(NULL, NULL, NULL);
+        
+        self.averageFeatureVec = nil;
     }
     
     return self;
@@ -193,24 +195,14 @@
         return nil;
     }
 
-    NSDictionary* labelsAndScores = [self labelsFromOutput:outputs];
-    
-    tensorflow::DataType type = outputs[1].dtype();
-    int64_t numElements = outputs[1].NumElements();
-//
-//    Eigen::Tensor<float, 2048> t = outputs[1].tensor<float, 2048>()
-    
-    std::string summaryFeatureVec = outputs[1].SummarizeValue(2048);
-    
-    //    tensorflow::TensorBuffer =
-//    NSDictionary* featureVec = = @{
+    NSDictionary* labelsAndScores = [self dictionaryFromOutput:outputs];
     
     return labelsAndScores ;
 }
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
 {
-    return nil;
+    return @{ @"Features" : self.averageFeatureVec };
 }
 
 
@@ -286,7 +278,7 @@ template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, 
     return out_tensors;
 }
 
-- (NSDictionary*) labelsFromOutput:(const std::vector<tensorflow::Tensor>&)outputs
+- (NSDictionary*) dictionaryFromOutput:(const std::vector<tensorflow::Tensor>&)outputs
 {
     const int numLabels = std::min(5, static_cast<int>(self.labelsArray.count));
 
@@ -330,8 +322,67 @@ template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, 
         [outputScores addObject:@(score)];
         
     }
+    
+    // Feature Vector
+//    tensorflow::DataType type = outputs[1].dtype();
+    int64_t numElements = outputs[1].NumElements();
+    
+    tensorflow::TensorShape featureShape = outputs[1].shape();
+
+//    auto featureVec = outputs[1].vec<float>();
+//
+//    for(auto element = featureVec.begin(); element != featureVec.end(); ++element)
+//    {
+//
+//    }
+    
+//    for(auto featureElement = featureShape.begin(); featureElement != featureShape.end(); ++featureElement)
+//    {
+//        float element = *featureElement;
+//        //auto& v = *it; // should also work
+//        std::cout << v(0,0);
+//        std::cout << v(1,0);
+//    }
+
+#pragma mark - Feature Vector
+    
+    // TODO: Figure out how to access the tensor values directly as floats
+    std::string summaryFeatureVec = outputs[1].SummarizeValue(numElements);
+    
+    NSMutableString* featureVec = [NSMutableString stringWithCString:summaryFeatureVec.c_str() encoding:NSUTF8StringEncoding];
+    
+    // delete the [ and ]'s
+    NSString* cleanedFeatureVec = [featureVec stringByReplacingOccurrencesOfString:@"[" withString:@""];
+    cleanedFeatureVec = [cleanedFeatureVec stringByReplacingOccurrencesOfString:@"]" withString:@""];
+
+    NSArray* stringsOfFeatureElements = [cleanedFeatureVec componentsSeparatedByString:@" "];
+    
+    NSMutableArray* featureElements = [NSMutableArray arrayWithCapacity:stringsOfFeatureElements.count];
+    for(NSString* element in stringsOfFeatureElements)
+    {
+        [featureElements addObject:@( [element floatValue] ) ];
+    }
+    
+    if(self.averageFeatureVec == nil)
+    {
+        self.averageFeatureVec = featureElements;
+    }
+    else
+    {
+        // average each vector element with the prior
+        for(int i = 0; i < featureElements.count; i++)
+        {
+            float  a = [featureElements[i] floatValue];
+            float  b = [self.averageFeatureVec[i] floatValue];
+            
+            self.averageFeatureVec[i] = @( (a + b / 2.0)) ;
+        }
+    }
+    
+    
     return @{ @"Labels" : outputLabels,
-              @"Scores" : outputScores};
+              @"Scores" : outputScores,
+              };
 }
 
 @end
