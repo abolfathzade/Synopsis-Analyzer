@@ -53,3 +53,10 @@ Synopsis Analysis is plugin based, allowing developers to easily extend and expe
 * Global Image Style Description (via Tensorflow)
 
 See the DesignDiscussion wiki for more information about possible modules and direction of development.
+
+
+Tensorflow compiled with cuda 8.0 
+
+build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:build_pip_package
+
+library 
