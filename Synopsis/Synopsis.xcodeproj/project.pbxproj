@@ -49,7 +49,6 @@
 		1B805E3C1B01488D005D7354 /* ProgressTableViewCellRevealController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3A1B01488D005D7354 /* ProgressTableViewCellRevealController.m */; };
 		1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */; };
 		1B805E401B028BB6005D7354 /* LogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3F1B028BB6005D7354 /* LogController.m */; };
-		1B8673981D2EAC470064BECF /* StandardAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B9873E71D42DB7A0015E54C /* DispatchQueueManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B9873E61D42DB7A0015E54C /* DispatchQueueManager.m */; };
 		1B9E10891D2DD9DF004523A9 /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B9E10881D2DD9DF004523A9 /* libippicv.a */; };
 		1BA4D1991C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA4D1971C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m */; };
@@ -135,13 +134,6 @@
 			remoteGlobalIDString = 1B0A02AD1DDAE4DD00F542F7;
 			remoteInfo = TensorFlowAnalyzer;
 		};
-		1B9E108C1D2E8A2F004523A9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1BEA4D111ACB2BCC00AB57C1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1BA8F83A1C138B330066BDDB;
-			remoteInfo = DeepBeliefAnalyzer;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -170,7 +162,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				1B8673981D2EAC470064BECF /* StandardAnalyzer.plugin in CopyFiles */,
 				1BEC6BCD1DDB03F500F77397 /* TensorFlowAnalyzer.plugin in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -770,6 +761,8 @@
 		1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnalysisAndTranscodeOperation.m; sourceTree = "<group>"; };
 		1BEC6BCB1DDB03AD00F77397 /* tensorflow_inception_graph.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph.pb; sourceTree = SOURCE_ROOT; };
 		1BEC6BD11DDB809800F77397 /* imagenet_comp_graph_label_strings.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = imagenet_comp_graph_label_strings.txt; path = TensorFlowAnalyzer/models/inception2015/imagenet_comp_graph_label_strings.txt; sourceTree = SOURCE_ROOT; };
+		1BEC6BD61DDFBB3F00F77397 /* libcudnn_static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcudnn_static.a; path = "../../../../../../../Developer/NVIDIA/CUDA-8.0/lib/libcudnn_static.a"; sourceTree = "<group>"; };
+		1BEC6BD81DDFBBDD00F77397 /* libcudart.8.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcudart.8.0.dylib; path = "../../../../../../../Developer/NVIDIA/CUDA-8.0/lib/libcudart.8.0.dylib"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1421,6 +1414,8 @@
 		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1BEC6BD81DDFBBDD00F77397 /* libcudart.8.0.dylib */,
+				1BEC6BD61DDFBB3F00F77397 /* libcudnn_static.a */,
 				1B7BCE071DDAF87500250692 /* libstdc++.tbd */,
 				1B9E10881D2DD9DF004523A9 /* libippicv.a */,
 				1B02BA491D2B07D100A4430F /* Cocoa.framework */,
@@ -2134,8 +2129,8 @@
 				1B0A02AA1DDAE4DD00F542F7 /* Sources */,
 				1B0A02AB1DDAE4DD00F542F7 /* Frameworks */,
 				1B0A02AC1DDAE4DD00F542F7 /* Resources */,
-				1BEC6BCE1DDB069B00F77397 /* ShellScript */,
 				1BEC6BCF1DDB07C500F77397 /* CopyFiles */,
+				1BEC6BCE1DDB069B00F77397 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -2200,7 +2195,6 @@
 				1B7BCE051DDAF20F00250692 /* PBXTargetDependency */,
 				1B61BD041ACF28660013418D /* PBXTargetDependency */,
 				1B007ECD1B4D7D0900DE6E98 /* PBXTargetDependency */,
-				1B9E108D1D2E8A2F004523A9 /* PBXTargetDependency */,
 			);
 			name = Synopsis;
 			productName = MetadataTranscoderTestHarness;
@@ -2348,7 +2342,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "install_name_tool -change \"bazel-out/local-opt/bin/tensorflow/libtensorflow_cc.so\" @loader_path/../Frameworks/libtensorflow_cc.so \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/MacOS/$PRODUCT_NAME\"\n";
+			shellScript = "#install_name_tool -change \"bazel-out/local-opt/bin/tensorflow/libtensorflow_cc.so\" @loader_path/../Frameworks/libtensorflow_cc.so \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/MacOS/$PRODUCT_NAME\"\n\n# BELOW FOR CUDA VERSION\ninstall_name_tool -change \"bazel-out/local_darwin-opt/bin/tensorflow/libtensorflow_cc.so\" @loader_path/../Frameworks/libtensorflow_cc.so \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/MacOS/$PRODUCT_NAME\"\n\ninstall_name_tool -add_rpath /usr/local/cuda/lib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/Frameworks/libtensorflow_cc.so\"\n\ninstall_name_tool -add_rpath /usr/local/cuda/extras/CUPTI/lib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/Frameworks/libtensorflow_cc.so\"\n\n#install_name_tool -change \"@rpath/libcudart.8.0.dylib\" \"@loader_path/../Frameworks/libcudart.8.0.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/Frameworks/libtensorflow_cc.so\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2447,11 +2441,6 @@
 			target = 1B0A02AD1DDAE4DD00F542F7 /* TensorFlowAnalyzer */;
 			targetProxy = 1B7BCE041DDAF20F00250692 /* PBXContainerItemProxy */;
 		};
-		1B9E108D1D2E8A2F004523A9 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1BA8F83A1C138B330066BDDB /* DeepBeliefAnalyzer */;
-			targetProxy = 1B9E108C1D2E8A2F004523A9 /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -2531,9 +2520,11 @@
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/TensorFlowAnalyzer/includes";
 				INFOPLIST_FILE = TensorFlowAnalyzer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/TensorFlowAnalyzer/lib",
@@ -2556,9 +2547,11 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/TensorFlowAnalyzer/includes";
 				INFOPLIST_FILE = TensorFlowAnalyzer/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/TensorFlowAnalyzer/lib",
