@@ -41,7 +41,8 @@
 
     
     // Cached resized tensor from our input buffer (image)
-    tensorflow::Tensor resized_tensor;
+    tensorflow::Tensor input_tensor; // batchsize x input width x input height x channel
+    tensorflow::Tensor resized_tensor; // batchsize x expected width x expected heigh x channel
     
     // input image tensor
     std::string input_layer;
@@ -116,9 +117,14 @@
 - (void) dealloc
 {
     // TODO: Cleanup Tensorflow
-    inceptionSession.reset();
-    resizeSession.reset();
-    topLabelsSession.reset();
+    inceptionSession->Close();
+    resizeSession->Close();
+    topLabelsSession->Close();
+
+    
+//    inceptionSession.reset();
+//    resizeSession.reset();
+//    topLabelsSession.reset();
 }
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
@@ -167,13 +173,17 @@
     }
 }
 
-- (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
+- (void) submitAndCacheCurrentBatchedVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow batchSize:(NSUInteger)batchSize forBatchIndex:(NSUInteger)batchIndex
 {
     // http://stackoverflow.com/questions/36044197/how-do-i-pass-an-opencv-mat-into-a-c-tensorflow-graph
     
     // So - were going to ditch the last channel
-    tensorflow::Tensor input_tensor(tensorflow::DT_UINT8,
-                                    tensorflow::TensorShape({1, static_cast<long long>(height), static_cast<long long>(width), 3})); // was 4
+    
+    if(!input_tensor.IsInitialized())
+    {
+        input_tensor = tensorflow::Tensor(tensorflow::DT_UINT8,
+                                    tensorflow::TensorShape({static_cast<long long>(batchSize), static_cast<long long>(height), static_cast<long long>(width), 3})); // was 4
+    }
     
     auto input_tensor_mapped = input_tensor.tensor<unsigned char, 4>();
 
@@ -189,18 +199,19 @@
             for (int c = 0; c < 3; ++c) // was 4
             {
                 const unsigned char* source_value = source_pixel + c;
-                input_tensor_mapped(0, y, x, c) = *source_value;
+                // assign to current batch index
+                input_tensor_mapped(batchIndex, y, x, c) = *source_value;
             }
         }
     }
-    
-    std::vector<tensorflow::Tensor> resized_tensors = [self resizeAndNormalizeInputTensor:input_tensor];
-    
-    resized_tensor = resized_tensors[0];
 }
 
 - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
+    std::vector<tensorflow::Tensor> resized_tensors = [self resizeAndNormalizeInputTensor:input_tensor];
+    
+    resized_tensor = resized_tensors[0];
+
     // Actually run the image through the model.
     std::vector<tensorflow::Tensor> outputs;
     tensorflow::Status run_status = inceptionSession->Run({ {input_layer, resized_tensor} }, {final_layer, feature_layer}, {}, &outputs);

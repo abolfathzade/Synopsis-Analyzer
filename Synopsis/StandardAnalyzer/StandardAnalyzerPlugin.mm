@@ -149,7 +149,7 @@
     return cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
 }
 
-- (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow
+- (void) submitAndCacheCurrentBatchedVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow batchSize:(NSUInteger)batchSize forBatchIndex:(NSUInteger)batchIndex
 {
     [self setOpenCLEnabled:USE_OPENCL];
     

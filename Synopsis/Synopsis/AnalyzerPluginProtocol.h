@@ -114,7 +114,7 @@ typedef void (^LogBlock)(NSString* log);
 // Updates the cached read only video buffer to be used for every module an analyzer implements.
 // This is where one would do color conversion cache lower resolution proxies, submit to OpenCL, Cuda, etc
 // This is called once per frame, and the cache
-- (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow;
+- (void) submitAndCacheCurrentBatchedVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow batchSize:(NSUInteger)batchSize forBatchIndex:(NSUInteger)batchIndex;
 
 
 // Analyze a sample buffer.
