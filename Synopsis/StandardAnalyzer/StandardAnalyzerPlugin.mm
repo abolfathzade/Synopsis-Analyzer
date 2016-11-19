@@ -82,11 +82,13 @@
         self.hasModules = YES;
         
         self.modules = [NSMutableArray new];
-        self.moduleClasses  = @[//NSStringFromClass([AverageColor class]),
+        self.moduleClasses  = @[// AVG Color is useless and just an example module
+                                //NSStringFromClass([AverageColor class]),
                                 NSStringFromClass([DominantColorModule class]),
                                 NSStringFromClass([HistogramModule class]),
                                 NSStringFromClass([MotionModule class]),
-                                NSStringFromClass([PerceptualHashModule class]),
+                                // Diabled - using Tensorflow feature vec
+                                //NSStringFromClass([PerceptualHashModule class]),
                                 NSStringFromClass([TrackerModule class]),
                                 NSStringFromClass([SaliencyModule class]),
                               ];

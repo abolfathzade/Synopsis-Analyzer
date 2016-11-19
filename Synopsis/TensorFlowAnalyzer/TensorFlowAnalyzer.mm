@@ -32,9 +32,14 @@
 @interface TensorFlowAnalyzer ()
 {
     // TensorFlow
-    std::unique_ptr<tensorflow::Session> session;
-    tensorflow::GraphDef tfInceptionGraphDef;
+    std::unique_ptr<tensorflow::Session> inceptionSession;
+    tensorflow::GraphDef inceptionGraphDef;
 
+    std::unique_ptr<tensorflow::Session> resizeSession;
+
+    std::unique_ptr<tensorflow::Session> topLabelsSession;
+
+    
     // Cached resized tensor from our input buffer (image)
     tensorflow::Tensor resized_tensor;
     
@@ -94,11 +99,13 @@
         self.inception2015GraphName = @"tensorflow_inception_graph";
         self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
         
+        inceptionSession = NULL;
+        resizeSession = NULL;
+        topLabelsSession = NULL;
+
         input_layer = "Mul";
         final_layer = "softmax";
         feature_layer = "pool_3";
-
-        tensorflow::port::InitMain(NULL, NULL, NULL);
         
         self.averageFeatureVec = nil;
     }
@@ -109,12 +116,20 @@
 - (void) dealloc
 {
     // TODO: Cleanup Tensorflow
-    session.reset();
-    
+    inceptionSession.reset();
+    resizeSession.reset();
+    topLabelsSession.reset();
 }
 
 - (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
 {
+    // we need to ensure the GPU has memory for the max num of batches we can run
+    // if we try to run more than 1 analysis session at a time then TF's CUDNN wont have memory and bail
+    // However, if we dont get enough memory, we wont be performant.
+    // Fuck.
+    
+    tensorflow::port::InitMain(NULL, NULL, NULL);
+
     // Cache labels
     NSString* inception2015LabelPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015LabelName ofType:@"txt"];
     NSString* rawLabels = [NSString stringWithContentsOfFile:inception2015LabelPath usedEncoding:nil error:nil];
@@ -123,7 +138,7 @@
     // Create Tensorflow graph and session
     NSString* inception2015GraphPath = [[NSBundle bundleForClass:[self class]] pathForResource:self.inception2015GraphName ofType:@"pb"];
     
-    tensorflow::Status load_graph_status = ReadBinaryProto(tensorflow::Env::Default(), [inception2015GraphPath cStringUsingEncoding:NSASCIIStringEncoding], &tfInceptionGraphDef);
+    tensorflow::Status load_graph_status = ReadBinaryProto(tensorflow::Env::Default(), [inception2015GraphPath cStringUsingEncoding:NSUTF8StringEncoding], &inceptionGraphDef);
     
     if (!load_graph_status.ok())
     {
@@ -136,9 +151,9 @@
             self.successLog(@"Tensorflow: Loaded Graph");
     }
     
-    session = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
+    inceptionSession = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
     
-    tensorflow::Status session_create_status = session->Create(tfInceptionGraphDef);
+    tensorflow::Status session_create_status = inceptionSession->Create(inceptionGraphDef);
     
     if (!session_create_status.ok())
     {
@@ -182,14 +197,13 @@
     std::vector<tensorflow::Tensor> resized_tensors = [self resizeAndNormalizeInputTensor:input_tensor];
     
     resized_tensor = resized_tensors[0];
-
 }
 
 - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
     // Actually run the image through the model.
     std::vector<tensorflow::Tensor> outputs;
-    tensorflow::Status run_status = session->Run({ {input_layer, resized_tensor} }, {final_layer, feature_layer}, {}, &outputs);
+    tensorflow::Status run_status = inceptionSession->Run({ {input_layer, resized_tensor} }, {final_layer, feature_layer}, {}, &outputs);
     if (!run_status.ok()) {
         LOG(ERROR) << "Running model failed: " << run_status;
         return nil;
@@ -208,15 +222,6 @@
 
 #pragma mark - Utilities
 
-// Construct Tensor from our base address image
-template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, bool do_memcpy) {
-    auto dst_data = dst.flat<T>().data();
-    long long n = dst.NumElements();
-    if(do_memcpy) memcpy(dst_data, in, n * sizeof(T));
-    else for(int i=0; i<n; i++) dst_data[i] = in[i];
-}
-
-
 // TODO: ensure we dont copy too much data around.
 // TODO: Keep out_tensors cached and re-use
 // TODO: Cache resizeAndNormalizeSession to re-use.
@@ -224,51 +229,60 @@ template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, 
 - (std::vector<tensorflow::Tensor>) resizeAndNormalizeInputTensor:(tensorflow::Tensor)inputTensor
 {
     tensorflow::Status status;
-    auto root = tensorflow::Scope::NewRootScope();
-
     std::vector<tensorflow::Tensor> out_tensors;
-    
     std::string input_name = "input"; // was file_reader
     std::string output_name = "normalized";
 
-    const int input_height = 299;
-    const int input_width = 299;
-    const float input_mean = 128;
-    const float input_std = 128;
-    
-    // Now cast the image data to float so we can do normal math on it.
-    auto float_caster = tensorflow::ops::Cast(root.WithOpName("float_caster"), inputTensor, tensorflow::DT_FLOAT);
-    
-    // The convention for image ops in TensorFlow is that all images are expected
-    // to be in batches, so that they're four-dimensional arrays with indices of
-    // [batch, height, width, channel]. Because we only have a single image, we
-    // have to add a batch dimension of 1 to the start with ExpandDims().
-    // auto dims_expander = tensorflow::ops::ExpandDims(root, float_caster, 0);
-    
-    // Bilinearly resize the image to fit the required dimensions.
-    auto resized = tensorflow::ops::ResizeBilinear(root, float_caster, tensorflow::ops::Const(root.WithOpName("size"), {input_height, input_width}));
-    
-    // Subtract the mean and divide by the scale.
-    tensorflow::ops::Div(root.WithOpName(output_name), tensorflow::ops::Sub(root, resized, {input_mean}),
-        {input_std});
-    
-    // This runs the GraphDef network definition that we've just constructed, and
-    // returns the results in the output tensor.
-    tensorflow::GraphDef graph;
-    status = root.ToGraphDef(&graph);
-    
-    if( status.ok() )
+    if(resizeSession == NULL)
     {
-        std::unique_ptr<tensorflow::Session> resizeAndNormalizeSession(tensorflow::NewSession(tensorflow::SessionOptions()));
+        auto root = tensorflow::Scope::NewRootScope();
         
-        status = resizeAndNormalizeSession->Create(graph);
+        const int input_height = 299;
+        const int input_width = 299;
+        const float input_mean = 128;
+        const float input_std = 128;
+        
+        // Now cast the image data to float so we can do normal math on it.
+        auto float_caster = tensorflow::ops::Cast(root.WithOpName("float_caster"), inputTensor, tensorflow::DT_FLOAT);
+        
+        // The convention for image ops in TensorFlow is that all images are expected
+        // to be in batches, so that they're four-dimensional arrays with indices of
+        // [batch, height, width, channel]. Because we only have a single image, we
+        // have to add a batch dimension of 1 to the start with ExpandDims().
+        // auto dims_expander = tensorflow::ops::ExpandDims(root, float_caster, 0);
+        
+        // Bilinearly resize the image to fit the required dimensions.
+        auto resized = tensorflow::ops::ResizeBilinear(root, float_caster, tensorflow::ops::Const(root.WithOpName("size"), {input_height, input_width}));
+        
+        // Subtract the mean and divide by the scale.
+        tensorflow::ops::Div(root.WithOpName(output_name), tensorflow::ops::Sub(root, resized, {input_mean}),
+                             {input_std});
+        
+        // This runs the GraphDef network definition that we've just constructed, and
+        // returns the results in the output tensor.
+        tensorflow::GraphDef graph;
+        status = root.ToGraphDef(&graph);
         
         if( status.ok() )
         {
-            status = resizeAndNormalizeSession->Run({}, {output_name}, {}, &out_tensors);
+           resizeSession = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
+            
+            status = resizeSession->Create(graph);
+            
             if( status.ok() )
-                return out_tensors;
+            {
+                status = resizeSession->Run({}, {output_name}, {}, &out_tensors);
+                if( status.ok() )
+                    return out_tensors;
+            }
         }
+    }
+    else
+    {
+        status = resizeSession->Run({}, {output_name}, {}, &out_tensors);
+        if( status.ok() )
+            return out_tensors;
+
     }
     
     if(self.errorLog)
@@ -282,29 +296,37 @@ template<typename T> void array_to_tensor(const T *in, tensorflow::Tensor &dst, 
 {
     const int numLabels = std::min(5, static_cast<int>(self.labelsArray.count));
 
+    std::vector<tensorflow::Tensor> out_tensors;
     tensorflow::Tensor indices;
     tensorflow::Tensor scores;
-
-    auto root = tensorflow::Scope::NewRootScope();
-    using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
-    
     std::string output_name = "top_k";
-    
-    tensorflow::ops::TopKV2(root.WithOpName(output_name), outputs[0], numLabels);
 
-    // This runs the GraphDef network definition that we've just constructed, and
-    // returns the results in the output tensors.
-    tensorflow::GraphDef graph;
-    root.ToGraphDef(&graph);
+    if(topLabelsSession == NULL)
+    {
+        auto root = tensorflow::Scope::NewRootScope();
+        
+        tensorflow::ops::TopKV2(root.WithOpName(output_name), outputs[0], numLabels);
+
+        // This runs the GraphDef network definition that we've just constructed, and
+        // returns the results in the output tensors.
+        tensorflow::GraphDef graph;
+        root.ToGraphDef(&graph);
+        
+        topLabelsSession = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
+        topLabelsSession->Create(graph);
+        
+        // The TopK node returns two outputs, the scores and their original indices,
+        // so we have to append :0 and :1 to specify them both.
+        (topLabelsSession->Run({}, {output_name + ":0", output_name + ":1"},
+                                        {}, &out_tensors));
+    }
+    else
+    {
+        (topLabelsSession->Run({}, {output_name + ":0", output_name + ":1"},
+                               {}, &out_tensors));
+
+    }
     
-    std::unique_ptr<tensorflow::Session> topLabelsSession(tensorflow::NewSession(tensorflow::SessionOptions()));
-    topLabelsSession->Create(graph);
-    
-    // The TopK node returns two outputs, the scores and their original indices,
-    // so we have to append :0 and :1 to specify them both.
-    std::vector<tensorflow::Tensor> out_tensors;
-    (topLabelsSession->Run({}, {output_name + ":0", output_name + ":1"},
-                                    {}, &out_tensors));
     scores = out_tensors[0];
     indices = out_tensors[1];
 

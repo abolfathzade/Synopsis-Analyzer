@@ -10,7 +10,7 @@
 
 NSString * const kSynopsisNewTranscodeOperationAvailable = @"kSynopsisNewTranscodeOperationAvailable";
 
-NSString * const kSynopsislMetadataIdentifier = @"mdta/info.v002.synopsis.metadata";
+NSString * const kSynopsislMetadataIdentifier = @"mdta/info.synopsis.metadata";
 
 // Pass 1
 NSString * const kSynopsisTranscodeVideoSettingsKey = @"kSynopsisVideoTranscodeSettings";
