@@ -38,12 +38,15 @@
 
 @property (readonly) BOOL hasModules;
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint;
+- (void) beginAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint error:(NSError**)error;
 
-- (void) submitAndCacheCurrentBatchedVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow batchSize:(NSUInteger)batchSize forBatchIndex:(NSUInteger)batchIndex;
+- (void) submitAndCacheCurrentSampleBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forTime:(CVTime)time error:(NSError**)error;
 
-- (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error;
+- (void) runAnalysisForModuleAtIndex:(SynopsisModuleIndex)moduleIndex forTimeRange:(CMTimeRange)timeRange error:(NSError**)error;
 
-- (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error;
+- (void) finalizeAnalysisSessionWithError:(NSError**)error;
+
+@property (copy) NSArray* perSampleMetadata;
+@property (copy) NSArray* summaryMetadata;
 
 @end

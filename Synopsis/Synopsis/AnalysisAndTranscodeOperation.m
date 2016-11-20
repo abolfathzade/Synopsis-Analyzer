@@ -343,7 +343,7 @@
     // For every Analyzer, begin an new Analysis Session
     for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
     {
-        [analyzer beginMetadataAnalysisSessionWithQuality:self.analysisQualityHint];
+        [analyzer beginAnalysisSessionWithQuality:self.analysisQualityHint error:nil];
     }
     
     return error;
@@ -377,12 +377,6 @@
         CMBufferQueueRef videoUncompressedBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &videoUncompressedBufferQueue);
 
-        // We use this to enqueue batches for analyzers that prefer multipe frames at once (for performance reasons etc)
-        CMSimpleQueueRef videoBatchsizeQueue;
-        int batchCount = 25;
-        CMSimpleQueueCreate(kCFAllocatorDefault, batchCount, &videoBatchsizeQueue);
-        
-        
         dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
@@ -581,129 +575,18 @@
                             CVPixelBufferRef transformedPixelBuffer = [self createPixelBuffer:pixelBuffer withTransform:self.transcodeAssetWriterVideo.transform forQuality:self.analysisQualityHint];
                             
                             
-                            // Cache our transformed pixel buffer until we have 'Batchsize' buffers cached
-                            CMSimpleQueueEnqueue(videoBatchsizeQueue, transformedPixelBuffer);
-                            
-                            if(CMSimpleQueueGetCount(videoBatchsizeQueue) == CMSimpleQueueGetCapacity(videoBatchsizeQueue))
-                            {
-                                // Drain the queue to for our batch
-                                int batchIndex = 0;
-                                while(CMSimpleQueueGetCount(videoBatchsizeQueue) != 0)
-                                {
-                                    CVPixelBufferRef aBatchedPixelBuffer = (CVPixelBufferRef) CMSimpleQueueDequeue(videoBatchsizeQueue);
-
-                                    // Lock
-                                    CVPixelBufferLockBaseAddress(aBatchedPixelBuffer, kCVPixelBufferLock_ReadOnly);
-
-                                    // submit and cache
-                                    for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
-                                    {
-                                        
-                                        [analyzer submitAndCacheCurrentBatchedVideoBuffer:CVPixelBufferGetBaseAddress(aBatchedPixelBuffer)
-                                                                             width:CVPixelBufferGetWidth(aBatchedPixelBuffer)
-                                                                            height:CVPixelBufferGetHeight(aBatchedPixelBuffer)
-                                                                       bytesPerRow:CVPixelBufferGetBytesPerRow(aBatchedPixelBuffer)
-                                                                                batchSize:batchCount
-                                                                            forBatchIndex:batchIndex];
-                                    }
-                                    
-                                    CVPixelBufferUnlockBaseAddress(aBatchedPixelBuffer, kCVPixelBufferLock_ReadOnly);
-
-                                }
-                                
-                                
-                                        // enter our group.
-                                        if([analyzer hasModules])
-                                        {
-                                            // dont overwrite the keys. we have one entry for the  plugin, and then many entries for the ley
-                                            NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                            NSMutableDictionary* newMetadataValue = [NSMutableDictionary new];
-                                            
-                                            for(NSInteger moduleIndex = 0; moduleIndex < [analyzer moduleClasses].count; moduleIndex++)
-                                            {
-                                                // enter our group.
-                                                dispatch_group_enter(analysisGroup);
-                                                
-                                                // dispatch a single module
-                                                dispatch_async(concurrentVideoAnalysisQueue, ^{
-                                                    
-                                                    NSDictionary* newModuleValue = [analyzer analyzeMetadataDictionaryForModuleIndex:moduleIndex
-                                                                                                                               error:&analyzerError];
-                                                    
-                                                    if(analyzerError)
-                                                    {
-                                                        NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
-                                                        [[LogController sharedLogController] appendErrorLog:errorString];
-                                                    }
-                                                    
-                                                    [dictionaryLock lock];
-                                                    [newMetadataValue addEntriesFromDictionary:newModuleValue];
-                                                    [dictionaryLock unlock];
-                                                    
-                                                    dispatch_group_leave(analysisGroup);
-                                                });
-                                            }
-                                            
-                                            if(newMetadataValue)
-                                            {
-                                                // provide some thread safety to our now async fetches.
-                                                [dictionaryLock lock];
-                                                [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
-                                                [dictionaryLock unlock];
-                                            }
-                                            
-                                        }
-                                        
-                                        // otherwise we dispatch once and run the
-                                        else
-                                        {
-                                            // enter our group.
-                                            dispatch_group_enter(analysisGroup);
-                                            
-                                            dispatch_async(concurrentVideoAnalysisQueue, ^{
-                                                
-                                                NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                                NSDictionary* newMetadataValue = [analyzer analyzeMetadataDictionaryForModuleIndex:SynopsisModuleIndexNone
-                                                                                                                             error:&analyzerError];
-                                                
-                                                if(analyzerError)
-                                                {
-                                                    NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
-                                                    [[LogController sharedLogController] appendErrorLog:errorString];
-                                                }
-                                                
-                                                if(newMetadataValue)
-                                                {
-                                                    // provide some thread safety to our now async fetches.
-                                                    [dictionaryLock lock];
-                                                    [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
-                                                    [dictionaryLock unlock];
-                                                }
-                                                
-                                                dispatch_group_leave(analysisGroup);
-                                            });
-                                        }
-                                        
-                                        dispatch_group_wait(analysisGroup, DISPATCH_TIME_FOREVER);
-                                        
-                                        // if we had an analyzer error, bail.
-                                        if(analyzerError)
-                                        {
-                                            break;
-                                        }
-                                    }
-
-                                    
                             CVPixelBufferLockBaseAddress(transformedPixelBuffer, kCVPixelBufferLock_ReadOnly);
                             
                             // Run an analysis pass on each plugin
                             for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
                                 
-                                [analyzer submitAndCacheCurrentVideoBuffer:CVPixelBufferGetBaseAddress(transformedPixelBuffer)
+                                [analyzer submitAndCacheCurrentSampleBuffer:CVPixelBufferGetBaseAddress(transformedPixelBuffer)
                                                                      width:CVPixelBufferGetWidth(transformedPixelBuffer)
                                                                     height:CVPixelBufferGetHeight(transformedPixelBuffer)
-                                                               bytesPerRow:CVPixelBufferGetBytesPerRow(transformedPixelBuffer)];
+                                                               bytesPerRow:CVPixelBufferGetBytesPerRow(transformedPixelBuffer)
+                                                              forTimeRange:currentSampleTimeRange
+                                                                     error:nil];
 
                                 // enter our group.
                                 if([analyzer hasModules])
@@ -720,8 +603,9 @@
                                         // dispatch a single module
                                         dispatch_async(concurrentVideoAnalysisQueue, ^{
                                             
-                                            NSDictionary* newModuleValue = [analyzer analyzeMetadataDictionaryForModuleIndex:moduleIndex
-                                                                                                                       error:&analyzerError];
+                                            NSDictionary* newModuleValue = [analyzer runAnalysisForModuleAtIndex:moduleIndex
+                                                                                                    forTimeRange:currentSampleTimeRange
+                                                                                                           error:&analyzerError];
                                             
                                             if(analyzerError)
                                             {
@@ -802,7 +686,6 @@
                             }
 
                             CFRelease(uncompressedVideoSampleBuffer);
-                            }
                         }
                         else
                         {
@@ -959,7 +842,8 @@
                             NSError* analyzerError = nil;
                             for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
-                                NSDictionary* finalizedMetadata = [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
+                                [analyzer finalizeAnalysisSessionWithError:&analyzerError];
+                                NSDictionary* finalizedMetadata = analyzer.su
                                 if(analyzerError)
                                 {
                                     NSString* errorString = [@"Error Finalizing Analysis - bailing: " stringByAppendingString:[analyzerError description]];

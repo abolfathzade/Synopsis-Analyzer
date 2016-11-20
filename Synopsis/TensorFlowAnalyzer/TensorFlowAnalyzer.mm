@@ -127,7 +127,7 @@
 //    topLabelsSession.reset();
 }
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
+- (void) beginAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint error:(NSError**)error;
 {
     // we need to ensure the GPU has memory for the max num of batches we can run
     // if we try to run more than 1 analysis session at a time then TF's CUDNN wont have memory and bail
@@ -173,7 +173,7 @@
     }
 }
 
-- (void) submitAndCacheCurrentBatchedVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow batchSize:(NSUInteger)batchSize forBatchIndex:(NSUInteger)batchIndex
+- (void) submitAndCacheCurrentSampleBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forTime:(CVTime)time error:(NSError**)error;
 {
     // http://stackoverflow.com/questions/36044197/how-do-i-pass-an-opencv-mat-into-a-c-tensorflow-graph
     
@@ -182,7 +182,7 @@
     if(!input_tensor.IsInitialized())
     {
         input_tensor = tensorflow::Tensor(tensorflow::DT_UINT8,
-                                    tensorflow::TensorShape({static_cast<long long>(batchSize), static_cast<long long>(height), static_cast<long long>(width), 3})); // was 4
+                                    tensorflow::TensorShape({1, static_cast<long long>(height), static_cast<long long>(width), 3})); // was 4
     }
     
     auto input_tensor_mapped = input_tensor.tensor<unsigned char, 4>();
@@ -200,13 +200,13 @@
             {
                 const unsigned char* source_value = source_pixel + c;
                 // assign to current batch index
-                input_tensor_mapped(batchIndex, y, x, c) = *source_value;
+                input_tensor_mapped(0, y, x, c) = *source_value;
             }
         }
     }
 }
 
-- (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
+- (void) runAnalysisForModuleAtIndex:(SynopsisModuleIndex)moduleIndex forTimeRange:(CMTimeRange)timeRange error:(NSError**)error
 {
     std::vector<tensorflow::Tensor> resized_tensors = [self resizeAndNormalizeInputTensor:input_tensor];
     
@@ -215,19 +215,18 @@
     // Actually run the image through the model.
     std::vector<tensorflow::Tensor> outputs;
     tensorflow::Status run_status = inceptionSession->Run({ {input_layer, resized_tensor} }, {final_layer, feature_layer}, {}, &outputs);
-    if (!run_status.ok()) {
-        LOG(ERROR) << "Running model failed: " << run_status;
-        return nil;
+    if (!run_status.ok())
+    {
+        if(self.errorLog)
+            self.errorLog(@"Tensorflow: Unable to run model session");
     }
 
     NSDictionary* labelsAndScores = [self dictionaryFromOutput:outputs];
-    
-    return labelsAndScores ;
 }
 
-- (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
+- (void) finalizeAnalysisSessionWithError:(NSError**)error;
 {
-    return @{ @"Features" : self.averageFeatureVec };
+    @{ @"Features" : self.averageFeatureVec };
 }
 
 

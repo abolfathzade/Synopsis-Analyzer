@@ -10,6 +10,10 @@
 
 @interface Module ()
 @property (readwrite) SynopsisAnalysisQualityHint qualityHint;
+
+@property (readwrite) NSMutableArray* perSampleMetadata;
+@property (readwrite) NSDictionary* summaryMetadata;
+
 @end
 
 @implementation Module
@@ -19,6 +23,7 @@
     self = [super init];
     {
         self.qualityHint = qualityHint;
+        self.perSampleMetadata = [NSMutableArray new];
     }
     return self;
 }
@@ -48,10 +53,22 @@
     return FrameCacheFormatBGR8;
 }
 
+- (void) analyzeCurrentFrame:(matType)frame previousFrame:(matType)lastFrame forTimeRange:(CMTimeRange)timeRange
+{
+    NSDictionary* currentFrameMetadata = [self analyzedMetadataForCurrentFrame:frame previousFrame:lastFrame];
+    
+    [self.perSampleMetadata addObject:@{ [NSValue valueWithCMTimeRange:timeRange] : currentFrameMetadata} ];
+}
+
 - (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame
 {
     [NSObject doesNotRecognizeSelector:_cmd];
     return nil;
+}
+
+- (void) finalizeSummaryMetadata
+{
+    self.summaryMetadata = [self finaledAnalysisMetadata];
 }
 
 - (NSDictionary*) finaledAnalysisMetadata;
@@ -59,5 +76,6 @@
     [NSObject doesNotRecognizeSelector:_cmd];
     return nil;
 }
+
 
 @end

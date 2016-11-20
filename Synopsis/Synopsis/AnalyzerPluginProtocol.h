@@ -105,32 +105,39 @@ typedef void (^LogBlock)(NSString* log);
 
 #pragma mark - Analysis Methods
 
+// Analysis roughly looks like
+// 1 : for each analysis plugin instance, call "beginMetadataAnalysisSessionWithQuality" prior to sending sample
+// 2 : for a vended sample from our source media - for each analysis plugin, call submitAndCacheCurrentSampleBuffer for that analysis plugin instance
+// 3 : for each analysis plugin, for each module enabled, call "runAnalysisForModuleAtIndex"
+// 4 : upon reaching the last sample, for each analysis plugin, call finalizeMetadataAnalysisSessionWithError
+// 5 : we now access perSampleMetadata and summaryMetadata
+
 // Initialize any resources required by the plugin for Analysis
-// This is where one might initialize resources that exist over the lifetime of the module
+// This is where one might initialize resources that exist over the lifetime of an analysis session
 // For example, feature detectors, OpenGL/CL/Cuda contexts
-// Memory pools, etc.
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint;
+// Memory pools / caches for batching, etc
+
+- (void) beginAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint error:(NSError**)error;
 
 // Updates the cached read only video buffer to be used for every module an analyzer implements.
-// This is where one would do color conversion cache lower resolution proxies, submit to OpenCL, Cuda, etc
-// This is called once per frame, and the cache
-- (void) submitAndCacheCurrentBatchedVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow batchSize:(NSUInteger)batchSize forBatchIndex:(NSUInteger)batchIndex;
-
+// This is where one would do color conversion /  cache / calculate lower resolution intermediates / submit to OpenCL, Cuda, etc
+// This is called once per sample we want to analyze
+- (void) submitAndCacheCurrentSampleBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forTimeRange:(CMTimeRange)timeRange error:(NSError**)error;
 
 // Analyze a sample buffer.
-// The resulting dictionary is aggregated with all other plugins and added to the 
-// If a module name is supplied, the plugin should run analysis for that module only.
-//
-// This method will be called once per frame, once per enabled module.
+// This method will run once per 'module' that your analyzer provides
+// Each call may run on a different thread, concurrently.
+// This means each module your provide should not serially depend on another modules output (if so, combine them so there are no dependencies)
+// This also means each module in your analyzer should be thread safe / avoid locking on resources to be performant.
 // This method may be called from a different thread per invocation.
+- (void) runAnalysisForModuleAtIndex:(SynopsisModuleIndex)moduleIndex forTimeRange:(CMTimeRange)timeRange error:(NSError**)error;
 
-- (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error;
+// Finalize any calculations required to populate the metadata
+- (void) finalizeAnalysisSessionWithError:(NSError**)error;
 
-
-// Finalize any calculations required to return global metadata
-// Global Metadata is metadata that describes the entire file, not the individual frames or samples
-// Things like most prominent colors over all, agreggate amounts of motion, etc
-- (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error;
+// Metadata made available once finalize has been called.
+@property (copy) NSArray* perSampleMetadata;
+@property (copy) NSDictionary* summaryMetadata;
 
 #pragma mark - Module Support
 

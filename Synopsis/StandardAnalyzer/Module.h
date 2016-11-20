@@ -25,8 +25,10 @@
 - (FrameCacheFormat) currentFrameFormat;
 - (FrameCacheFormat) previousFrameFormat;
 
-- (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame;
-- (NSDictionary*) finaledAnalysisMetadata;
+- (void) analyzeCurrentFrame:(matType)frame previousFrame:(matType)lastFrame forTimeRange:(CMTimeRange)timeRange;
+- (void) finalizeSummaryMetadata;
 
+@property (readonly) NSMutableArray* perSampleMetadata;
+@property (readonly) NSDictionary* summaryMetadata;
 
 @end

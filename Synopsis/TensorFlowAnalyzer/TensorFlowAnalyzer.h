@@ -36,16 +36,18 @@
 @property (copy) LogBlock warningLog;
 @property (copy) LogBlock verboseLog;
 
-
 @property (readonly) BOOL hasModules;
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint;
+- (void) beginAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint error:(NSError**)error;
 
-- (void) submitAndCacheCurrentVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow;
+- (void) submitAndCacheCurrentSampleBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forTimeRange:(CMTimeRange)timeRange error:(NSError**)error;
 
-- (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error;
+- (void) runAnalysisForModuleAtIndex:(SynopsisModuleIndex)moduleIndex forTimeRange:(CMTimeRange)timeRange error:(NSError**)error;
 
-- (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error;
+- (void) finalizeAnalysisSessionWithError:(NSError**)error;
+
+@property (copy) NSArray<AVTimedMetadataGroup*>* perSampleMetadata;
+@property (copy) NSArray<AVTimedMetadataGroup*>* summaryMetadata;
 
 @end
 

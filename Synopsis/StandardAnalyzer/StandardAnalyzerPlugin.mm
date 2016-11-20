@@ -115,7 +115,7 @@
 }
 
 
-- (void) beginMetadataAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint
+- (void) beginAnalysisSessionWithQuality:(SynopsisAnalysisQualityHint)qualityHint error:(NSError**)error;
 {
 //    dispatch_async(dispatch_get_main_queue(), ^{
 //        cv::namedWindow("OpenCV Debug", CV_WINDOW_NORMAL);
@@ -149,14 +149,15 @@
     return cv::Mat((int)height, (int)extendedWidth, CV_8UC4, baseAddress);
 }
 
-- (void) submitAndCacheCurrentBatchedVideoBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow batchSize:(NSUInteger)batchSize forBatchIndex:(NSUInteger)batchIndex
+- (void) submitAndCacheCurrentSampleBuffer:(void*)baseAddress width:(size_t)width height:(size_t)height bytesPerRow:(size_t)bytesPerRow forTimeRange:(CMTimeRange)timeRange error:(NSError**)erro
 {
     [self setOpenCLEnabled:USE_OPENCL];
     
     [self.frameCache cacheAndConvertBuffer:baseAddress width:width height:height bytesPerRow:bytesPerRow];
+
 }
 
-- (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
+- (void) runAnalysisForModuleAtIndex:(SynopsisModuleIndex)moduleIndex forTimeRange:(CMTimeRange)timeRange error:(NSError**)error
 {
 #define SHOWIMAGE 0
     
@@ -184,21 +185,28 @@
     FrameCacheFormat currentFormat = [module currentFrameFormat];
     FrameCacheFormat previousFormat = [module previousFrameFormat];
     
-    return [module analyzedMetadataForCurrentFrame:[self.frameCache currentFrameForFormat:currentFormat] previousFrame:[self.frameCache previousFrameForFormat:previousFormat]];
+    [module analyzeCurrentFrame:[self.frameCache currentFrameForFormat:currentFormat] previousFrame:[self.frameCache previousFrameForFormat:previousFormat] forTimeRange:timeRange];
 }
 
 #pragma mark - Finalization
 
-- (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
+- (void) finalizeAnalysisSessionWithError:(NSError**)error;
 {
+    // instances of metadata for this frame
+    NSString* newMetadataKey = [self pluginIdentifier];
+    NSMutableDictionary* newMetadataValue = [NSMutableDictionary new];
+
+    // combine all module entries by CMTime key
+    
+    
+    
     NSMutableDictionary* finalized = [NSMutableDictionary new];
     
     for(Module* module in self.modules)
     {
-        [finalized addEntriesFromDictionary:[module finaledAnalysisMetadata]];
+        [module finalizeSummaryMetadata];
+        [finalized addEntriesFromDictionary:module.summaryMetadata];
     }
-
-    return finalized;
 }
 
 
