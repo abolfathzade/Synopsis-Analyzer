@@ -25,6 +25,13 @@
 @property (readonly) NSDictionary* pluginReturnedMetadataKeysAndDataTypes;
 @property (readonly) NSString* pluginMediaType;
 
+// Logging callbacks fo inclusion in the UI
+@property (copy) LogBlock errorLog;
+@property (copy) LogBlock successLog;
+@property (copy) LogBlock warningLog;
+@property (copy) LogBlock verboseLog;
+
+
 #pragma mark -
 
 @property (readonly) NSArray* moduleClasses;

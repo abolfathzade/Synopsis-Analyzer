@@ -11,7 +11,7 @@
 #import "opencv.hpp"
 #import "ocl.hpp"
 #import "types_c.h"
-#import "utility.hpp"
+#import "opencv2/core/utility.hpp"
 
 #import <Foundation/Foundation.h>
 #import "AnalyzerPluginProtocol.h"

@@ -58,6 +58,8 @@ typedef enum : NSUInteger {
     SynopsisAnalysisQualityHintOriginal = NSUIntegerMax,
 } SynopsisAnalysisQualityHint;
 
+typedef void (^LogBlock)(NSString* log);
+
 @protocol AnalyzerPluginProtocol <NSObject>
 
 @required
@@ -91,6 +93,12 @@ typedef enum : NSUInteger {
 // Supported values are currently only AVMediaTypeVideo, or AVMediaTypeAudio.
 // Perhaps Muxed comes in the future.
 @property (readonly) NSString* pluginMediaType;
+
+// Logging callbacks fo inclusion in the UI
+@property (copy) LogBlock errorLog;
+@property (copy) LogBlock successLog;
+@property (copy) LogBlock warningLog;
+@property (copy) LogBlock verboseLog;
 
 // Processing overhead for the plugin
 //@property (readonly) SynopsisAnalysisOverhead pluginOverhead;

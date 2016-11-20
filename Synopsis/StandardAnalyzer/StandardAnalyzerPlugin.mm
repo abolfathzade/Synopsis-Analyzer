@@ -13,7 +13,7 @@
 #import "ocl.hpp"
 #import "types_c.h"
 #import "features2d.hpp"
-#import "utility.hpp"
+#import "opencv2/core/utility.hpp"
 
 #import <AVFoundation/AVFoundation.h>
 #import <CoreVideo/CoreVideo.h>
@@ -21,8 +21,6 @@
 #import <OpenCL/opencl.h>
 
 #import "StandardAnalyzerPlugin.h"
-
-#import "LogController.h"
 
 #import "StandardAnalyzerDefines.h"
 
@@ -72,7 +70,7 @@
     if(self)
     {
         self.pluginName = @"OpenCV Analyzer";
-        self.pluginIdentifier = @"info.v002.Synopsis.OpenCVAnalyzer";
+        self.pluginIdentifier = @"info.Synopsis.OpenCVAnalyzer";
         self.pluginAuthors = @[@"Anton Marini"];
         self.pluginDescription = @"OpenCV analysis for color, motion, features and more.";
         self.pluginAPIVersionMajor = 0;
@@ -84,11 +82,13 @@
         self.hasModules = YES;
         
         self.modules = [NSMutableArray new];
-        self.moduleClasses  = @[//NSStringFromClass([AverageColor class]),
+        self.moduleClasses  = @[// AVG Color is useless and just an example module
+                                //NSStringFromClass([AverageColor class]),
                                 NSStringFromClass([DominantColorModule class]),
                                 NSStringFromClass([HistogramModule class]),
                                 NSStringFromClass([MotionModule class]),
-                                NSStringFromClass([PerceptualHashModule class]),
+                                // Diabled - using Tensorflow feature vec
+                                //NSStringFromClass([PerceptualHashModule class]),
                                 NSStringFromClass([TrackerModule class]),
                                 NSStringFromClass([SaliencyModule class]),
                               ];
@@ -106,10 +106,6 @@
         if(cv::ocl::haveOpenCL())
         {
             cv::ocl::setUseOpenCL(true);
-        }
-        else
-        {
-            NSLog(@"Unable to Enable OpenCL - No OpenCL Devices detected");
         }
     }
     else
@@ -135,7 +131,14 @@
         
         Module* module = [(Module*)[moduleClass alloc] initWithQualityHint:qualityHint];
         
-        [self.modules addObject:module];
+        if(module != nil)
+        {
+        
+            [self.modules addObject:module];
+            
+            if(self.successLog)
+                self.successLog([@"Loaded Module: " stringByAppendingString:classString]);
+        }
     }
 }
 

@@ -16,6 +16,8 @@
 		1B02B7581D2AE03200A4430F /* CIEDE2000.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1B02B7521D2AE02900A4430F /* CIEDE2000.cpp */; };
 		1B02BA481D2B07C700A4430F /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B02BA471D2B07C700A4430F /* OpenCL.framework */; };
 		1B02BA4A1D2B07D100A4430F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B02BA491D2B07D100A4430F /* Cocoa.framework */; };
+		1B0A02B71DDAE58000F542F7 /* TensorFlowAnalyzer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1B0A02B61DDAE58000F542F7 /* TensorFlowAnalyzer.mm */; };
+		1B0A02C21DDAE8CB00F542F7 /* libtensorflow_cc.so in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B0A02C11DDAE8CB00F542F7 /* libtensorflow_cc.so */; settings = {ATTRIBUTES = (Required, ); }; };
 		1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
 		1B190E4C1D06806F00728443 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1B190E501D06819900728443 /* libpython.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4F1D06819900728443 /* libpython.tbd */; };
@@ -30,7 +32,6 @@
 		1B3233D71C306B2300C9CF5E /* PresetObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233D61C306B2300C9CF5E /* PresetObject.m */; };
 		1B3233D91C30C6CE00C9CF5E /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B3233D81C30C6CE00C9CF5E /* Accelerate.framework */; };
 		1B3233DC1C31F8F200C9CF5E /* PresetGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233DB1C31F8F200C9CF5E /* PresetGroup.m */; };
-		1B4073701DCBDD4C00AB8A53 /* LogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3F1B028BB6005D7354 /* LogController.m */; };
 		1B49BD9E1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1B49BD9D1B503BAD0043EBA0 /* StandardAnalyzerPlugin.mm */; };
 		1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B578C401B02F37E00D76F62 /* DropFilesView.m */; };
 		1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BCD91ACB90850013418D /* VideoToolbox.framework */; };
@@ -38,6 +39,8 @@
 		1B61BD061ACF371A0013418D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1B61BD081ACF371A0013418D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
 		1B61BD091ACF37200013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
+		1B7BCE061DDAF85600250692 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
+		1B7BCE081DDAF87500250692 /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B7BCE071DDAF87500250692 /* libstdc++.tbd */; };
 		1B805E2C1B0114D0005D7354 /* ProgressTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */; };
 		1B805E2F1B012309005D7354 /* ProgressTableViewCellSource.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B805E2E1B012309005D7354 /* ProgressTableViewCellSource.xib */; };
 		1B805E321B012386005D7354 /* ProgressTableViewCellSourceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E311B012386005D7354 /* ProgressTableViewCellSourceController.m */; };
@@ -46,7 +49,6 @@
 		1B805E3C1B01488D005D7354 /* ProgressTableViewCellRevealController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3A1B01488D005D7354 /* ProgressTableViewCellRevealController.m */; };
 		1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */; };
 		1B805E401B028BB6005D7354 /* LogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3F1B028BB6005D7354 /* LogController.m */; };
-		1B8673981D2EAC470064BECF /* StandardAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B9873E71D42DB7A0015E54C /* DispatchQueueManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B9873E61D42DB7A0015E54C /* DispatchQueueManager.m */; };
 		1B9E10891D2DD9DF004523A9 /* libippicv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B9E10881D2DD9DF004523A9 /* libippicv.a */; };
 		1BA4D1991C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA4D1971C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m */; };
@@ -101,6 +103,13 @@
 		1BEA4D3D1ACB2BDD00AB57C1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
 		1BEA4D421ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */; };
+		1BEC6BC91DDB028C00F77397 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
+		1BEC6BCC1DDB03AD00F77397 /* tensorflow_inception_graph.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC6BCB1DDB03AD00F77397 /* tensorflow_inception_graph.pb */; };
+		1BEC6BCD1DDB03F500F77397 /* TensorFlowAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B0A02AE1DDAE4DD00F542F7 /* TensorFlowAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1BEC6BD01DDB07E000F77397 /* libtensorflow_cc.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B0A02C11DDAE8CB00F542F7 /* libtensorflow_cc.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1BEC6BD21DDB809800F77397 /* imagenet_comp_graph_label_strings.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC6BD11DDB809800F77397 /* imagenet_comp_graph_label_strings.txt */; };
+		1BEC6BD31DDBD25B00F77397 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C561AD26696003B3CE9 /* CoreVideo.framework */; };
+		1BEC6BD41DDBD26100F77397 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B3233D81C30C6CE00C9CF5E /* Accelerate.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -118,12 +127,12 @@
 			remoteGlobalIDString = 1B61BCF81ACF26710013418D;
 			remoteInfo = OpenCVAnalyzerPlugin;
 		};
-		1B9E108C1D2E8A2F004523A9 /* PBXContainerItemProxy */ = {
+		1B7BCE041DDAF20F00250692 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1BEA4D111ACB2BCC00AB57C1 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 1BA8F83A1C138B330066BDDB;
-			remoteInfo = DeepBeliefAnalyzer;
+			remoteGlobalIDString = 1B0A02AD1DDAE4DD00F542F7;
+			remoteInfo = TensorFlowAnalyzer;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -153,7 +162,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				1B8673981D2EAC470064BECF /* StandardAnalyzer.plugin in CopyFiles */,
+				1BEC6BCD1DDB03F500F77397 /* TensorFlowAnalyzer.plugin in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +173,16 @@
 			dstSubfolderSpec = 10;
 			files = (
 				1BA8F84F1C13968E0066BDDB /* DeepBelief.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1BEC6BCF1DDB07C500F77397 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1BEC6BD01DDB07E000F77397 /* libtensorflow_cc.so in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -407,6 +426,11 @@
 		1B02BA281D2B06C800A4430F /* cv2.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.bundle"; path = cv2.so; sourceTree = "<group>"; };
 		1B02BA471D2B07C700A4430F /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
 		1B02BA491D2B07D100A4430F /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		1B0A02AE1DDAE4DD00F542F7 /* TensorFlowAnalyzer.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TensorFlowAnalyzer.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B0A02B01DDAE4DD00F542F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1B0A02B51DDAE57F00F542F7 /* TensorFlowAnalyzer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TensorFlowAnalyzer.h; sourceTree = "<group>"; };
+		1B0A02B61DDAE58000F542F7 /* TensorFlowAnalyzer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TensorFlowAnalyzer.mm; sourceTree = "<group>"; };
+		1B0A02C11DDAE8CB00F542F7 /* libtensorflow_cc.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libtensorflow_cc.so; sourceTree = "<group>"; };
 		1B190E4B1D06806F00728443 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		1B190E4F1D06819900728443 /* libpython.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libpython.tbd; path = usr/lib/libpython.tbd; sourceTree = SDKROOT; };
 		1B3233C01C2E395700C9CF5E /* PreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesViewController.h; sourceTree = "<group>"; };
@@ -439,6 +463,7 @@
 		1B61BCFC1ACF26710013418D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1B61BD001ACF27740013418D /* StandardAnalyzerPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StandardAnalyzerPlugin.h; sourceTree = "<group>"; };
 		1B61BD071ACF371A0013418D /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		1B7BCE071DDAF87500250692 /* libstdc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libstdc++.tbd"; path = "usr/lib/libstdc++.tbd"; sourceTree = SDKROOT; };
 		1B805E2A1B0114D0005D7354 /* ProgressTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTableViewController.h; sourceTree = "<group>"; };
 		1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTableViewController.m; sourceTree = "<group>"; };
 		1B805E2E1B012309005D7354 /* ProgressTableViewCellSource.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProgressTableViewCellSource.xib; sourceTree = "<group>"; };
@@ -734,6 +759,10 @@
 		1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnalysisAndTranscodeOperation.h; sourceTree = "<group>"; };
 		1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnalysisAndTranscodeOperation.m; sourceTree = "<group>"; };
+		1BEC6BCB1DDB03AD00F77397 /* tensorflow_inception_graph.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph.pb; sourceTree = SOURCE_ROOT; };
+		1BEC6BD11DDB809800F77397 /* imagenet_comp_graph_label_strings.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = imagenet_comp_graph_label_strings.txt; path = TensorFlowAnalyzer/models/inception2015/imagenet_comp_graph_label_strings.txt; sourceTree = SOURCE_ROOT; };
+		1BEC6BD61DDFBB3F00F77397 /* libcudnn_static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcudnn_static.a; path = "../../../../../../../Developer/NVIDIA/CUDA-8.0/lib/libcudnn_static.a"; sourceTree = "<group>"; };
+		1BEC6BD81DDFBBDD00F77397 /* libcudart.8.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcudart.8.0.dylib; path = "../../../../../../../Developer/NVIDIA/CUDA-8.0/lib/libcudart.8.0.dylib"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -741,6 +770,19 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1B0A02AB1DDAE4DD00F542F7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1BEC6BD41DDBD26100F77397 /* Accelerate.framework in Frameworks */,
+				1BEC6BD31DDBD25B00F77397 /* CoreVideo.framework in Frameworks */,
+				1BEC6BC91DDB028C00F77397 /* AVFoundation.framework in Frameworks */,
+				1B7BCE081DDAF87500250692 /* libstdc++.tbd in Frameworks */,
+				1B7BCE061DDAF85600250692 /* CoreFoundation.framework in Frameworks */,
+				1B0A02C21DDAE8CB00F542F7 /* libtensorflow_cc.so in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1301,6 +1343,52 @@
 			path = "site-packages";
 			sourceTree = "<group>";
 		};
+		1B0A02A91DDAE46800F542F7 /* TensorflowAnalyzer */ = {
+			isa = PBXGroup;
+			children = (
+				1B0A02B51DDAE57F00F542F7 /* TensorFlowAnalyzer.h */,
+				1B0A02B61DDAE58000F542F7 /* TensorFlowAnalyzer.mm */,
+				1B0A02C01DDAE8CB00F542F7 /* lib */,
+				1B0A02B81DDAE5FB00F542F7 /* Models */,
+				1B0A02B41DDAE53B00F542F7 /* Supporting Files */,
+			);
+			name = TensorflowAnalyzer;
+			path = TensorFlowAnalyzer;
+			sourceTree = "<group>";
+		};
+		1B0A02B41DDAE53B00F542F7 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1B0A02B01DDAE4DD00F542F7 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1B0A02B81DDAE5FB00F542F7 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1B0A02B91DDAE60A00F542F7 /* inception2015 */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		1B0A02B91DDAE60A00F542F7 /* inception2015 */ = {
+			isa = PBXGroup;
+			children = (
+				1BEC6BD11DDB809800F77397 /* imagenet_comp_graph_label_strings.txt */,
+				1BEC6BCB1DDB03AD00F77397 /* tensorflow_inception_graph.pb */,
+			);
+			path = inception2015;
+			sourceTree = "<group>";
+		};
+		1B0A02C01DDAE8CB00F542F7 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				1B0A02C11DDAE8CB00F542F7 /* libtensorflow_cc.so */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
 		1B3233BC1C2E390600C9CF5E /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
@@ -1326,6 +1414,9 @@
 		1B61BCDB1ACC70D50013418D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1BEC6BD81DDFBBDD00F77397 /* libcudart.8.0.dylib */,
+				1BEC6BD61DDFBB3F00F77397 /* libcudnn_static.a */,
+				1B7BCE071DDAF87500250692 /* libstdc++.tbd */,
 				1B9E10881D2DD9DF004523A9 /* libippicv.a */,
 				1B02BA491D2B07D100A4430F /* Cocoa.framework */,
 				1B02BA471D2B07C700A4430F /* OpenCL.framework */,
@@ -1349,6 +1440,7 @@
 			children = (
 				1BA8F8421C138B8C0066BDDB /* DeepBeliefAnalyzer */,
 				1B61BCFA1ACF26710013418D /* StandardAnalyzer */,
+				1B0A02A91DDAE46800F542F7 /* TensorflowAnalyzer */,
 			);
 			name = Plugins;
 			sourceTree = "<group>";
@@ -1968,6 +2060,7 @@
 				1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */,
 				1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */,
 				1BA8F83B1C138B330066BDDB /* DeepBeliefAnalyzer.plugin */,
+				1B0A02AE1DDAE4DD00F542F7 /* TensorFlowAnalyzer.plugin */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2029,6 +2122,25 @@
 			productReference = 1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */;
 			productType = "com.apple.product-type.spotlight-importer";
 		};
+		1B0A02AD1DDAE4DD00F542F7 /* TensorFlowAnalyzer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B0A02B11DDAE4DD00F542F7 /* Build configuration list for PBXNativeTarget "TensorFlowAnalyzer" */;
+			buildPhases = (
+				1B0A02AA1DDAE4DD00F542F7 /* Sources */,
+				1B0A02AB1DDAE4DD00F542F7 /* Frameworks */,
+				1B0A02AC1DDAE4DD00F542F7 /* Resources */,
+				1BEC6BCF1DDB07C500F77397 /* CopyFiles */,
+				1BEC6BCE1DDB069B00F77397 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TensorFlowAnalyzer;
+			productName = TensorFlowAnalyzer;
+			productReference = 1B0A02AE1DDAE4DD00F542F7 /* TensorFlowAnalyzer.plugin */;
+			productType = "com.apple.product-type.bundle";
+		};
 		1B61BCF81ACF26710013418D /* StandardAnalyzer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1B61BCFD1ACF26710013418D /* Build configuration list for PBXNativeTarget "StandardAnalyzer" */;
@@ -2080,9 +2192,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				1B7BCE051DDAF20F00250692 /* PBXTargetDependency */,
 				1B61BD041ACF28660013418D /* PBXTargetDependency */,
 				1B007ECD1B4D7D0900DE6E98 /* PBXTargetDependency */,
-				1B9E108D1D2E8A2F004523A9 /* PBXTargetDependency */,
 			);
 			name = Synopsis;
 			productName = MetadataTranscoderTestHarness;
@@ -2100,6 +2212,10 @@
 				TargetAttributes = {
 					1B007EBF1B4D7D0900DE6E98 = {
 						CreatedOnToolsVersion = 6.3.2;
+					};
+					1B0A02AD1DDAE4DD00F542F7 = {
+						CreatedOnToolsVersion = 8.1;
+						ProvisioningStyle = Automatic;
 					};
 					1B61BCF81ACF26710013418D = {
 						CreatedOnToolsVersion = 6.2;
@@ -2130,6 +2246,7 @@
 				1B61BCF81ACF26710013418D /* StandardAnalyzer */,
 				1B007EBF1B4D7D0900DE6E98 /* SynopsisImporter */,
 				1BA8F83A1C138B330066BDDB /* DeepBeliefAnalyzer */,
+				1B0A02AD1DDAE4DD00F542F7 /* TensorFlowAnalyzer */,
 			);
 		};
 /* End PBXProject section */
@@ -2141,6 +2258,15 @@
 			files = (
 				1B007ED91B4EBAD500DE6E98 /* schema.xml in Resources */,
 				1B007ED61B4EBAC700DE6E98 /* schema.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1B0A02AC1DDAE4DD00F542F7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1BEC6BD21DDB809800F77397 /* imagenet_comp_graph_label_strings.txt in Resources */,
+				1BEC6BCC1DDB03AD00F77397 /* tensorflow_inception_graph.pb in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2205,6 +2331,19 @@
 			shellPath = /bin/sh;
 			shellScript = "install_name_tool -change \"@executable_path/../Frameworks/DeepBelief.framework/Versions/A/DeepBelief\" \"@loader_path/../Frameworks/DeepBelief.framework/Versions/A/DeepBelief\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/MacOS/$PRODUCT_NAME\"\n";
 		};
+		1BEC6BCE1DDB069B00F77397 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "install_name_tool -change \"bazel-out/local-opt/bin/tensorflow/libtensorflow_cc.so\" @loader_path/../Frameworks/libtensorflow_cc.so \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/MacOS/$PRODUCT_NAME\"\n\n# BELOW FOR CUDA VERSION\n#install_name_tool -change \"bazel-out/local_darwin-opt/bin/tensorflow/libtensorflow_cc.so\" @loader_path/../Frameworks/libtensorflow_cc.so \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/MacOS/$PRODUCT_NAME\"\n\n#install_name_tool -add_rpath /usr/local/cuda/lib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/Frameworks/libtensorflow_cc.so\"\n\n#install_name_tool -add_rpath /usr/local/cuda/extras/CUPTI/lib \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/Frameworks/libtensorflow_cc.so\"\n\n#Uneeded?\n#install_name_tool -change \"@rpath/libcudart.8.0.dylib\" \"@loader_path/../Frameworks/libcudart.8.0.dylib\" \"$TARGET_BUILD_DIR/$PRODUCT_NAME.plugin/Contents/Frameworks/libtensorflow_cc.so\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -2217,12 +2356,19 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1B0A02AA1DDAE4DD00F542F7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1B0A02B71DDAE58000F542F7 /* TensorFlowAnalyzer.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1B61BCF51ACF26710013418D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				1BCB53241DD9119900403CDC /* TrackerModule.mm in Sources */,
-				1B4073701DCBDD4C00AB8A53 /* LogController.m in Sources */,
 				1BABD3781DD5069800DB5A22 /* MotionModule.mm in Sources */,
 				1BABD36F1DD4EE8E00DB5A22 /* Module.mm in Sources */,
 				1BABD3661DD4DEDA00DB5A22 /* FrameCache.mm in Sources */,
@@ -2290,10 +2436,10 @@
 			target = 1B61BCF81ACF26710013418D /* StandardAnalyzer */;
 			targetProxy = 1B61BD031ACF28660013418D /* PBXContainerItemProxy */;
 		};
-		1B9E108D1D2E8A2F004523A9 /* PBXTargetDependency */ = {
+		1B7BCE051DDAF20F00250692 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 1BA8F83A1C138B330066BDDB /* DeepBeliefAnalyzer */;
-			targetProxy = 1B9E108C1D2E8A2F004523A9 /* PBXContainerItemProxy */;
+			target = 1B0A02AD1DDAE4DD00F542F7 /* TensorFlowAnalyzer */;
+			targetProxy = 1B7BCE041DDAF20F00250692 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2340,7 +2486,7 @@
 				INSTALL_PATH = "@executable_path/../Contents/Library/Spotlight";
 				LIBRARY_STYLE = BUNDLE;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis.SynopsisImporter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = mdimporter;
@@ -2357,17 +2503,72 @@
 				INSTALL_PATH = "@executable_path/../Contents/Library/Spotlight";
 				LIBRARY_STYLE = BUNDLE;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis.SynopsisImporter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = mdimporter;
 			};
 			name = Release;
 		};
+		1B0A02B21DDAE4DD00F542F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_UNROLL_LOOPS = YES;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/TensorFlowAnalyzer/includes";
+				INFOPLIST_FILE = TensorFlowAnalyzer/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/TensorFlowAnalyzer/lib",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = info.synopsis.TensorFlowAnalyzer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				USER_HEADER_SEARCH_PATHS = "";
+				WRAPPER_EXTENSION = plugin;
+			};
+			name = Debug;
+		};
+		1B0A02B31DDAE4DD00F542F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_UNROLL_LOOPS = YES;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/TensorFlowAnalyzer/includes";
+				INFOPLIST_FILE = TensorFlowAnalyzer/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/TensorFlowAnalyzer/lib",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = info.synopsis.TensorFlowAnalyzer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				USER_HEADER_SEARCH_PATHS = "";
+				WRAPPER_EXTENSION = plugin;
+			};
+			name = Release;
+		};
 		1B61BCFE1ACF26710013418D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
@@ -2378,6 +2579,7 @@
 					"$(inherited)",
 				);
 				GCC_UNROLL_LOOPS = NO;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
 				INFOPLIST_FILE = StandardAnalyzer/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				LIBRARY_SEARCH_PATHS = (
@@ -2386,10 +2588,10 @@
 					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/share/OpenCV/3rdparty/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis.StandardAnalyzer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = plugin;
 			};
 			name = Debug;
@@ -2397,13 +2599,14 @@
 		1B61BCFF1ACF26710013418D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = YES;
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_GENERATE_TEST_COVERAGE_FILES = YES;
 				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = YES;
 				GCC_UNROLL_LOOPS = YES;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
 				INFOPLIST_FILE = StandardAnalyzer/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				LIBRARY_SEARCH_PATHS = (
@@ -2412,10 +2615,10 @@
 					"$(PROJECT_DIR)/StandardAnalyzer/OpenCV/share/OpenCV/3rdparty/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis.StandardAnalyzer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/StandardAnalyzer/OpenCV/include/**";
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = plugin;
 			};
 			name = Release;
@@ -2439,7 +2642,7 @@
 				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis.DeepBeliefAnalyzer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = plugin;
@@ -2460,7 +2663,7 @@
 				INFOPLIST_FILE = DeepBeliefAnalyzer/Info.plist;
 				INSTALL_PATH = "@executable_path/../Contents/PlugIns";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.Synopsis.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis.DeepBeliefAnalyzer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = plugin;
@@ -2559,7 +2762,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -2573,7 +2776,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = "info.v002.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -2586,6 +2789,15 @@
 			buildConfigurations = (
 				1B007ECF1B4D7D0900DE6E98 /* Debug */,
 				1B007ED01B4D7D0900DE6E98 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1B0A02B11DDAE4DD00F542F7 /* Build configuration list for PBXNativeTarget "TensorFlowAnalyzer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1B0A02B21DDAE4DD00F542F7 /* Debug */,
+				1B0A02B31DDAE4DD00F542F7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
