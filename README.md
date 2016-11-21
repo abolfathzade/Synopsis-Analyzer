@@ -64,8 +64,11 @@ bazel build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:bui
 
 Tensorflow libtensorflow_cc.so compiled with
 
-bazel build -c opt --copt=-mavx --cxxopt=-fno-exceptions --cxxopt=-DUSE_GEMM_FOR_CONV //tensorflow:libtensorflow_cc.so
+ALL OPTS but deadlocks:
+bazel build -c opt --copt=-mavx --cxxopt=-fno-exceptions --cxxopt=--std=c++11 --cxxopt=-DNDEBUG --cxxopt=-DNOTFDBG --cxxopt=-O2 --cxxopt=-DUSE_GEMM_FOR_CONV --cxxopt=-D__ANDROID_TYPES_SLIM__ --cxxopt=-DTF_LEAN_BINARY --cxxopt=-D__thread=  //tensorflow:libtensorflow_cc.so
 
+DOES NOT DEADLOCK:
+bazel build -c opt --copt=-mavx --cxxopt=-fno-exceptions --cxxopt=--std=c++11 --cxxopt=-DNDEBUG --cxxopt=-DNOTFDBG --cxxopt=-O2 --cxxopt=-DUSE_GEMM_FOR_CONV //tensorflow:libtensorflow_cc.so
 Build useful tools
 
 bazel build tensorflow/python/tools:optimize_for_inference
