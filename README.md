@@ -56,11 +56,22 @@ See the DesignDiscussion wiki for more information about possible modules and di
 
 ## Development Notes
 
-Tensorflow compiled with cuda 8.0 via XCode 7.3 command line tools, due to Cuda 8.0 SDK / Clang incompatibility.
+Tensorflow 0.11 compiled with cuda 8.0 via XCode 7.3 command line tools, due to Cuda 8.0 SDK / Clang incompatibility.
 
 sudo xcode-select --switch /Library/Developer/CommandLineTools
+
 bazel build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
 Tensorflow libtensorflow_cc.so compiled with
-bazel build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
+bazel build -c opt --copt=-mavx --config=cuda //tensorflow:libtensorflow_cc.so
+
+Build useful tools
+
+bazel build tensorflow/python/tools:optimize_for_inference
+
+build tensorflow/tools/quantization/quantize_graph
+
+bazel-bin/tensorflow/python/tools/optimize_for_inference --input=/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph.pb --output=/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_optimized.pb --input_names=Mul --output_names=softmax,pool_3 
+
+bazel-bin/tensorflow/tools/quantization/quantize_graph --input=/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_optimized.pb --output=/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_quantized.pb --output_node_names=softmax --mode=weights_rounded
