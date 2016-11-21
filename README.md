@@ -56,11 +56,13 @@ See the DesignDiscussion wiki for more information about possible modules and di
 
 ## Development Notes
 
-Tensorflow compiled with cuda 8.0 via XCode 7.3 command line tools, due to Cuda 8.0 SDK / Clang incompatibility.
+Tensorflow 0.11 compiled with cuda 8.0 via XCode 7.3 command line tools, due to Cuda 8.0 SDK / Clang incompatibility.
 
 sudo xcode-select --switch /Library/Developer/CommandLineTools
+
 bazel build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
 Tensorflow libtensorflow_cc.so compiled with
+
 bazel build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:build_pip_package
 
