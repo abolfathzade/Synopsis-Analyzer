@@ -64,7 +64,7 @@ bazel build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:bui
 
 Tensorflow libtensorflow_cc.so compiled with
 
-bazel build -c opt --copt=-mavx --config=cuda //tensorflow:libtensorflow_cc.so
+bazel build -c opt --copt=-mavx --cxxopt=-fno-exceptions --cxxopt=-DUSE_GEMM_FOR_CONV //tensorflow:libtensorflow_cc.so
 
 Build useful tools
 
