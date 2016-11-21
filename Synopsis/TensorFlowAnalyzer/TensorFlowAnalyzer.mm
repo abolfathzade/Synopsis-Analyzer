@@ -29,7 +29,7 @@
 #import "tensorflow/core/util/command_line_flags.h"
 #import "tensorflow/core/util/stat_summarizer.h"
 
-#define TF_DEBUG_TRACE 0
+#define TF_DEBUG_TRACE 1
 
 @interface TensorFlowAnalyzer ()
 {
@@ -37,8 +37,7 @@
     std::unique_ptr<tensorflow::Session> inceptionSession;
     tensorflow::GraphDef inceptionGraphDef;
 
-    std::unique_ptr<tensorflow::Session> resizeSession;
-
+    // Todo: Adopt code from iOS example and not use this
     std::unique_ptr<tensorflow::Session> topLabelsSession;
 
 #if TF_DEBUG_TRACE
@@ -105,10 +104,10 @@
 //        self.inception2015GraphName = @"tensorflow_inception_graph";
 //        self.inception2015GraphName = @"tensorflow_inception_graph_optimized";
         self.inception2015GraphName = @"tensorflow_inception_graph_optimized_quantized";
+//        self.inception2015GraphName = @"tensorflow_inception_graph_optimized_quantized_8bit";
         self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
         
         inceptionSession = NULL;
-        resizeSession = NULL;
         topLabelsSession = NULL;
 
         input_layer = "Mul";
@@ -124,8 +123,10 @@
 - (void) dealloc
 {
     // TODO: Cleanup Tensorflow
+    inceptionSession->Close();
+//    topLabelsSession->Close();
+    
     inceptionSession.reset();
-    resizeSession.reset();
     topLabelsSession.reset();
 }
 
@@ -160,12 +161,14 @@
     }
     
     tensorflow::SessionOptions options;
-    // Disable optimizations on this graph so that constant folding doesn't
-    // increase the memory footprint by creating new constant copies of the weight
-    // parameters.
+    
+    // Experimenting with tweaks from iOS example code.
+    // Optimizer seems to make a difference, as does per session threads
     options.config.mutable_graph_options()->mutable_optimizer_options()->set_opt_level(::tensorflow::OptimizerOptions::L0);
     options.config.set_use_per_session_threads(true);
-    options.config.set_inter_op_parallelism_threads(8);
+    // These dont appear to matter, or defaults are good.
+//    options.config.set_inter_op_parallelism_threads(2);
+//    options.config.set_intra_op_parallelism_threads(1);
     
     inceptionSession = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(options));
     
@@ -227,21 +230,23 @@
     auto image_tensor_mapped = resized_tensor.tensor<float, 4>();
     tensorflow::uint8 *in = sourceStartAddr;
     float *out = image_tensor_mapped.data();
-    for (int y = 0; y < wanted_input_height; ++y) {
+    for (int y = 0; y < wanted_input_height; ++y)
+    {
         float *out_row = out + (y * wanted_input_width * wanted_input_channels);
-        for (int x = 0; x < wanted_input_width; ++x) {
+        for (int x = 0; x < wanted_input_width; ++x)
+        {
             const int in_x = (y * (int)width) / wanted_input_width;
             const int in_y = (x * image_height) / wanted_input_height;
-            tensorflow::uint8 *in_pixel =
-            in + (in_y * width * image_channels) + (in_x * image_channels);
+ 
+            tensorflow::uint8 *in_pixel = in + (in_y * width * image_channels) + (in_x * image_channels);
             float *out_pixel = out_row + (x * wanted_input_channels);
-            for (int c = 0; c < wanted_input_channels; ++c) {
+            
+            for (int c = 0; c < wanted_input_channels; ++c)
+            {
                 out_pixel[c] = (in_pixel[c] - input_mean) / input_std;
             }
         }
     }
-
-    
     
     // http://stackoverflow.com/questions/36044197/how-do-i-pass-an-opencv-mat-into-a-c-tensorflow-graph
 //    
@@ -275,13 +280,12 @@
 
 - (NSDictionary*) analyzeMetadataDictionaryForModuleIndex:(SynopsisModuleIndex)moduleIndex error:(NSError**)error
 {
-    tensorflow::RunOptions run_options;
-    run_options.set_trace_level(tensorflow::RunOptions::FULL_TRACE);
-    
     // Actually run the image through the model.
     std::vector<tensorflow::Tensor> outputs;
 
 #if TF_DEBUG_TRACE
+    tensorflow::RunOptions run_options;
+    run_options.set_trace_level(tensorflow::RunOptions::FULL_TRACE);
     tensorflow::Status run_status = inceptionSession->Run(run_options, { {input_layer, resized_tensor} }, {final_layer, feature_layer}, {}, &outputs, &run_metadata);
 #else
     tensorflow::Status run_status = inceptionSession->Run({ {input_layer, resized_tensor} }, {final_layer, feature_layer}, {}, &outputs);
@@ -311,78 +315,9 @@
 
 #pragma mark - Utilities
 
-// TODO: ensure we dont copy too much data around.
-// TODO: Keep out_tensors cached and re-use
-// TODO: Cache resizeAndNormalizeSession to re-use.
-
-- (std::vector<tensorflow::Tensor>) resizeAndNormalizeInputTensor:(tensorflow::Tensor)inputTensor
-{
-    tensorflow::Status status;
-    std::vector<tensorflow::Tensor> out_tensors;
-    std::string input_name = "input"; // was file_reader
-    std::string output_name = "normalized";
-
-    if(resizeSession == NULL)
-    {
-        auto root = tensorflow::Scope::NewRootScope();
-        
-        const int input_height = 299;
-        const int input_width = 299;
-        const float input_mean = 128.0f;
-        const float input_std = 128.0f;
-        
-        // Now cast the image data to float so we can do normal math on it.
-        auto float_caster = tensorflow::ops::Cast(root.WithOpName("float_caster"), inputTensor, tensorflow::DT_FLOAT);
-        
-        // The convention for image ops in TensorFlow is that all images are expected
-        // to be in batches, so that they're four-dimensional arrays with indices of
-        // [batch, height, width, channel]. Because we only have a single image, we
-        // have to add a batch dimension of 1 to the start with ExpandDims().
-        // auto dims_expander = tensorflow::ops::ExpandDims(root, float_caster, 0);
-        
-        // Bilinearly resize the image to fit the required dimensions.
-        auto resized = tensorflow::ops::ResizeBilinear(root, float_caster, tensorflow::ops::Const(root.WithOpName("size"), {input_height, input_width}));
-        
-        // Subtract the mean and divide by the scale.
-        tensorflow::ops::Div(root.WithOpName(output_name), tensorflow::ops::Sub(root, resized, {input_mean}),
-                             {input_std});
-        
-        // This runs the GraphDef network definition that we've just constructed, and
-        // returns the results in the output tensor.
-        tensorflow::GraphDef graph;
-        status = root.ToGraphDef(&graph);
-        
-        if( status.ok() )
-        {
-           resizeSession = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(tensorflow::SessionOptions()));
-            
-            status = resizeSession->Create(graph);
-            
-            if( status.ok() )
-            {
-                status = resizeSession->Run({}, {output_name}, {}, &out_tensors);
-                if( status.ok() )
-                    return out_tensors;
-            }
-        }
-    }
-    else
-    {
-        status = resizeSession->Run({}, {output_name}, {}, &out_tensors);
-        if( status.ok() )
-            return out_tensors;
-
-    }
-    
-    if(self.errorLog)
-        self.errorLog(@"Error resizing and normalizing Tensor");
-    
-    out_tensors.clear();
-    return out_tensors;
-}
-
 - (NSDictionary*) dictionaryFromOutput:(const std::vector<tensorflow::Tensor>&)outputs
 {
+    
 //    const int numLabels = std::min(5, static_cast<int>(self.labelsArray.count));
 //
 //    std::vector<tensorflow::Tensor> out_tensors;
@@ -434,7 +369,8 @@
 //        
 //    }
     
-    // Feature Vector
+#pragma mark - Feature Vector
+
 //    tensorflow::DataType type = outputs[1].dtype();
     int64_t numElements = outputs[1].NumElements();
     
@@ -455,7 +391,6 @@
 //        std::cout << v(1,0);
 //    }
 
-#pragma mark - Feature Vector
     
     // TODO: Figure out how to access the tensor values directly as floats
     std::string summaryFeatureVec = outputs[1].SummarizeValue(numElements);
@@ -491,7 +426,9 @@
     }
     
     return nil;
-//    return @{ @"Labels" : outputLabels,
+    
+    // Disable Labels and Scores since they are irrelevant until we re-train
+    //    return @{ @"Labels" : outputLabels,
 //              @"Scores" : outputScores,
 //              };
 }

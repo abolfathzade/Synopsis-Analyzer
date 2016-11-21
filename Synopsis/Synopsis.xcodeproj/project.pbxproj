@@ -100,6 +100,7 @@
 		1BE7D60C1DE27B8900FAEC23 /* tensorflow_inception_graph_optimized.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D60B1DE27B8900FAEC23 /* tensorflow_inception_graph_optimized.pb */; };
 		1BE7D60E1DE27F0200FAEC23 /* tensorflow_inception_graph.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D60D1DE27F0200FAEC23 /* tensorflow_inception_graph.pb */; };
 		1BE7D6121DE2962F00FAEC23 /* tensorflow_inception_graph_optimized_quantized.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D6111DE2962F00FAEC23 /* tensorflow_inception_graph_optimized_quantized.pb */; };
+		1BE7D6141DE3686E00FAEC23 /* tensorflow_inception_graph_optimized_quantized_8bit.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D6131DE3686E00FAEC23 /* tensorflow_inception_graph_optimized_quantized_8bit.pb */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -753,6 +754,7 @@
 		1BE7D60B1DE27B8900FAEC23 /* tensorflow_inception_graph_optimized.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph_optimized.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_optimized.pb; sourceTree = SOURCE_ROOT; };
 		1BE7D60D1DE27F0200FAEC23 /* tensorflow_inception_graph.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph.pb; sourceTree = SOURCE_ROOT; };
 		1BE7D6111DE2962F00FAEC23 /* tensorflow_inception_graph_optimized_quantized.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph_optimized_quantized.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_optimized_quantized.pb; sourceTree = SOURCE_ROOT; };
+		1BE7D6131DE3686E00FAEC23 /* tensorflow_inception_graph_optimized_quantized_8bit.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph_optimized_quantized_8bit.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_optimized_quantized_8bit.pb; sourceTree = SOURCE_ROOT; };
 		1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Synopsis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -1379,6 +1381,7 @@
 		1B0A02B91DDAE60A00F542F7 /* inception2015 */ = {
 			isa = PBXGroup;
 			children = (
+				1BE7D6131DE3686E00FAEC23 /* tensorflow_inception_graph_optimized_quantized_8bit.pb */,
 				1BE7D60D1DE27F0200FAEC23 /* tensorflow_inception_graph.pb */,
 				1BE7D6111DE2962F00FAEC23 /* tensorflow_inception_graph_optimized_quantized.pb */,
 				1BE7D60B1DE27B8900FAEC23 /* tensorflow_inception_graph_optimized.pb */,
@@ -2273,6 +2276,7 @@
 			files = (
 				1BEC6BD21DDB809800F77397 /* imagenet_comp_graph_label_strings.txt in Resources */,
 				1BE7D6121DE2962F00FAEC23 /* tensorflow_inception_graph_optimized_quantized.pb in Resources */,
+				1BE7D6141DE3686E00FAEC23 /* tensorflow_inception_graph_optimized_quantized_8bit.pb in Resources */,
 				1BE7D60E1DE27F0200FAEC23 /* tensorflow_inception_graph.pb in Resources */,
 				1BE7D60C1DE27B8900FAEC23 /* tensorflow_inception_graph_optimized.pb in Resources */,
 			);
@@ -2525,9 +2529,13 @@
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
 				GCC_UNROLL_LOOPS = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/TensorFlowAnalyzer/includes";
 				INFOPLIST_FILE = TensorFlowAnalyzer/Info.plist;
@@ -2553,8 +2561,12 @@
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/TensorFlowAnalyzer/includes";
