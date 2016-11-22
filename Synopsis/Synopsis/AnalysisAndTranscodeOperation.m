@@ -856,7 +856,7 @@
                                 }
                                 else
                                 {
-                                    NSString* warning = [@"No Global Analysis Data for Analyzer %@ " stringByAppendingString:analyzer.pluginIdentifier];
+                                    NSString* warning = [@"No Global Analysis Data for Analyzer " stringByAppendingString:analyzer.pluginIdentifier];
                                     [[LogController sharedLogController] appendWarningLog:warning];
                                 }
                             }
