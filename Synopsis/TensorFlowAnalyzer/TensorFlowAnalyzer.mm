@@ -100,19 +100,31 @@
         self.pluginVersionMinor = 1;
         self.pluginMediaType = AVMediaTypeVideo;
         self.hasModules = NO;
-        
-//        self.inception2015GraphName = @"tensorflow_inception_graph";
-//        self.inception2015GraphName = @"tensorflow_inception_graph_optimized";
-        self.inception2015GraphName = @"tensorflow_inception_graph_optimized_quantized";
-//        self.inception2015GraphName = @"tensorflow_inception_graph_optimized_quantized_8bit";
-        self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
-        
-        inceptionSession = NULL;
-        topLabelsSession = NULL;
 
+        // Inception V3
+#define V3 0
+#if V3
+//        self.inception2015GraphName = @"tensorflow_inceptionV3_graph";
+//        self.inception2015GraphName = @"tensorflow_inceptionV3_graph_optimized";
+        self.inception2015GraphName = @"tensorflow_inceptionV3_graph_optimized_quantized";
+//        self.inception2015GraphName = @"tensorflow_inceptionV3_graph_optimized_quantized_8bit";
+        self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
         input_layer = "Mul";
         final_layer = "softmax";
         feature_layer = "pool_3";
+#else
+//        self.inception2015GraphName = @"tensorflow_inceptionV2_graph";
+        self.inception2015GraphName = @"tensorflow_inceptionV2_graph_optimized";
+//        self.inception2015GraphName = @"tensorflow_inception_graph_optimized_quantized_8bit";
+        self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
+        input_layer = "input";
+        final_layer = "output";
+        feature_layer = "softmax0";
+
+#endif
+        inceptionSession = NULL;
+        topLabelsSession = NULL;
+
         
         self.averageFeatureVec = nil;
     }
@@ -171,7 +183,7 @@
 //    options.config.set_intra_op_parallelism_threads(1);
     
     inceptionSession = std::unique_ptr<tensorflow::Session>(tensorflow::NewSession(options));
-    
+        
     tensorflow::Status session_create_status = inceptionSession->Create(inceptionGraphDef);
     
     if (!session_create_status.ok())
@@ -199,12 +211,19 @@
 //    unsigned char *sourceBaseAddr =
 //    (unsigned char *)(CVPixelBufferGetBaseAddress(pixelBuffer));
 
+#if V3
     const int wanted_input_width = 299;
     const int wanted_input_height = 299;
     const int wanted_input_channels = 3;
     const float input_mean = 128.0f;
     const float input_std = 128.0f;
-
+#else
+    const int wanted_input_width = 224;
+    const int wanted_input_height = 224;
+    const int wanted_input_channels = 3;
+    const float input_mean = 117.0f;
+    const float input_std = 1.0f;
+#endif
     
     int image_height;
     unsigned char *sourceStartAddr;
@@ -295,7 +314,7 @@
         LOG(ERROR) << "Running model failed: " << run_status;
         return nil;
     }
-
+    
     NSDictionary* labelsAndScores = [self dictionaryFromOutput:outputs];
     
     return labelsAndScores ;
@@ -303,7 +322,6 @@
 
 - (NSDictionary*) finalizeMetadataAnalysisSessionWithError:(NSError**)error
 {
-    
 #if TF_DEBUG_TRACE
     const tensorflow::StepStats& step_stats = run_metadata.step_stats();
     stat_summarizer->ProcessStepStats(step_stats);
