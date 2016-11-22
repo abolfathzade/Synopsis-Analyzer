@@ -730,7 +730,7 @@
         [self.transcodeAssetWriter finishWritingWithCompletionHandler:^{
 
             // Lets get our global 'summary' metadata - we get this from our standard analyzer
-            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[@"info.v002.Synopsis.OpenCVAnalyzer"];
+            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[@"info.Synopsis.OpenCVAnalyzer"];
             
 //            NSString* dHash = standardAnalyzerOutputs[@"Hash"];
 //            NSArray* histogram = standardAnalyzerOutputs[@"Histogram"];
@@ -746,7 +746,7 @@
             if(allHumanSearchableDescriptors.count)
             {
                 // make PList out of our array
-                [self xattrsetPlist:allHumanSearchableDescriptors forKey:@"info_v002_synopsis_descriptors"];
+                [self xattrsetPlist:allHumanSearchableDescriptors forKey:@"info_synopsis_descriptors"];
             }
             
 //            if(dominantColors.count)

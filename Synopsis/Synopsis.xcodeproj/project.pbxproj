@@ -100,7 +100,8 @@
 		1BE7D6201DE408F300FAEC23 /* imagenet_comp_graph_label_strings.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D61C1DE408F300FAEC23 /* imagenet_comp_graph_label_strings.txt */; };
 		1BE7D6211DE408F300FAEC23 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D61D1DE408F300FAEC23 /* LICENSE */; };
 		1BE7D6301DE40ED000FAEC23 /* StandardAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		1BE7D6311DE4134100FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D62C1DE409EE00FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb */; };
+		1BE7D6321DE48B2100FAEC23 /* tensorflow_inceptionV2_graph.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D62D1DE409EE00FAEC23 /* tensorflow_inceptionV2_graph.pb */; };
+		1BE7D6331DE4AF2900FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D62C1DE409EE00FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -2289,9 +2290,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1BE7D6311DE4134100FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb in Resources */,
 				1BE7D6201DE408F300FAEC23 /* imagenet_comp_graph_label_strings.txt in Resources */,
+				1BE7D6331DE4AF2900FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb in Resources */,
 				1BE7D6211DE408F300FAEC23 /* LICENSE in Resources */,
+				1BE7D6321DE48B2100FAEC23 /* tensorflow_inceptionV2_graph.pb in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2603,6 +2605,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
@@ -2634,6 +2637,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = YES;

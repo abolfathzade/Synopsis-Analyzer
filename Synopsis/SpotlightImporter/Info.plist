@@ -11,7 +11,7 @@
 			<string>MDImporter</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>info.v002.Synopsis</string>
+				<string>info.Synopsis</string>
 			</array>
 		</dict>
 	</array>

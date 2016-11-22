@@ -29,7 +29,7 @@
 #import "tensorflow/core/util/command_line_flags.h"
 #import "tensorflow/core/util/stat_summarizer.h"
 
-#define TF_DEBUG_TRACE 1
+#define TF_DEBUG_TRACE 0
 
 @interface TensorFlowAnalyzer ()
 {
@@ -102,21 +102,21 @@
         self.hasModules = NO;
 
         // Inception V3
+        self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
+
 #define V3 0
 #if V3
 //        self.inception2015GraphName = @"tensorflow_inceptionV3_graph";
 //        self.inception2015GraphName = @"tensorflow_inceptionV3_graph_optimized";
         self.inception2015GraphName = @"tensorflow_inceptionV3_graph_optimized_quantized";
 //        self.inception2015GraphName = @"tensorflow_inceptionV3_graph_optimized_quantized_8bit";
-        self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
         input_layer = "Mul";
         final_layer = "softmax";
         feature_layer = "pool_3";
 #else
-//        self.inception2015GraphName = @"tensorflow_inceptionV2_graph";
-        self.inception2015GraphName = @"tensorflow_inceptionV2_graph_optimized";
+        self.inception2015GraphName = @"tensorflow_inceptionV2_graph";
+//        self.inception2015GraphName = @"tensorflow_inceptionV2_graph_optimized";
 //        self.inception2015GraphName = @"tensorflow_inception_graph_optimized_quantized_8bit";
-        self.inception2015LabelName = @"imagenet_comp_graph_label_strings";
         input_layer = "input";
         final_layer = "output";
         feature_layer = "softmax0";
@@ -125,7 +125,6 @@
         inceptionSession = NULL;
         topLabelsSession = NULL;
 
-        
         self.averageFeatureVec = nil;
     }
     

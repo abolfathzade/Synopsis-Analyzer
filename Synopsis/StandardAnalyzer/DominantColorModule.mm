@@ -100,10 +100,11 @@
                                      ]];
     }
     
-    return  @{[self moduleName] : dominantColors};
+    NSMutableDictionary* metadata = [NSMutableDictionary new];
+    metadata[@"DominantColors"] = dominantColors;
+    metadata[@"Description"] = [self matchColorNamesToColors:dominantColors];
+    return metadata;
 }
-
-
 
 - (cv::Mat) nearestColorCIEDE2000:(cv::Vec3f)labColorVec3f inFrame:(matType)frame
 {
