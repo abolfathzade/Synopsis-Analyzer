@@ -97,10 +97,10 @@
 		1BD4292F1D2D691E00870D2F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1BD710A81D615E9F007D61B9 /* AVASettingsTableViewCellController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */; };
 		1BD710AA1D615EC5007D61B9 /* AVASettingsTableViewCellController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */; };
-		1BE7D60C1DE27B8900FAEC23 /* tensorflow_inception_graph_optimized.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D60B1DE27B8900FAEC23 /* tensorflow_inception_graph_optimized.pb */; };
-		1BE7D60E1DE27F0200FAEC23 /* tensorflow_inception_graph.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D60D1DE27F0200FAEC23 /* tensorflow_inception_graph.pb */; };
-		1BE7D6121DE2962F00FAEC23 /* tensorflow_inception_graph_optimized_quantized.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D6111DE2962F00FAEC23 /* tensorflow_inception_graph_optimized_quantized.pb */; };
-		1BE7D6141DE3686E00FAEC23 /* tensorflow_inception_graph_optimized_quantized_8bit.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D6131DE3686E00FAEC23 /* tensorflow_inception_graph_optimized_quantized_8bit.pb */; };
+		1BE7D6201DE408F300FAEC23 /* imagenet_comp_graph_label_strings.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D61C1DE408F300FAEC23 /* imagenet_comp_graph_label_strings.txt */; };
+		1BE7D6211DE408F300FAEC23 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D61D1DE408F300FAEC23 /* LICENSE */; };
+		1BE7D6301DE40ED000FAEC23 /* StandardAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1BE7D6311DE4134100FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb in Resources */ = {isa = PBXBuildFile; fileRef = 1BE7D62C1DE409EE00FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -110,7 +110,6 @@
 		1BEC6BC91DDB028C00F77397 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1BEC6BCD1DDB03F500F77397 /* TensorFlowAnalyzer.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B0A02AE1DDAE4DD00F542F7 /* TensorFlowAnalyzer.plugin */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1BEC6BD01DDB07E000F77397 /* libtensorflow_cc.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B0A02C11DDAE8CB00F542F7 /* libtensorflow_cc.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		1BEC6BD21DDB809800F77397 /* imagenet_comp_graph_label_strings.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1BEC6BD11DDB809800F77397 /* imagenet_comp_graph_label_strings.txt */; };
 		1BEC6BD31DDBD25B00F77397 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C561AD26696003B3CE9 /* CoreVideo.framework */; };
 		1BEC6BD41DDBD26100F77397 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B3233D81C30C6CE00C9CF5E /* Accelerate.framework */; };
 /* End PBXBuildFile section */
@@ -166,6 +165,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				1BEC6BCD1DDB03F500F77397 /* TensorFlowAnalyzer.plugin in CopyFiles */,
+				1BE7D6301DE40ED000FAEC23 /* StandardAnalyzer.plugin in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -751,10 +751,14 @@
 		1BD710A61D615E9F007D61B9 /* AVASettingsTableViewCellController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVASettingsTableViewCellController.h; sourceTree = "<group>"; };
 		1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVASettingsTableViewCellController.m; sourceTree = "<group>"; };
 		1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AVASettingsTableViewCellController.xib; sourceTree = "<group>"; };
-		1BE7D60B1DE27B8900FAEC23 /* tensorflow_inception_graph_optimized.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph_optimized.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_optimized.pb; sourceTree = SOURCE_ROOT; };
-		1BE7D60D1DE27F0200FAEC23 /* tensorflow_inception_graph.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph.pb; sourceTree = SOURCE_ROOT; };
-		1BE7D6111DE2962F00FAEC23 /* tensorflow_inception_graph_optimized_quantized.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph_optimized_quantized.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_optimized_quantized.pb; sourceTree = SOURCE_ROOT; };
-		1BE7D6131DE3686E00FAEC23 /* tensorflow_inception_graph_optimized_quantized_8bit.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inception_graph_optimized_quantized_8bit.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_optimized_quantized_8bit.pb; sourceTree = SOURCE_ROOT; };
+		1BE7D61C1DE408F300FAEC23 /* imagenet_comp_graph_label_strings.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = imagenet_comp_graph_label_strings.txt; path = models/inception5h/imagenet_comp_graph_label_strings.txt; sourceTree = "<group>"; };
+		1BE7D61D1DE408F300FAEC23 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		1BE7D6241DE409B400FAEC23 /* tensorflow_inceptionV3_graph_optimized_quantized_8bit.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inceptionV3_graph_optimized_quantized_8bit.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inceptionV3_graph_optimized_quantized_8bit.pb; sourceTree = SOURCE_ROOT; };
+		1BE7D6251DE409B400FAEC23 /* tensorflow_inceptionV3_graph_optimized_quantized.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inceptionV3_graph_optimized_quantized.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inceptionV3_graph_optimized_quantized.pb; sourceTree = SOURCE_ROOT; };
+		1BE7D6261DE409B400FAEC23 /* tensorflow_inceptionV3_graph_optimized.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inceptionV3_graph_optimized.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inceptionV3_graph_optimized.pb; sourceTree = SOURCE_ROOT; };
+		1BE7D6271DE409B400FAEC23 /* tensorflow_inceptionV3_graph.pb */ = {isa = PBXFileReference; lastKnownFileType = file; name = tensorflow_inceptionV3_graph.pb; path = TensorFlowAnalyzer/models/inception2015/tensorflow_inceptionV3_graph.pb; sourceTree = SOURCE_ROOT; };
+		1BE7D62C1DE409EE00FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb */ = {isa = PBXFileReference; lastKnownFileType = file; path = tensorflow_inceptionV2_graph_optimized.pb; sourceTree = "<group>"; };
+		1BE7D62D1DE409EE00FAEC23 /* tensorflow_inceptionV2_graph.pb */ = {isa = PBXFileReference; lastKnownFileType = file; path = tensorflow_inceptionV2_graph.pb; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Synopsis.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -766,7 +770,6 @@
 		1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnalysisAndTranscodeOperation.h; sourceTree = "<group>"; };
 		1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnalysisAndTranscodeOperation.m; sourceTree = "<group>"; };
-		1BEC6BD11DDB809800F77397 /* imagenet_comp_graph_label_strings.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = imagenet_comp_graph_label_strings.txt; path = TensorFlowAnalyzer/models/inception2015/imagenet_comp_graph_label_strings.txt; sourceTree = SOURCE_ROOT; };
 		1BEC6BD61DDFBB3F00F77397 /* libcudnn_static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcudnn_static.a; path = "../../../../../../../Developer/NVIDIA/CUDA-8.0/lib/libcudnn_static.a"; sourceTree = "<group>"; };
 		1BEC6BD81DDFBBDD00F77397 /* libcudart.8.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcudart.8.0.dylib; path = "../../../../../../../Developer/NVIDIA/CUDA-8.0/lib/libcudart.8.0.dylib"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1373,6 +1376,8 @@
 		1B0A02B81DDAE5FB00F542F7 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				1BE7D61C1DE408F300FAEC23 /* imagenet_comp_graph_label_strings.txt */,
+				1BE7D61B1DE408F300FAEC23 /* inception5h */,
 				1B0A02B91DDAE60A00F542F7 /* inception2015 */,
 			);
 			name = Models;
@@ -1381,11 +1386,10 @@
 		1B0A02B91DDAE60A00F542F7 /* inception2015 */ = {
 			isa = PBXGroup;
 			children = (
-				1BE7D6131DE3686E00FAEC23 /* tensorflow_inception_graph_optimized_quantized_8bit.pb */,
-				1BE7D60D1DE27F0200FAEC23 /* tensorflow_inception_graph.pb */,
-				1BE7D6111DE2962F00FAEC23 /* tensorflow_inception_graph_optimized_quantized.pb */,
-				1BE7D60B1DE27B8900FAEC23 /* tensorflow_inception_graph_optimized.pb */,
-				1BEC6BD11DDB809800F77397 /* imagenet_comp_graph_label_strings.txt */,
+				1BE7D6241DE409B400FAEC23 /* tensorflow_inceptionV3_graph_optimized_quantized_8bit.pb */,
+				1BE7D6251DE409B400FAEC23 /* tensorflow_inceptionV3_graph_optimized_quantized.pb */,
+				1BE7D6261DE409B400FAEC23 /* tensorflow_inceptionV3_graph_optimized.pb */,
+				1BE7D6271DE409B400FAEC23 /* tensorflow_inceptionV3_graph.pb */,
 			);
 			path = inception2015;
 			sourceTree = "<group>";
@@ -2051,6 +2055,17 @@
 			name = NewUI;
 			sourceTree = "<group>";
 		};
+		1BE7D61B1DE408F300FAEC23 /* inception5h */ = {
+			isa = PBXGroup;
+			children = (
+				1BE7D62C1DE409EE00FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb */,
+				1BE7D62D1DE409EE00FAEC23 /* tensorflow_inceptionV2_graph.pb */,
+				1BE7D61D1DE408F300FAEC23 /* LICENSE */,
+			);
+			name = inception5h;
+			path = models/inception5h;
+			sourceTree = "<group>";
+		};
 		1BEA4D101ACB2BCC00AB57C1 = {
 			isa = PBXGroup;
 			children = (
@@ -2274,11 +2289,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1BEC6BD21DDB809800F77397 /* imagenet_comp_graph_label_strings.txt in Resources */,
-				1BE7D6121DE2962F00FAEC23 /* tensorflow_inception_graph_optimized_quantized.pb in Resources */,
-				1BE7D6141DE3686E00FAEC23 /* tensorflow_inception_graph_optimized_quantized_8bit.pb in Resources */,
-				1BE7D60E1DE27F0200FAEC23 /* tensorflow_inception_graph.pb in Resources */,
-				1BE7D60C1DE27B8900FAEC23 /* tensorflow_inception_graph_optimized.pb in Resources */,
+				1BE7D6311DE4134100FAEC23 /* tensorflow_inceptionV2_graph_optimized.pb in Resources */,
+				1BE7D6201DE408F300FAEC23 /* imagenet_comp_graph_label_strings.txt in Resources */,
+				1BE7D6211DE408F300FAEC23 /* LICENSE in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
