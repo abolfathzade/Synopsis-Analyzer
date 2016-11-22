@@ -87,7 +87,7 @@
                                 NSStringFromClass([DominantColorModule class]),
                                 NSStringFromClass([HistogramModule class]),
                                 NSStringFromClass([MotionModule class]),
-                                // Diabled - using Tensorflow feature vec
+                                // Disabled - using Tensorflow feature vec
                                 //NSStringFromClass([PerceptualHashModule class]),
                                 NSStringFromClass([TrackerModule class]),
                                 NSStringFromClass([SaliencyModule class]),
