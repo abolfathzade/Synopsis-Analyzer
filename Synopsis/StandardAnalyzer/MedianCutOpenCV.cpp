@@ -66,14 +66,13 @@ namespace MedianCutOpenCV
             std::vector<cv::Mat>channels;
             cv::split(image, channels);
             
-            double minR, maxR, minG, maxG, minB, maxB = 0;
-            cv::minMaxLoc(channels[0], &minR, &maxR);
-            cv::minMaxLoc(channels[1], &minG, &maxG);
-            cv::minMaxLoc(channels[2], &minB, &maxB);
+            double minR, maxR, minG, maxG, minB, maxB = 0.0;
+            cv::minMaxLoc(channels[0], &minR, &maxR, NULL, NULL, cv::noArray());
+            cv::minMaxLoc(channels[1], &minG, &maxG, NULL, NULL, cv::noArray());
+            cv::minMaxLoc(channels[2], &minB, &maxB, NULL, NULL, cv::noArray());
             
             minColor = cv::Vec3f(minR, minG, minB);
-            maxColor = cv::Vec3f(maxR, maxG, maxB);
-            
+            maxColor = cv::Vec3f(maxR, maxG, maxB);            
         }
     }
     
