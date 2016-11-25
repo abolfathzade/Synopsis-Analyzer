@@ -438,7 +438,7 @@
             float  a = [featureElements[i] floatValue];
             float  b = [self.averageFeatureVec[i] floatValue];
             
-            self.averageFeatureVec[i] = @( (a + b / 2.0)) ;
+            self.averageFeatureVec[i] = @( MAX(a,b)) ;
         }
     }
     
