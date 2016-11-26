@@ -1367,7 +1367,7 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     BOOL inputIsFlipped = CVImageBufferIsFlipped(pixelBuffer);
     
     CVPixelBufferRef scaledPixelBuffer = [self createScaledPixelBuffer:pixelBuffer forQuality:quality];
-
+    
     // Is our transform equal to any 90 º rotations?
     if(!CGAffineTransformEqualToTransform(CGAffineTransformIdentity, transform))
     {
@@ -1376,6 +1376,22 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
         CGAffineTransform twoseventy = CGAffineTransformMakeRotation(270);
         CGAffineTransform three360 = CGAffineTransformMakeRotation(360);
 
+        // since we are transforming our scaled pixel buffer, and our transform is not identity,
+        // the tx and ty components of the input transform are no longer correct since width and height are different.
+        // Multiply them by the ratio of difference
+        size_t scaledWidth = CVPixelBufferGetWidth(scaledPixelBuffer);
+        size_t scaledHeight = CVPixelBufferGetHeight(scaledPixelBuffer);
+        
+        size_t originalWidth = CVPixelBufferGetWidth(pixelBuffer);
+        size_t originalHeight = CVPixelBufferGetHeight(pixelBuffer);
+        
+        CGFloat widthRatio = (float)scaledWidth / (float)originalWidth;
+        GLfloat heightRatio = (float)scaledHeight / (float)originalHeight;
+        
+        // round to nearest pixel
+        transform.tx =  (size_t) round(transform.tx * widthRatio);
+        transform.ty =  (size_t) round(transform.ty * heightRatio);
+        
         unsigned int rotation = -1;
         if(CGAffineTransformEqualToTransform(ninety, transform))
             rotation = 1;
