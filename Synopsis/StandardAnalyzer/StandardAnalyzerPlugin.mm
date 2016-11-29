@@ -33,6 +33,7 @@
 #import "PerceptualHashModule.h"
 #import "TrackerModule.h"
 #import "SaliencyModule.h"
+#import "TensorflowFeatureModule.h"
 
 @interface StandardAnalyzerPlugin ()
 {
@@ -70,9 +71,9 @@
     if(self)
     {
         self.pluginName = @"OpenCV Analyzer";
-        self.pluginIdentifier = @"info.Synopsis.OpenCVAnalyzer";
+        self.pluginIdentifier = @"info.Synopsis.StandardAnalyzer";
         self.pluginAuthors = @[@"Anton Marini"];
-        self.pluginDescription = @"OpenCV analysis for color, motion, features and more.";
+        self.pluginDescription = @"Standard Analyzer, providing Color, Features, Histogram, Motion, Tracking and Visual Saliency.";
         self.pluginAPIVersionMajor = 0;
         self.pluginAPIVersionMinor = 1;
         self.pluginVersionMajor = 0;
@@ -87,7 +88,8 @@
                                 NSStringFromClass([DominantColorModule class]),
                                 NSStringFromClass([HistogramModule class]),
                                 NSStringFromClass([MotionModule class]),
-                                NSStringFromClass([PerceptualHashModule class]),
+                                //NSStringFromClass([PerceptualHashModule class]),
+                                NSStringFromClass([TensorflowFeatureModule class]),
                                 NSStringFromClass([TrackerModule class]),
                                 NSStringFromClass([SaliencyModule class]),
                               ];

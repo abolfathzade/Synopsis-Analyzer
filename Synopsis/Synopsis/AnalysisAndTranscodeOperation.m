@@ -211,6 +211,14 @@
     {
         AVAssetTrack* firstVideoTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual][0];
         
+        // read our CMFormatDescription from our video track
+        // use that to determine what video color properties we should set for output to decode to linear
+        if(firstVideoTrack.formatDescriptions.count > 0)
+        {
+            CMVideoFormatDescriptionRef videoFormat = (__bridge CMVideoFormatDescriptionRef)(firstVideoTrack.formatDescriptions[0]);
+            
+            
+        }
         NSDictionary* HDProperties =  @{AVVideoColorPrimariesKey : AVVideoColorPrimaries_ITU_R_709_2, AVVideoTransferFunctionKey : AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey : AVVideoYCbCrMatrix_ITU_R_709_2 };
 
         NSDictionary* SDProperties =  @{AVVideoColorPrimariesKey : AVVideoColorPrimaries_SMPTE_C, AVVideoTransferFunctionKey : AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey : AVVideoYCbCrMatrix_ITU_R_601_4 };
