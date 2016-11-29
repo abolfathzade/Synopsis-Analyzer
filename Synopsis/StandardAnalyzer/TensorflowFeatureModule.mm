@@ -180,8 +180,11 @@
 
 - (NSDictionary*) analyzedMetadataForCurrentFrame:(matType)frame previousFrame:(matType)lastFrame
 {
-    
-    //[self submitAndCacheCurrentVideoBuffer: width: height: bytesPerRow: ];
+    void* baseAddress = (void*)frame.datastart;
+    size_t width = (size_t) frame.cols;
+    size_t height = (size_t) frame.rows;
+    size_t bytesPerRow =  (size_t) frame.cols * 3; // (BGR)
+    [self submitAndCacheCurrentVideoBuffer:baseAddress width:width height:height bytesPerRow:bytesPerRow];
     
     // Actually run the image through the model.
     std::vector<tensorflow::Tensor> outputs;
@@ -256,7 +259,10 @@
         const int marginY = (int)((height - width) / 2);
         sourceStartAddr = ( (unsigned char*)baseAddress + (marginY * bytesPerRow));
     }
-    const int image_channels = 4;
+
+    // Now back to 3, since we are pulling from OpenCV BGR8
+    // Do we care about BGR ordering
+    const int image_channels = 3;
     
     assert(image_channels >= wanted_input_channels);
     
