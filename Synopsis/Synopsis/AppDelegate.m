@@ -10,7 +10,7 @@
 
 #import "DropFilesView.h"
 #import "LogController.h"
-#import "AnalyzerPluginProtocol.h"
+#import <Synopsis/AnalyzerPluginProtocol.h>
 
 #import "AnalysisAndTranscodeOperation.h"
 #import "MetadataWriterTranscodeOperation.h"

@@ -10,7 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 
-#import "AnalyzerPluginProtocol.h"
+#import <Synopsis/AnalyzerPluginProtocol.h>
 
 #import "NSDictionary+JSONString.h"
 #import "BSON/BSONSerialization.h"
@@ -730,7 +730,7 @@
         [self.transcodeAssetWriter finishWritingWithCompletionHandler:^{
 
             // Lets get our global 'summary' metadata - we get this from our standard analyzer
-            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[@"info.Synopsis.OpenCVAnalyzer"];
+            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[@"info.Synopsis.StandardAnalyzer"];
             
 //            NSString* dHash = standardAnalyzerOutputs[@"Hash"];
 //            NSArray* histogram = standardAnalyzerOutputs[@"Histogram"];

@@ -11,7 +11,7 @@
 #import <CoreMedia/CoreMedia.h>
 #import <Accelerate/Accelerate.h>
 
-#import "AnalyzerPluginProtocol.h"
+#import <Synopsis/AnalyzerPluginProtocol.h>
 
 #import "NSDictionary+JSONString.h"
 #import "BSON/BSONSerialization.h"
@@ -215,7 +215,7 @@
         // use that to determine what video color properties we should set for output to decode to linear
         if(firstVideoTrack.formatDescriptions.count > 0)
         {
-            CMVideoFormatDescriptionRef videoFormat = (__bridge CMVideoFormatDescriptionRef)(firstVideoTrack.formatDescriptions[0]);
+//            CMVideoFormatDescriptionRef videoFormat = (__bridge CMVideoFormatDescriptionRef)(firstVideoTrack.formatDescriptions[0]);
             
             
         }

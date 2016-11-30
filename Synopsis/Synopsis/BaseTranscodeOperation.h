@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
+#import <Synopsis/Synopsis.h>
 #import <Foundation/Foundation.h>
 #import "LogController.h"
 
@@ -13,7 +14,6 @@
 
 extern NSString* const kSynopsisNewTranscodeOperationAvailable;
 
-extern NSString* const kSynopsislMetadataIdentifier;
 
 // We have a 2 pass analysis and decode (and possibly encode) system:
 

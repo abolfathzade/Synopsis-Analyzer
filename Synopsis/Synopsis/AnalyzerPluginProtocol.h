@@ -6,57 +6,10 @@
 //  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
+#import <Synopsis/Synopsis.h>
+
 #import <Cocoa/Cocoa.h>
 #import <AVFoundation/AVFoundation.h>
-
-
-#pragma mark - Standard Analyzer and Spotlight Keys
-
-// These keys are used within our Spotlight plugin, and our Standard Analyzer plugin to ensure spotlight and our analyzer agree on key names.
-// These particular keys allow for a spotlight UI to be created, certain keys to be visible in the ui (and others to not be)
-// This lets users easily find specific information in the Finder and in the UI.
-
-// To be clear, if a plugin writes out custom summary metadata, that metada will be included in the HFS extended attributes
-// under the com.apple.metadata: key allowing programmatic spotlight searches to work (along with command line searches).
-// The only limitation is that a custom UI wont be made (as the spotlight schema wont match).
-
-// Note, these strings need to match our schema.xml file exactly.
-
-// A multivalue (NSArray) that holds the actual RGB (or RGBA) values (another NSArray) for a color.
-// Note, this is an Array of colors. Or an Array of Arrays.
-// Not exposed to the UI
-extern NSString * const kStandardAnalyzerKey_DominantColorValues;
-// A multivalue (NSArray) of of NSStrings for readable color names.
-// values can be Black, White, Gray, Red, Green, Blue, Cyan, Magenta, Yellow, Orange, Brown
-extern NSString * const kStandardAnalyzerKey_DominantColorName;
-
-#pragma mark - Plugin Particulars
-
-// Rough amount of overhead a particular plugin or module has
-// For example very very taxing
-typedef enum : NSUInteger {
-    SynopsisAnalysisOverheadNone = 0,
-    SynopsisAnalysisOverheadLow,
-    SynopsisAnalysisOverheadMedium,
-    SynopsisAnalysisOverheadHigh,
-} SynopsisAnalysisOverhead;
-
-
-typedef NSInteger SynopsisModuleIndex;
-
-enum : SynopsisModuleIndex {
-    SynopsisModuleIndexNone = -1,
-};
-
-// Should a plugin have configurable quality settings
-// Hint the plugin to use a specific quality hint
-typedef enum : NSUInteger {
-    SynopsisAnalysisQualityHintLow,
-    SynopsisAnalysisQualityHintMedium,
-    SynopsisAnalysisQualityHintHigh,
-    // No downsampling
-    SynopsisAnalysisQualityHintOriginal = NSUIntegerMax,
-} SynopsisAnalysisQualityHint;
 
 typedef void (^LogBlock)(NSString* log);
 
