@@ -8,9 +8,10 @@
 
 #import "AppDelegate.h"
 
+#import <Synopsis/Synopsis.h>
+
 #import "DropFilesView.h"
 #import "LogController.h"
-#import <Synopsis/AnalyzerPluginProtocol.h>
 
 #import "AnalysisAndTranscodeOperation.h"
 #import "MetadataWriterTranscodeOperation.h"
@@ -87,12 +88,17 @@ static NSTimeInterval start;
     // But Yea
     [self initSpotlight];
     
+    // force Standard Analyzer to be a plugin
+    [self.analyzerPlugins addObject:NSStringFromClass([StandardAnalyzerPlugin class])];
+
+    
     // Load our plugins
     NSString* pluginsPath = [[NSBundle mainBundle] builtInPlugInsPath];
     
     NSError* error = nil;
     
     NSArray* possiblePlugins = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:pluginsPath error:&error];
+    
     
     if(!error)
     {
