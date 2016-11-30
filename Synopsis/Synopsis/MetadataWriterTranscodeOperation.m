@@ -10,6 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 
+#import <Synopsis/Constants.h>
 #import <Synopsis/AnalyzerPluginProtocol.h>
 
 #import "NSDictionary+JSONString.h"
@@ -730,12 +731,12 @@
         [self.transcodeAssetWriter finishWritingWithCompletionHandler:^{
 
             // Lets get our global 'summary' metadata - we get this from our standard analyzer
-            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[@"info.Synopsis.StandardAnalyzer"];
+            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[kSynopsisStandardMetadataDictKey];
             
 //            NSString* dHash = standardAnalyzerOutputs[@"Hash"];
 //            NSArray* histogram = standardAnalyzerOutputs[@"Histogram"];
 //            NSArray* dominantColors = standardAnalyzerOutputs[@"DominantColors"];
-            NSArray* matchedNamedColors = standardAnalyzerOutputs[@"Description"];
+            NSArray* matchedNamedColors = standardAnalyzerOutputs[kSynopsisStandardMetadataDescriptionDictKey];
 
             NSMutableArray* allHumanSearchableDescriptors = [NSMutableArray new];
                         
@@ -746,7 +747,7 @@
             if(allHumanSearchableDescriptors.count)
             {
                 // make PList out of our array
-                [self xattrsetPlist:allHumanSearchableDescriptors forKey:@"info_synopsis_descriptors"];
+                [self xattrsetPlist:allHumanSearchableDescriptors forKey:kSynopsisMetadataHFSAttributeTag];
             }
             
 //            if(dominantColors.count)
