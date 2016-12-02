@@ -1233,6 +1233,10 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
         const CGFloat backColorF[4] = {0.0};
         
         toLinearConverter = vImageConverter_CreateWithColorSyncCodeFragment(codeFragment, &inputFormat, &desiredFormat, backColorF, SynopsisvImageTileFlag, &err);
+        
+        CFRelease(srcDict);
+        CFRelease(dstDict);
+        CFRelease(profileSequence);
     }
     
     // TODO: Create linear pixel buffer pool / reuse memory
