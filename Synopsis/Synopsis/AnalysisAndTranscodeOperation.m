@@ -1147,6 +1147,29 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
         }
     }
 
+#define CONVERT_TO_LINEAR 1
+    vImage_Error err;
+    
+#if CONVERT_TO_LINEAR
+    
+    vImage_Buffer inBuff;
+    
+    vImage_CGImageFormat desiredFormat;
+    desiredFormat.bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Little;
+    desiredFormat.renderingIntent = kCGRenderingIntentAbsoluteColorimetric;
+    desiredFormat.colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
+    desiredFormat.bitsPerPixel = 32;
+    desiredFormat.bitsPerComponent = 8;
+    desiredFormat.decode = NULL;
+    desiredFormat.version = 0;
+    
+    const CGFloat backColorF[4] = {0.0};
+
+    err = vImageBuffer_InitWithCVPixelBuffer(&inBuff, &desiredFormat, pixelBuffer, NULL, backColorF, SynopsisvImageTileFlag);
+    if (err != kvImageNoError)
+        NSLog(@" error %ld", err);
+#else
+    
     // Create our input vImage from our CVPixelBuffer
     CVPixelBufferLockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
     void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
@@ -1158,6 +1181,8 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     inBuff.rowBytes = bytesPerRow;
     inBuff.data = baseAddress;
 
+#endif
+    
     // Scale our transformmed buffer
     CVPixelBufferRef scaledBuffer;
     CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, scaledPixelBufferPool, &scaledBuffer);
@@ -1166,19 +1191,23 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     unsigned char *resizedBytes = CVPixelBufferGetBaseAddress(scaledBuffer);
     
     vImage_Buffer resized = {resizedBytes, CVPixelBufferGetHeight(scaledBuffer), CVPixelBufferGetWidth(scaledBuffer), CVPixelBufferGetBytesPerRow(scaledBuffer)};
-    //    err = vImageBuffer_InitWithCVPixelBuffer(&resized, &desiredFormat, scaledBuffer, NULL, backColorF, kvImageNoFlags);
-    //    if (err != kvImageNoError)
-    //        NSLog(@" error %ld", err);
     
-    vImage_Error err = vImageScale_ARGB8888(&inBuff, &resized, NULL, SynopsisvImageTileFlag);
+    err = vImageScale_ARGB8888(&inBuff, &resized, NULL, SynopsisvImageTileFlag);
     if (err != kvImageNoError)
         NSLog(@" error %ld", err);
 
     
     // Free / unlock
+#if CONVERT_TO_LINEAR
+    // Since we converted our pixelBuffer to inBuff we free it to be clean
+    free(inBuff.data);
+#else
+    // Since we just proxy our inBuff as our pixelBuffer we unlock and the pool cleans it up
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
     inBuff.data = NULL; // explicit
-
+#endif
+    
+    
     CVPixelBufferUnlockBaseAddress(scaledBuffer, 0);
     
     return scaledBuffer;
@@ -1248,20 +1277,8 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     
     const uint8_t backColorU[4] = {0};
     
-    //    vImage_CGImageFormat desiredFormat;
-    //    desiredFormat.bitsPerComponent = 8;
-    //    desiredFormat.bitsPerPixel = 32;
-    //    desiredFormat.colorSpace = NULL;
-    //    desiredFormat.bitmapInfo = (CGBitmapInfo)(kCGImageAlphaFirst | kCGImageAlphaPremultipliedFirst| kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little);
-    //    desiredFormat.version = 0;
-    //    desiredFormat.decode = NULL;
-    //    desiredFormat.renderingIntent = kCGRenderingIntentDefault;
-    
     vImage_Buffer transformed = {transformBytes, CVPixelBufferGetHeight(transformedBuffer), CVPixelBufferGetWidth(transformedBuffer), CVPixelBufferGetBytesPerRow(transformedBuffer)};
     vImage_Error err;
-    //    err = vImageBuffer_InitWithCVPixelBuffer(&transformed, &desiredFormat, transformedBuffer, NULL, backColorF, kvImageNoFlags);
-    //    if (err != kvImageNoError)
-    //        NSLog(@" error %ld", err);
     
     err = vImageAffineWarpCG_ARGB8888(&inBuff, &transformed, NULL, &finalAffineTransform, backColorU, kvImageLeaveAlphaUnchanged | kvImageBackgroundColorFill | SynopsisvImageTileFlag);
     if (err != kvImageNoError)
@@ -1351,11 +1368,6 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     
     vImage_Buffer transformed = {transformBytes, CVPixelBufferGetHeight(transformedBuffer), CVPixelBufferGetWidth(transformedBuffer), CVPixelBufferGetBytesPerRow(transformedBuffer)};
     vImage_Error err;
-    //    err = vImageBuffer_InitWithCVPixelBuffer(&transformed, &desiredFormat, transformedBuffer, NULL, backColorF, kvImageNoFlags);
-    //    if (err != kvImageNoError)
-    //        NSLog(@" error %ld", err);
-    
-   // err = vImageRotate90_ARGB8888(&inBuff, <#const vImage_Buffer *dest#>, <#uint8_t rotationConstant#>, <#const uint8_t *backColor#>, <#vImage_Flags flags#>)
     
     err = vImageAffineWarpCG_ARGB8888(&inBuff, &transformed, NULL, &finalAffineTransform, backColorU, kvImageLeaveAlphaUnchanged | kvImageBackgroundColorFill | SynopsisvImageTileFlag);
     if (err != kvImageNoError)
