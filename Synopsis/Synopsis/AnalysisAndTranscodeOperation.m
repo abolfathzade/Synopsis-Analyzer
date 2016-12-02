@@ -22,6 +22,7 @@
     // We use this pixel buffer pool to handle memory for our resized pixel buffers
     CVPixelBufferPoolRef transformPixelBufferPool;
     CVPixelBufferPoolRef scaledPixelBufferPool;
+    vImageConverterRef toLinearConverter;
 }
 
 // Prerequisites
@@ -129,6 +130,7 @@
         // See pixelBuffer:withTransform:forQuality:
         transformPixelBufferPool = NULL;
         scaledPixelBufferPool = NULL;
+        toLinearConverter = NULL;
         
     }
     return self;
@@ -146,6 +148,11 @@
     {
         CVPixelBufferPoolRelease(scaledPixelBufferPool);
         scaledPixelBufferPool = NULL;
+    }
+    
+    if(toLinearConverter != NULL)
+    {
+        CFRelease(toLinearConverter);
     }
 }
 
@@ -1147,42 +1154,100 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
         }
     }
 
-#define CONVERT_TO_LINEAR 1
-    vImage_Error err;
-    
-#if CONVERT_TO_LINEAR
-    
-    vImage_Buffer inBuff;
-    
-    vImage_CGImageFormat desiredFormat;
-    desiredFormat.bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Little;
-    desiredFormat.renderingIntent = kCGRenderingIntentAbsoluteColorimetric;
-    desiredFormat.colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
-    desiredFormat.bitsPerPixel = 32;
-    desiredFormat.bitsPerComponent = 8;
-    desiredFormat.decode = NULL;
-    desiredFormat.version = 0;
-    
-    const CGFloat backColorF[4] = {0.0};
-
-    err = vImageBuffer_InitWithCVPixelBuffer(&inBuff, &desiredFormat, pixelBuffer, NULL, backColorF, SynopsisvImageTileFlag);
-    if (err != kvImageNoError)
-        NSLog(@" error %ld", err);
-#else
     
     // Create our input vImage from our CVPixelBuffer
     CVPixelBufferLockBaseAddress(pixelBuffer,kCVPixelBufferLock_ReadOnly);
     void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
     size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
     
+    vImage_Error err;
+
     vImage_Buffer inBuff;
     inBuff.height = CVPixelBufferGetHeight(pixelBuffer);
     inBuff.width = CVPixelBufferGetWidth(pixelBuffer);
     inBuff.rowBytes = bytesPerRow;
     inBuff.data = baseAddress;
 
-#endif
+    // Convert in buff to linear
+    if(toLinearConverter == NULL)
+    {
+        // TODO: Introspect to confirm we are 709 / 601 / 2020 / P3 etc etc
+        // Fuck Video
+        
+        ColorSyncProfileRef rec709 = ColorSyncProfileCreateWithName(kColorSyncITUR709Profile);
+//        ColorSyncProfileRef linearProfile = ColorSyncProfileCreateWithName(kColorSyncACESCGLinearProfile);
+        ColorSyncProfileRef linearProfile = [self linearRGBProfile];
+        
+        const void *keys[] = {kColorSyncProfile, kColorSyncRenderingIntent, kColorSyncTransformTag};
+        
+        const void *srcVals[] = {rec709,  kColorSyncRenderingIntentPerceptual, kColorSyncTransformPCSToPCS};
+        const void *dstVals[] = {linearProfile,  kColorSyncRenderingIntentPerceptual, kColorSyncTransformPCSToPCS};
+        
+        CFDictionaryRef srcDict = CFDictionaryCreate (
+                                                      NULL,
+                                                      (const void **)keys,
+                                                      (const void **)srcVals,
+                                                      3,
+                                                      &kCFTypeDictionaryKeyCallBacks,
+                                                      &kCFTypeDictionaryValueCallBacks);
+        
+        
+        CFDictionaryRef dstDict = CFDictionaryCreate (
+                                                      NULL,
+                                                      (const void **)keys,
+                                                      (const void **)dstVals,
+                                                      3,
+                                                      &kCFTypeDictionaryKeyCallBacks,
+                                                      &kCFTypeDictionaryValueCallBacks);
+        
+        const void* arrayVals[] = {srcDict, dstDict, NULL};
+        
+        CFArrayRef profileSequence = CFArrayCreate(NULL, (const void **)arrayVals, 2, &kCFTypeArrayCallBacks);
+        
+        ColorSyncTransformRef transform = ColorSyncTransformCreate(profileSequence, NULL);
+        
+        CFTypeRef codeFragment = NULL;
+        codeFragment = ColorSyncTransformCopyProperty(transform, kColorSyncTransformFullConversionData, NULL);
+        
+        if (transform)
+            CFRelease (transform);
+        
+        vImage_CGImageFormat inputFormat;
+        inputFormat.bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Little;
+        inputFormat.renderingIntent = kCGRenderingIntentAbsoluteColorimetric;
+        inputFormat.colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceITUR_709);
+        inputFormat.bitsPerPixel = 32;
+        inputFormat.bitsPerComponent = 8;
+        inputFormat.decode = NULL;
+        inputFormat.version = 0;
+
+        vImage_CGImageFormat desiredFormat;
+        desiredFormat.bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Little;
+        desiredFormat.renderingIntent = kCGRenderingIntentAbsoluteColorimetric;
+        desiredFormat.colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
+        desiredFormat.bitsPerPixel = 32;
+        desiredFormat.bitsPerComponent = 8;
+        desiredFormat.decode = NULL;
+        desiredFormat.version = 0;
+        
+        const CGFloat backColorF[4] = {0.0};
+        
+        toLinearConverter = vImageConverter_CreateWithColorSyncCodeFragment(codeFragment, &inputFormat, &desiredFormat, backColorF, SynopsisvImageTileFlag, &err);
+    }
     
+    // TODO: Create linear pixel buffer pool / reuse memory
+    vImage_Buffer linear;
+    linear.data = malloc(CVPixelBufferGetDataSize(pixelBuffer));
+    linear.height = CVPixelBufferGetHeight(pixelBuffer);
+    linear.width = CVPixelBufferGetWidth(pixelBuffer);
+    linear.rowBytes = bytesPerRow;
+    
+    // TODO: Use temp buffer not NULL
+    
+    err = vImageConvert_AnyToAny(toLinearConverter, &inBuff, &linear, NULL, SynopsisvImageTileFlag);
+    if (err != kvImageNoError)
+        NSLog(@" error %ld", err);
+
     // Scale our transformmed buffer
     CVPixelBufferRef scaledBuffer;
     CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, scaledPixelBufferPool, &scaledBuffer);
@@ -1192,20 +1257,19 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     
     vImage_Buffer resized = {resizedBytes, CVPixelBufferGetHeight(scaledBuffer), CVPixelBufferGetWidth(scaledBuffer), CVPixelBufferGetBytesPerRow(scaledBuffer)};
     
-    err = vImageScale_ARGB8888(&inBuff, &resized, NULL, SynopsisvImageTileFlag);
+    err = vImageScale_ARGB8888(&linear, &resized, NULL, SynopsisvImageTileFlag);
     if (err != kvImageNoError)
         NSLog(@" error %ld", err);
 
     
     // Free / unlock
-#if CONVERT_TO_LINEAR
-    // Since we converted our pixelBuffer to inBuff we free it to be clean
-    free(inBuff.data);
-#else
+    // Since we converted our inBuff to linear we free it to be clean
+    free(linear.data);
+    linear.data = NULL;
+    
     // Since we just proxy our inBuff as our pixelBuffer we unlock and the pool cleans it up
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
     inBuff.data = NULL; // explicit
-#endif
     
     
     CVPixelBufferUnlockBaseAddress(scaledBuffer, 0);
@@ -1357,15 +1421,6 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     
     const uint8_t backColorU[4] = {0};
     
-    //    vImage_CGImageFormat desiredFormat;
-    //    desiredFormat.bitsPerComponent = 8;
-    //    desiredFormat.bitsPerPixel = 32;
-    //    desiredFormat.colorSpace = NULL;
-    //    desiredFormat.bitmapInfo = (CGBitmapInfo)(kCGImageAlphaFirst | kCGImageAlphaPremultipliedFirst| kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little);
-    //    desiredFormat.version = 0;
-    //    desiredFormat.decode = NULL;
-    //    desiredFormat.renderingIntent = kCGRenderingIntentDefault;
-    
     vImage_Buffer transformed = {transformBytes, CVPixelBufferGetHeight(transformedBuffer), CVPixelBufferGetWidth(transformedBuffer), CVPixelBufferGetBytesPerRow(transformedBuffer)};
     vImage_Error err;
     
@@ -1469,6 +1524,62 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     }
 
     return nil;
+}
+
+
+#pragma mark - Linear Color Sync Profile Helper
+
+- (ColorSyncProfileRef) linearRGBProfile
+{
+    static const uint8_t bytes[0x220] =
+    "\x00\x00\x02\x20\x61\x70\x70\x6c\x02\x20\x00\x00\x6d\x6e\x74\x72"
+    "\x52\x47\x42\x20\x58\x59\x5a\x20\x07\xd2\x00\x05\x00\x0d\x00\x0c"
+    "\x00\x00\x00\x00\x61\x63\x73\x70\x41\x50\x50\x4c\x00\x00\x00\x00"
+    "\x61\x70\x70\x6c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    "\x00\x00\x00\x00\x00\x00\xf6\xd6\x00\x01\x00\x00\x00\x00\xd3\x2d"
+    "\x61\x70\x70\x6c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    "\x00\x00\x00\x0a\x72\x58\x59\x5a\x00\x00\x00\xfc\x00\x00\x00\x14"
+    "\x67\x58\x59\x5a\x00\x00\x01\x10\x00\x00\x00\x14\x62\x58\x59\x5a"
+    "\x00\x00\x01\x24\x00\x00\x00\x14\x77\x74\x70\x74\x00\x00\x01\x38"
+    "\x00\x00\x00\x14\x63\x68\x61\x64\x00\x00\x01\x4c\x00\x00\x00\x2c"
+    "\x72\x54\x52\x43\x00\x00\x01\x78\x00\x00\x00\x0e\x67\x54\x52\x43"
+    "\x00\x00\x01\x78\x00\x00\x00\x0e\x62\x54\x52\x43\x00\x00\x01\x78"
+    "\x00\x00\x00\x0e\x64\x65\x73\x63\x00\x00\x01\xb0\x00\x00\x00\x6d"
+    "\x63\x70\x72\x74\x00\x00\x01\x88\x00\x00\x00\x26\x58\x59\x5a\x20"
+    "\x00\x00\x00\x00\x00\x00\x74\x4b\x00\x00\x3e\x1d\x00\x00\x03\xcb"
+    "\x58\x59\x5a\x20\x00\x00\x00\x00\x00\x00\x5a\x73\x00\x00\xac\xa6"
+    "\x00\x00\x17\x26\x58\x59\x5a\x20\x00\x00\x00\x00\x00\x00\x28\x18"
+    "\x00\x00\x15\x57\x00\x00\xb8\x33\x58\x59\x5a\x20\x00\x00\x00\x00"
+    "\x00\x00\xf3\x52\x00\x01\x00\x00\x00\x01\x16\xcf\x73\x66\x33\x32"
+    "\x00\x00\x00\x00\x00\x01\x0c\x42\x00\x00\x05\xde\xff\xff\xf3\x26"
+    "\x00\x00\x07\x92\x00\x00\xfd\x91\xff\xff\xfb\xa2\xff\xff\xfd\xa3"
+    "\x00\x00\x03\xdc\x00\x00\xc0\x6c\x63\x75\x72\x76\x00\x00\x00\x00"
+    "\x00\x00\x00\x01\x01\x00\x00\x00\x74\x65\x78\x74\x00\x00\x00\x00"
+    "\x43\x6f\x70\x79\x72\x69\x67\x68\x74\x20\x41\x70\x70\x6c\x65\x20"
+    "\x43\x6f\x6d\x70\x75\x74\x65\x72\x20\x49\x6e\x63\x2e\x00\x00\x00"
+    "\x64\x65\x73\x63\x00\x00\x00\x00\x00\x00\x00\x13\x4c\x69\x6e\x65"
+    "\x61\x72\x20\x52\x47\x42\x20\x50\x72\x6f\x66\x69\x6c\x65\x00\x00"
+    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+    
+    CFDataRef data = CFDataCreateWithBytesNoCopy (NULL, bytes, sizeof (bytes), kCFAllocatorNull);
+    
+    ColorSyncProfileRef mRef = ColorSyncProfileCreate (data, NULL);
+    
+    if (data)
+        CFRelease (data);
+    
+    if (mRef)
+    {
+        return mRef;
+    }
+    
+    return NULL;
 }
 
 @end
