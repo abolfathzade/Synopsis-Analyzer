@@ -1214,7 +1214,7 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
         
         vImage_CGImageFormat inputFormat;
         inputFormat.bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Little;
-        inputFormat.renderingIntent = kCGRenderingIntentAbsoluteColorimetric;
+        inputFormat.renderingIntent = kCGRenderingIntentPerceptual;
         inputFormat.colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceITUR_709);
         inputFormat.bitsPerPixel = 32;
         inputFormat.bitsPerComponent = 8;
@@ -1223,7 +1223,7 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
 
         vImage_CGImageFormat desiredFormat;
         desiredFormat.bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Little;
-        desiredFormat.renderingIntent = kCGRenderingIntentAbsoluteColorimetric;
+        desiredFormat.renderingIntent = kCGRenderingIntentPerceptual;
         desiredFormat.colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
         desiredFormat.bitsPerPixel = 32;
         desiredFormat.bitsPerComponent = 8;
@@ -1264,7 +1264,6 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     err = vImageScale_ARGB8888(&linear, &resized, NULL, SynopsisvImageTileFlag);
     if (err != kvImageNoError)
         NSLog(@" error %ld", err);
-
     
     // Free / unlock
     // Since we converted our inBuff to linear we free it to be clean
@@ -1274,7 +1273,6 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     // Since we just proxy our inBuff as our pixelBuffer we unlock and the pool cleans it up
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
     inBuff.data = NULL; // explicit
-    
     
     CVPixelBufferUnlockBaseAddress(scaledBuffer, 0);
     
