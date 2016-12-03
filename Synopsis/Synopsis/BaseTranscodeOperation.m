@@ -8,7 +8,28 @@
 
 #import "BaseTranscodeOperation.h"
 
+// Notification Key, used when our enqueing fires off a new operation
 NSString * const kSynopsisNewTranscodeOperationAvailable = @"kSynopsisNewTranscodeOperationAvailable";
+
+// Above Notifications sends a user info object that is our operations
+// "descriptionDictionary"
+
+// keys for descriptionDictionary
+NSString* const kSynopsisTranscodeOperationUUIDKey = @"UUID"; //  NSUUID
+NSString* const kSynopsisTranscodeOperationSourceURLKey = @"sourceURL"; // NSURL
+NSString* const kSynopsisTranscodeOperationDestinationURLKey = @"destinationURL"; // NSURL
+
+
+// Notification used when an transcode operation updates
+NSString* const kSynopsisTranscodeOperationProgressUpdate = @"kSynopsisTranscodeOperationProgressUpdate";
+
+// Contains UUID key from above
+NSString* const kSynopsisTranscodeOperationProgressKey = @"progress";// NSNumber current progress
+NSString* const kSynopsisTranscodeOperationTimeElapsedKey = @"timeelapsed"; // NSNumber as NSTimeInterval
+NSString* const kSynopsisTranscodeOperationTimeRemainingKey = @"timeremaining"; // NSNumber as NSTimeInterval
+NSString* const kSynopsisTranscodeOperationMetadataKey = @"metadata";// NSDictionary of available analyzed metadata - may be nil
+
+
 
 // Pass 1
 NSString * const kSynopsisTranscodeVideoSettingsKey = @"kSynopsisVideoTranscodeSettings";
@@ -26,6 +47,11 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
 
 @interface BaseTranscodeOperation ()
 
+@property (atomic, readwrite, strong) NSDictionary* descriptionDictionary;
+@property (atomic, readwrite, strong) NSURL* sourceURL;
+@property (atomic, readwrite, strong) NSURL* destinationURL;
+
+@property (atomic, readwrite, strong) NSUUID* uuid;
 @property (atomic, readwrite, strong) NSDate* startDate;
 @property (atomic, readwrite, assign) NSTimeInterval elapsedTime;
 @property (atomic, readwrite, assign) NSTimeInterval remainingTime;
@@ -38,11 +64,21 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
 @synthesize audioProgress = _audioProgress;
 @synthesize videoProgress = _videoProgress;
 
-- (id) init
+- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL
 {
     self = [super init];
     if(self)
     {
+        self.uuid = [NSUUID UUID];
+        self.sourceURL = sourceURL;
+        self.destinationURL = destinationURL;
+        
+        self.descriptionDictionary = @{ kSynopsisTranscodeOperationUUIDKey : self.uuid,
+                                        kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
+                                        kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
+                                        };
+                                        
+        
         self.videoProgress = (CGFloat)0.0;
         self.audioProgress = (CGFloat)0.0;
     }
@@ -110,10 +146,6 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
     
     [self calculateEta];
         
-    if(self.progressBlock)
-    {
-        self.progressBlock(self.progress);
-    }
 }
 
 - (CGFloat) audioProgress
@@ -133,10 +165,6 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
     
     [self calculateEta];
     
-    if(self.progressBlock)
-    {
-        self.progressBlock(self.progress);
-    }
 }
 
 
@@ -147,6 +175,17 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
     double secondsRemaining = (1.0 - self.progress) / itemsPerSecond;
     
     self.remainingTime = secondsRemaining;
+    
+    // send notification of updated progress and ETA
+    
+    dispatch_async(dispatch_get_main_queue(), ^(){
+    
+        [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisTranscodeOperationProgressUpdate object:@{kSynopsisTranscodeOperationUUIDKey : self.uuid,
+                                                                                                                      kSynopsisTranscodeOperationProgressKey : @(self.progress),
+                                                                                                                      kSynopsisTranscodeOperationTimeElapsedKey: @(self.elapsedTime),
+                                                                                                                      kSynopsisTranscodeOperationTimeRemainingKey : @( self.remainingTime )}];
+    });
 }
+
 
 @end

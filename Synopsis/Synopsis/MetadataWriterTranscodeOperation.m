@@ -61,7 +61,7 @@
 
 - (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL metadataOptions:(NSDictionary*)metadataOptions 
 {
-    self = [super init];
+    self = [super initWithSourceURL:sourceURL destinationURL:destinationURL];
     if(self)
     {
         if(metadataOptions == nil)
@@ -69,8 +69,6 @@
             return nil;
         }
 
-        self.sourceURL = sourceURL;
-        self.destinationURL = destinationURL;
         self.metadataOptions = metadataOptions;
         
         self.transcodeAssetHasVideo = NO;

@@ -82,7 +82,7 @@
 
 - (instancetype) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions
 {
-    self = [super init];
+    self = [super initWithSourceURL:sourceURL destinationURL:destinationURL];
     if(self)
     {
         if(transcodeOptions == nil)
@@ -117,10 +117,6 @@
         NSDictionary* analysisOptions = self.transcodeOptions[kSynopsisAnalysisSettingsKey];
         self.requestedAnalyzers = analysisOptions[kSynopsisAnalysisSettingsEnabledPluginsKey];
         self.analysisQualityHint = [analysisOptions[kSynopsisAnalysisSettingsQualityHintKey] unsignedIntegerValue];
-        
-        
-        self.sourceURL = sourceURL;
-        self.destinationURL = destinationURL;
         
         self.inFlightGlobalMetadata = [NSMutableDictionary new];
         self.inFlightVideoSampleBufferMetadata = [NSMutableArray new];

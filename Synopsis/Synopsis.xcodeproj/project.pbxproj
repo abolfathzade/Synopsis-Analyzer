@@ -375,7 +375,6 @@
 		1B578C3F1B02F37E00D76F62 /* DropFilesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropFilesView.h; sourceTree = "<group>"; };
 		1B578C401B02F37E00D76F62 /* DropFilesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropFilesView.m; sourceTree = "<group>"; };
 		1B61BCD91ACB90850013418D /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
-		1B61BCDC1ACEFEEE0013418D /* AnalyzerPluginProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnalyzerPluginProtocol.h; sourceTree = "<group>"; };
 		1B61BCEF1ACF181C0013418D /* NSDictionary+JSONString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+JSONString.h"; sourceTree = "<group>"; };
 		1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+JSONString.m"; sourceTree = "<group>"; };
 		1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StandardAnalyzer.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1086,7 +1085,6 @@
 			children = (
 				1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */,
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
-				1B61BCDC1ACEFEEE0013418D /* AnalyzerPluginProtocol.h */,
 				1B805E381B012B5E005D7354 /* TableView & Cells */,
 				1B3233BC1C2E390600C9CF5E /* Preferences */,
 				1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */,

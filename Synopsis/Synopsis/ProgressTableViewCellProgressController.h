@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface ProgressTableViewCellProgressController : NSViewController
+@property (readwrite, atomic) NSUUID* trackedOperationUUID;
 - (void) setProgress:(CGFloat)progress;
 - (void) setTimeRemainingSeconds:(NSTimeInterval)timeRemaining;
 @end

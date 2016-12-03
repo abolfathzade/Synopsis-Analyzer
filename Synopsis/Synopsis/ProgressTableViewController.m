@@ -18,7 +18,7 @@
 @property (weak) IBOutlet NSTableView* tableView;
 
 // We dont want to hold on to our NSOperationQueues because we want to dealloc all the heavy media bullshit each one retains internally
-@property (atomic, readwrite, strong) NSPointerArray* transcodeAndAnalysisOperationsWeak;
+@property (atomic, readwrite, strong) NSMutableArray* trackedOperationDescriptions;
 @property (atomic, readwrite, strong) NSMutableArray* progressControllerArray;
 @property (atomic, readwrite, strong) NSMutableArray* presetControllerArray;
 @property (atomic, readwrite, strong) NSMutableArray* revealControllerArray;
@@ -58,9 +58,7 @@
         NSNib* presetTableViewCell = [[NSNib alloc] initWithNibNamed:@"ProgressTableViewCellPreset" bundle:[NSBundle mainBundle]];
         [self.tableView registerNib:presetTableViewCell forIdentifier:@"Preset"];
 
-        
-        // We dont want to hold on to our NSOperationQueues because we want to dealloc all the heavy media bullshit each one retains internally
-        self.transcodeAndAnalysisOperationsWeak = [[NSPointerArray alloc] initWithOptions:NSPointerFunctionsWeakMemory];
+        self.trackedOperationDescriptions = [NSMutableArray new];
 
         // Keep tabs on our controllers
         self.sourceControllerArray = [NSMutableArray new];
@@ -74,14 +72,14 @@
 
 - (void)addTranscodeAndAnalysisOperation:(NSNotification*)notification
 {    
-    @synchronized(_transcodeAndAnalysisOperationsWeak)
+    @synchronized(_trackedOperationDescriptions)
     {
-        [self.transcodeAndAnalysisOperationsWeak addPointer:(__bridge void *)(notification.object)];
+        [self.trackedOperationDescriptions addObject:[notification.object copy]];
     }
     
     [self.tableView beginUpdates];
     
-    NSIndexSet* rowSet = [[NSIndexSet alloc] initWithIndex:[self numberOfRowsInTableView:self.tableView] - 1];
+    NSIndexSet* rowSet = [[NSIndexSet alloc] initWithIndex:[self.tableView numberOfRows]];
 
     [self.tableView insertRowsAtIndexes:rowSet withAnimation:NSTableViewAnimationEffectNone];
     
@@ -92,7 +90,7 @@
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    BaseTranscodeOperation* operationForRow = [self.transcodeAndAnalysisOperationsWeak pointerAtIndex:row];
+    NSDictionary* operationDescription = [self.trackedOperationDescriptions objectAtIndex:row];
     NSView* result = nil;
     
     if([tableColumn.identifier isEqualToString:@"SourceFile"])
@@ -114,13 +112,12 @@
         
         result = [tableView makeViewWithIdentifier:@"SourceFile" owner:controller];
         
-        if(operationForRow)
+        if(operationDescription)
         {
-            NSURL* sourceURL = operationForRow.sourceURL;
+            NSURL* sourceURL = [operationDescription valueForKey:kSynopsisTranscodeOperationSourceURLKey];
             [controller setSourceFileName:[sourceURL lastPathComponent]];
         }
     }
-
     
     else  if([tableColumn.identifier isEqualToString:@"Progress"])
     {
@@ -136,32 +133,12 @@
         {
             // cache if we dont have...
             controller = [[ProgressTableViewCellProgressController alloc] init];
+            controller.trackedOperationUUID = [operationDescription valueForKey:kSynopsisTranscodeOperationUUIDKey];
             self.progressControllerArray[row] = controller;
         }
 
          result = [tableView makeViewWithIdentifier:@"Progress" owner:controller];
     }
-
-    else  if([tableColumn.identifier isEqualToString:@"Progress"])
-    {
-        // find our cached controller if we have one
-        ProgressTableViewCellProgressController* controller = nil;
-        
-        if(self.progressControllerArray.count > row)
-        {
-            controller = self.progressControllerArray[row];
-        }
-        
-        if(!controller)
-        {
-            // cache if we dont have...
-            controller = [[ProgressTableViewCellProgressController alloc] init];
-            self.progressControllerArray[row] = controller;
-        }
-        
-        result = [tableView makeViewWithIdentifier:@"Progress" owner:controller];
-    }
-
     
     else  if([tableColumn.identifier isEqualToString:@"Preset"])
     {
@@ -188,38 +165,20 @@
 //        }
     }
 
-    // Set up our callbacks if we need to.
-    if(operationForRow)
-    {
-        __weak typeof(operationForRow) weakOperationForRow = operationForRow;
-        // set up our callback
-        operationForRow.progressBlock = ^void(CGFloat progress)
-        {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                ProgressTableViewCellProgressController* progressController = self.progressControllerArray[row];
-                
-                if(progressController)
-                {
-                    [progressController setProgress:progress];
-                    [progressController setTimeRemainingSeconds:weakOperationForRow.remainingTime];
-                }
-            });
-        };
-    }
     
     return result;
 }
 
 #pragma mark - NSTableViewDataSource
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
-{
-    NSUInteger count = 0;
-    @synchronized(_transcodeAndAnalysisOperationsWeak)
-    {
-        count = self.transcodeAndAnalysisOperationsWeak.count;
-    }
-    
-    return count;
-}
+//- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
+//{
+//    NSUInteger count = 0;
+//    @synchronized(_trackedOperationDescriptions)
+//    {
+//        count = self.trackedOperationDescriptions.count;
+//    }
+//    
+//    return count;
+//}
 @end

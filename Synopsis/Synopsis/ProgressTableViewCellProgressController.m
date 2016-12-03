@@ -7,6 +7,7 @@
 //
 
 #import "ProgressTableViewCellProgressController.h"
+#import "BaseTranscodeOperation.h"
 
 @interface ProgressTableViewCellProgressController ()
 @property (weak) IBOutlet NSProgressIndicator* progressIndicator;
@@ -18,7 +19,34 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do view setup here.
+
+}
+
+- (void) viewDidAppear
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateProgress:) name:kSynopsisTranscodeOperationProgressUpdate object:nil];
+}
+
+- (void) viewDidDisappear
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:kSynopsisTranscodeOperationProgressUpdate object:nil];
+}
+
+- (void) updateProgress:(NSNotification*)notification
+{
+    NSDictionary* possibleUpdate = [notification object];
+    NSUUID* possibleUUID = [possibleUpdate valueForKey:kSynopsisTranscodeOperationUUIDKey];
+    
+    if([possibleUUID isEqual:self.trackedOperationUUID])
+    {
+        NSNumber* currentProgress = [possibleUpdate valueForKey:kSynopsisTranscodeOperationProgressKey];
+        NSNumber* currentTimeRemaining = [possibleUpdate valueForKey:kSynopsisTranscodeOperationTimeRemainingKey];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self setProgress:currentProgress.floatValue];
+            [self setTimeRemainingSeconds:currentTimeRemaining.doubleValue];
+        });
+    }
+    
 }
 
 - (void) setProgress:(CGFloat)progress

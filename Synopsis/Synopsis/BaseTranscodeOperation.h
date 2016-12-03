@@ -10,9 +10,27 @@
 #import <Foundation/Foundation.h>
 #import "LogController.h"
 
-// Self explanatory, used when our enqueing fires off a new operation
+// Notification Key, used when our enqueing fires off a new operation
 
 extern NSString* const kSynopsisNewTranscodeOperationAvailable;
+
+// Above Notifications sends a user info object that is our operations
+// "descriptionDictionary"
+
+// keys for descriptionDictionary
+extern NSString* const kSynopsisTranscodeOperationUUIDKey; // NSUUID
+extern NSString* const kSynopsisTranscodeOperationSourceURLKey; // NSURL
+extern NSString* const kSynopsisTranscodeOperationDestinationURLKey; // NSURL
+
+
+// Notification used when an transcode operation updates
+extern NSString* const kSynopsisTranscodeOperationProgressUpdate;
+// contains UUID key from above
+extern NSString* const kSynopsisTranscodeOperationProgressKey; // NSNumber current progress
+extern NSString* const kSynopsisTranscodeOperationTimeElapsedKey; // NSNumber as NSTimeInterval
+extern NSString* const kSynopsisTranscodeOperationTimeRemainingKey; // NSNumber as NSTimeInterval
+extern NSString* const kSynopsisTranscodeOperationMetadataKey; // NSDictionary of available analyzed metadata - may be nil
+
 
 
 // We have a 2 pass analysis and decode (and possibly encode) system:
@@ -78,8 +96,9 @@ extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
 
 
 @interface BaseTranscodeOperation : NSOperation
-@property (atomic, readwrite, strong) NSURL* sourceURL;
-@property (atomic, readwrite, strong) NSURL* destinationURL;
+@property (atomic, readonly, strong) NSDictionary* descriptionDictionary;
+@property (atomic, readonly, strong) NSURL* sourceURL;
+@property (atomic, readonly, strong) NSURL* destinationURL;
 @property (atomic, readonly) CGFloat progress;
 @property (atomic, readonly) NSTimeInterval elapsedTime;
 @property (atomic, readonly) NSTimeInterval remainingTime;
@@ -88,8 +107,10 @@ extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
 @property (atomic, readwrite) CGFloat videoProgress;
 @property (atomic, readwrite) CGFloat audioProgress;
 
-// Every progress update tick this block is fired - update your ui on the main queue here.
-@property (copy) void (^progressBlock)(CGFloat progress);
+//// Every progress update tick this block is fired - update your ui on the main queue here.
+//@property (copy) void (^progressBlock)(CGFloat progress);
+
+- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL;
 
 - (void) start NS_REQUIRES_SUPER;
 - (void) main NS_REQUIRES_SUPER;
