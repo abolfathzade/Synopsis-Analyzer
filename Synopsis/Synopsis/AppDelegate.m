@@ -324,20 +324,11 @@ static NSTimeInterval start;
                                                                  
                                                              });
                                     
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                        [[NSNotificationCenter defaultCenter]  postNotificationName:kSynopsisNewTranscodeOperationAvailable object:pass2.descriptionDictionary];
-                                    });
-                                    
                                     [self.metadataQueue addOperation:pass2];
                                     
                                 });
     
     [[LogController sharedLogController] appendVerboseLog:@"Begin Transcode and Analysis"];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter]  postNotificationName:kSynopsisNewTranscodeOperationAvailable object:analysis.descriptionDictionary];
-    });
-    
     
     [self.transcodeQueue addOperation:analysis];
 }

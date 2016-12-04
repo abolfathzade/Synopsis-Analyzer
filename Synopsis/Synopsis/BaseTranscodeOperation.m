@@ -10,6 +10,8 @@
 
 // Notification Key, used when our enqueing fires off a new operation
 NSString * const kSynopsisNewTranscodeOperationAvailable = @"kSynopsisNewTranscodeOperationAvailable";
+// Notification used when an transcode operation updates
+NSString* const kSynopsisTranscodeOperationProgressUpdate = @"kSynopsisTranscodeOperationProgressUpdate";
 
 // Above Notifications sends a user info object that is our operations
 // "descriptionDictionary"
@@ -18,12 +20,6 @@ NSString * const kSynopsisNewTranscodeOperationAvailable = @"kSynopsisNewTransco
 NSString* const kSynopsisTranscodeOperationUUIDKey = @"UUID"; //  NSUUID
 NSString* const kSynopsisTranscodeOperationSourceURLKey = @"sourceURL"; // NSURL
 NSString* const kSynopsisTranscodeOperationDestinationURLKey = @"destinationURL"; // NSURL
-
-
-// Notification used when an transcode operation updates
-NSString* const kSynopsisTranscodeOperationProgressUpdate = @"kSynopsisTranscodeOperationProgressUpdate";
-
-// Contains UUID key from above
 NSString* const kSynopsisTranscodeOperationProgressKey = @"progress";// NSNumber current progress
 NSString* const kSynopsisTranscodeOperationTimeElapsedKey = @"timeelapsed"; // NSNumber as NSTimeInterval
 NSString* const kSynopsisTranscodeOperationTimeRemainingKey = @"timeremaining"; // NSNumber as NSTimeInterval
@@ -56,6 +52,8 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
 @property (atomic, readwrite, assign) NSTimeInterval elapsedTime;
 @property (atomic, readwrite, assign) NSTimeInterval remainingTime;
 
+@property (atomic, readwrite, assign) BOOL initted;
+
 @end
 
 @implementation BaseTranscodeOperation
@@ -69,20 +67,32 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
     self = [super init];
     if(self)
     {
+        self.initted = NO;
         self.uuid = [NSUUID UUID];
         self.sourceURL = sourceURL;
         self.destinationURL = destinationURL;
         
-        self.descriptionDictionary = @{ kSynopsisTranscodeOperationUUIDKey : self.uuid,
-                                        kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
-                                        kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
-                                        };
-                                        
         
         self.videoProgress = (CGFloat)0.0;
         self.audioProgress = (CGFloat)0.0;
+        self.elapsedTime = 0;
+        self.remainingTime = (NSTimeInterval) DBL_MAX;
+        
+        self.descriptionDictionary = @{ kSynopsisTranscodeOperationUUIDKey : self.uuid,
+                                        kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
+                                        kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
+                                        kSynopsisTranscodeOperationProgressKey : @(self.progress),
+                                        kSynopsisTranscodeOperationTimeElapsedKey: @(self.elapsedTime),
+                                        kSynopsisTranscodeOperationTimeRemainingKey : @( self.remainingTime ),
+                                        };
+        
+        self.initted = YES;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter]  postNotificationName:kSynopsisNewTranscodeOperationAvailable object:self.descriptionDictionary];
+        });
     }
-    
+
     return self;
 }
 
@@ -177,14 +187,18 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
     self.remainingTime = secondsRemaining;
     
     // send notification of updated progress and ETA
-    
-    dispatch_async(dispatch_get_main_queue(), ^(){
-    
-        [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisTranscodeOperationProgressUpdate object:@{kSynopsisTranscodeOperationUUIDKey : self.uuid,
-                                                                                                                      kSynopsisTranscodeOperationProgressKey : @(self.progress),
-                                                                                                                      kSynopsisTranscodeOperationTimeElapsedKey: @(self.elapsedTime),
-                                                                                                                      kSynopsisTranscodeOperationTimeRemainingKey : @( self.remainingTime )}];
-    });
+    if(self.initted)
+    {
+        dispatch_async(dispatch_get_main_queue(), ^(){
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisTranscodeOperationProgressUpdate object:@{kSynopsisTranscodeOperationUUIDKey : self.uuid,
+                                                                                                                          kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
+                                                                                                                          kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
+                                                                                                                          kSynopsisTranscodeOperationProgressKey : @(self.progress),
+                                                                                                                          kSynopsisTranscodeOperationTimeElapsedKey: @(self.elapsedTime),
+                                                                                                                          kSynopsisTranscodeOperationTimeRemainingKey : @( self.remainingTime )}];
+        });
+    }
 }
 
 
