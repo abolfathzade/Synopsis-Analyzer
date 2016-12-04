@@ -58,7 +58,12 @@
 {
     NSString* timeString = @"";
     
-    if(!isnan(timeRemaining))
+    if(timeRemaining == DBL_MIN)
+    {
+        timeString = @"Unknown";
+    }
+
+    else if(isnormal(timeRemaining))
     {
         NSInteger ti = (NSInteger)timeRemaining;
         NSInteger seconds = ti % 60;

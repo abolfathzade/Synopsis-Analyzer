@@ -75,15 +75,13 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
         
         self.videoProgress = (CGFloat)0.0;
         self.audioProgress = (CGFloat)0.0;
-        self.elapsedTime = 0;
-        self.remainingTime = (NSTimeInterval) DBL_MAX;
         
         self.descriptionDictionary = @{ kSynopsisTranscodeOperationUUIDKey : self.uuid,
                                         kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
                                         kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
-                                        kSynopsisTranscodeOperationProgressKey : @(self.progress),
-                                        kSynopsisTranscodeOperationTimeElapsedKey: @(self.elapsedTime),
-                                        kSynopsisTranscodeOperationTimeRemainingKey : @( self.remainingTime ),
+                                        kSynopsisTranscodeOperationProgressKey : @(0),
+                                        kSynopsisTranscodeOperationTimeElapsedKey: @(0),
+                                        kSynopsisTranscodeOperationTimeRemainingKey : @( DBL_MIN ),
                                         };
         
         self.initted = YES;
