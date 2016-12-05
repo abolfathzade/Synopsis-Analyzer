@@ -77,8 +77,6 @@
 
 - (void)addTranscodeAndAnalysisOperation:(NSNotification*)notification
 {
-    NSLog(@"recieved new op: %@", [notification object]);
-    
     NSDictionary* operationDescription = [notification object];
     
     NSUUID* opID = [operationDescription valueForKey:kSynopsisTranscodeOperationUUIDKey];
