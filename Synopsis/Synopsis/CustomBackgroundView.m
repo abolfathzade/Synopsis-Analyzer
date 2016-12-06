@@ -18,7 +18,7 @@
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
-    [super drawRect:dirtyRect];
+    //[super drawRect:dirtyRect];
     
     // Drawing code here.
     [[NSColor darkGrayColor] set];

@@ -17,7 +17,7 @@
 @property (copy) NSMutableArray* analyzedAudioSampleBufferMetadata;
 @property (copy) NSDictionary* analyzedGlobalMetadata;
 
-- (instancetype) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions NS_DESIGNATED_INITIALIZER;
+- (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions NS_DESIGNATED_INITIALIZER;
 
 - (instancetype) init NS_UNAVAILABLE;
 

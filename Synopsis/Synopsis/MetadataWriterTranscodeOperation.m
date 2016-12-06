@@ -31,6 +31,9 @@
 {
 }
 
+// override -
+@property (atomic, readwrite, strong) NSUUID* uuid;
+
 // Prerequisites
 @property (atomic, readwrite, strong) NSDictionary* metadataOptions;
 
@@ -59,16 +62,16 @@
 
 @implementation MetadataWriterTranscodeOperation
 
-- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL metadataOptions:(NSDictionary*)metadataOptions 
+- (id) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL metadataOptions:(NSDictionary*)metadataOptions
 {
-    self = [super initWithSourceURL:sourceURL destinationURL:destinationURL];
+    self = [super initWithUUID:uuid sourceURL:sourceURL destinationURL:destinationURL];
     if(self)
     {
         if(metadataOptions == nil)
         {
             return nil;
         }
-
+        
         self.metadataOptions = metadataOptions;
         
         self.transcodeAssetHasVideo = NO;

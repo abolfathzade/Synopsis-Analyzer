@@ -62,16 +62,15 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
 @synthesize audioProgress = _audioProgress;
 @synthesize videoProgress = _videoProgress;
 
-- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL
+- (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL;
 {
     self = [super init];
     if(self)
     {
         self.initted = NO;
-        self.uuid = [NSUUID UUID];
+        self.uuid = uuid;
         self.sourceURL = sourceURL;
         self.destinationURL = destinationURL;
-        
         
         self.videoProgress = (CGFloat)0.0;
         self.audioProgress = (CGFloat)0.0;
@@ -84,11 +83,13 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
                                         kSynopsisTranscodeOperationTimeRemainingKey : @( DBL_MIN ),
                                         };
         
-        self.initted = YES;
         
         dispatch_async(dispatch_get_main_queue(), ^{
             [[NSNotificationCenter defaultCenter]  postNotificationName:kSynopsisNewTranscodeOperationAvailable object:self.descriptionDictionary];
         });
+        
+        self.initted = YES;
+
     }
 
     return self;

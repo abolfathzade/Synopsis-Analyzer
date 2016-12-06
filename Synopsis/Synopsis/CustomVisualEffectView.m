@@ -19,7 +19,7 @@
 {
     [self setState:NSVisualEffectStateActive];
     [self.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
-    [self setMaterial:NSVisualEffectMaterialDark];
+    [self setMaterial:NSVisualEffectMaterialUltraDark];
 
     // set our mask image'
 //    self.maskImage = [NSImage imageNamed:NSImageNameActionTemplate];

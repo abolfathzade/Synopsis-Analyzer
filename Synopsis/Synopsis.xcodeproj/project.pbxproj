@@ -18,6 +18,8 @@
 		1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
 		1B190E4C1D06806F00728443 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1B190E501D06819900728443 /* libpython.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4F1D06819900728443 /* libpython.tbd */; };
+		1B1DF39A1DF70B47001A79E2 /* OperationItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B1DF3981DF70B47001A79E2 /* OperationItem.m */; };
+		1B1DF39B1DF70B47001A79E2 /* OperationItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B1DF3991DF70B47001A79E2 /* OperationItem.xib */; };
 		1B3233C21C2E395700C9CF5E /* PreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233C11C2E395700C9CF5E /* PreferencesViewController.m */; };
 		1B3233C61C2EFDB200C9CF5E /* PreferencesGeneralViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233C41C2EFDB200C9CF5E /* PreferencesGeneralViewController.m */; };
 		1B3233C71C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B3233C51C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib */; };
@@ -354,6 +356,9 @@
 		1B02BA491D2B07D100A4430F /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		1B190E4B1D06806F00728443 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		1B190E4F1D06819900728443 /* libpython.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libpython.tbd; path = usr/lib/libpython.tbd; sourceTree = SDKROOT; };
+		1B1DF3971DF70B47001A79E2 /* OperationItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OperationItem.h; sourceTree = "<group>"; };
+		1B1DF3981DF70B47001A79E2 /* OperationItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OperationItem.m; sourceTree = "<group>"; };
+		1B1DF3991DF70B47001A79E2 /* OperationItem.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OperationItem.xib; sourceTree = "<group>"; };
 		1B3233C01C2E395700C9CF5E /* PreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesViewController.h; sourceTree = "<group>"; };
 		1B3233C11C2E395700C9CF5E /* PreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesViewController.m; sourceTree = "<group>"; };
 		1B3233C31C2EFDB200C9CF5E /* PreferencesGeneralViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesGeneralViewController.h; sourceTree = "<group>"; };
@@ -941,6 +946,16 @@
 			path = "site-packages";
 			sourceTree = "<group>";
 		};
+		1B1DF3961DF70B12001A79E2 /* CollectionView */ = {
+			isa = PBXGroup;
+			children = (
+				1B1DF3971DF70B47001A79E2 /* OperationItem.h */,
+				1B1DF3981DF70B47001A79E2 /* OperationItem.m */,
+				1B1DF3991DF70B47001A79E2 /* OperationItem.xib */,
+			);
+			name = CollectionView;
+			sourceTree = "<group>";
+		};
 		1B3233BC1C2E390600C9CF5E /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
@@ -1085,6 +1100,7 @@
 			children = (
 				1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */,
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
+				1B1DF3961DF70B12001A79E2 /* CollectionView */,
 				1B805E381B012B5E005D7354 /* TableView & Cells */,
 				1B3233BC1C2E390600C9CF5E /* Preferences */,
 				1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */,
@@ -1262,6 +1278,7 @@
 				1B3233D11C2EFDD300C9CF5E /* PreferencesAdvancedViewController.xib in Resources */,
 				1BD710AA1D615EC5007D61B9 /* AVASettingsTableViewCellController.xib in Resources */,
 				1B3233C71C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib in Resources */,
+				1B1DF39B1DF70B47001A79E2 /* OperationItem.xib in Resources */,
 				1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1315,6 +1332,7 @@
 				1B805E371B012ADF005D7354 /* ProgressTableViewCellProgressController.m in Sources */,
 				1B805E2C1B0114D0005D7354 /* ProgressTableViewController.m in Sources */,
 				1B3233C21C2E395700C9CF5E /* PreferencesViewController.m in Sources */,
+				1B1DF39A1DF70B47001A79E2 /* OperationItem.m in Sources */,
 				1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */,
 				1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */,
 				1B61BCF11ACF181C0013418D /* NSDictionary+JSONString.m in Sources */,

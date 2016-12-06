@@ -80,9 +80,9 @@
 @implementation AnalysisAndTranscodeOperation
 
 
-- (instancetype) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions
+- (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions
 {
-    self = [super initWithSourceURL:sourceURL destinationURL:destinationURL];
+    self = [super initWithUUID:uuid sourceURL:sourceURL destinationURL:destinationURL];
     if(self)
     {
         if(transcodeOptions == nil)
@@ -1086,8 +1086,8 @@
 
 #pragma mark - CVPixelBuffer Transform and scale helper
 
-#define SynopsisvImageTileFlag kvImageNoFlags
-//#define SynopsisvImageTileFlag kvImageDoNotTile
+//#define SynopsisvImageTileFlag kvImageNoFlags
+#define SynopsisvImageTileFlag kvImageDoNotTile
 
 //static const CGRect lowQuality = (CGRect) { 0, 0, 80, 60 };
 static const CGRect lowQuality = (CGRect) { 0, 0, 160, 120 };

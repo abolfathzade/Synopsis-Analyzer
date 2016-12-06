@@ -10,7 +10,7 @@
 
 @interface MetadataWriterTranscodeOperation : BaseTranscodeOperation
 
-- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL metadataOptions:(NSDictionary*)metadataOptions NS_DESIGNATED_INITIALIZER;
+- (id) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL metadataOptions:(NSDictionary*)metadataOptions NS_DESIGNATED_INITIALIZER;
 - (instancetype) init NS_UNAVAILABLE;
 
 @end

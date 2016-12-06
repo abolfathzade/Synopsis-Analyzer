@@ -81,17 +81,25 @@
     
     NSUUID* opID = [operationDescription valueForKey:kSynopsisTranscodeOperationUUIDKey];
     
-    [self.trackedOperationDescriptions addObject:operationDescription];
-    [self.trackedOperationUUIDs addObject:opID];
-
-    [self.tableView beginUpdates];
-    
-    NSIndexSet* rowSet = [[NSIndexSet alloc] initWithIndex:[self.tableView numberOfRows]];
-
-    [self.tableView insertRowsAtIndexes:rowSet withAnimation:NSTableViewAnimationEffectNone];
-    
-    [self.tableView endUpdates];
+    NSInteger index = [self.trackedOperationUUIDs indexOfObject:opID];
+    if(index == NSNotFound)
+    {
+        [self.trackedOperationDescriptions addObject:operationDescription];
+        [self.trackedOperationUUIDs addObject:opID];
+        
+        [self.tableView beginUpdates];
+        
+        NSIndexSet* rowSet = [[NSIndexSet alloc] initWithIndex:[self.tableView numberOfRows]];
+        
+        [self.tableView insertRowsAtIndexes:rowSet withAnimation:NSTableViewAnimationEffectNone];
+        
+        [self.tableView endUpdates];
     }
+    else
+    {
+        [self updateTrackedOperationState:notification];
+    }
+}
 
 - (void) updateTrackedOperationState:(NSNotification*)notification
 {
@@ -179,18 +187,33 @@
         {
             // cache if we dont have...
             controller = [[ProgressTableViewCellPresetController alloc] init];
-            self.revealControllerArray[row] = controller;
+            self.presetControllerArray[row] = controller;
         }
 
         result = [tableView makeViewWithIdentifier:@"Preset" owner:controller];
         
-//        if(operationForRow)
-//        {
-//            NSURL* destinationURL = operationForRow.destinationURL;
-//            controller.destinationURL = destinationURL;
-//        }
     }
+    else  if([tableColumn.identifier isEqualToString:@"Reveal"])
+    {
+        // find our cached controller if we have one
+        ProgressTableViewCellRevealController* controller = nil;
+        if(self.revealControllerArray.count > row)
+        {
+            controller = self.revealControllerArray[row];
+        }
+        
+        if(!controller)
+        {
+            // cache if we dont have...
+            controller = [[ProgressTableViewCellRevealController alloc] init];
+            self.revealControllerArray[row] = controller;
+        }
+        
+        result = [tableView makeViewWithIdentifier:@"Reveal" owner:controller];
 
+        NSURL* destinationURL = operationDescription[kSynopsisTranscodeOperationDestinationURLKey];
+        controller.destinationURL = destinationURL;
+    }
     
     return result;
 }

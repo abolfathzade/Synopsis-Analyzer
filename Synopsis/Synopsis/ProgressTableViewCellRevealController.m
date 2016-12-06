@@ -22,6 +22,8 @@
 
 - (IBAction)revealDestinationURL:(id)sender
 {
+    NSLog(@"%@ %@", NSStringFromSelector(_cmd), sender);
+    
     if(self.destinationURL)
         [[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[self.destinationURL]];
 }

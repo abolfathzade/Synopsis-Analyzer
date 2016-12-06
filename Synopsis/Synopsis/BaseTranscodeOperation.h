@@ -110,10 +110,12 @@ extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
 //// Every progress update tick this block is fired - update your ui on the main queue here.
 //@property (copy) void (^progressBlock)(CGFloat progress);
 
-- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL;
-
+- (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL;
 - (void) start NS_REQUIRES_SUPER;
 - (void) main NS_REQUIRES_SUPER;
+
+- (void) signalProgress;
+- (void) signalProgressWithMetadata:(NSDictionary*)metadata;
 
 
 @end
