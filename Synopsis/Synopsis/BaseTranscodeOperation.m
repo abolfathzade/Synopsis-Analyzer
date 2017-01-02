@@ -11,7 +11,7 @@
 // Notification Key, used when our enqueing fires off a new operation
 NSString * const kSynopsisNewTranscodeOperationAvailable = @"kSynopsisNewTranscodeOperationAvailable";
 // Notification used when an transcode operation updates
-NSString* const kSynopsisTranscodeOperationProgressUpdate = @"kSynopsisTranscodeOperationProgressUpdate";
+NSString* const kSynopsisTranscodeOperationProgressUpdate = @"kSynopsisTranscodeOperationPass1ProgressUpdate";
 
 // Above Notifications sends a user info object that is our operations
 // "descriptionDictionary"
@@ -24,7 +24,6 @@ NSString* const kSynopsisTranscodeOperationProgressKey = @"progress";// NSNumber
 NSString* const kSynopsisTranscodeOperationTimeElapsedKey = @"timeelapsed"; // NSNumber as NSTimeInterval
 NSString* const kSynopsisTranscodeOperationTimeRemainingKey = @"timeremaining"; // NSNumber as NSTimeInterval
 NSString* const kSynopsisTranscodeOperationMetadataKey = @"metadata";// NSDictionary of available analyzed metadata - may be nil
-
 
 
 // Pass 1
@@ -188,17 +187,13 @@ NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalM
     // send notification of updated progress and ETA
     if(self.initted)
     {
-        dispatch_async(dispatch_get_main_queue(), ^(){
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisTranscodeOperationProgressUpdate object:@{kSynopsisTranscodeOperationUUIDKey : self.uuid,
-                                                                                                                          kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
-                                                                                                                          kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
-                                                                                                                          kSynopsisTranscodeOperationProgressKey : @(self.progress),
-                                                                                                                          kSynopsisTranscodeOperationTimeElapsedKey: @(self.elapsedTime),
-                                                                                                                          kSynopsisTranscodeOperationTimeRemainingKey : @( self.remainingTime )}];
-        });
+        [self notifyProgress];
     }
 }
 
+- (void) notifyProgress
+{
+    [self doesNotRecognizeSelector:_cmd];
+}
 
 @end

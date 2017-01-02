@@ -22,9 +22,9 @@ extern NSString* const kSynopsisTranscodeOperationUUIDKey; // NSUUID
 extern NSString* const kSynopsisTranscodeOperationSourceURLKey; // NSURL
 extern NSString* const kSynopsisTranscodeOperationDestinationURLKey; // NSURL
 
-
 // Notification used when an transcode operation updates
 extern NSString* const kSynopsisTranscodeOperationProgressUpdate;
+
 // contains UUID key from above
 extern NSString* const kSynopsisTranscodeOperationProgressKey; // NSNumber current progress
 extern NSString* const kSynopsisTranscodeOperationTimeElapsedKey; // NSNumber as NSTimeInterval
@@ -96,6 +96,7 @@ extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
 
 
 @interface BaseTranscodeOperation : NSOperation
+@property (atomic, readonly, strong) NSUUID* uuid;
 @property (atomic, readonly, strong) NSDictionary* descriptionDictionary;
 @property (atomic, readonly, strong) NSURL* sourceURL;
 @property (atomic, readonly, strong) NSURL* destinationURL;

@@ -59,12 +59,12 @@ static NSTimeInterval start;
     {
         // Serial transcode queue
         self.transcodeQueue = [[NSOperationQueue alloc] init];
-        self.transcodeQueue.maxConcurrentOperationCount = [[NSProcessInfo processInfo] activeProcessorCount] / 4; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
+        self.transcodeQueue.maxConcurrentOperationCount = [[NSProcessInfo processInfo] activeProcessorCount] / 2; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
         self.transcodeQueue.qualityOfService = NSQualityOfServiceUserInitiated;
         
         // Serial metadata / passthrough writing queue
         self.metadataQueue = [[NSOperationQueue alloc] init];
-        self.metadataQueue.maxConcurrentOperationCount = [[NSProcessInfo processInfo] activeProcessorCount] / 4; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
+        self.metadataQueue.maxConcurrentOperationCount = [[NSProcessInfo processInfo] activeProcessorCount] / 2; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
         self.metadataQueue.qualityOfService = NSQualityOfServiceUserInitiated;
         
         self.analyzerPlugins = [NSMutableArray new];
