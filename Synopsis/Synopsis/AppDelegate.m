@@ -302,34 +302,36 @@ static NSTimeInterval start;
                                 {
                                     // Retarded weak/strong pattern so we avoid retain loopl
                                     __strong AnalysisAndTranscodeOperation* strongAnalysis = weakAnalysis;
-                                    
-                                    NSDictionary* metadataOptions = @{kSynopsisAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
-                                                                      kSynopsisAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
-                                                                      kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
-                                                                      };
-                                    
-                                    MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];
-                                    
-                                    pass2.completionBlock = (^(void)
-                                                             {
-                                                                 [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis"];
-                                                                 
-                                                                 // Clean up
-                                                                 NSError* error;
-                                                                 if(![[NSFileManager defaultManager] removeItemAtURL:destinationURL error:&error])
-                                                                 {
-                                                                     [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
-                                                                 }
-                                                                 
-                                                                 
-                                                             });
-                                    
-                                    [self.metadataQueue addOperation:pass2];
-                                    
+									
+									if (strongAnalysis.succeeded) {
+										NSDictionary* metadataOptions = @{kSynopsisAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
+																		  kSynopsisAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
+																		  kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
+																		  };
+										
+										MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];
+										
+										pass2.completionBlock = (^(void)
+																 {
+																	 [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis"];
+																	 
+																	 // Clean up
+																	 NSError* error;
+																	 if(![[NSFileManager defaultManager] removeItemAtURL:destinationURL error:&error])
+																	 {
+																		 [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
+																	 }
+																	 
+																	 
+																 });
+										
+										[self.metadataQueue addOperation:pass2];
+									}
+									
                                 });
-    
+	
     [[LogController sharedLogController] appendVerboseLog:@"Begin Transcode and Analysis"];
-    
+	
     [self.transcodeQueue addOperation:analysis];
 }
 
@@ -340,21 +342,21 @@ static NSTimeInterval start;
     if(fileURLArray)
     {
         start = [NSDate timeIntervalSinceReferenceDate];
-        
+		
         for(NSURL* url in fileURLArray)
         {
             [self enqueueFileForTranscode:url];
         }
-        
+		
         NSBlockOperation* blockOp = [NSBlockOperation blockOperationWithBlock:^{
             NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
-            
+			
             [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Batch Took : %f seconds", delta]];
-            
+			
         }];
-        
+		
         [blockOp addDependency:[self.transcodeQueue.operations lastObject]];
-        
+		
         [self.transcodeQueue addOperation:blockOp];
     }
 }

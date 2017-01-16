@@ -1066,12 +1066,13 @@
         
         // dealloc any analyzers now
         self.availableAnalyzers = nil;
-        
+		
+		self.succeeded = YES;
         [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis Operation"];
     }
     else
     {
-        [[LogController sharedLogController] appendErrorLog:@"Unable to start transcode:"];
+        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to start transcode from %@ to %@:", self.sourceURL, self.destinationURL]];
         if(self.transcodeAssetReader.error)
         {
             [[LogController sharedLogController] appendErrorLog:[@"Read Error" stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
@@ -1080,6 +1081,7 @@
         {
             [[LogController sharedLogController] appendErrorLog:[@"Write Error" stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
         }
+		self.succeeded = NO;
     }
 }
 
