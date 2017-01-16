@@ -17,8 +17,12 @@
 @property (copy) NSMutableArray* analyzedAudioSampleBufferMetadata;
 @property (copy) NSDictionary* analyzedGlobalMetadata;
 
+@property (assign) BOOL succeeded;
+
 - (instancetype) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions NS_DESIGNATED_INITIALIZER;
 
 - (instancetype) init NS_UNAVAILABLE;
+
+
 
 @end
