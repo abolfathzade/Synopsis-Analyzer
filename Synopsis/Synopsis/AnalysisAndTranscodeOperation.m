@@ -1086,8 +1086,8 @@
 
 #pragma mark - CVPixelBuffer Transform and scale helper
 
-//#define SynopsisvImageTileFlag kvImageNoFlags
-#define SynopsisvImageTileFlag kvImageDoNotTile
+#define SynopsisvImageTileFlag kvImageNoFlags
+//#define SynopsisvImageTileFlag kvImageDoNotTile
 
 //static const CGRect lowQuality = (CGRect) { 0, 0, 80, 60 };
 static const CGRect lowQuality = (CGRect) { 0, 0, 160, 120 };
