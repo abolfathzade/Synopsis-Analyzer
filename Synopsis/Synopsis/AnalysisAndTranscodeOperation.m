@@ -394,6 +394,11 @@
         // Or use the CMBufferqueue callbacks with a semaphore signal
         CMItemCount numBuffers = 0;
         
+        
+        // TODO :: NEed semaphore to indicate we are done encoding JSON
+        dispatch_queue_t jsonEncodeQueue = dispatch_queue_create("jsonEncodeQueue", DISPATCH_QUEUE_SERIAL);
+
+        
 #pragma mark - Video Requirements
         
         // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
@@ -404,23 +409,23 @@
         CMBufferQueueRef videoUncompressedBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &videoUncompressedBufferQueue);
 
-        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
-        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t videoUncompressedDecodeQueue = dispatch_queue_create("videoUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoUncompressedDecodeQueue = dispatch_queue_create("videoUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
-        dispatch_queue_t concurrentVideoAnalysisQueue = dispatch_queue_create("concurrentVideoAnalysisQueue", DISPATCH_QUEUE_CONCURRENT_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t concurrentVideoAnalysisQueue = dispatch_queue_create("concurrentVideoAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
         
 #pragma mark - Audio Requirements
         
@@ -440,14 +445,14 @@
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t audioDequeueSemaphore = dispatch_semaphore_create(0);
         
-//        dispatch_queue_t concurrentAudioAnalysisQueue = dispatch_queue_create("concurrentAudioAnalysisQueue", DISPATCH_QUEUE_CONCURRENT_WITH_AUTORELEASE_POOL);
+//        dispatch_queue_t concurrentAudioAnalysisQueue = dispatch_queue_create("concurrentAudioAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
 
 #pragma mark - Read Video pass through
 
@@ -697,18 +702,23 @@
                             CVPixelBufferRelease(transformedPixelBuffer);
                             CVPixelBufferRelease(pixelBuffer);
 
-                            // Store out running metadata
-                            AVTimedMetadataGroup *group = [self compressedTimedMetadataFromDictionary:aggregatedAndAnalyzedMetadata atTime:currentSampleTimeRange];
-                            if(group)
-                            {
-                                [self.inFlightVideoSampleBufferMetadata addObject:group];
-                            }
-                            else
-                            {
-                                [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
-                            }
+                            
+                            dispatch_async(jsonEncodeQueue, ^{
+                                
+                                // Store out running metadata
+                                AVTimedMetadataGroup *group = [self compressedTimedMetadataFromDictionary:aggregatedAndAnalyzedMetadata atTime:currentSampleTimeRange];
+                                if(group)
+                                {
+                                    [self.inFlightVideoSampleBufferMetadata addObject:group];
+                                }
+                                else
+                                {
+                                    [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
+                                }
+                                
+                                CFRelease(uncompressedVideoSampleBuffer);
 
-                            CFRelease(uncompressedVideoSampleBuffer);
+                            });
                         }
                         else
                         {
