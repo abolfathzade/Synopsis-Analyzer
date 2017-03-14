@@ -254,21 +254,37 @@
         
         size_t layoutSize;
         const AudioChannelLayout* layout = CMAudioFormatDescriptionGetChannelLayout(audioDescription, &layoutSize);
+
+        unsigned int numberOfChannels;
         
-        unsigned int numberOfChannels = AudioChannelLayoutTag_GetNumberOfChannels(layout->mChannelLayoutTag);
+        if(layout != NULL)
+        {
+            numberOfChannels = AudioChannelLayoutTag_GetNumberOfChannels(layout->mChannelLayoutTag);
+        }
+        
+        // Looks like we need to get an ASBD instead
+        
+        AudioStreamBasicDescription* asbd = CMAudioFormatDescriptionGetStreamBasicDescription(audioDescription);
+        
+        if(asbd != NULL)
+        {
+            numberOfChannels = asbd->mChannelsPerFrame;
+        }
         
         if(self.audioTranscodeSettings[AVNumberOfChannelsKey] == [NSNull null])
         {
             NSMutableDictionary* newAudioSettingsWithChannelCountAndLayout = [self.audioTranscodeSettings mutableCopy];
-        
-            NSData* audioLayoutData = [[NSData alloc] initWithBytes:layout length:layoutSize];
             
-            newAudioSettingsWithChannelCountAndLayout[AVChannelLayoutKey] = audioLayoutData;
+            if(layout != nil)
+            {
+                NSData* audioLayoutData = [[NSData alloc] initWithBytes:layout length:layoutSize];
+                newAudioSettingsWithChannelCountAndLayout[AVChannelLayoutKey] = audioLayoutData;
+            }
+            
             newAudioSettingsWithChannelCountAndLayout[AVNumberOfChannelsKey] = @(numberOfChannels);
             
             self.audioTranscodeSettings = newAudioSettingsWithChannelCountAndLayout;
         }
-        
         
         self.transcodeAssetReaderAudio = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstAudioTrack
                                                                                 outputSettings:@{(NSString*) AVFormatIDKey : @(kAudioFormatLinearPCM)}];
