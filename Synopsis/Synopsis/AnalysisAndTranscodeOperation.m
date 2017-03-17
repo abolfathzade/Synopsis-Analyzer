@@ -255,7 +255,7 @@
         size_t layoutSize;
         const AudioChannelLayout* layout = CMAudioFormatDescriptionGetChannelLayout(audioDescription, &layoutSize);
 
-        unsigned int numberOfChannels;
+        unsigned int numberOfChannels = 0;
         
         if(layout != NULL)
         {
@@ -264,7 +264,7 @@
         
         // Looks like we need to get an ASBD instead
         
-        AudioStreamBasicDescription* asbd = CMAudioFormatDescriptionGetStreamBasicDescription(audioDescription);
+        const AudioStreamBasicDescription* asbd = CMAudioFormatDescriptionGetStreamBasicDescription(audioDescription);
         
         if(asbd != NULL)
         {
