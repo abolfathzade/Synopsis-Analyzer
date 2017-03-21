@@ -16,7 +16,7 @@
 #import "NSDictionary+JSONString.h"
 #import "BSON/BSONSerialization.h"
 #import "GZIP/GZIP.h"
-
+#import "AtomicBoolean.h"
 #include <sys/xattr.h>
 
 //
@@ -385,8 +385,8 @@
         
 #pragma mark - Read Video pass through
         
-        __block BOOL finishedReadingAllPassthroughVideo = NO;
-        
+        __block AtomicBoolean* finishedReadingAllPassthroughVideo = [[AtomicBoolean alloc] init];
+
         if(self.transcodeAssetHasVideo)
         {
             dispatch_async(videoPassthroughDecodeQueue, ^{
@@ -414,7 +414,7 @@
                     }
                 }
                 
-                finishedReadingAllPassthroughVideo = YES;
+                [finishedReadingAllPassthroughVideo setValue:YES];
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
                 
                 // Fire final semaphore signal to hit finalization
@@ -426,7 +426,7 @@
 
 #pragma mark - Read Audio pass through
         
-        __block BOOL finishedReadingAllPassthroughAudio = NO;
+        __block AtomicBoolean* finishedReadingAllPassthroughAudio = [[AtomicBoolean alloc] init];
         
         if(self.transcodeAssetHasAudio)
         {
@@ -455,7 +455,7 @@
                     }
                 }
                 
-                finishedReadingAllPassthroughAudio = YES;
+                [finishedReadingAllPassthroughAudio setValue:YES];
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Audio Buffers"];
                 
                 // Fire final semaphore signal to hit finalization
@@ -477,7 +477,7 @@
                        && [self.transcodeAssetWriterMetadata isReadyForMoreMediaData])
                  {
                      // Are we done reading,
-                     if(finishedReadingAllPassthroughVideo || self.isCancelled)
+                     if([finishedReadingAllPassthroughVideo getValue] || self.isCancelled)
                      {
 //                         NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(videoDequeueSemaphore);
@@ -604,7 +604,7 @@
                      
                  {
                      // Are we done reading,
-                     if(finishedReadingAllPassthroughAudio || self.isCancelled)
+                     if([finishedReadingAllPassthroughAudio getValue] || self.isCancelled)
                      {
 //                         NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(audioDequeueSemaphore);

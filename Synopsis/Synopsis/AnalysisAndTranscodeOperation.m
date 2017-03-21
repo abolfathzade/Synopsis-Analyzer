@@ -17,6 +17,8 @@
 #import "BSON/BSONSerialization.h"
 #import "GZIP/GZIP.h"
 
+#import "AtomicBoolean.h"
+
 @interface AnalysisAndTranscodeOperation ()
 {
     // We use this pixel buffer pool to handle memory for our resized pixel buffers
@@ -394,10 +396,8 @@
         // Or use the CMBufferqueue callbacks with a semaphore signal
         CMItemCount numBuffers = 0;
         
-        
         // TODO :: NEed semaphore to indicate we are done encoding JSON
         dispatch_queue_t jsonEncodeQueue = dispatch_queue_create("jsonEncodeQueue", DISPATCH_QUEUE_SERIAL);
-
         
 #pragma mark - Video Requirements
         
@@ -456,7 +456,7 @@
 
 #pragma mark - Read Video pass through
 
-        __block BOOL finishedReadingAllPassthroughVideo = NO;
+        __block AtomicBoolean *finishedReadingAllPassthroughVideo = [[AtomicBoolean alloc] init];;
         
         if(self.transcodeAssetHasVideo)
         {
@@ -493,7 +493,7 @@
                     }
                 }
                 
-                finishedReadingAllPassthroughVideo = YES;
+                [finishedReadingAllPassthroughVideo setValue:YES];
 
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
 
@@ -506,7 +506,7 @@
         
 #pragma mark - Read Audio pass through
         
-        __block BOOL finishedReadingAllPassthroughAudio = NO;
+        __block AtomicBoolean* finishedReadingAllPassthroughAudio = [[AtomicBoolean alloc] init];
 
         if(self.transcodeAssetHasAudio)
         {
@@ -543,7 +543,7 @@
                     }
                 }
                 
-                finishedReadingAllPassthroughAudio = YES;
+                [finishedReadingAllPassthroughAudio setValue:YES];
                 
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Audio Buffers"];
                 
@@ -557,7 +557,7 @@
 #pragma mark - Read Video Decompressed
         
         // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
-        __block BOOL finishedReadingAllUncompressedVideo = NO;
+        __block AtomicBoolean* finishedReadingAllUncompressedVideo = [[AtomicBoolean alloc] init];
         
         if(self.transcodeAssetHasVideo)
         {
@@ -729,7 +729,7 @@
                     }
                 }
 
-                finishedReadingAllUncompressedVideo = YES;
+                [finishedReadingAllUncompressedVideo setValue:YES];
 
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Video Buffers"];
                 
@@ -743,7 +743,7 @@
 #pragma mark - Read Audio Decompressed
         
         // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
-        __block BOOL finishedReadingAllUncompressedAudio = NO;
+        __block AtomicBoolean* finishedReadingAllUncompressedAudio = [[AtomicBoolean alloc] init];
         
         if(self.transcodeAssetHasAudio)
         {
@@ -842,7 +842,7 @@
                 }
             }
             
-            finishedReadingAllUncompressedAudio = YES;
+                [finishedReadingAllUncompressedAudio setValue:YES];
             
             [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Audio Buffers"];
             
@@ -864,7 +864,7 @@
                 while([self.transcodeAssetWriterVideo isReadyForMoreMediaData] )
                 {
                     // Are we done reading,
-                    if( (finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo) || self.isCancelled)
+                    if( ([finishedReadingAllPassthroughVideo getValue] && [finishedReadingAllUncompressedVideo getValue]) || self.isCancelled)
                     {
 //                        NSLog(@"Finished Reading waiting to empty queue...");
                         dispatch_semaphore_signal(videoDequeueSemaphore);
@@ -935,7 +935,7 @@
                 }
                 
                 // some debug code to see 
-                if( (finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo) || self.isCancelled)
+                if( ([finishedReadingAllPassthroughVideo getValue] && [finishedReadingAllUncompressedVideo getValue]) || self.isCancelled)
                 {
                     if(!CMBufferQueueIsEmpty(videoPassthroughBufferQueue) || !CMBufferQueueIsEmpty(videoUncompressedBufferQueue))
                     {
@@ -966,7 +966,7 @@
                  while([self.transcodeAssetWriterAudio isReadyForMoreMediaData])
                  {
                      // Are we done reading,
-                     if( (finishedReadingAllPassthroughAudio && finishedReadingAllUncompressedAudio) || self.isCancelled)
+                     if( ([finishedReadingAllPassthroughAudio getValue] && [finishedReadingAllUncompressedAudio getValue]) || self.isCancelled)
                      {
 //                         NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(audioDequeueSemaphore);
@@ -1037,7 +1037,7 @@
                  }
                  
                  // some debug code to see
-                 if( (finishedReadingAllPassthroughAudio && finishedReadingAllUncompressedAudio) || self.isCancelled)
+                 if( ([finishedReadingAllPassthroughAudio getValue] && [finishedReadingAllUncompressedAudio getValue]) || self.isCancelled)
                  {
                      if(!CMBufferQueueIsEmpty(audioPassthroughBufferQueue) || !CMBufferQueueIsEmpty(audioUncompressedBufferQueue))
                      {

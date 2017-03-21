@@ -20,6 +20,7 @@
 		1B190E501D06819900728443 /* libpython.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4F1D06819900728443 /* libpython.tbd */; };
 		1B1DF39A1DF70B47001A79E2 /* OperationItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B1DF3981DF70B47001A79E2 /* OperationItem.m */; };
 		1B1DF39B1DF70B47001A79E2 /* OperationItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B1DF3991DF70B47001A79E2 /* OperationItem.xib */; };
+		1B2E7C831E81DA8000EF07BC /* AtomicBoolean.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B2E7C821E81DA8000EF07BC /* AtomicBoolean.m */; };
 		1B3233C21C2E395700C9CF5E /* PreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233C11C2E395700C9CF5E /* PreferencesViewController.m */; };
 		1B3233C61C2EFDB200C9CF5E /* PreferencesGeneralViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233C41C2EFDB200C9CF5E /* PreferencesGeneralViewController.m */; };
 		1B3233C71C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B3233C51C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib */; };
@@ -359,6 +360,8 @@
 		1B1DF3971DF70B47001A79E2 /* OperationItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OperationItem.h; sourceTree = "<group>"; };
 		1B1DF3981DF70B47001A79E2 /* OperationItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OperationItem.m; sourceTree = "<group>"; };
 		1B1DF3991DF70B47001A79E2 /* OperationItem.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OperationItem.xib; sourceTree = "<group>"; };
+		1B2E7C811E81DA8000EF07BC /* AtomicBoolean.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AtomicBoolean.h; sourceTree = "<group>"; };
+		1B2E7C821E81DA8000EF07BC /* AtomicBoolean.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AtomicBoolean.m; sourceTree = "<group>"; };
 		1B3233C01C2E395700C9CF5E /* PreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesViewController.h; sourceTree = "<group>"; };
 		1B3233C11C2E395700C9CF5E /* PreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesViewController.m; sourceTree = "<group>"; };
 		1B3233C31C2EFDB200C9CF5E /* PreferencesGeneralViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesGeneralViewController.h; sourceTree = "<group>"; };
@@ -1114,6 +1117,8 @@
 				1B3233D31C2F0A7000C9CF5E /* CustomBackgroundView.m */,
 				1B61BCEF1ACF181C0013418D /* NSDictionary+JSONString.h */,
 				1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */,
+				1B2E7C811E81DA8000EF07BC /* AtomicBoolean.h */,
+				1B2E7C821E81DA8000EF07BC /* AtomicBoolean.m */,
 				1BA68C5D1AD5D2A1003B3CE9 /* BSON */,
 				1BA68C6B1AD5D8D3003B3CE9 /* GZIP */,
 				1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */,
@@ -1339,6 +1344,7 @@
 				1B3233C61C2EFDB200C9CF5E /* PreferencesGeneralViewController.m in Sources */,
 				1B3233DC1C31F8F200C9CF5E /* PresetGroup.m in Sources */,
 				1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */,
+				1B2E7C831E81DA8000EF07BC /* AtomicBoolean.m in Sources */,
 				1B805E3C1B01488D005D7354 /* ProgressTableViewCellRevealController.m in Sources */,
 				1BA4D1991C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m in Sources */,
 				1B805E321B012386005D7354 /* ProgressTableViewCellSourceController.m in Sources */,
@@ -1592,7 +1598,8 @@
 				GCC_UNROLL_LOOPS = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				OTHER_CFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1607,7 +1614,8 @@
 				GCC_UNROLL_LOOPS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				OTHER_CFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
