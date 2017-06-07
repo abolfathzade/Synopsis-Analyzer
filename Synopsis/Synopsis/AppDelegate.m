@@ -277,7 +277,7 @@ static NSTimeInterval start;
     PresetAnalysisSettings* analysisSettings = currentPreset.analyzerSettings;
     
     // TODO:
-    NSDictionary* placeholderAnalysisSettings = @{kSynopsisAnalysisSettingsQualityHintKey : @(SynopsisAnalysisQualityHintMedium),
+    NSDictionary* placeholderAnalysisSettings = @{kSynopsisAnalysisSettingsQualityHintKey : @(SynopsisAnalysisQualityHintHigh),
                                                   kSynopsisAnalysisSettingsEnabledPluginsKey : self.analyzerPlugins,
                                                   kSynopsisAnalysisSettingsEnableConcurrencyKey : @TRUE,
                                                   };
