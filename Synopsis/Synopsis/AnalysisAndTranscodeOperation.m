@@ -17,6 +17,8 @@
 #import "BSON/BSONSerialization.h"
 #import "GZIP/GZIP.h"
 
+#import "AtomicBoolean.h"
+
 @interface AnalysisAndTranscodeOperation ()
 {
     // We use this pixel buffer pool to handle memory for our resized pixel buffers
@@ -80,9 +82,9 @@
 @implementation AnalysisAndTranscodeOperation
 
 
-- (instancetype) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions
+- (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions
 {
-    self = [super initWithSourceURL:sourceURL destinationURL:destinationURL];
+    self = [super initWithUUID:uuid sourceURL:sourceURL destinationURL:destinationURL];
     if(self)
     {
         if(transcodeOptions == nil)
@@ -254,21 +256,37 @@
         
         size_t layoutSize;
         const AudioChannelLayout* layout = CMAudioFormatDescriptionGetChannelLayout(audioDescription, &layoutSize);
+
+        unsigned int numberOfChannels = 0;
         
-        unsigned int numberOfChannels = AudioChannelLayoutTag_GetNumberOfChannels(layout->mChannelLayoutTag);
+        if(layout != NULL)
+        {
+            numberOfChannels = AudioChannelLayoutTag_GetNumberOfChannels(layout->mChannelLayoutTag);
+        }
+        
+        // Looks like we need to get an ASBD instead
+        
+        const AudioStreamBasicDescription* asbd = CMAudioFormatDescriptionGetStreamBasicDescription(audioDescription);
+        
+        if(asbd != NULL)
+        {
+            numberOfChannels = asbd->mChannelsPerFrame;
+        }
         
         if(self.audioTranscodeSettings[AVNumberOfChannelsKey] == [NSNull null])
         {
             NSMutableDictionary* newAudioSettingsWithChannelCountAndLayout = [self.audioTranscodeSettings mutableCopy];
-        
-            NSData* audioLayoutData = [[NSData alloc] initWithBytes:layout length:layoutSize];
             
-            newAudioSettingsWithChannelCountAndLayout[AVChannelLayoutKey] = audioLayoutData;
+            if(layout != nil)
+            {
+                NSData* audioLayoutData = [[NSData alloc] initWithBytes:layout length:layoutSize];
+                newAudioSettingsWithChannelCountAndLayout[AVChannelLayoutKey] = audioLayoutData;
+            }
+            
             newAudioSettingsWithChannelCountAndLayout[AVNumberOfChannelsKey] = @(numberOfChannels);
             
             self.audioTranscodeSettings = newAudioSettingsWithChannelCountAndLayout;
         }
-        
         
         self.transcodeAssetReaderAudio = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstAudioTrack
                                                                                 outputSettings:@{(NSString*) AVFormatIDKey : @(kAudioFormatLinearPCM)}];
@@ -378,6 +396,9 @@
         // Or use the CMBufferqueue callbacks with a semaphore signal
         CMItemCount numBuffers = 0;
         
+        // TODO :: NEed semaphore to indicate we are done encoding JSON
+        dispatch_queue_t jsonEncodeQueue = dispatch_queue_create("jsonEncodeQueue", DISPATCH_QUEUE_SERIAL);
+        
 #pragma mark - Video Requirements
         
         // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
@@ -388,23 +409,23 @@
         CMBufferQueueRef videoUncompressedBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &videoUncompressedBufferQueue);
 
-        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
-        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t videoUncompressedDecodeQueue = dispatch_queue_create("videoUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoUncompressedDecodeQueue = dispatch_queue_create("videoUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
-        dispatch_queue_t concurrentVideoAnalysisQueue = dispatch_queue_create("concurrentVideoAnalysisQueue", DISPATCH_QUEUE_CONCURRENT_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t concurrentVideoAnalysisQueue = dispatch_queue_create("concurrentVideoAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
         
 #pragma mark - Audio Requirements
         
@@ -424,18 +445,18 @@
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t audioDequeueSemaphore = dispatch_semaphore_create(0);
         
-//        dispatch_queue_t concurrentAudioAnalysisQueue = dispatch_queue_create("concurrentAudioAnalysisQueue", DISPATCH_QUEUE_CONCURRENT_WITH_AUTORELEASE_POOL);
+//        dispatch_queue_t concurrentAudioAnalysisQueue = dispatch_queue_create("concurrentAudioAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
 
 #pragma mark - Read Video pass through
 
-        __block BOOL finishedReadingAllPassthroughVideo = NO;
+        __block AtomicBoolean *finishedReadingAllPassthroughVideo = [[AtomicBoolean alloc] init];;
         
         if(self.transcodeAssetHasVideo)
         {
@@ -472,7 +493,7 @@
                     }
                 }
                 
-                finishedReadingAllPassthroughVideo = YES;
+                [finishedReadingAllPassthroughVideo setValue:YES];
 
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
 
@@ -485,7 +506,7 @@
         
 #pragma mark - Read Audio pass through
         
-        __block BOOL finishedReadingAllPassthroughAudio = NO;
+        __block AtomicBoolean* finishedReadingAllPassthroughAudio = [[AtomicBoolean alloc] init];
 
         if(self.transcodeAssetHasAudio)
         {
@@ -522,7 +543,7 @@
                     }
                 }
                 
-                finishedReadingAllPassthroughAudio = YES;
+                [finishedReadingAllPassthroughAudio setValue:YES];
                 
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Audio Buffers"];
                 
@@ -536,7 +557,7 @@
 #pragma mark - Read Video Decompressed
         
         // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
-        __block BOOL finishedReadingAllUncompressedVideo = NO;
+        __block AtomicBoolean* finishedReadingAllUncompressedVideo = [[AtomicBoolean alloc] init];
         
         if(self.transcodeAssetHasVideo)
         {
@@ -681,18 +702,23 @@
                             CVPixelBufferRelease(transformedPixelBuffer);
                             CVPixelBufferRelease(pixelBuffer);
 
-                            // Store out running metadata
-                            AVTimedMetadataGroup *group = [self compressedTimedMetadataFromDictionary:aggregatedAndAnalyzedMetadata atTime:currentSampleTimeRange];
-                            if(group)
-                            {
-                                [self.inFlightVideoSampleBufferMetadata addObject:group];
-                            }
-                            else
-                            {
-                                [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
-                            }
+                            
+                            dispatch_async(jsonEncodeQueue, ^{
+                                
+                                // Store out running metadata
+                                AVTimedMetadataGroup *group = [self compressedTimedMetadataFromDictionary:aggregatedAndAnalyzedMetadata atTime:currentSampleTimeRange];
+                                if(group)
+                                {
+                                    [self.inFlightVideoSampleBufferMetadata addObject:group];
+                                }
+                                else
+                                {
+                                    [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
+                                }
+                                
+                                CFRelease(uncompressedVideoSampleBuffer);
 
-                            CFRelease(uncompressedVideoSampleBuffer);
+                            });
                         }
                         else
                         {
@@ -703,7 +729,7 @@
                     }
                 }
 
-                finishedReadingAllUncompressedVideo = YES;
+                [finishedReadingAllUncompressedVideo setValue:YES];
 
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Video Buffers"];
                 
@@ -717,7 +743,7 @@
 #pragma mark - Read Audio Decompressed
         
         // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
-        __block BOOL finishedReadingAllUncompressedAudio = NO;
+        __block AtomicBoolean* finishedReadingAllUncompressedAudio = [[AtomicBoolean alloc] init];
         
         if(self.transcodeAssetHasAudio)
         {
@@ -816,7 +842,7 @@
                 }
             }
             
-            finishedReadingAllUncompressedAudio = YES;
+                [finishedReadingAllUncompressedAudio setValue:YES];
             
             [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Audio Buffers"];
             
@@ -838,7 +864,7 @@
                 while([self.transcodeAssetWriterVideo isReadyForMoreMediaData] )
                 {
                     // Are we done reading,
-                    if( (finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo) || self.isCancelled)
+                    if( ([finishedReadingAllPassthroughVideo getValue] && [finishedReadingAllUncompressedVideo getValue]) || self.isCancelled)
                     {
 //                        NSLog(@"Finished Reading waiting to empty queue...");
                         dispatch_semaphore_signal(videoDequeueSemaphore);
@@ -909,7 +935,7 @@
                 }
                 
                 // some debug code to see 
-                if( (finishedReadingAllPassthroughVideo && finishedReadingAllUncompressedVideo) || self.isCancelled)
+                if( ([finishedReadingAllPassthroughVideo getValue] && [finishedReadingAllUncompressedVideo getValue]) || self.isCancelled)
                 {
                     if(!CMBufferQueueIsEmpty(videoPassthroughBufferQueue) || !CMBufferQueueIsEmpty(videoUncompressedBufferQueue))
                     {
@@ -940,7 +966,7 @@
                  while([self.transcodeAssetWriterAudio isReadyForMoreMediaData])
                  {
                      // Are we done reading,
-                     if( (finishedReadingAllPassthroughAudio && finishedReadingAllUncompressedAudio) || self.isCancelled)
+                     if( ([finishedReadingAllPassthroughAudio getValue] && [finishedReadingAllUncompressedAudio getValue]) || self.isCancelled)
                      {
 //                         NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(audioDequeueSemaphore);
@@ -1011,7 +1037,7 @@
                  }
                  
                  // some debug code to see
-                 if( (finishedReadingAllPassthroughAudio && finishedReadingAllUncompressedAudio) || self.isCancelled)
+                 if( ([finishedReadingAllPassthroughAudio getValue] && [finishedReadingAllUncompressedAudio getValue]) || self.isCancelled)
                  {
                      if(!CMBufferQueueIsEmpty(audioPassthroughBufferQueue) || !CMBufferQueueIsEmpty(audioUncompressedBufferQueue))
                      {
@@ -1580,6 +1606,20 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     }
     
     return NULL;
+}
+
+- (void) notifyProgress
+{
+    dispatch_async(dispatch_get_main_queue(), ^(){
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisTranscodeOperationProgressUpdate object:@{kSynopsisTranscodeOperationUUIDKey : self.uuid,
+                                                                                                                      kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
+                                                                                                                      kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
+                                                                                                                      kSynopsisTranscodeOperationProgressKey : @(self.progress),
+                                                                                                                      kSynopsisTranscodeOperationTimeElapsedKey: @(self.elapsedTime),
+                                                                                                                      kSynopsisTranscodeOperationTimeRemainingKey : @( self.remainingTime )}];
+    });
+
 }
 
 @end

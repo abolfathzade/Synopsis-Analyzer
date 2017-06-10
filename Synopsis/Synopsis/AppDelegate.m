@@ -287,8 +287,10 @@ static NSTimeInterval start;
                                        kSynopsisAnalysisSettingsKey : (analysisSettings.settingsDictionary) ? analysisSettings.settingsDictionary : placeholderAnalysisSettings,
                                        };
     
+    NSUUID* sessionUUID = [NSUUID UUID];
     // TODO: Just pass a copy of the current Preset directly.
-    AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithSourceURL:fileURL
+    AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithUUID:sessionUUID
+                                                                                        sourceURL:fileURL
                                                                                         destinationURL:destinationURL
                                                                                       transcodeOptions:transcodeOptions
                                                                                     ];
@@ -302,32 +304,34 @@ static NSTimeInterval start;
                                 {
                                     // Retarded weak/strong pattern so we avoid retain loopl
                                     __strong AnalysisAndTranscodeOperation* strongAnalysis = weakAnalysis;
-									
-									if (strongAnalysis.succeeded) {
-										NSDictionary* metadataOptions = @{kSynopsisAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
-																		  kSynopsisAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
-																		  kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
-																		  };
-										
-										MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithSourceURL:destinationURL destinationURL:destinationURL2 metadataOptions:metadataOptions];
-										
-										pass2.completionBlock = (^(void)
-																 {
-																	 [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis"];
-																	 
-																	 // Clean up
-																	 NSError* error;
-																	 if(![[NSFileManager defaultManager] removeItemAtURL:destinationURL error:&error])
-																	 {
-																		 [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
-																	 }
-																	 
-																	 
-																 });
-										
-										[self.metadataQueue addOperation:pass2];
-									}
-									
+                                    
+                                    if (strongAnalysis.succeeded)
+                                    {
+                                        NSDictionary* metadataOptions = @{kSynopsisAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
+                                                                          kSynopsisAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
+                                                                          kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
+                                                                          };
+                                        
+                                        // Inherit UUID
+                                        MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithUUID:sessionUUID
+                                                                                                                               sourceURL:destinationURL
+                                                                                                                          destinationURL:destinationURL2
+                                                                                                                         metadataOptions:metadataOptions];
+                                        
+                                        pass2.completionBlock = (^(void)
+                                        {
+                                            [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis"];
+                                            
+                                            // Clean up
+                                            NSError* error;
+                                            if(![[NSFileManager defaultManager] removeItemAtURL:destinationURL error:&error])
+                                            {
+                                                [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
+                                            }
+                                        });
+                                        
+                                        [self.metadataQueue addOperation:pass2];
+                                    }
                                 });
 	
     [[LogController sharedLogController] appendVerboseLog:@"Begin Transcode and Analysis"];

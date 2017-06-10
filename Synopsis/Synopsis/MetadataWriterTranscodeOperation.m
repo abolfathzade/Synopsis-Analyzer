@@ -16,7 +16,7 @@
 #import "NSDictionary+JSONString.h"
 #import "BSON/BSONSerialization.h"
 #import "GZIP/GZIP.h"
-
+#import "AtomicBoolean.h"
 #include <sys/xattr.h>
 
 //
@@ -30,6 +30,9 @@
 @interface MetadataWriterTranscodeOperation ()
 {
 }
+
+// override -
+@property (atomic, readwrite, strong) NSUUID* uuid;
 
 // Prerequisites
 @property (atomic, readwrite, strong) NSDictionary* metadataOptions;
@@ -59,16 +62,16 @@
 
 @implementation MetadataWriterTranscodeOperation
 
-- (id) initWithSourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL metadataOptions:(NSDictionary*)metadataOptions 
+- (id) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL metadataOptions:(NSDictionary*)metadataOptions
 {
-    self = [super initWithSourceURL:sourceURL destinationURL:destinationURL];
+    self = [super initWithUUID:uuid sourceURL:sourceURL destinationURL:destinationURL];
     if(self)
     {
         if(metadataOptions == nil)
         {
             return nil;
         }
-
+        
         self.metadataOptions = metadataOptions;
         
         self.transcodeAssetHasVideo = NO;
@@ -353,11 +356,11 @@
         // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
         
-        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
-        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
@@ -369,11 +372,11 @@
         CMBufferQueueRef audioPassthroughBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &audioPassthroughBufferQueue);
         
-        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
-        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
+        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
@@ -382,8 +385,8 @@
         
 #pragma mark - Read Video pass through
         
-        __block BOOL finishedReadingAllPassthroughVideo = NO;
-        
+        __block AtomicBoolean* finishedReadingAllPassthroughVideo = [[AtomicBoolean alloc] init];
+
         if(self.transcodeAssetHasVideo)
         {
             dispatch_async(videoPassthroughDecodeQueue, ^{
@@ -411,7 +414,7 @@
                     }
                 }
                 
-                finishedReadingAllPassthroughVideo = YES;
+                [finishedReadingAllPassthroughVideo setValue:YES];
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
                 
                 // Fire final semaphore signal to hit finalization
@@ -423,7 +426,7 @@
 
 #pragma mark - Read Audio pass through
         
-        __block BOOL finishedReadingAllPassthroughAudio = NO;
+        __block AtomicBoolean* finishedReadingAllPassthroughAudio = [[AtomicBoolean alloc] init];
         
         if(self.transcodeAssetHasAudio)
         {
@@ -452,7 +455,7 @@
                     }
                 }
                 
-                finishedReadingAllPassthroughAudio = YES;
+                [finishedReadingAllPassthroughAudio setValue:YES];
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Audio Buffers"];
                 
                 // Fire final semaphore signal to hit finalization
@@ -474,7 +477,7 @@
                        && [self.transcodeAssetWriterMetadata isReadyForMoreMediaData])
                  {
                      // Are we done reading,
-                     if(finishedReadingAllPassthroughVideo || self.isCancelled)
+                     if([finishedReadingAllPassthroughVideo getValue] || self.isCancelled)
                      {
 //                         NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(videoDequeueSemaphore);
@@ -601,7 +604,7 @@
                      
                  {
                      // Are we done reading,
-                     if(finishedReadingAllPassthroughAudio || self.isCancelled)
+                     if([finishedReadingAllPassthroughAudio getValue] || self.isCancelled)
                      {
 //                         NSLog(@"Finished Reading waiting to empty queue...");
                          dispatch_semaphore_signal(audioDequeueSemaphore);
@@ -847,5 +850,20 @@
     
     return NO;
 }
+
+- (void) notifyProgress
+{
+    dispatch_async(dispatch_get_main_queue(), ^(){
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisTranscodeOperationProgressUpdate object:@{kSynopsisTranscodeOperationUUIDKey : self.uuid,
+                                                                                                                           kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
+                                                                                                                           kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
+                                                                                                                           kSynopsisTranscodeOperationProgressKey : @(self.progress),
+                                                                                                                           kSynopsisTranscodeOperationTimeElapsedKey: @(self.elapsedTime),
+                                                                                                                           kSynopsisTranscodeOperationTimeRemainingKey : @( self.remainingTime )}];
+    });
+    
+}
+
 
 @end
