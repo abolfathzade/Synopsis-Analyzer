@@ -18,7 +18,11 @@
 @property (copy) NSDictionary* analyzedGlobalMetadata;
 
 - (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions NS_DESIGNATED_INITIALIZER;
+@property (assign) BOOL succeeded;
+
 
 - (instancetype) init NS_UNAVAILABLE;
+
+
 
 @end

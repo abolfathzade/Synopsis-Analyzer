@@ -64,17 +64,12 @@ bazel build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:bui
 
 Tensorflow libtensorflow_cc.so compiled with
 
-ALL OPTS but deadlocks:
-bazel build -c opt --copt=-mavx --cxxopt=-fno-exceptions --cxxopt=--std=c++11 --cxxopt=-DNDEBUG --cxxopt=-DNOTFDBG --cxxopt=-O2 --cxxopt=-DUSE_GEMM_FOR_CONV --cxxopt=-D__ANDROID_TYPES_SLIM__ --cxxopt=-DTF_LEAN_BINARY --cxxopt=-D__thread=  //tensorflow:libtensorflow_cc.so
-
-DOES NOT DEADLOCK:
 bazel build -c opt --copt=-mavx --cxxopt=-fno-exceptions --cxxopt=--std=c++11 --cxxopt=-DNDEBUG --cxxopt=-DNOTFDBG --cxxopt=-O2 --cxxopt=-DUSE_GEMM_FOR_CONV //tensorflow:libtensorflow_cc.so
 Build useful tools
 
-bazel build tensorflow/python/tools:optimize_for_inference
 
-build tensorflow/tools/quantization/quantize_graph
+Graph Transform:
 
-bazel-bin/tensorflow/python/tools/optimize_for_inference --input=/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph.pb --output=/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_optimized.pb --input_names=Mul --output_names=softmax,pool_3 
+bazel-bin/tensorflow/tools/graph_transforms/transform_graph --in_graph="/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/Synopsis-Framework/Synopsis/Synopsis/Tensorflow/models/inception5h/tensorflow_inceptionV2_graph.pb" --out_graph="/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/Synopsis-Framework/Synopsis/Synopsis/Tensorflow/models/inception5h/deploy_quantized_tensorflow_inceptionV2_graph.pb" --inputs='input' --outputs='softmax0' --transforms='strip_unused_nodes(type=float, shape="1,224,224,3") remove_nodes(op=Identity, op=CheckNumerics) fold_constants(ignore_errors=true) fold_batch_norms fold_old_batch_norms quantize_weights' 
+I tensorflow/tools/graph_transforms/transform_graph.cc:249] Applying strip_unused_nodes
 
-bazel-bin/tensorflow/tools/quantization/quantize_graph --input=/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_optimized.pb --output=/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/TensorFlowAnalyzer/models/inception2015/tensorflow_inception_graph_quantized.pb --output_node_names=softmax --mode=weights_rounded
