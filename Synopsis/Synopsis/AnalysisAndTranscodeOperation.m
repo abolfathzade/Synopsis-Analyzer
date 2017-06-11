@@ -635,15 +635,10 @@
                                     }];
                                 });
                                 
-                                dispatch_group_wait(analysisGroup, DISPATCH_TIME_FOREVER);
-                                
-                                // if we had an analyzer error, bail.
-                                if(analyzerError)
-                                {
-                                    break;
-                                }
                             }
-                            
+
+                            dispatch_group_wait(analysisGroup, DISPATCH_TIME_FOREVER);
+                                                        
                             CVPixelBufferRelease(transformedPixelBuffer);
                             CVPixelBufferRelease(pixelBuffer);
 
