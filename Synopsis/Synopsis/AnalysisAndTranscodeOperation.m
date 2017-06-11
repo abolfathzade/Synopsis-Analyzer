@@ -397,7 +397,8 @@
         CMItemCount numBuffers = 0;
         
         // TODO :: NEed semaphore to indicate we are done encoding JSON
-        dispatch_queue_t jsonEncodeQueue = dispatch_queue_create("jsonEncodeQueue", DISPATCH_QUEUE_SERIAL);
+        NSOperationQueue* jsonEncodeQueue = [[NSOperationQueue alloc] init];
+        jsonEncodeQueue.maxConcurrentOperationCount = 1;
         
 #pragma mark - Video Requirements
         
@@ -409,7 +410,8 @@
         CMBufferQueueRef videoUncompressedBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &videoUncompressedBufferQueue);
 
-        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthrougDecodeQueue", DISPATCH_QUEUE_SERIAL);
+        NSOperationQueue* videoPassthroughDecodeQueue = [[NSOperationQueue alloc] init];
+        videoPassthroughDecodeQueue.maxConcurrentOperationCount = 1;
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
@@ -418,14 +420,16 @@
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t videoUncompressedDecodeQueue = dispatch_queue_create("videoUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL);
+        NSOperationQueue* videoUncompressedDecodeQueue = [[NSOperationQueue alloc] init];
+        videoUncompressedDecodeQueue.maxConcurrentOperationCount = 1;
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
-        dispatch_queue_t concurrentVideoAnalysisQueue = dispatch_queue_create("concurrentVideoAnalysisQueue", DISPATCH_QUEUE_CONCURRENT);
+        NSOperationQueue* concurrentVideoAnalysisQueue = [[NSOperationQueue alloc] init];
+        videoUncompressedDecodeQueue.maxConcurrentOperationCount = 4;
         
 #pragma mark - Audio Requirements
         
@@ -461,7 +465,7 @@
         if(self.transcodeAssetHasVideo)
         {
             // Passthrough Video Read into our Buffer Queue
-            dispatch_async(videoPassthroughDecodeQueue, ^{
+            [videoPassthroughDecodeQueue addOperationWithBlock: ^{
                 
                 // read sample buffers from our video reader - and append them to the queue.
                 // only read while we have samples, and while our buffer queue isnt full
@@ -501,7 +505,7 @@
                 dispatch_semaphore_signal(videoDequeueSemaphore);
 
                 dispatch_group_leave(g);
-            });
+            }];
         }
         
 #pragma mark - Read Audio pass through
@@ -561,7 +565,7 @@
         
         if(self.transcodeAssetHasVideo)
         {
-            dispatch_async(videoUncompressedDecodeQueue, ^{
+            [videoUncompressedDecodeQueue addOperationWithBlock: ^{
                 
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
                 
@@ -599,52 +603,50 @@
                             // grab our image buffer
                             CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(uncompressedVideoSampleBuffer);
                             
-                            CVPixelBufferRetain(pixelBuffer);
-                            
                             assert( kCVPixelFormatType_32BGRA == CVPixelBufferGetPixelFormatType(pixelBuffer));
                             
                             // resize and transform it to match expected raster
                             CVPixelBufferRef transformedPixelBuffer = [self createPixelBuffer:pixelBuffer withTransform:self.transcodeAssetWriterVideo.transform forQuality:self.analysisQualityHint];
                             
                             // Run an analysis pass on each plugin
+                            NSMutableArray* analysisOperations = [NSMutableArray array];
                             for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
                                 // enter our group.
                                 dispatch_group_enter(analysisGroup);
                                 
-                                dispatch_async(concurrentVideoAnalysisQueue, ^{
+                                NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock: ^{
                                     
                                     NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                    [analyzer analyzeCurrentCVPixelBufferRef:transformedPixelBuffer completionHandler:^(NSDictionary * newMetadataValue, NSError *analyzerError)
-                                    {
-                                        if(analyzerError)
-                                        {
-                                            NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
-                                            [[LogController sharedLogController] appendErrorLog:errorString];
-                                        }
-                                        
-                                        if(newMetadataValue)
-                                        {
-                                            // provide some thread safety to our now async fetches.
-                                            [dictionaryLock lock];
-                                            [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
-                                            [dictionaryLock unlock];
-                                        }
-                                        
-                                        dispatch_group_leave(analysisGroup);
-                                    }];
-                                });
+                                    [analyzer analyzeCurrentCVPixelBufferRef:transformedPixelBuffer
+                                                           completionHandler:^(NSDictionary * newMetadataValue, NSError *analyzerError){
+                                                               if(analyzerError)
+                                                               {
+                                                                   NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
+                                                                   [[LogController sharedLogController] appendErrorLog:errorString];
+                                                               }
+                                                               
+                                                               if(newMetadataValue)
+                                                               {
+                                                                   // provide some thread safety to our now async fetches.
+                                                                   [dictionaryLock lock];
+                                                                   [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+                                                                   [dictionaryLock unlock];
+                                                               }
+                                                               
+                                                               dispatch_group_leave(analysisGroup);
+                                                           }];
+                                }];
                                 
+                                [analysisOperations addObject:operation];
                             }
 
-                            dispatch_group_wait(analysisGroup, DISPATCH_TIME_FOREVER);
-                                                        
-                            CVPixelBufferRelease(transformedPixelBuffer);
-                            CVPixelBufferRelease(pixelBuffer);
-
-                            
-                            dispatch_async(jsonEncodeQueue, ^{
+                            NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
                                 
+                                
+                                CVPixelBufferRelease(transformedPixelBuffer);
+                                CFRelease(uncompressedVideoSampleBuffer);
+
                                 // Store out running metadata
                                 AVTimedMetadataGroup *group = [self compressedTimedMetadataFromDictionary:aggregatedAndAnalyzedMetadata atTime:currentSampleTimeRange];
                                 if(group)
@@ -656,9 +658,16 @@
                                     [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
                                 }
                                 
-                                CFRelease(uncompressedVideoSampleBuffer);
+                            }];
 
-                            });
+                            for(NSOperation* analysisOperation in analysisOperations)
+                            {
+                                [jsonEncodeOperation addDependency:analysisOperation];
+                            }
+                            
+                            [concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
+                            [jsonEncodeQueue addOperation:jsonEncodeOperation];
+
                         }
                         else
                         {
@@ -677,7 +686,7 @@
                 dispatch_semaphore_signal(videoDequeueSemaphore);
 
                 dispatch_group_leave(g);
-            });
+            }];
         }
         
 #pragma mark - Read Audio Decompressed
@@ -998,6 +1007,12 @@
         }
         
 #pragma mark - Cleanup
+        
+        
+        [videoPassthroughDecodeQueue waitUntilAllOperationsAreFinished];
+        [videoUncompressedDecodeQueue waitUntilAllOperationsAreFinished];
+        [concurrentVideoAnalysisQueue waitUntilAllOperationsAreFinished];
+        [jsonEncodeQueue waitUntilAllOperationsAreFinished];
         
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);
