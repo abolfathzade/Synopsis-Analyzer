@@ -396,7 +396,6 @@
         // Or use the CMBufferqueue callbacks with a semaphore signal
         CMItemCount numBuffers = 0;
         
-        // TODO :: NEed semaphore to indicate we are done encoding JSON
         NSOperationQueue* jsonEncodeQueue = [[NSOperationQueue alloc] init];
         jsonEncodeQueue.maxConcurrentOperationCount = 1;
         
@@ -429,7 +428,7 @@
         dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
         
         NSOperationQueue* concurrentVideoAnalysisQueue = [[NSOperationQueue alloc] init];
-        videoUncompressedDecodeQueue.maxConcurrentOperationCount = 4;
+        videoUncompressedDecodeQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount;
         
 #pragma mark - Audio Requirements
         
@@ -597,8 +596,6 @@
                             NSLock* dictionaryLock = [[NSLock alloc] init];
                             
                             NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
-                            
-                            dispatch_group_t analysisGroup = dispatch_group_create();
 
                             // grab our image buffer
                             CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(uncompressedVideoSampleBuffer);
@@ -612,12 +609,10 @@
                             NSMutableArray* analysisOperations = [NSMutableArray array];
                             for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                             {
-                                // enter our group.
-                                dispatch_group_enter(analysisGroup);
-                                
                                 NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock: ^{
                                     
                                     NSString* newMetadataKey = [analyzer pluginIdentifier];
+                                    
                                     [analyzer analyzeCurrentCVPixelBufferRef:transformedPixelBuffer
                                                            completionHandler:^(NSDictionary * newMetadataValue, NSError *analyzerError){
                                                                if(analyzerError)
@@ -633,8 +628,6 @@
                                                                    [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
                                                                    [dictionaryLock unlock];
                                                                }
-                                                               
-                                                               dispatch_group_leave(analysisGroup);
                                                            }];
                                 }];
                                 
@@ -642,7 +635,6 @@
                             }
 
                             NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
-                                
                                 
                                 CVPixelBufferRelease(transformedPixelBuffer);
                                 CFRelease(uncompressedVideoSampleBuffer);
@@ -657,7 +649,6 @@
                                 {
                                     [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
                                 }
-                                
                             }];
 
                             for(NSOperation* analysisOperation in analysisOperations)
@@ -667,7 +658,6 @@
                             
                             [concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
                             [jsonEncodeQueue addOperation:jsonEncodeOperation];
-
                         }
                         else
                         {
