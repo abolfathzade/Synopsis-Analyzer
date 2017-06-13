@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
-#import <Synopsis/AnalyzerPluginProtocol.h>
+#import <Synopsis/Synopsis.h>
 #import "AnalysisAndTranscodeOperation.h"
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
@@ -580,7 +580,7 @@
                             NSOperation* transformOperation = [self.videoHelper pixelBuffer:pixelBuffer
                                                                               withTransform:self.transcodeAssetWriterVideo.transform
                                                                                        rect:rectForQualityHint(originalRect, self.analysisQualityHint)
-                                                                            completionBlock:^(CVPixelBufferRef transformedPixelBuffer, NSError * error) {
+                                                                            completionBlock:^(SynopsisVideoFormatConverter* converter, NSError * error) {
                                               
                                               CFRelease(uncompressedVideoSampleBuffer);
 
@@ -589,13 +589,13 @@
                                               
                                               for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                                               {
-                                                  CVPixelBufferRetain(transformedPixelBuffer);
+//                                                  CVPixelBufferRetain(transformedPixelBuffer);
                                                   
                                                   NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock: ^{
                                                       
                                                       NSString* newMetadataKey = [analyzer pluginIdentifier];
                                                       
-                                                      [analyzer analyzeCurrentCVPixelBufferRef:transformedPixelBuffer
+                                                      [analyzer analyzeCurrentCVPixelBufferRef:converter
                                                                              completionHandler:^(NSDictionary * newMetadataValue, NSError *analyzerError) {
                                                                                  if(analyzerError)
                                                                                  {
@@ -611,7 +611,7 @@
                                                                                      [dictionaryLock unlock];
                                                                                  }
                                                                                  
-                                                                                 CVPixelBufferRelease(transformedPixelBuffer);
+//                                                                                 CVPixelBufferRelease(transformedPixelBuffer);
                                                                              }];
                                                   }];
                                                   

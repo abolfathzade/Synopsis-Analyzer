@@ -74,13 +74,14 @@
 
         CVPixelBufferRef transformedPixelBuffer = [self createPixelBuffer:pixelBuffer withTransform:transform withRect:rect];
 
+        SynopsisVideoFormatConverter* videoFormatConverter = [[SynopsisVideoFormatConverter alloc] initWithPixelBuffer:transformedPixelBuffer];
+        
         CVPixelBufferRelease(pixelBuffer);
         
         if(completionBlock)
         {
-            completionBlock(transformedPixelBuffer, nil);
+            completionBlock(videoFormatConverter, nil);
             
-            CVPixelBufferRelease(transformedPixelBuffer);
         }
     }];
     

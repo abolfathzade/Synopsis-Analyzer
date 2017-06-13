@@ -8,8 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreVideo/CoreVideo.h>
-
-typedef void(^VideoTransformScaleLinearizeCompletionBlock)(CVPixelBufferRef, NSError*);
+#import <Synopsis/Synopsis.h>
+typedef void(^VideoTransformScaleLinearizeCompletionBlock)(SynopsisVideoFormatConverter*, NSError*);
 
 @interface VideoTransformScaleLinearizeHelper : NSObject
 
