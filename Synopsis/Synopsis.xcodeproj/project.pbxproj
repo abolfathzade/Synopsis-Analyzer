@@ -57,6 +57,7 @@
 		1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C5F1AD5D2A1003B3CE9 /* BSONSerialization.m */; };
 		1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C6D1AD5D8D3003B3CE9 /* GZIP.m */; };
 		1BA8F8361C125DC20066BDDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */; };
+		1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */; };
 		1BD4292F1D2D691E00870D2F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1BD710A81D615E9F007D61B9 /* AVASettingsTableViewCellController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */; };
 		1BD710AA1D615EC5007D61B9 /* AVASettingsTableViewCellController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */; };
@@ -89,6 +90,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 1BBB10DC1D5542A200C22439;
 			remoteInfo = Synopsis;
+		};
+		1BB08BBF1EEF151F0058DFBB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1B7350F91DEF4FAE0053BC06 /* Synopsis-Framework.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1B4446B81EE1FE4A0075575D;
+			remoteInfo = "Synopsis-iOS";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -418,6 +426,10 @@
 		1BA68C6D1AD5D8D3003B3CE9 /* GZIP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GZIP.m; sourceTree = "<group>"; };
 		1BA8F8331C125DAA0066BDDB /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		1BB08BBB1EEF151F0058DFBB /* AsycAnalysisAndTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AsycAnalysisAndTranscodeOperation.h; sourceTree = "<group>"; };
+		1BB08BBC1EEF151F0058DFBB /* AsycAnalysisAndTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AsycAnalysisAndTranscodeOperation.m; sourceTree = "<group>"; };
+		1BB9B1A41EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoTransformScaleLinearizeHelper.h; sourceTree = "<group>"; };
+		1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoTransformScaleLinearizeHelper.m; sourceTree = "<group>"; };
 		1BD710A61D615E9F007D61B9 /* AVASettingsTableViewCellController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVASettingsTableViewCellController.h; sourceTree = "<group>"; };
 		1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVASettingsTableViewCellController.m; sourceTree = "<group>"; };
 		1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AVASettingsTableViewCellController.xib; sourceTree = "<group>"; };
@@ -1009,6 +1021,7 @@
 			isa = PBXGroup;
 			children = (
 				1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */,
+				1BB08BC01EEF151F0058DFBB /* Synopsis.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1018,10 +1031,14 @@
 			children = (
 				1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */,
 				1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */,
+				1BB08BBB1EEF151F0058DFBB /* AsycAnalysisAndTranscodeOperation.h */,
+				1BB08BBC1EEF151F0058DFBB /* AsycAnalysisAndTranscodeOperation.m */,
 				1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */,
 				1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */,
 				1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */,
 				1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */,
+				1BB9B1A41EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.h */,
+				1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */,
 			);
 			name = "Transcode & Analysis Operations";
 			sourceTree = "<group>";
@@ -1251,6 +1268,13 @@
 			remoteRef = 1B7350FD1DEF4FAF0053BC06 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		1BB08BC01EEF151F0058DFBB /* Synopsis.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Synopsis.framework;
+			remoteRef = 1BB08BBF1EEF151F0058DFBB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -1329,6 +1353,7 @@
 			files = (
 				1B3233CB1C2EFDC500C9CF5E /* PreferencesPresetViewController.m in Sources */,
 				1BEA4D421ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m in Sources */,
+				1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */,
 				1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */,
 				1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */,
 				1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */,
