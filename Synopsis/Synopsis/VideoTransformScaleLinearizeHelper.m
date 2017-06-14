@@ -199,6 +199,7 @@
         
         toLinearConverter = vImageConverter_CreateWithColorSyncCodeFragment(codeFragment, &inputFormat, &desiredFormat, backColorF, SynopsisvImageTileFlag, &err);
         
+        CFRelease(codeFragment);
         CFRelease(srcDict);
         CFRelease(dstDict);
         CFRelease(profileSequence);
