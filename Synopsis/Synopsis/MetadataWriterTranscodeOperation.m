@@ -31,9 +31,6 @@
 {
 }
 
-// override -
-@property (atomic, readwrite, strong) NSUUID* uuid;
-
 // Prerequisites
 @property (atomic, readwrite, strong) NSDictionary* metadataOptions;
 
