@@ -202,7 +202,6 @@
     else
         self.transcodeAssetWriterAudioPassthrough = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:nil];
 
-    
 //    // Our custom extensions for versioning and what not
 //    CMFormatDescriptionRef metadataExtensionDescription = NULL;
 //    

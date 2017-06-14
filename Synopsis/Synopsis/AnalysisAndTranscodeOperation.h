@@ -13,9 +13,9 @@
 // NSArrays of AVTimedMetadataGroups that contain time ranges and metadata.
 // For our second pass where we write out our metadata to the final file.
 // Only available on completion / main being returned
-@property (copy) NSMutableArray* analyzedVideoSampleBufferMetadata;
-@property (copy) NSMutableArray* analyzedAudioSampleBufferMetadata;
-@property (copy) NSDictionary* analyzedGlobalMetadata;
+@property (readwrite,strong) NSMutableArray* analyzedVideoSampleBufferMetadata;
+@property (readwrite,strong) NSMutableArray* analyzedAudioSampleBufferMetadata;
+@property (readwrite,strong) NSDictionary* analyzedGlobalMetadata;
 
 - (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions NS_DESIGNATED_INITIALIZER;
 @property (assign) BOOL succeeded;

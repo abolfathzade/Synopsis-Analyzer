@@ -21,6 +21,10 @@
 
 @interface AnalysisAndTranscodeOperation ()
 {
+    // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
+    CMBufferQueueRef videoPassthroughBufferQueue;
+    CMBufferQueueRef videoUncompressedBufferQueue;
+
 }
 
 @property (atomic, readwrite, strong) VideoTransformScaleLinearizeHelper* videoHelper;
@@ -75,6 +79,18 @@
 
 @property (atomic, readwrite, assign) SynopsisAnalysisQualityHint analysisQualityHint;
 
+
+// Transcode Operation and Queue objects
+// Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
+@property (readwrite, strong) dispatch_semaphore_t videoDequeueSemaphore;
+@property (readwrite, strong) NSOperationQueue* videoPassthroughDecodeQueue;
+@property (readwrite, strong) dispatch_queue_t videoPassthroughEncodeQueue;
+@property (readwrite, strong) NSOperationQueue* videoUncompressedDecodeQueue;
+
+@property (readwrite, strong) NSOperationQueue* concurrentVideoAnalysisQueue;
+@property (readwrite, strong) NSOperationQueue* videoTransformQueue;
+@property (readwrite, strong) NSOperationQueue* jsonEncodeQueue;
+
 @end
 
 @implementation AnalysisAndTranscodeOperation
@@ -124,6 +140,37 @@
         self.inFlightVideoSampleBufferMetadata = [NSMutableArray new];
         self.inFlightAudioSampleBufferMetadata = [NSMutableArray new];
         
+        
+#pragma mark - Video Requirements
+
+        CMItemCount numBuffers = 0;
+        
+        // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
+        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
+        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &videoUncompressedBufferQueue);
+        
+        self.videoPassthroughDecodeQueue = [[NSOperationQueue alloc] init];
+        self.videoPassthroughDecodeQueue.maxConcurrentOperationCount = 1;
+        
+        self.videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
+        
+        // We always need to decode uncompressed frames to send to our analysis plugins
+        self.videoUncompressedDecodeQueue = [[NSOperationQueue alloc] init];
+        self.videoUncompressedDecodeQueue.maxConcurrentOperationCount = 1;
+        
+        // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
+        self.videoDequeueSemaphore = dispatch_semaphore_create(0);
+        
+        self.concurrentVideoAnalysisQueue = [[NSOperationQueue alloc] init];
+        self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount;
+        
+        self.videoTransformQueue = [[NSOperationQueue alloc] init];
+        self.videoTransformQueue.maxConcurrentOperationCount = 1;
+
+        self.jsonEncodeQueue = [[NSOperationQueue alloc] init];
+        self.jsonEncodeQueue.maxConcurrentOperationCount = 1;
+        
+
     }
     return self;
 }
@@ -167,6 +214,16 @@
     [super main];
 }
 
+- (void) cancel
+{
+    [super cancel];
+
+    [self.videoPassthroughDecodeQueue cancelAllOperations];
+    [self.videoUncompressedDecodeQueue cancelAllOperations];
+    [self.concurrentVideoAnalysisQueue cancelAllOperations];
+    [self.jsonEncodeQueue cancelAllOperations];
+    [self.videoTransformQueue cancelAllOperations];
+}
 
 - (NSError*) setupTranscodeShitSucessfullyOrDontWhatverMan
 {
@@ -369,43 +426,14 @@
         // Or use the CMBufferqueue callbacks with a semaphore signal
         CMItemCount numBuffers = 0;
         
-        NSOperationQueue* jsonEncodeQueue = [[NSOperationQueue alloc] init];
-        jsonEncodeQueue.maxConcurrentOperationCount = 1;
-        
-#pragma mark - Video Requirements
-        
-        // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
-        CMBufferQueueRef videoPassthroughBufferQueue;
-        // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
-        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
 
-        CMBufferQueueRef videoUncompressedBufferQueue;
-        CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &videoUncompressedBufferQueue);
-
-        NSOperationQueue* videoPassthroughDecodeQueue = [[NSOperationQueue alloc] init];
-        videoPassthroughDecodeQueue.maxConcurrentOperationCount = 1;
         if(self.transcodeAssetHasVideo)
+        {
             dispatch_group_enter(g);
-        
-        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
-        if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
-        
-        // We always need to decode uncompressed frames to send to our analysis plugins
-        NSOperationQueue* videoUncompressedDecodeQueue = [[NSOperationQueue alloc] init];
-        videoUncompressedDecodeQueue.maxConcurrentOperationCount = 1;
-        if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
+        }
         
-        // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
-        dispatch_semaphore_t videoDequeueSemaphore = dispatch_semaphore_create(0);
-        
-        NSOperationQueue* concurrentVideoAnalysisQueue = [[NSOperationQueue alloc] init];
-        concurrentVideoAnalysisQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount;
-
-        NSOperationQueue* transformQueue = [[NSOperationQueue alloc] init];
-        transformQueue.maxConcurrentOperationCount = 1;
-
 #pragma mark - Audio Requirements
         
         CMBufferQueueRef audioPassthroughBufferQueue;
@@ -440,7 +468,7 @@
         if(self.transcodeAssetHasVideo)
         {
             // Passthrough Video Read into our Buffer Queue
-            [videoPassthroughDecodeQueue addOperationWithBlock: ^{
+            [self.videoPassthroughDecodeQueue addOperationWithBlock: ^{
                 
                 // read sample buffers from our video reader - and append them to the queue.
                 // only read while we have samples, and while our buffer queue isnt full
@@ -459,7 +487,7 @@
                             {
                                 CMBufferQueueEnqueue(videoPassthroughBufferQueue, passthroughVideoSampleBuffer);
                                 // Free to dequeue on other thread
-                                dispatch_semaphore_signal(videoDequeueSemaphore);
+                                dispatch_semaphore_signal(self.videoDequeueSemaphore);
                             }
                             
                             CFRelease(passthroughVideoSampleBuffer);
@@ -477,7 +505,7 @@
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
 
                 // Fire final semaphore signal to hit finalization
-                dispatch_semaphore_signal(videoDequeueSemaphore);
+                dispatch_semaphore_signal(self.videoDequeueSemaphore);
 
                 dispatch_group_leave(g);
             }];
@@ -540,7 +568,7 @@
         
         if(self.transcodeAssetHasVideo)
         {
-            [videoUncompressedDecodeQueue addOperationWithBlock: ^{
+            [self.videoUncompressedDecodeQueue addOperationWithBlock: ^{
                 
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
                 
@@ -556,7 +584,7 @@
                             {
                                 CMBufferQueueEnqueue(videoUncompressedBufferQueue, uncompressedVideoSampleBuffer);
                                 // Free to dequeue on other thread
-                                dispatch_semaphore_signal(videoDequeueSemaphore);
+                                dispatch_semaphore_signal(self.videoDequeueSemaphore);
                             }
 
                             CMTime currentSamplePTS = CMSampleBufferGetOutputPresentationTimeStamp(uncompressedVideoSampleBuffer);
@@ -639,12 +667,12 @@
                                                   [jsonEncodeOperation addDependency:analysisOperation];
                                               }
                                               
-                                              [concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
-                                              [jsonEncodeQueue addOperation:jsonEncodeOperation];
+                                              [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
+                                              [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
                                 }];
                             
 
-                            [transformQueue addOperations:@[transformOperation] waitUntilFinished:NO];
+                            [self.videoTransformQueue addOperations:@[transformOperation] waitUntilFinished:NO];
                             
                         }
                         else
@@ -661,7 +689,7 @@
                 [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Video Buffers"];
                 
                 // Fire final semaphore signal to hit finalization
-                dispatch_semaphore_signal(videoDequeueSemaphore);
+                dispatch_semaphore_signal(self.videoDequeueSemaphore);
 
                 dispatch_group_leave(g);
             }];
@@ -784,7 +812,7 @@
         
         if(self.transcodeAssetHasVideo)
         {
-            [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:videoPassthroughEncodeQueue usingBlock:^
+            [self.transcodeAssetWriterVideo requestMediaDataWhenReadyOnQueue:self.videoPassthroughEncodeQueue usingBlock:^
             {
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Writing Video"];
                 
@@ -794,7 +822,7 @@
                     if( ([finishedReadingAllPassthroughVideo getValue] && [finishedReadingAllUncompressedVideo getValue]) || self.isCancelled)
                     {
 //                        NSLog(@"Finished Reading waiting to empty queue...");
-                        dispatch_semaphore_signal(videoDequeueSemaphore);
+                        dispatch_semaphore_signal(self.videoDequeueSemaphore);
 
                         if(CMBufferQueueIsEmpty(videoPassthroughBufferQueue) && CMBufferQueueIsEmpty(videoUncompressedBufferQueue))
                         {
@@ -837,7 +865,7 @@
                     CMSampleBufferRef videoSampleBuffer = NULL;
 
                     // wait to dequeue until we have an enqueued buffer / signal from our enqueue thread.
-                    dispatch_semaphore_wait(videoDequeueSemaphore, DISPATCH_TIME_FOREVER);
+                    dispatch_semaphore_wait(self.videoDequeueSemaphore, DISPATCH_TIME_FOREVER);
 
                     // Pull from an appropriate source - passthrough or decompressed
                     if(self.transcodingVideo)
@@ -980,17 +1008,16 @@
                          [[LogController sharedLogController] appendVerboseLog:@"Stopped Requesting Destination Audio but did not empty Source Queues"];
                      }
                  }
-                 
              }];
         }
         
 #pragma mark - Cleanup
         
-        [videoPassthroughDecodeQueue waitUntilAllOperationsAreFinished];
-        [videoUncompressedDecodeQueue waitUntilAllOperationsAreFinished];
-        [concurrentVideoAnalysisQueue waitUntilAllOperationsAreFinished];
-        [jsonEncodeQueue waitUntilAllOperationsAreFinished];
-        [transformQueue waitUntilAllOperationsAreFinished];
+        [self.videoPassthroughDecodeQueue waitUntilAllOperationsAreFinished];
+        [self.videoUncompressedDecodeQueue waitUntilAllOperationsAreFinished];
+        [self.concurrentVideoAnalysisQueue waitUntilAllOperationsAreFinished];
+        [self.jsonEncodeQueue waitUntilAllOperationsAreFinished];
+        [self.videoTransformQueue waitUntilAllOperationsAreFinished];
         
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);
