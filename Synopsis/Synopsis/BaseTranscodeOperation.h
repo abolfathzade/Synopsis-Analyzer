@@ -115,8 +115,5 @@ extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
 - (void) start NS_REQUIRES_SUPER;
 - (void) main NS_REQUIRES_SUPER;
 
-- (void) signalProgress;
-- (void) signalProgressWithMetadata:(NSDictionary*)metadata;
-
 
 @end
