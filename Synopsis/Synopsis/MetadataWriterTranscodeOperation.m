@@ -744,9 +744,11 @@
             if(allHumanSearchableDescriptors.count)
             {
                 // make PList out of our array
-                [self xattrsetPlist:allHumanSearchableDescriptors forKey:kSynopsisMetadataHFSAttributeTag];
+                [self xattrsetPlist:allHumanSearchableDescriptors forKey:kSynopsisMetadataHFSAttributeDescriptorKey];
             }
             
+            [self xattrsetPlist:@[kSynopsisMetadataHFSAttributeVersionValue] forKey:kSynopsisMetadataHFSAttributeVersionKey];
+
 //            if(dominantColors.count)
 //            {
 //                // Because xattr's cannot hold array's of arrays, we are forced to 'unroll' our colors
