@@ -672,7 +672,7 @@
                                 }];
                             
 
-                            [self.videoTransformQueue addOperations:@[transformOperation] waitUntilFinished:NO];
+                            [self.videoTransformQueue addOperations:@[transformOperation] waitUntilFinished:YES];
                             
                         }
                         else
