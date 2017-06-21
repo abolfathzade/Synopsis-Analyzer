@@ -79,6 +79,8 @@
 
 @property (atomic, readwrite, assign) SynopsisAnalysisQualityHint analysisQualityHint;
 
+@property (atomic, readwrite, strong) SynopsisMetadataEncoder* metadataEncoder;
+
 
 // Transcode Operation and Queue objects
 // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
@@ -169,6 +171,8 @@
 
         self.jsonEncodeQueue = [[NSOperationQueue alloc] init];
         self.jsonEncodeQueue.maxConcurrentOperationCount = 1;
+        
+        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsislMetadataVersionValue];
         
 
     }
@@ -649,7 +653,7 @@
                                               NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
                                                   
                                                   // Store out running metadata
-                                                  AVTimedMetadataGroup *group = [self compressedTimedMetadataFromDictionary:aggregatedAndAnalyzedMetadata atTime:currentSampleTimeRange];
+                                                  AVTimedMetadataGroup *group = [self.metadataEncoder encodeSynopsisMetadataToMetadataItem:aggregatedAndAnalyzedMetadata timeRange:currentSampleTimeRange];
                                                   if(group)
                                                   {
                                                       [self.inFlightVideoSampleBufferMetadata addObject:group];
@@ -1106,32 +1110,6 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
             break;
     }
 
-}
-
-#pragma mark - Metadata Helper
-
--(AVTimedMetadataGroup*) compressedTimedMetadataFromDictionary:(NSDictionary*)aggregatedAndAnalyzedMetadata atTime:(CMTimeRange)currentSampleTimeRange
-{
-    if([NSJSONSerialization isValidJSONObject:aggregatedAndAnalyzedMetadata])
-    {
-        // TODO: Probably want to mark to NO for shipping code:
-        NSString* aggregateMetadataAsJSON = [aggregatedAndAnalyzedMetadata jsonStringWithPrettyPrint:NO];
-        NSData* jsonData = [aggregateMetadataAsJSON dataUsingEncoding:NSUTF8StringEncoding];
-        
-        NSData* gzipData = [jsonData gzippedData];
-        
-        // Annotation text item
-        AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
-        textItem.identifier = kSynopsislMetadataIdentifier;
-        textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_RawData;
-        textItem.value = gzipData;
-        
-        AVTimedMetadataGroup *group = [[AVTimedMetadataGroup alloc] initWithItems:@[textItem] timeRange:currentSampleTimeRange];
-        
-        return group;
-    }
-
-    return nil;
 }
 
 #pragma mark - Notification

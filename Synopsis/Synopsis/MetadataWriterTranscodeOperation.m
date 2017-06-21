@@ -747,7 +747,7 @@
                 [self xattrsetPlist:allHumanSearchableDescriptors forKey:kSynopsisMetadataHFSAttributeDescriptorKey];
             }
             
-            [self xattrsetPlist:@[kSynopsisMetadataHFSAttributeVersionValue] forKey:kSynopsisMetadataHFSAttributeVersionKey];
+            [self xattrsetPlist:@(kSynopsisMetadataHFSAttributeVersionValue) forKey:kSynopsisMetadataHFSAttributeVersionKey];
 
 //            if(dominantColors.count)
 //            {
