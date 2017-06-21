@@ -15,7 +15,7 @@
 // Only available on completion / main being returned
 @property (readwrite,strong) NSMutableArray* analyzedVideoSampleBufferMetadata;
 @property (readwrite,strong) NSMutableArray* analyzedAudioSampleBufferMetadata;
-@property (readwrite,strong) NSDictionary* analyzedGlobalMetadata;
+@property (readwrite,strong) AVMetadataItem* analyzedGlobalMetadata;
 
 - (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions NS_DESIGNATED_INITIALIZER;
 @property (assign) BOOL succeeded;

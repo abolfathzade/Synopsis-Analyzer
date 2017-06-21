@@ -37,7 +37,7 @@
 // Metadata to write
 @property (atomic, readwrite, strong) NSMutableArray* analyzedVideoSampleBufferMetadata;
 @property (atomic, readwrite, strong) NSMutableArray* analyzedAudioSampleBufferMetadata;
-@property (atomic, readwrite, strong) NSMutableDictionary* analyzedGlobalMetadata;
+@property (atomic, readwrite, strong) AVMetadataItem* analyzedGlobalMetadata;
 
 @property (atomic, readwrite, assign) BOOL transcodeAssetHasVideo;
 @property (atomic, readwrite, assign) BOOL transcodeAssetHasAudio;
@@ -86,7 +86,7 @@
         
         if(self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey])
         {
-            self.analyzedGlobalMetadata = [self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey] mutableCopy];
+            self.analyzedGlobalMetadata = self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey];
         }
         
         [self setupTranscodeShitSucessfullyOrDontWhatverMan];
@@ -307,28 +307,7 @@
     // Convert our global metadata to a valid top level AVMetadata item
     if(self.analyzedGlobalMetadata)
     {
-        if([NSJSONSerialization isValidJSONObject:self.analyzedGlobalMetadata])
-        {
-            // TODO: Probably want to mark to NO for shipping code:
-            NSString* aggregateMetadataAsJSON = [self.analyzedGlobalMetadata jsonStringWithPrettyPrint:NO];
-            NSData* jsonData = [aggregateMetadataAsJSON dataUsingEncoding:NSUTF8StringEncoding];
-            
-            NSData* gzipData = [jsonData gzippedData];
-            
-            // Annotation text item
-            AVMutableMetadataItem *textItem = [AVMutableMetadataItem metadataItem];
-            textItem.identifier = kSynopsislMetadataIdentifier;
-            textItem.dataType = (__bridge NSString *)kCMMetadataBaseDataType_RawData;
-            textItem.value = gzipData;
-            
-            self.transcodeAssetWriter.metadata = @[textItem];
-
-        }
-        else
-        {
-            NSString* warning = @"Unable To Convert Global Metadata to JSON Format, invalid object";
-            [[LogController sharedLogController] appendErrorLog:warning];
-        }
+        self.transcodeAssetWriter.metadata = @[self.analyzedGlobalMetadata];
     }
     
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading] && !self.isCancelled)
@@ -728,24 +707,24 @@
         [self.transcodeAssetWriter finishWritingWithCompletionHandler:^{
 
             // Lets get our global 'summary' metadata - we get this from our standard analyzer
-            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[kSynopsisStandardMetadataDictKey];
-            
-//            NSString* dHash = standardAnalyzerOutputs[@"Hash"];
-//            NSArray* histogram = standardAnalyzerOutputs[@"Histogram"];
-//            NSArray* dominantColors = standardAnalyzerOutputs[@"DominantColors"];
-            NSArray* matchedNamedColors = standardAnalyzerOutputs[kSynopsisStandardMetadataDescriptionDictKey];
-
-            NSMutableArray* allHumanSearchableDescriptors = [NSMutableArray new];
-                        
-            // Append all decriptors to our descriptor array
-            [allHumanSearchableDescriptors addObjectsFromArray:matchedNamedColors];
-            
-            // write out our XATTR's
-            if(allHumanSearchableDescriptors.count)
-            {
-                // make PList out of our array
-                [self xattrsetPlist:allHumanSearchableDescriptors forKey:kSynopsisMetadataHFSAttributeDescriptorKey];
-            }
+//            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[kSynopsisStandardMetadataDictKey];
+//            
+////            NSString* dHash = standardAnalyzerOutputs[@"Hash"];
+////            NSArray* histogram = standardAnalyzerOutputs[@"Histogram"];
+////            NSArray* dominantColors = standardAnalyzerOutputs[@"DominantColors"];
+//            NSArray* matchedNamedColors = standardAnalyzerOutputs[kSynopsisStandardMetadataDescriptionDictKey];
+//
+//            NSMutableArray* allHumanSearchableDescriptors = [NSMutableArray new];
+//                        
+//            // Append all decriptors to our descriptor array
+//            [allHumanSearchableDescriptors addObjectsFromArray:matchedNamedColors];
+//            
+//            // write out our XATTR's
+//            if(allHumanSearchableDescriptors.count)
+//            {
+//                // make PList out of our array
+//                [self xattrsetPlist:allHumanSearchableDescriptors forKey:kSynopsisMetadataHFSAttributeDescriptorKey];
+//            }
             
             [self xattrsetPlist:@(kSynopsisMetadataHFSAttributeVersionValue) forKey:kSynopsisMetadataHFSAttributeVersionKey];
 

@@ -53,8 +53,8 @@
 @property (atomic, readwrite, strong) NSDictionary* audioTranscodeSettings;
 
 // Eventually becomes our analyzed metadata - this stuff is mutated during reading of frames
-@property (atomic, readwrite, strong) NSMutableArray* inFlightVideoSampleBufferMetadata;
-@property (atomic, readwrite, strong) NSMutableArray* inFlightAudioSampleBufferMetadata;
+@property (atomic, readwrite, strong) NSMutableArray<AVTimedMetadataGroup*>* inFlightVideoSampleBufferMetadata;
+@property (atomic, readwrite, strong) NSMutableArray<AVTimedMetadataGroup*>* inFlightAudioSampleBufferMetadata;
 @property (atomic, readwrite, strong) NSMutableDictionary* inFlightGlobalMetadata;
 
 // Reading the original sample Data
@@ -653,7 +653,7 @@
                                               NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
                                                   
                                                   // Store out running metadata
-                                                  AVTimedMetadataGroup *group = [self.metadataEncoder encodeSynopsisMetadataToMetadataItem:aggregatedAndAnalyzedMetadata timeRange:currentSampleTimeRange];
+                                                  AVTimedMetadataGroup *group = [self.metadataEncoder encodeSynopsisMetadataToTimesMetadataGroup:aggregatedAndAnalyzedMetadata timeRange:currentSampleTimeRange];
                                                   if(group)
                                                   {
                                                       [self.inFlightVideoSampleBufferMetadata addObject:group];
@@ -1038,7 +1038,7 @@
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);
 
-        self.analyzedGlobalMetadata = self.inFlightGlobalMetadata;
+        self.analyzedGlobalMetadata = [self.metadataEncoder encodeSynopsisMetadataToMetadataItem:self.inFlightGlobalMetadata timeRange:kCMTimeRangeZero];
         self.analyzedVideoSampleBufferMetadata = self.inFlightVideoSampleBufferMetadata;
         self.analyzedAudioSampleBufferMetadata = self.inFlightAudioSampleBufferMetadata;
         

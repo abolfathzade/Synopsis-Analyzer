@@ -73,7 +73,7 @@ extern NSString * const kSynopsisAnalysisSettingsEnabledPluginModulesKey;
 
 #pragma mark - Pass 2 Settings:
 
-// Key whose value is an NSArray of metadata dictionaries (format TBD, we need to include time, maybe CMTimeRangeValues ?)
+// Key whose value is an NSArray of AVMetadataItem (format TBD, we need to include time, maybe CMTimeRangeValues ?)
 // The existence of this key implies we will write a metadata track associated with our video track
 // Optional
 extern NSString* const kSynopsisAnalyzedVideoSampleBufferMetadataKey;
@@ -84,7 +84,7 @@ extern NSString* const kSynopsisAnalyzedVideoSampleBufferMetadataKey;
 // Optional
 extern NSString* const kSynopsisAnalyzedAudioSampleBufferMetadataKey;
 
-// Key whose value is a dictionary containing aggregate overall metadata used to write a summary metadata entry.
+// Key whose value is a AVMetadataItem containing aggregate overall metadata used to write a summary metadata entry.
 // The existence of this key implies we will write a metadata track with no association
 // Optional
 extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
