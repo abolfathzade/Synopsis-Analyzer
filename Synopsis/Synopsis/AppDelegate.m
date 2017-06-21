@@ -253,10 +253,12 @@ static NSTimeInterval start;
         }
     }
     
+    NSUUID* sessionUUID = [NSUUID UUID];
+
     // delete our file extension
     lastPath = [lastPath stringByDeletingPathExtension];
     
-    NSString* firstPassFilePath = [lastPath stringByAppendingString:@"_temp"];
+    NSString* firstPassFilePath = [[lastPath stringByAppendingString:@"_temp_"] stringByAppendingString:sessionUUID.UUIDString];
     NSString* lastPassFilePath = [lastPath stringByAppendingString:@"_analyzed"];
     
     NSURL* destinationURL = [fileURL URLByDeletingLastPathComponent];
@@ -265,8 +267,12 @@ static NSTimeInterval start;
     NSURL* destinationURL2 = [fileURL URLByDeletingLastPathComponent];
     destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPassFilePath] URLByAppendingPathExtension:lastPathExtention];
 
-    // check to see if our destination URLs already exist. If so - we re-number them for now.
-    
+    // check to see if our final pass destination URLs already exist - if so, append our sesion UUI.
+    if([[NSFileManager defaultManager] fileExistsAtPath:destinationURL2.path])
+    {
+        destinationURL2 = [fileURL URLByDeletingLastPathComponent];
+        destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:[lastPassFilePath stringByAppendingString:[@"_" stringByAppendingString:sessionUUID.UUIDString]]] URLByAppendingPathExtension:lastPathExtention];
+    }
     
     // Pass 1 is our analysis pass, and our decode pass
 
@@ -287,7 +293,6 @@ static NSTimeInterval start;
                                        kSynopsisAnalysisSettingsKey : (analysisSettings.settingsDictionary) ? analysisSettings.settingsDictionary : placeholderAnalysisSettings,
                                        };
     
-    NSUUID* sessionUUID = [NSUUID UUID];
     // TODO: Just pass a copy of the current Preset directly.
     AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithUUID:sessionUUID
                                                                                         sourceURL:fileURL
