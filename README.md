@@ -20,6 +20,8 @@ Synopsis can analysize video and embed the following metadata:
 * Visual Saliency (areas of visual interest) (beta)
 * Motion amount, direction, and smoothness for every frame, and globally, for similarity and sorting.
 
+Please note Synopsis Analyzer (and related tools and frameworks) are under heavy development. Things are changing fast.
+
 ### Workflow Opporunities:
 
 **Archival**: 
