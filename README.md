@@ -1,16 +1,24 @@
 
 # Synopsis Analyzer/Transcoder
 
-![alt tag](https://dl.dropboxusercontent.com/u/42612525/SynopsisRTF/MainUI.png)
-
+![alt tag](https://dl.dropboxusercontent.com/u/42612525/SynopsisRTF/SynopsisAnalyzer.jpg)
 
 ### Overview
 
 Synopsis is video analysis and transcoding tool, as well as a metadata format for embeddeding advanced analyzed metadata within .MOV and (in testing) .MP4 video files. 
 
-This repository hosts a Synopsis Multimedia Analyser and Transcoder implementation written for Mac OS X.
+Please note Synopsis Analyzer (and related tools and frameworks) are under heavy development. Things are changing fast.
 
-Synopsis can analysize video and embed the following metadata:
+### Synopsis Analyzer features:
+
+* Multithreaded batch video transcoding
+* Hardware accelerated vidoe decode and encode for supported codecs.
+* Presets for encoding settings
+* Optional Analysis stage during transcode
+* Export analsysis files to JSON sidecar or embed into supported video container formats.
+* Supports 3rd party analysis plugins that implement the Synopsis Plugin standard.
+
+### Included video analysis following metadata:
 
 * Cinematic Shot Type tagging for search
 * Object recognition
@@ -19,8 +27,6 @@ Synopsis can analysize video and embed the following metadata:
 * Perceptual hashing for perceptual similarity and sorting
 * Visual Saliency (areas of visual interest) (beta)
 * Motion amount, direction, and smoothness for every frame, and globally, for similarity and sorting.
-
-Please note Synopsis Analyzer (and related tools and frameworks) are under heavy development. Things are changing fast.
 
 ### Workflow Opporunities:
 
