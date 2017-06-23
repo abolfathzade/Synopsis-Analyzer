@@ -142,7 +142,6 @@
         self.inFlightVideoSampleBufferMetadata = [NSMutableArray new];
         self.inFlightAudioSampleBufferMetadata = [NSMutableArray new];
         
-        
 #pragma mark - Video Requirements
 
         CMItemCount numBuffers = 0;
@@ -173,8 +172,6 @@
         self.jsonEncodeQueue.maxConcurrentOperationCount = 1;
         
         self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsislMetadataVersionValue];
-        
-
     }
     return self;
 }
