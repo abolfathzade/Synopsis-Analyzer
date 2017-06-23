@@ -21,10 +21,8 @@
             /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Resources/schema.xml
     -->
     <attributes>
+        <attribute name="info_synopsis_version" multivalued="false" type="CFNumber" uniqued="false"/>
         <attribute name="info_synopsis_descriptors" multivalued="true" type="CFString" uniqued="false"/>
-        <attribute name="info_synopsis_perceptual_hash" multivalued="false" type="CFString" nosearch="true" uniqued="false"/>
-        <attribute name="info_synopsis_histogram" multivalued="true" type="CFNumber" nosearch="true" uniqued="false"/>
-        <attribute name="info_synopsis_dominant_colors" multivalued="true" type="CFNumber" nosearch="true" uniqued="false"/>
    </attributes>
 
     <types>
@@ -33,14 +31,12 @@
             <!-- 'allattrs' is a whitespace separated list of all of the attributes that this UTI type normally has.
                  It does not have to be exhaustive. -->
             <allattrs> 
-			info_v002_synopsis_descriptors
-            info_v002_synopsis_perceptual_hash
-            info_v002_synopsis_histogram
-            info_v002_synopsis_dominant_colors
-            info_v002_synopsis_motion_vector_values
+            info_synopsis_version
+            info_v002_synopsis_descriptors
             </allattrs>
             <!-- 'displayattrs' is a whitespace separated list of the attributes that should normally be displayed when previewing files of this UTI type. -->
             <displayattrs>
+            info_synopsis_version
             info_v002_synopsis_descriptors
             </displayattrs>
             
