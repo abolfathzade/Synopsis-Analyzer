@@ -1,5 +1,5 @@
 
-#Synopsis Analyzer/Transcoder
+# Synopsis Analyzer/Transcoder
 
 ![alt tag](https://dl.dropboxusercontent.com/u/42612525/SynopsisRTF/MainUI.png)
 
