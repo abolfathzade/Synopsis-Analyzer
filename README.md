@@ -15,18 +15,20 @@ Please note Synopsis Analyzer (and related tools and frameworks) are under heavy
 * Hardware accelerated vidoe decode and encode for supported codecs.
 * Presets for encoding settings
 * Optional Analysis stage during transcode
+* Spotlight integration for tag based searching of analyzed content.
 * Export analsysis files to JSON sidecar or embed into supported video container formats.
 * Supports 3rd party analysis plugins that implement the Synopsis Plugin standard.
 
 ### Included video analysis following metadata:
 
 * Cinematic Shot Type tagging for search
-* Object recognition
+* Object recognition and tagging
 * Feature vectors for similarity and sorting.
-* Dominant Color and Histograms similarity and sorting,
+* Dominant Color and Histograms similarity and sorting, color tagging
 * Perceptual hashing for perceptual similarity and sorting
 * Visual Saliency (areas of visual interest) (beta)
-* Motion amount, direction, and smoothness for every frame, and globally, for similarity and sorting.
+* Motion amount, direction, smoothness and key word tagging for similarity and sorting.
+* Feature tracking
 
 ### Workflow Opporunities:
 
