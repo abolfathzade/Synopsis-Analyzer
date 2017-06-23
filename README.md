@@ -47,16 +47,9 @@ Synopsis can analysize video and embed the following metadata:
 
 Synopsis Analysis is plugin based, allowing developers to easily extend and experiment analyzing video and caching results for future use.
 
-### In Development:
-
-* Per Frame Image Description via Inception (via Tensorflow)
-* Global Image Description via Inception (via Tensorflow)
-* Per Frame Image Style Description (via Tensorflow)
-* Global Image Style Description (via Tensorflow)
-
 See the DesignDiscussion wiki for more information about possible modules and direction of development.
 
-## Development Notes
+### Development Notes
 
 **Current Requirements**:
 * Mac OS X 10.10 or higher
