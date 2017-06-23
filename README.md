@@ -4,7 +4,7 @@
 ![alt tag](https://dl.dropboxusercontent.com/u/42612525/SynopsisRTF/MainUI.png)
 
 
-###Overview
+### Overview
 
 Synopsis is video analysis and transcoding tool, as well as a metadata format for embeddeding advanced analyzed metadata within .MOV and (in testing) .MP4 video files. 
 
@@ -12,13 +12,15 @@ This repository hosts a Synopsis Multimedia Analyser and Transcoder implementati
 
 Synopsis can analysize video and embed the following metadata:
 
-* Dominant Color and Histograms for every frame, and globally for color similarity and sorting,
-* Perceptual hashing for perceptual similarity searching / sorting
-* Visual Saliency (areas of visual interest)
+* Cinematic Shot Type tagging for search
+* Object recognition
+* Feature vectors for similarity and sorting.
+* Dominant Color and Histograms similarity and sorting,
+* Perceptual hashing for perceptual similarity and sorting
+* Visual Saliency (areas of visual interest) (beta)
 * Motion amount, direction, and smoothness for every frame, and globally, for similarity and sorting.
-* Automatic feature tracking 
 
-###Workflow Opporunities:
+### Workflow Opporunities:
 
 **Archival**: 
 * Analyze your media archive, optionally transcoding to an appropriate archival video format like H.264.
@@ -41,11 +43,11 @@ Synopsis can analysize video and embed the following metadata:
 * Sort clips by motion, color, features, content, style.
 * Video effects that follow content, choose their color scheme, and react to the clips you play without slowing down your performance by running computationally expensive and slow analysis in realtime.
 
-###Extending Features:
+### Extending Features:
 
 Synopsis Analysis is plugin based, allowing developers to easily extend and experiment analyzing video and caching results for future use.
 
-###In Development:
+### In Development:
 
 * Per Frame Image Description via Inception (via Tensorflow)
 * Global Image Description via Inception (via Tensorflow)
@@ -56,20 +58,19 @@ See the DesignDiscussion wiki for more information about possible modules and di
 
 ## Development Notes
 
-Tensorflow 0.11 compiled with cuda 8.0 via XCode 7.3 command line tools, due to Cuda 8.0 SDK / Clang incompatibility.
+**Current Requirements**:
+* Mac OS X 10.10 or higher
+* XCode 8 or higher
 
-sudo xcode-select --switch /Library/Developer/CommandLineTools
+**Dependencies**
+* Synopsis.framework (included in submodule)
+* * Tensorflow 1.1 +
+* * OpenCV 3.2 +
 
-bazel build -c opt --copt=-mavx --config=cuda //tensorflow/tools/pip_package:build_pip_package
+**Compilation Guideline**
 
-Tensorflow libtensorflow_cc.so compiled with
+Please ensure that your git checkout includes all submodules - downloading an archive from the webpage does not include submodules. 
 
-bazel build -c opt --copt=-mavx --cxxopt=-fno-exceptions --cxxopt=--std=c++11 --cxxopt=-DNDEBUG --cxxopt=-DNOTFDBG --cxxopt=-O2 --cxxopt=-DUSE_GEMM_FOR_CONV //tensorflow:libtensorflow_cc.so
-Build useful tools
+Please see the Compilation Guide for Synopsis.framework in the Synopsis Wiki - once you can properly build the Framework building Synopsis Analyzer should be straightforward.
 
-
-Graph Transform:
-
-bazel-bin/tensorflow/tools/graph_transforms/transform_graph --in_graph="/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/Synopsis-Framework/Synopsis/Synopsis/Tensorflow/models/inception5h/tensorflow_inceptionV2_graph.pb" --out_graph="/Users/vade/Documents/Repositories/Synopsis/Synopsis/Synopsis/Synopsis-Framework/Synopsis/Synopsis/Tensorflow/models/inception5h/deploy_quantized_tensorflow_inceptionV2_graph.pb" --inputs='input' --outputs='softmax0' --transforms='strip_unused_nodes(type=float, shape="1,224,224,3") remove_nodes(op=Identity, op=CheckNumerics) fold_constants(ignore_errors=true) fold_batch_norms fold_old_batch_norms quantize_weights' 
-I tensorflow/tools/graph_transforms/transform_graph.cc:249] Applying strip_unused_nodes
 
