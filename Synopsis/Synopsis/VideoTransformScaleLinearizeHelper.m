@@ -76,6 +76,7 @@
 
         SynopsisVideoFormatConverter* videoFormatConverter = [[SynopsisVideoFormatConverter alloc] initWithPixelBuffer:transformedPixelBuffer];
         
+        CVPixelBufferRelease(transformedPixelBuffer);
         CVPixelBufferRelease(pixelBuffer);
         
         if(completionBlock)
@@ -203,6 +204,8 @@
         CFRelease(srcDict);
         CFRelease(dstDict);
         CFRelease(profileSequence);
+        CFRelease(rec709);
+        CFRelease(linearProfile);
     }
     
     // TODO: Create linear pixel buffer pool / reuse memory

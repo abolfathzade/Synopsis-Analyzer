@@ -595,7 +595,6 @@
                             CMTime currentSampleDuration = CMSampleBufferGetOutputDuration(uncompressedVideoSampleBuffer);
                             CMTimeRange currentSampleTimeRange = CMTimeRangeMake(currentSamplePTS, currentSampleDuration);
                             CGFloat currentPresetnationTimeInSeconds = CMTimeGetSeconds(currentSamplePTS);
-                            
 
                             NSLock* dictionaryLock = [[NSLock alloc] init];
                             
@@ -612,17 +611,15 @@
                             NSOperation* transformOperation = [self.videoHelper pixelBuffer:pixelBuffer
                                                                               withTransform:self.transcodeAssetWriterVideo.transform
                                                                                        rect:rectForQualityHint(originalRect, self.analysisQualityHint)
-                                                                            completionBlock:^(SynopsisVideoFormatConverter* converter, NSError * error) {
+                                                                            completionBlock:^(SynopsisVideoFormatConverter* converter, NSError * error){
                                               
                                               CFRelease(uncompressedVideoSampleBuffer);
-
+                                                                                
                                               // Run an analysis pass on each plugin
                                               NSMutableArray* analysisOperations = [NSMutableArray array];
                                               
                                               for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                                               {
-//                                                  CVPixelBufferRetain(transformedPixelBuffer);
-                                                  
                                                   NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock: ^{
                                                       
                                                       NSString* newMetadataKey = [analyzer pluginIdentifier];
@@ -642,8 +639,6 @@
                                                                                      [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
                                                                                      [dictionaryLock unlock];
                                                                                  }
-                                                                                 
-//                                                                                 CVPixelBufferRelease(transformedPixelBuffer);
                                                                              }];
                                                   }];
                                                   
