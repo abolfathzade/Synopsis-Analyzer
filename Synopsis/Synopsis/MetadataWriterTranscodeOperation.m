@@ -10,7 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 
-#import <Synopsis/Constants.h>
+#import <Synopsis/Synopsis.h>
 #import <Synopsis/AnalyzerPluginProtocol.h>
 
 #import "NSDictionary+JSONString.h"
