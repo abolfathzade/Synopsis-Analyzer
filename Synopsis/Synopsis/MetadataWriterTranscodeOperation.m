@@ -37,7 +37,7 @@
 // Metadata to write
 @property (atomic, readwrite, strong) NSMutableArray* analyzedVideoSampleBufferMetadata;
 @property (atomic, readwrite, strong) NSMutableArray* analyzedAudioSampleBufferMetadata;
-@property (atomic, readwrite, strong) AVMetadataItem* analyzedGlobalMetadata;
+@property (atomic, readwrite, strong) NSDictionary* analyzedGlobalMetadata;
 
 @property (atomic, readwrite, assign) BOOL transcodeAssetHasVideo;
 @property (atomic, readwrite, assign) BOOL transcodeAssetHasAudio;
@@ -54,6 +54,8 @@
 @property (atomic, readwrite, strong) AVAssetWriterInput* transcodeAssetWriterAudioPassthrough;
 @property (atomic, readwrite, strong) AVAssetWriterInput* transcodeAssetWriterMetadata;
 @property (atomic, readwrite, strong) AVAssetWriterInputMetadataAdaptor* transcodeAssetWriterMetadataAdaptor;
+
+@property (atomic, readwrite, strong) SynopsisMetadataEncoder* metadataEncoder;
 
 @end
 
@@ -88,6 +90,8 @@
         {
             self.analyzedGlobalMetadata = self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey];
         }
+        
+        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsislMetadataVersionValue];
         
         [self setupTranscodeShitSucessfullyOrDontWhatverMan];
     }
@@ -307,7 +311,8 @@
     // Convert our global metadata to a valid top level AVMetadata item
     if(self.analyzedGlobalMetadata)
     {
-        self.transcodeAssetWriter.metadata = @[self.analyzedGlobalMetadata];
+        AVMetadataItem* encodedItem =  [self.metadataEncoder encodeSynopsisMetadataToMetadataItem:self.analyzedGlobalMetadata timeRange:kCMTimeRangeZero];
+        self.transcodeAssetWriter.metadata = @[encodedItem];
     }
     
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading] && !self.isCancelled)
@@ -707,63 +712,20 @@
         [self.transcodeAssetWriter finishWritingWithCompletionHandler:^{
 
             // Lets get our global 'summary' metadata - we get this from our standard analyzer
-//            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[kSynopsisStandardMetadataDictKey];
-//            
-////            NSString* dHash = standardAnalyzerOutputs[@"Hash"];
-////            NSArray* histogram = standardAnalyzerOutputs[@"Histogram"];
-////            NSArray* dominantColors = standardAnalyzerOutputs[@"DominantColors"];
-//            NSArray* matchedNamedColors = standardAnalyzerOutputs[kSynopsisStandardMetadataDescriptionDictKey];
-//
-//            NSMutableArray* allHumanSearchableDescriptors = [NSMutableArray new];
-//                        
-//            // Append all decriptors to our descriptor array
-//            [allHumanSearchableDescriptors addObjectsFromArray:matchedNamedColors];
-//            
-//            // write out our XATTR's
-//            if(allHumanSearchableDescriptors.count)
-//            {
-//                // make PList out of our array
-//                [self xattrsetPlist:allHumanSearchableDescriptors forKey:kSynopsisMetadataHFSAttributeDescriptorKey];
-//            }
+            NSDictionary* standardAnalyzerOutputs = self.analyzedGlobalMetadata[kSynopsisStandardMetadataDictKey];
             
+            // Get our shared description tags
+            NSArray* descriptionTags = standardAnalyzerOutputs[kSynopsisStandardMetadataDescriptionDictKey];
+            
+            // write out our XATTR's
+            if(descriptionTags.count)
+            {
+                // make PList out of our array
+                [self xattrsetPlist:descriptionTags forKey:kSynopsisMetadataHFSAttributeDescriptorKey];
+            }
+            
+            // Mark our version tag in HFS+Metadata as well, for introspection sake
             [self xattrsetPlist:@(kSynopsisMetadataHFSAttributeVersionValue) forKey:kSynopsisMetadataHFSAttributeVersionKey];
-
-//            if(dominantColors.count)
-//            {
-//                // Because xattr's cannot hold array's of arrays, we are forced to 'unroll' our colors
-//                NSMutableArray* unrolledDominantColors = [NSMutableArray new];
-//                
-//                for(NSArray* color in dominantColors)
-//                {
-//                    for(NSNumber* channel in color)
-//                    {
-//                        [unrolledDominantColors addObject:channel];
-//                    }
-//                }
-//
-//                [self xattrsetPlist:unrolledDominantColors forKey:@"info_v002_synopsis_dominant_colors"];
-//            }
-//
-//            if(histogram.count)
-//            {
-//                // Because xattr's cannot hold array's of arrays, we are forced to 'unroll' our histogram
-//                NSMutableArray* unrolledHistogram = [NSMutableArray new];
-//                
-//                for(NSArray* binTuplet in histogram)
-//                {
-//                    for(NSNumber* channel in binTuplet)
-//                    {
-//                        [unrolledHistogram addObject:channel];
-//                    }
-//                }
-//
-//                [self xattrsetPlist:unrolledHistogram forKey:@"info_v002_synopsis_histogram"];
-//            }
-//
-//            if(dHash)
-//            {
-//                [self xattrsetPlist:dHash forKey:@"info_v002_synopsis_perceptual_hash"];
-//            }
             
             dispatch_semaphore_signal(waitForWriting);
         }];

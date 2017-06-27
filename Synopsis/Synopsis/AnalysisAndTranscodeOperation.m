@@ -1030,7 +1030,7 @@
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);
 
-        self.analyzedGlobalMetadata = [self.metadataEncoder encodeSynopsisMetadataToMetadataItem:self.inFlightGlobalMetadata timeRange:kCMTimeRangeZero];
+        self.analyzedGlobalMetadata = self.inFlightGlobalMetadata;
         self.analyzedVideoSampleBufferMetadata = self.inFlightVideoSampleBufferMetadata;
         self.analyzedAudioSampleBufferMetadata = self.inFlightAudioSampleBufferMetadata;
         

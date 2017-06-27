@@ -32,7 +32,6 @@ extern NSString* const kSynopsisTranscodeOperationTimeRemainingKey; // NSNumber 
 extern NSString* const kSynopsisTranscodeOperationMetadataKey; // NSDictionary of available analyzed metadata - may be nil
 
 
-
 // We have a 2 pass analysis and decode (and possibly encode) system:
 
 // Pass 1:
