@@ -849,6 +849,8 @@
                                 }
                             }
                         
+                            self.inFlightGlobalMetadata[kSynopsislMetadataVersionKey] = @(kSynopsislMetadataVersionValue);
+                            
                             [self.transcodeAssetWriterVideo markAsFinished];
                             
                             [[LogController sharedLogController] appendSuccessLog:@"Finished Writing Video"];
