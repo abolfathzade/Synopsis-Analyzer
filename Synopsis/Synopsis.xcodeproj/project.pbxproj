@@ -39,7 +39,7 @@
 		1B61BD081ACF371A0013418D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
 		1B61BD091ACF37200013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
 		1B7351041DEF4FE40053BC06 /* Synopsis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; };
-		1B7351061DEF50300053BC06 /* Synopsis.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1B7351061DEF50300053BC06 /* Synopsis.framework in Copy Files */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B805E2C1B0114D0005D7354 /* ProgressTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */; };
 		1B805E2F1B012309005D7354 /* ProgressTableViewCellSource.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B805E2E1B012309005D7354 /* ProgressTableViewCellSource.xib */; };
 		1B805E321B012386005D7354 /* ProgressTableViewCellSourceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E311B012386005D7354 /* ProgressTableViewCellSourceController.m */; };
@@ -120,14 +120,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		1B7351051DEF4FF00053BC06 /* CopyFiles */ = {
+		1B7351051DEF4FF00053BC06 /* Copy Files */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1B7351061DEF50300053BC06 /* Synopsis.framework in CopyFiles */,
+				1B7351061DEF50300053BC06 /* Synopsis.framework in Copy Files */,
 			);
+			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -1197,7 +1198,7 @@
 				1BEA4D161ACB2BCC00AB57C1 /* Frameworks */,
 				1BEA4D171ACB2BCC00AB57C1 /* Resources */,
 				1B007EDC1B4EC6AB00DE6E98 /* CopyFiles */,
-				1B7351051DEF4FF00053BC06 /* CopyFiles */,
+				1B7351051DEF4FF00053BC06 /* Copy Files */,
 			);
 			buildRules = (
 			);
