@@ -58,6 +58,7 @@
 		1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C6D1AD5D8D3003B3CE9 /* GZIP.m */; };
 		1BA8F8361C125DC20066BDDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */; };
 		1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */; };
+		1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 1BC71D431F150CA6006DD7DC /* Credits.rtf */; };
 		1BD4292F1D2D691E00870D2F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1BD710A81D615E9F007D61B9 /* AVASettingsTableViewCellController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */; };
 		1BD710AA1D615EC5007D61B9 /* AVASettingsTableViewCellController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */; };
@@ -429,6 +430,7 @@
 		1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		1BB9B1A41EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoTransformScaleLinearizeHelper.h; sourceTree = "<group>"; };
 		1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoTransformScaleLinearizeHelper.m; sourceTree = "<group>"; };
+		1BC71D431F150CA6006DD7DC /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		1BD710A61D615E9F007D61B9 /* AVASettingsTableViewCellController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVASettingsTableViewCellController.h; sourceTree = "<group>"; };
 		1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVASettingsTableViewCellController.m; sourceTree = "<group>"; };
 		1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AVASettingsTableViewCellController.xib; sourceTree = "<group>"; };
@@ -1147,6 +1149,7 @@
 			children = (
 				1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */,
 				1BEA4D211ACB2BCD00AB57C1 /* main.m */,
+				1BC71D431F150CA6006DD7DC /* Credits.rtf */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -1190,9 +1193,9 @@
 			productReference = 1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */;
 			productType = "com.apple.product-type.bundle";
 		};
-		1BEA4D181ACB2BCC00AB57C1 /* Synopsis */ = {
+		1BEA4D181ACB2BCC00AB57C1 /* Synopsis Analyzer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1BEA4D361ACB2BCD00AB57C1 /* Build configuration list for PBXNativeTarget "Synopsis" */;
+			buildConfigurationList = 1BEA4D361ACB2BCD00AB57C1 /* Build configuration list for PBXNativeTarget "Synopsis Analyzer" */;
 			buildPhases = (
 				1BEA4D151ACB2BCC00AB57C1 /* Sources */,
 				1BEA4D161ACB2BCC00AB57C1 /* Frameworks */,
@@ -1206,7 +1209,7 @@
 				1B7351031DEF4FE00053BC06 /* PBXTargetDependency */,
 				1B007ECD1B4D7D0900DE6E98 /* PBXTargetDependency */,
 			);
-			name = Synopsis;
+			name = "Synopsis Analyzer";
 			productName = MetadataTranscoderTestHarness;
 			productReference = 1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */;
 			productType = "com.apple.product-type.application";
@@ -1250,7 +1253,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				1BEA4D181ACB2BCC00AB57C1 /* Synopsis */,
+				1BEA4D181ACB2BCC00AB57C1 /* Synopsis Analyzer */,
 				1B61BCF81ACF26710013418D /* StandardAnalyzer */,
 				1B007EBF1B4D7D0900DE6E98 /* SynopsisImporter */,
 			);
@@ -1302,6 +1305,7 @@
 				1B805E341B012AA0005D7354 /* ProgressTableViewCellProgress.xib in Resources */,
 				1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */,
 				1B3233D11C2EFDD300C9CF5E /* PreferencesAdvancedViewController.xib in Resources */,
+				1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */,
 				1BD710AA1D615EC5007D61B9 /* AVASettingsTableViewCellController.xib in Resources */,
 				1B3233C71C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib in Resources */,
 				1B1DF39B1DF70B47001A79E2 /* OperationItem.xib in Resources */,
@@ -1622,7 +1626,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				OTHER_CFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis;
+				PRODUCT_BUNDLE_IDENTIFIER = "info.Synopsis.Synopsis-Analyzer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1638,7 +1642,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				OTHER_CFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = info.Synopsis;
+				PRODUCT_BUNDLE_IDENTIFIER = "info.Synopsis.Synopsis-Analyzer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -1673,7 +1677,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1BEA4D361ACB2BCD00AB57C1 /* Build configuration list for PBXNativeTarget "Synopsis" */ = {
+		1BEA4D361ACB2BCD00AB57C1 /* Build configuration list for PBXNativeTarget "Synopsis Analyzer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1BEA4D371ACB2BCD00AB57C1 /* Debug */,

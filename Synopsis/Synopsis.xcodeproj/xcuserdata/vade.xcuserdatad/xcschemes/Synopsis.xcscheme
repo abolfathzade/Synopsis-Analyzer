@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1BEA4D181ACB2BCC00AB57C1"
-               BuildableName = "Synopsis.app"
-               BlueprintName = "Synopsis"
+               BuildableName = "Synopsis Analyzer.app"
+               BlueprintName = "Synopsis Analyzer"
                ReferencedContainer = "container:Synopsis.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -48,8 +48,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1BEA4D181ACB2BCC00AB57C1"
-            BuildableName = "Synopsis.app"
-            BlueprintName = "Synopsis"
+            BuildableName = "Synopsis Analyzer.app"
+            BlueprintName = "Synopsis Analyzer"
             ReferencedContainer = "container:Synopsis.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -67,8 +67,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1BEA4D181ACB2BCC00AB57C1"
-            BuildableName = "Synopsis.app"
-            BlueprintName = "Synopsis"
+            BuildableName = "Synopsis Analyzer.app"
+            BlueprintName = "Synopsis Analyzer"
             ReferencedContainer = "container:Synopsis.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
