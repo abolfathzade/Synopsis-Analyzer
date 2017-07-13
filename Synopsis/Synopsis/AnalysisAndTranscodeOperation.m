@@ -619,6 +619,10 @@
                         {
                             if(self.decodeHAP)
                             {
+                                // Seems like on some HAP encoders, we get duplicate frames marked kCMTimeZero?
+                                // the Hap video track output bails if thats the case
+                                // so I've commented out that code (maybe thats a horrible idea?)
+                                // But this appears to allow us to decode HAP to other formats + analyze
                                 CMTime sampleTime = CMSampleBufferGetPresentationTimeStamp(uncompressedVideoSampleBuffer);
                                 if(CMTIME_COMPARE_INLINE(kCMTimeZero, ==, sampleTime) &&  !hapGotFirstZerothFrameHack)
                                 {
