@@ -83,7 +83,7 @@ static NSInteger currentTag = 0;
         if ([object isKindOfClass:[PresetGroup class]])
         {
             PresetGroup* group = (PresetGroup*)object;
-            NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:[group.title stringByAppendingString:@" Group"] action:NULL keyEquivalent:@""];
+            NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:group.title action:NULL keyEquivalent:@""];
             
             NSMenu* subMenu = [[NSMenu alloc] initWithTitle:group.title];
             [menuItem setSubmenu:subMenu];

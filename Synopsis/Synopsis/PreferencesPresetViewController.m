@@ -10,6 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <VideoToolbox/VideoToolbox.h>
 #import <VideoToolbox/VTVideoEncoderList.h>
+#import <VideoToolbox/VTCompressionProperties.h>
 #import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 #import "PresetGroup.h"
 
@@ -80,42 +81,454 @@ const NSString* value = @"Value";
         self.standardPresets = [[PresetGroup alloc] initWithTitle:@"Standard Presets" editable:NO];
         self.customPresets = [[PresetGroup alloc] initWithTitle:@"Custom Presets" editable:NO];
         
-        // set up some basic presets
-
+#pragma mark - Passthrough 
+        
         PresetObject* passthrough = [[PresetObject alloc] initWithTitle:@"Passthrough" audioSettings:[PresetAudioSettings none] videoSettings:[PresetVideoSettings none] analyzerSettings:[PresetAnalysisSettings none] useAudio:YES useVideo:YES useAnalysis:YES editable:NO];
         
-        PresetObject* passthroughNoAudio = [[PresetObject alloc] initWithTitle:@"Passthrough No Audio" audioSettings:[PresetAudioSettings none] videoSettings:[PresetVideoSettings none] analyzerSettings:[PresetAnalysisSettings none] useAudio:NO useVideo:YES useAnalysis:YES editable:NO];
-        
-        
-        PresetVideoSettings* appleIntermediateLinearPCMVS = [[PresetVideoSettings alloc] init];
-        appleIntermediateLinearPCMVS.settingsDictionary = @{AVVideoCodecKey:@"icod"};
-        
-        PresetObject* appleIntermediateLinearPCM = [[PresetObject alloc] initWithTitle:@"Apple Intermediate Video Only"
-                                                                         audioSettings:[PresetAudioSettings none]
-                                                                         videoSettings:appleIntermediateLinearPCMVS
-                                                                      analyzerSettings:[PresetAnalysisSettings none]
-                                                                              useAudio:NO
-                                                                              useVideo:YES
-                                                                           useAnalysis:YES
-                                                                              editable:NO];
-
-        PresetVideoSettings* appleProRes422LinearPCMVS = [[PresetVideoSettings alloc] init];
-        appleProRes422LinearPCMVS.settingsDictionary = @{AVVideoCodecKey:AVVideoCodecAppleProRes422};
-        
-        PresetObject* appleProRes422LinearPCM = [[PresetObject alloc] initWithTitle:@"Apple Pro Res 422 Video Only"
-                                                                         audioSettings:[PresetAudioSettings none]
-                                                                         videoSettings:appleProRes422LinearPCMVS
-                                                                      analyzerSettings:[PresetAnalysisSettings none]
-                                                                              useAudio:NO
-                                                                              useVideo:YES
-                                                                           useAnalysis:YES
-                                                                              editable:NO];
-
+        PresetObject* passthroughNoAudio = [[PresetObject alloc] initWithTitle:@"Passthrough - No Audio" audioSettings:[PresetAudioSettings none] videoSettings:[PresetVideoSettings none] analyzerSettings:[PresetAnalysisSettings none] useAudio:NO useVideo:YES useAnalysis:YES editable:NO];
         
         PresetGroup* passthroughGroup = [[PresetGroup alloc] initWithTitle:@"Passthrough" editable:NO];
         passthroughGroup.children = @[passthrough, passthroughNoAudio];
+
+#pragma mark - Uncompressed
         
-        self.standardPresets.children = @[passthroughGroup, appleIntermediateLinearPCM, appleProRes422LinearPCM];
+        // Uncompressed YUV 422 -
+        // TODO: when to use yuvs vs 2vuy ?
+        PresetVideoSettings* yuv422YpCbCr8VideoSetting = [[PresetVideoSettings alloc] init];
+        yuv422YpCbCr8VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"2vuy"};
+        
+        PresetObject* yuv422YpCbCr8Preset = [[PresetObject alloc] initWithTitle:@"Uncompressed 8 Bit 422"
+                                                                         audioSettings:[PresetAudioSettings none]
+                                                                         videoSettings:yuv422YpCbCr8VideoSetting
+                                                                      analyzerSettings:[PresetAnalysisSettings none]
+                                                                              useAudio:YES
+                                                                              useVideo:YES
+                                                                           useAnalysis:YES
+                                                                              editable:NO];
+
+        // TODO: RGB 24 bit ?
+        PresetGroup* uncompressedGroup = [[PresetGroup alloc] initWithTitle:@"Uncompressed" editable:NO];
+        uncompressedGroup.children = @[yuv422YpCbCr8Preset];
+       
+#pragma mark - Animation
+
+        // No RLE Encoder in AVFoundation on 10.12?
+//        PresetVideoSettings* animationVideoSetting = [[PresetVideoSettings alloc] init];
+//        animationVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"rle "};
+//        
+//        PresetObject* animationPreset = [[PresetObject alloc] initWithTitle:@"Apple Animation"
+//                                                                  audioSettings:[PresetAudioSettings none]
+//                                                                  videoSettings:animationVideoSetting
+//                                                               analyzerSettings:[PresetAnalysisSettings none]
+//                                                                       useAudio:YES
+//                                                                       useVideo:YES
+//                                                                    useAnalysis:YES
+//                                                                       editable:NO];
+//        
+//        PresetGroup* animationGroup = [[PresetGroup alloc] initWithTitle:@"Animation" editable:NO];
+//        animationGroup.children = @[animationPreset];
+
+#pragma mark - Pro Res Variants
+        
+        // 4444
+        PresetVideoSettings* appleProRes4444VideoSetting = [[PresetVideoSettings alloc] init];
+        appleProRes4444VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"ap4h"};
+        
+        PresetObject* appleProRes4444Preset = [[PresetObject alloc] initWithTitle:@"Apple Pro Res 4444"
+                                                                   audioSettings:[PresetAudioSettings none]
+                                                                   videoSettings:appleProRes4444VideoSetting
+                                                                analyzerSettings:[PresetAnalysisSettings none]
+                                                                        useAudio:YES
+                                                                        useVideo:YES
+                                                                     useAnalysis:YES
+                                                                        editable:NO];
+       
+        // 422 HQ
+        PresetVideoSettings* appleProRes422HQVideoSetting = [[PresetVideoSettings alloc] init];
+        appleProRes422HQVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"apch"};
+        
+        PresetObject* appleProRes422HQPreset = [[PresetObject alloc] initWithTitle:@"Apple Pro Res 422 HQ"
+                                                                                audioSettings:[PresetAudioSettings none]
+                                                                                videoSettings:appleProRes422HQVideoSetting
+                                                                             analyzerSettings:[PresetAnalysisSettings none]
+                                                                                     useAudio:YES
+                                                                                     useVideo:YES
+                                                                                  useAnalysis:YES
+                                                                                     editable:NO];
+
+        
+        // 422
+        PresetVideoSettings* appleProRes422VideoSetting = [[PresetVideoSettings alloc] init];
+        appleProRes422VideoSetting.settingsDictionary = @{AVVideoCodecKey:AVVideoCodecAppleProRes422};
+        
+        PresetObject* appleProRes422Preset = [[PresetObject alloc] initWithTitle:@"Apple Pro Res 422"
+                                                                      audioSettings:[PresetAudioSettings none]
+                                                                      videoSettings:appleProRes422VideoSetting
+                                                                   analyzerSettings:[PresetAnalysisSettings none]
+                                                                           useAudio:YES
+                                                                           useVideo:YES
+                                                                        useAnalysis:YES
+                                                                           editable:NO];
+        
+        // 422 LT
+        PresetVideoSettings* appleProRes422LTVideoSetting = [[PresetVideoSettings alloc] init];
+        appleProRes422LTVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"apcs"};
+        
+        PresetObject* appleProRes422LTPreset = [[PresetObject alloc] initWithTitle:@"Apple Pro Res 422 LT"
+                                                                   audioSettings:[PresetAudioSettings none]
+                                                                   videoSettings:appleProRes422LTVideoSetting
+                                                                analyzerSettings:[PresetAnalysisSettings none]
+                                                                        useAudio:YES
+                                                                        useVideo:YES
+                                                                     useAnalysis:YES
+                                                                        editable:NO];
+
+        // 422 Proxy
+        PresetVideoSettings* appleProRes422ProxyVideoSetting = [[PresetVideoSettings alloc] init];
+        appleProRes422ProxyVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"apco"};
+        
+        PresetObject* appleProRes422ProxyPreset = [[PresetObject alloc] initWithTitle:@"Apple Pro Res 422 Proxy"
+                                                                     audioSettings:[PresetAudioSettings none]
+                                                                     videoSettings:appleProRes422ProxyVideoSetting
+                                                                  analyzerSettings:[PresetAnalysisSettings none]
+                                                                          useAudio:YES
+                                                                          useVideo:YES
+                                                                       useAnalysis:YES
+                                                                          editable:NO];
+
+        PresetGroup* proResGroup = [[PresetGroup alloc] initWithTitle:@"Pro Res" editable:NO];
+        proResGroup.children = @[appleProRes4444Preset,
+                                 appleProRes422HQPreset,
+                                 appleProRes422Preset,
+                                 appleProRes422LTPreset,
+                                 appleProRes422ProxyPreset,
+                                 ];
+        
+#pragma mark - Apple Intermediate
+        
+        PresetVideoSettings* appleIntermediateVideoSetting = [[PresetVideoSettings alloc] init];
+        appleIntermediateVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"icod"};
+        
+        PresetObject* appleIntermediatePreset = [[PresetObject alloc] initWithTitle:@"Apple Intermediate"
+                                                                         audioSettings:[PresetAudioSettings none]
+                                                                         videoSettings:appleIntermediateVideoSetting
+                                                                      analyzerSettings:[PresetAnalysisSettings none]
+                                                                              useAudio:YES
+                                                                              useVideo:YES
+                                                                           useAnalysis:YES
+                                                                              editable:NO];
+
+        PresetObject* appleIntermediatePresetNoAudio = [[PresetObject alloc] initWithTitle:@"Apple Intermediate - No Audio"
+                                                                     audioSettings:[PresetAudioSettings none]
+                                                                     videoSettings:appleIntermediateVideoSetting
+                                                                  analyzerSettings:[PresetAnalysisSettings none]
+                                                                          useAudio:NO
+                                                                          useVideo:YES
+                                                                       useAnalysis:YES
+                                                                          editable:NO];
+        
+        PresetGroup* aicGroup = [[PresetGroup alloc] initWithTitle:@"Apple Intermediate Codec" editable:NO];
+        aicGroup.children = @[appleIntermediatePreset,
+                              appleIntermediatePresetNoAudio];
+        
+#pragma mark - Motion Jpeg
+        
+        PresetVideoSettings* photoJPEGVideoSetting = [[PresetVideoSettings alloc] init];
+        photoJPEGVideoSetting.settingsDictionary = @{AVVideoCodecKey:AVVideoCodecJPEG};
+        
+        PresetObject* photoJPEGPreset = [[PresetObject alloc] initWithTitle:@"Photo JPEG"
+                                                                      audioSettings:[PresetAudioSettings none]
+                                                                      videoSettings:photoJPEGVideoSetting
+                                                                   analyzerSettings:[PresetAnalysisSettings none]
+                                                                           useAudio:YES
+                                                                           useVideo:YES
+                                                                        useAnalysis:YES
+                                                                           editable:NO];
+        
+        PresetObject* photoJPEGPresetNoAudio = [[PresetObject alloc] initWithTitle:@"Photo JPEG - No Audio"
+                                                               audioSettings:[PresetAudioSettings none]
+                                                               videoSettings:photoJPEGVideoSetting
+                                                            analyzerSettings:[PresetAnalysisSettings none]
+                                                                    useAudio:NO
+                                                                    useVideo:YES
+                                                                 useAnalysis:YES
+                                                                    editable:NO];
+
+        PresetGroup* motionJPEGGroup = [[PresetGroup alloc] initWithTitle:@"Photo JPEG" editable:NO];
+        motionJPEGGroup.children = @[photoJPEGPreset,
+                                     photoJPEGPresetNoAudio];
+
+#pragma mark - DV Family
+        
+        // DV NTSC
+        PresetVideoSettings* dvNTSCVideoSetting = [[PresetVideoSettings alloc] init];
+        dvNTSCVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"dvc ",
+                                                  AVVideoScalingModeKey : AVVideoScalingModeResizeAspect};
+        
+        PresetObject* dvNTSCPreset = [[PresetObject alloc] initWithTitle:@"DV NTSC (720x480)"
+                                                              audioSettings:[PresetAudioSettings none]
+                                                              videoSettings:dvNTSCVideoSetting
+                                                           analyzerSettings:[PresetAnalysisSettings none]
+                                                                   useAudio:YES
+                                                                   useVideo:YES
+                                                                useAnalysis:YES
+                                                                   editable:NO];
+       
+        // DV NTSC
+        PresetVideoSettings* dvPalVideoSetting = [[PresetVideoSettings alloc] init];
+        dvPalVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"dvcp",
+                                                  AVVideoScalingModeKey : AVVideoScalingModeResizeAspect};
+        
+        PresetObject* dvPalPreset = [[PresetObject alloc] initWithTitle:@"DV PAL (720x576)"
+                                                           audioSettings:[PresetAudioSettings none]
+                                                           videoSettings:dvPalVideoSetting
+                                                        analyzerSettings:[PresetAnalysisSettings none]
+                                                                useAudio:YES
+                                                                useVideo:YES
+                                                             useAnalysis:YES
+                                                                editable:NO];
+        
+        // DVCPro 50 NTSC
+        PresetVideoSettings* dvcProNTSCVideoSetting = [[PresetVideoSettings alloc] init];
+        dvcProNTSCVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"dv5n",
+                                                 AVVideoScalingModeKey : AVVideoScalingModeResizeAspect};
+        
+        PresetObject* dvcProNTSCPreset = [[PresetObject alloc] initWithTitle:@"DVCPro 50 NTSC (720x480)"
+                                                          audioSettings:[PresetAudioSettings none]
+                                                          videoSettings:dvcProNTSCVideoSetting
+                                                       analyzerSettings:[PresetAnalysisSettings none]
+                                                               useAudio:YES
+                                                               useVideo:YES
+                                                            useAnalysis:YES
+                                                               editable:NO];
+        
+        // DVCPro 50 PAL
+        PresetVideoSettings* dvcProPALVideoSetting = [[PresetVideoSettings alloc] init];
+        dvcProPALVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"dv5p",
+                                                     AVVideoScalingModeKey : AVVideoScalingModeResizeAspect
+                                                     };
+        
+        PresetObject* dvcProPALPreset = [[PresetObject alloc] initWithTitle:@"DVCPro 50 PAL (720x576)"
+                                                              audioSettings:[PresetAudioSettings none]
+                                                              videoSettings:dvcProPALVideoSetting
+                                                           analyzerSettings:[PresetAnalysisSettings none]
+                                                                   useAudio:YES
+                                                                   useVideo:YES
+                                                                useAnalysis:YES
+                                                                   editable:NO];
+       
+        // For whatever reason, DVCPro codecs need size
+        // Adjust for pixel aspect ratio
+        // so output size is right.
+
+        // DVC Pro HD 720p60
+        PresetVideoSettings* dvcPro720p60VideoSetting = [[PresetVideoSettings alloc] init];
+        dvcPro720p60VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"dvhp",
+                                                        AVVideoScalingModeKey : AVVideoScalingModeResizeAspect,
+                                                        AVVideoWidthKey : @(960),
+                                                        AVVideoHeightKey : @(720),
+                                                        };
+        
+        PresetObject* dvcPro720p60Preset = [[PresetObject alloc] initWithTitle:@"DVCPro 720p60 (1280x720)"
+                                                             audioSettings:[PresetAudioSettings none]
+                                                             videoSettings:dvcPro720p60VideoSetting
+                                                          analyzerSettings:[PresetAnalysisSettings none]
+                                                                  useAudio:YES
+                                                                  useVideo:YES
+                                                               useAnalysis:YES
+                                                                  editable:NO];
+
+        // DVC Pro HD 720p50
+        PresetVideoSettings* dvcPro720p50VideoSetting = [[PresetVideoSettings alloc] init];
+        dvcPro720p50VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"dvhq",
+                                                        AVVideoScalingModeKey : AVVideoScalingModeResizeAspect,
+                                                        AVVideoWidthKey : @(960),
+                                                        AVVideoHeightKey : @(720),
+                                                        };
+        
+        PresetObject* dvcPro720p50Preset = [[PresetObject alloc] initWithTitle:@"DVCPro 720p50 (1280x720)"
+                                                                 audioSettings:[PresetAudioSettings none]
+                                                                 videoSettings:dvcPro720p50VideoSetting
+                                                              analyzerSettings:[PresetAnalysisSettings none]
+                                                                      useAudio:YES
+                                                                      useVideo:YES
+                                                                   useAnalysis:YES
+                                                                      editable:NO];
+
+        // DVC Pro HD 1080i60
+        PresetVideoSettings* dvcPro1080i60VideoSetting = [[PresetVideoSettings alloc] init];
+        dvcPro1080i60VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"dvh6",
+                                                        AVVideoScalingModeKey : AVVideoScalingModeResizeAspect,
+                                                        AVVideoWidthKey : @(1280),
+                                                        AVVideoHeightKey : @(1080),
+                                                        };
+        
+        PresetObject* dvcPro1080i60Preset = [[PresetObject alloc] initWithTitle:@"DVCPro 1080i60 (1920x1080)"
+                                                                 audioSettings:[PresetAudioSettings none]
+                                                                 videoSettings:dvcPro1080i60VideoSetting
+                                                              analyzerSettings:[PresetAnalysisSettings none]
+                                                                      useAudio:YES
+                                                                      useVideo:YES
+                                                                   useAnalysis:YES
+                                                                      editable:NO];
+
+        // DVC Pro HD 1080i50
+        PresetVideoSettings* dvcPro1080i50VideoSetting = [[PresetVideoSettings alloc] init];
+        dvcPro1080i50VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"dvh5",
+                                                         AVVideoScalingModeKey : AVVideoScalingModeResizeAspect,
+                                                         AVVideoWidthKey : @(1280),
+                                                         AVVideoHeightKey : @(1080),
+                                                         };
+        
+        PresetObject* dvcPro1080i50Preset = [[PresetObject alloc] initWithTitle:@"DVCPro 1080i50 (1920x1080)"
+                                                                  audioSettings:[PresetAudioSettings none]
+                                                                  videoSettings:dvcPro1080i50VideoSetting
+                                                               analyzerSettings:[PresetAnalysisSettings none]
+                                                                       useAudio:YES
+                                                                       useVideo:YES
+                                                                    useAnalysis:YES
+                                                                       editable:NO];
+
+        // DVC Pro HD 1080p30
+        PresetVideoSettings* dvcPro1080p30VideoSetting = [[PresetVideoSettings alloc] init];
+        dvcPro1080p30VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"dvh3",
+                                                         AVVideoScalingModeKey : AVVideoScalingModeResizeAspect,
+                                                         AVVideoWidthKey : @(1280),
+                                                         AVVideoHeightKey : @(1080),
+                                                         };
+        
+        PresetObject* dvcPro1080p30Preset = [[PresetObject alloc] initWithTitle:@"DVCPro 1080p30 (1920x1080)"
+                                                                  audioSettings:[PresetAudioSettings none]
+                                                                  videoSettings:dvcPro1080p30VideoSetting
+                                                               analyzerSettings:[PresetAnalysisSettings none]
+                                                                       useAudio:YES
+                                                                       useVideo:YES
+                                                                    useAnalysis:YES
+                                                                       editable:NO];
+ 
+        // DVC Pro HD 1080p25
+        PresetVideoSettings* dvcPro1080p25VideoSetting = [[PresetVideoSettings alloc] init];
+        dvcPro1080p25VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"dvh3",
+                                                         AVVideoScalingModeKey : AVVideoScalingModeResizeAspect,
+                                                         AVVideoWidthKey : @(1280),
+                                                         AVVideoHeightKey : @(1080),
+                                                         };
+        
+        PresetObject* dvcPro1080p25Preset = [[PresetObject alloc] initWithTitle:@"DVCPro 1080p25 (1920x1080)"
+                                                                  audioSettings:[PresetAudioSettings none]
+                                                                  videoSettings:dvcPro1080p25VideoSetting
+                                                               analyzerSettings:[PresetAnalysisSettings none]
+                                                                       useAudio:YES
+                                                                       useVideo:YES
+                                                                    useAnalysis:YES
+                                                                       editable:NO];
+
+        PresetGroup* dvGroup = [[PresetGroup alloc] initWithTitle:@"DV" editable:NO];
+        dvGroup.children = @[dvNTSCPreset,
+                             dvPalPreset,
+                             dvcProNTSCPreset,
+                             dvcProPALPreset,
+                             dvcPro720p60Preset,
+                             dvcPro720p50Preset,
+//                             dvcPro1080i60Preset,
+//                             dvcPro1080i50Preset,
+                             dvcPro1080p30Preset,
+                             dvcPro1080p25Preset,
+                             ];
+
+#pragma mark - h.264
+        
+
+        PresetAudioSettings* aac48Khz = [[PresetAudioSettings alloc] init];
+        aac48Khz.settingsDictionary = @{ AVFormatIDKey : @(kAudioFormatMPEG4AAC),
+                                         AVSampleRateKey : @(48000.0),
+                                         AVNumberOfChannelsKey : @(2),
+                                         AVEncoderBitRateKey : @(256),
+//                                         AVEncoderAudioQualityKey : @(AVAudioQualityHigh),
+                                        };
+        
+        // h.264 Baseline Auto / AAC 48khz Stereo 256
+        PresetVideoSettings* baseLineAutoLevelVideoSetting = [[PresetVideoSettings alloc] init];
+        baseLineAutoLevelVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecH264,
+
+                                                             AVVideoCompressionPropertiesKey : @{
+                                                                     AVVideoProfileLevelKey : AVVideoProfileLevelH264BaselineAutoLevel,
+                                                             },
+                                                             
+                                                             AVVideoEncoderSpecificationKey : @{
+                                                                     (NSString*)kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder : @YES,
+                                                                     }
+                                                             };
+
+        PresetObject* baseLineAutoLevelPreset = [[PresetObject alloc] initWithTitle:@"h.264 Baseline Auto Level / Stereo AAC, 48Khz 240kbps"
+                                                                  audioSettings:aac48Khz
+                                                                  videoSettings:baseLineAutoLevelVideoSetting
+                                                               analyzerSettings:[PresetAnalysisSettings none]
+                                                                       useAudio:YES
+                                                                       useVideo:YES
+                                                                    useAnalysis:YES
+                                                                       editable:NO];
+       
+        // h.264 Main Auto / AAC 48khz Stereo 256
+        PresetVideoSettings* mainAutoLevelVideoSetting = [[PresetVideoSettings alloc] init];
+        mainAutoLevelVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecH264,
+                                                         AVVideoCompressionPropertiesKey : @{
+                                                                 AVVideoProfileLevelKey : AVVideoProfileLevelH264BaselineAutoLevel,
+                                                                 },
+                                                         AVVideoEncoderSpecificationKey : @{
+                                                                 (NSString*)kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder : @YES,
+                                                                 }
+                                                         };
+        
+        PresetObject* mainAutoLevelPreset = [[PresetObject alloc] initWithTitle:@"h.264 Main Auto Level / Stereo AAC, 48Khz 240kbps"
+                                                                      audioSettings:aac48Khz
+                                                                      videoSettings:mainAutoLevelVideoSetting
+                                                                   analyzerSettings:[PresetAnalysisSettings none]
+                                                                           useAudio:YES
+                                                                           useVideo:YES
+                                                                        useAnalysis:YES
+                                                                           editable:NO];
+
+        // h.264 Main Auto / AAC 48khz Stereo 256
+        PresetVideoSettings* highAutoLevelVideoSetting = [[PresetVideoSettings alloc] init];
+        highAutoLevelVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecH264,
+                                                         AVVideoCompressionPropertiesKey : @{
+                                                                 AVVideoProfileLevelKey : AVVideoProfileLevelH264BaselineAutoLevel,
+                                                                 },
+                                                         AVVideoEncoderSpecificationKey : @{
+                                                                 (NSString*)kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder : @YES,
+                                                                 }
+                                                         };
+        
+        PresetObject* highAutoLevelPreset = [[PresetObject alloc] initWithTitle:@"h.264 High Auto Level / Stereo AAC, 48Khz 240kbps"
+                                                                  audioSettings:aac48Khz
+                                                                  videoSettings:highAutoLevelVideoSetting
+                                                               analyzerSettings:[PresetAnalysisSettings none]
+                                                                       useAudio:YES
+                                                                       useVideo:YES
+                                                                    useAnalysis:YES
+                                                                       editable:NO];
+
+        
+        PresetGroup* h264Group = [[PresetGroup alloc] initWithTitle:@"h.264" editable:NO];
+        h264Group.children = @[
+                             baseLineAutoLevelPreset,
+                             mainAutoLevelPreset,
+                             highAutoLevelPreset
+                             ];
+
+        
+#pragma mark - HEVC
+        
+        self.standardPresets.children = @[passthroughGroup,
+                                          uncompressedGroup,
+//                                          animationGroup,
+                                          proResGroup,
+                                          aicGroup,
+                                          motionJPEGGroup,
+                                          dvGroup,
+                                          h264Group,
+                                          ];
 
         self.selectedPresetGroup = self.customPresets;
         
