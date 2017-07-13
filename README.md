@@ -12,7 +12,7 @@ Please note Synopsis Analyzer (and related tools and frameworks) are under heavy
 ### Synopsis Analyzer features:
 
 * Multithreaded batch video transcoding
-* Hardware accelerated vidoe decode and encode for supported codecs.
+* Hardware accelerated video decode and encode for supported codecs.
 * Presets for encoding settings
 * Optional Analysis stage during transcode
 * Spotlight integration for tag based searching of analyzed content.
