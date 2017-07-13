@@ -13,6 +13,8 @@
 
 #import "VideoTransformScaleLinearizeHelper.h"
 
+#import "HapInAVFoundation.h"
+
 #import "NSDictionary+JSONString.h"
 #import "BSON/BSONSerialization.h"
 #import "GZIP/GZIP.h"
@@ -48,6 +50,11 @@
 @property (atomic, readwrite, assign) BOOL transcodingAudio;
 @property (atomic, readwrite, assign) BOOL transcodeAssetHasVideo;
 @property (atomic, readwrite, assign) BOOL transcodeAssetHasAudio;
+
+// HAP Additions
+@property (atomic, readwrite, assign) BOOL decodeHAP;
+@property (atomic, readwrite, assign) BOOL encodeHAP;
+
 
 @property (atomic, readwrite, strong) NSDictionary* videoTranscodeSettings;
 @property (atomic, readwrite, strong) NSDictionary* audioTranscodeSettings;
@@ -124,6 +131,16 @@
         {
             self.videoTranscodeSettings = self.transcodeOptions[kSynopsisTranscodeVideoSettingsKey];
             self.transcodingVideo = YES;
+            
+            // See if our encode target is a HAP codec
+            if(self.videoTranscodeSettings[AVVideoCodecKey])
+            {
+                NSString* codecFourCC = self.videoTranscodeSettings[AVVideoCodecKey];
+                if([codecFourCC containsString:@"Hap"])
+                {
+                    self.encodeHAP = YES;
+                }
+            }
         }
         
         if(self.transcodeOptions[kSynopsisTranscodeAudioSettingsKey] != [NSNull null])
@@ -245,6 +262,8 @@
     // Video Reader -
     if(self.transcodeAssetHasVideo)
     {
+        self.decodeHAP = [self.transcodeAsset containsHapVideoTrack];
+        
         AVAssetTrack* firstVideoTrack = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual][0];
         
         // read our CMFormatDescription from our video track
@@ -259,11 +278,19 @@
 
         NSDictionary* SDProperties =  @{AVVideoColorPrimariesKey : AVVideoColorPrimaries_SMPTE_C, AVVideoTransferFunctionKey : AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey : AVVideoYCbCrMatrix_ITU_R_601_4 };
 
-        self.transcodeAssetReaderVideo = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
-                                                                                    outputSettings:@{(NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
-//                                                                                                     AVVideoColorPropertiesKey : HDProperties
-                                                                                                     }];
-        
+        if(self.decodeHAP)
+        {
+            self.transcodeAssetReaderVideo = [[AVAssetReaderHapTrackOutput alloc] initWithTrack:firstVideoTrack outputSettings:@{(NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
+//                                                                                                                                 AVVideoColorPropertiesKey : HDProperties
+                                                                                                                                }];
+        }
+        else
+        {
+            self.transcodeAssetReaderVideo = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
+                                                                                        outputSettings:@{(NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
+//                                                                                                         AVVideoColorPropertiesKey : HDProperties
+                                                                                                         }];
+        }
         self.transcodeAssetReaderVideo.alwaysCopiesSampleData = NO;
         prefferedTrackTransform = firstVideoTrack.preferredTransform;
         nativeSize = firstVideoTrack.naturalSize;
@@ -380,9 +407,17 @@
     
     // Writers
     self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:&error];
-    self.transcodeAssetWriterVideo = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:self.videoTranscodeSettings];
-    self.transcodeAssetWriterAudio = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:self.audioTranscodeSettings];
     
+    if(self.encodeHAP)
+    {
+        self.transcodeAssetWriterVideo = [[AVAssetWriterHapInput alloc] initWithOutputSettings:self.videoTranscodeSettings];
+    }
+    else
+    {
+        self.transcodeAssetWriterVideo = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:self.videoTranscodeSettings];
+    }
+        
+    self.transcodeAssetWriterAudio = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:self.audioTranscodeSettings];
     self.transcodeAssetWriterVideo.expectsMediaDataInRealTime = NO;
     self.transcodeAssetWriterVideo.transform = prefferedTrackTransform;
     
@@ -573,6 +608,8 @@
                 
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
                 
+                BOOL hapGotFirstZerothFrameHack = NO;
+                
                 while(self.transcodeAssetReader.status == AVAssetReaderStatusReading && !self.isCancelled)
                 {
                     @autoreleasepool
@@ -580,6 +617,21 @@
                         CMSampleBufferRef uncompressedVideoSampleBuffer = [self.transcodeAssetReaderVideo copyNextSampleBuffer];
                         if(uncompressedVideoSampleBuffer)
                         {
+                            if(self.decodeHAP)
+                            {
+                                // Seems like on some HAP encoders, we get duplicate frames marked kCMTimeZero?
+                                // the Hap video track output bails if thats the case
+                                // so I've commented out that code (maybe thats a horrible idea?)
+                                // But this appears to allow us to decode HAP to other formats + analyze
+                                CMTime sampleTime = CMSampleBufferGetPresentationTimeStamp(uncompressedVideoSampleBuffer);
+                                if(CMTIME_COMPARE_INLINE(kCMTimeZero, ==, sampleTime) &&  !hapGotFirstZerothFrameHack)
+                                {
+                                    hapGotFirstZerothFrameHack = YES;
+                                    CFRelease(uncompressedVideoSampleBuffer);
+                                    continue;
+                                }
+                            }
+                            
                             // Only add to our uncompressed buffer queue if we are going to use those buffers on the encoder end.
                             if(self.transcodingVideo)
                             {

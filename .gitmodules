@@ -1,3 +1,6 @@
 [submodule "Synopsis/Synopsis-Framework"]
 	path = Synopsis/Synopsis-Framework
 	url = https://github.com/Synopsis/Synopsis-Framework.git
+[submodule "Synopsis/hap-in-avfoundation"]
+	path = Synopsis/hap-in-avfoundation
+	url = https://github.com/Vidvox/hap-in-avfoundation.git

@@ -109,7 +109,81 @@ const NSString* value = @"Value";
         // TODO: RGB 24 bit ?
         PresetGroup* uncompressedGroup = [[PresetGroup alloc] initWithTitle:@"Uncompressed" editable:NO];
         uncompressedGroup.children = @[yuv422YpCbCr8Preset];
-       
+     
+#pragma mark - HAP
+        
+        // Hap1
+        PresetVideoSettings* hap1VideoSetting = [[PresetVideoSettings alloc] init];
+        hap1VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"Hap1"};
+        
+        PresetObject* hap1Preset = [[PresetObject alloc] initWithTitle:@"HAP 1"
+                                                                  audioSettings:[PresetAudioSettings none]
+                                                                  videoSettings:hap1VideoSetting
+                                                               analyzerSettings:[PresetAnalysisSettings none]
+                                                                       useAudio:YES
+                                                                       useVideo:YES
+                                                                    useAnalysis:YES
+                                                                       editable:NO];
+        // Hap5
+        PresetVideoSettings* hap5VideoSetting = [[PresetVideoSettings alloc] init];
+        hap5VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"Hap5"};
+        
+        PresetObject* hap5Preset = [[PresetObject alloc] initWithTitle:@"HAP 5"
+                                                         audioSettings:[PresetAudioSettings none]
+                                                         videoSettings:hap5VideoSetting
+                                                      analyzerSettings:[PresetAnalysisSettings none]
+                                                              useAudio:YES
+                                                              useVideo:YES
+                                                           useAnalysis:YES
+                                                              editable:NO];
+
+        // HapY
+        PresetVideoSettings* hapYVideoSetting = [[PresetVideoSettings alloc] init];
+        hapYVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"HapY"};
+        
+        PresetObject* hapYPreset = [[PresetObject alloc] initWithTitle:@"HAP Y"
+                                                         audioSettings:[PresetAudioSettings none]
+                                                         videoSettings:hapYVideoSetting
+                                                      analyzerSettings:[PresetAnalysisSettings none]
+                                                              useAudio:YES
+                                                              useVideo:YES
+                                                           useAnalysis:YES
+                                                              editable:NO];
+        
+        // HapM
+        PresetVideoSettings* hapMVideoSetting = [[PresetVideoSettings alloc] init];
+        hapMVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"HapM"};
+        
+        PresetObject* hapMPreset = [[PresetObject alloc] initWithTitle:@"HAP M"
+                                                         audioSettings:[PresetAudioSettings none]
+                                                         videoSettings:hapMVideoSetting
+                                                      analyzerSettings:[PresetAnalysisSettings none]
+                                                              useAudio:YES
+                                                              useVideo:YES
+                                                           useAnalysis:YES
+                                                              editable:NO];
+
+        // HapA
+        PresetVideoSettings* hapAVideoSetting = [[PresetVideoSettings alloc] init];
+        hapAVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"HapA"};
+        
+        PresetObject* hapAPreset = [[PresetObject alloc] initWithTitle:@"HAP Alpha"
+                                                         audioSettings:[PresetAudioSettings none]
+                                                         videoSettings:hapAVideoSetting
+                                                      analyzerSettings:[PresetAnalysisSettings none]
+                                                              useAudio:YES
+                                                              useVideo:YES
+                                                           useAnalysis:YES
+                                                              editable:NO];
+        
+        PresetGroup* hapGroup = [[PresetGroup alloc] initWithTitle:@"HAP" editable:NO];
+        hapGroup.children = @[hap1Preset,
+                              hap5Preset,
+                              hapYPreset,
+                              hapMPreset,
+                              hapAPreset,
+                              ];
+        
 #pragma mark - Animation
 
         // No RLE Encoder in AVFoundation on 10.12?
@@ -522,6 +596,7 @@ const NSString* value = @"Value";
         
         self.standardPresets.children = @[passthroughGroup,
                                           uncompressedGroup,
+                                          hapGroup,
 //                                          animationGroup,
                                           proResGroup,
                                           aicGroup,
