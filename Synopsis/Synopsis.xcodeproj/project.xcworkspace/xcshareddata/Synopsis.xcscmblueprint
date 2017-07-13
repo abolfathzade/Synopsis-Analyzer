@@ -4,6 +4,7 @@
 
   },
   "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "729A65D7AF67509EE4E4F93958E87ED82285AB3A" : 9223372036854775807,
     "FD621B61612EAE3F6614DE4F9F1FD281F3D57D52" : 0,
     "2607E71EBA339476A2AA0374C0A97B6C6DDE7A75" : 9223372036854775807,
     "696275204D6ACFB4CED91D2B4AC4227F459209A0" : 0,
@@ -11,6 +12,7 @@
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "E3B79F1E-EEED-49CF-93F9-B6B1BE8205A0",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "729A65D7AF67509EE4E4F93958E87ED82285AB3A" : "Synopsis\/Synopsis\/hap-in-avfoundation\/",
     "FD621B61612EAE3F6614DE4F9F1FD281F3D57D52" : "Synopsis\/Synopsis\/mp4v2\/",
     "2607E71EBA339476A2AA0374C0A97B6C6DDE7A75" : "Synopsis\/Synopsis\/Synopsis-Framework\/",
     "696275204D6ACFB4CED91D2B4AC4227F459209A0" : "Synopsis\/",
@@ -29,6 +31,11 @@
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/Synopsis\/Synopsis.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "696275204D6ACFB4CED91D2B4AC4227F459209A0"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/Vidvox\/hap-in-avfoundation.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "729A65D7AF67509EE4E4F93958E87ED82285AB3A"
     },
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/gfiumara\/CIEDE2000",
