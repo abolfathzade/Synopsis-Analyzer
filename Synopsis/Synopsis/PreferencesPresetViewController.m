@@ -13,6 +13,7 @@
 #import <VideoToolbox/VTCompressionProperties.h>
 #import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 #import "PresetGroup.h"
+#import "AVAssetWriterHapInput.h"
 
 // Preferences Keys
 const NSString* title = @"Title";
@@ -114,9 +115,9 @@ const NSString* value = @"Value";
         
         // Hap1
         PresetVideoSettings* hap1VideoSetting = [[PresetVideoSettings alloc] init];
-        hap1VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"Hap1"};
+        hap1VideoSetting.settingsDictionary = @{AVVideoCodecKey: AVVideoCodecHap};
         
-        PresetObject* hap1Preset = [[PresetObject alloc] initWithTitle:@"HAP 1"
+        PresetObject* hap1Preset = [[PresetObject alloc] initWithTitle:@"HAP"
                                                                   audioSettings:[PresetAudioSettings none]
                                                                   videoSettings:hap1VideoSetting
                                                                analyzerSettings:[PresetAnalysisSettings none]
@@ -126,9 +127,9 @@ const NSString* value = @"Value";
                                                                        editable:NO];
         // Hap5
         PresetVideoSettings* hap5VideoSetting = [[PresetVideoSettings alloc] init];
-        hap5VideoSetting.settingsDictionary = @{AVVideoCodecKey:@"Hap5"};
+        hap5VideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecHapAlpha};
         
-        PresetObject* hap5Preset = [[PresetObject alloc] initWithTitle:@"HAP 5"
+        PresetObject* hap5Preset = [[PresetObject alloc] initWithTitle:@"HAP Alpha"
                                                          audioSettings:[PresetAudioSettings none]
                                                          videoSettings:hap5VideoSetting
                                                       analyzerSettings:[PresetAnalysisSettings none]
@@ -139,9 +140,9 @@ const NSString* value = @"Value";
 
         // HapY
         PresetVideoSettings* hapYVideoSetting = [[PresetVideoSettings alloc] init];
-        hapYVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"HapY"};
+        hapYVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecHapQ};
         
-        PresetObject* hapYPreset = [[PresetObject alloc] initWithTitle:@"HAP Y"
+        PresetObject* hapYPreset = [[PresetObject alloc] initWithTitle:@"HAP Q"
                                                          audioSettings:[PresetAudioSettings none]
                                                          videoSettings:hapYVideoSetting
                                                       analyzerSettings:[PresetAnalysisSettings none]
@@ -152,9 +153,9 @@ const NSString* value = @"Value";
         
         // HapM
         PresetVideoSettings* hapMVideoSetting = [[PresetVideoSettings alloc] init];
-        hapMVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"HapM"};
+        hapMVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecHapQAlpha};
         
-        PresetObject* hapMPreset = [[PresetObject alloc] initWithTitle:@"HAP M"
+        PresetObject* hapMPreset = [[PresetObject alloc] initWithTitle:@"HAP Q Alpha"
                                                          audioSettings:[PresetAudioSettings none]
                                                          videoSettings:hapMVideoSetting
                                                       analyzerSettings:[PresetAnalysisSettings none]
@@ -163,25 +164,25 @@ const NSString* value = @"Value";
                                                            useAnalysis:YES
                                                               editable:NO];
 
-        // HapA
-        PresetVideoSettings* hapAVideoSetting = [[PresetVideoSettings alloc] init];
-        hapAVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"HapA"};
-        
-        PresetObject* hapAPreset = [[PresetObject alloc] initWithTitle:@"HAP Alpha"
-                                                         audioSettings:[PresetAudioSettings none]
-                                                         videoSettings:hapAVideoSetting
-                                                      analyzerSettings:[PresetAnalysisSettings none]
-                                                              useAudio:YES
-                                                              useVideo:YES
-                                                           useAnalysis:YES
-                                                              editable:NO];
+//        // HapA
+//        PresetVideoSettings* hapAVideoSetting = [[PresetVideoSettings alloc] init];
+//        hapAVideoSetting.settingsDictionary = @{AVVideoCodecKey:@"HapA"};
+//        
+//        PresetObject* hapAPreset = [[PresetObject alloc] initWithTitle:@"HAP Alpha"
+//                                                         audioSettings:[PresetAudioSettings none]
+//                                                         videoSettings:hapAVideoSetting
+//                                                      analyzerSettings:[PresetAnalysisSettings none]
+//                                                              useAudio:YES
+//                                                              useVideo:YES
+//                                                           useAnalysis:YES
+//                                                              editable:NO];
         
         PresetGroup* hapGroup = [[PresetGroup alloc] initWithTitle:@"HAP" editable:NO];
         hapGroup.children = @[hap1Preset,
                               hap5Preset,
                               hapYPreset,
                               hapMPreset,
-                              hapAPreset,
+//                              hapAPreset,
                               ];
         
 #pragma mark - Animation
@@ -644,10 +645,7 @@ const NSString* value = @"Value";
     
     VTRegisterProfessionalVideoWorkflowVideoDecoders();
     VTRegisterProfessionalVideoWorkflowVideoEncoders();
-    
-    
-    // TODO: HAP / Hardware Accelerated HAP, HAP Alpha, HAP Q encoding
-    
+        
     CFArrayRef videoEncoders;
     VTCopyVideoEncoderList(NULL, &videoEncoders);
     NSArray* videoEncodersArray = (__bridge NSArray*)videoEncoders;
@@ -668,6 +666,13 @@ const NSString* value = @"Value";
 
         [encoderArrayWithTitles addObject:@{title:encoder[@"DisplayName"], value:fourCCString}];
     }
+
+    // Add HAP Codecs manually
+    [encoderArrayWithTitles addObject:@{ title : @"HAP", value : AVVideoCodecHap}];
+    [encoderArrayWithTitles addObject:@{ title : @"HAP Alpha", value :AVVideoCodecHapAlpha}];
+    [encoderArrayWithTitles addObject:@{ title : @"HAP Q", value : AVVideoCodecHapQ}];
+    [encoderArrayWithTitles addObject:@{ title : @"HAP Q Alpha", value : AVVideoCodecHapQAlpha}];
+//    [encoderArrayWithTitles addObject:@{ title : @"HAP Alpha", value : @"HapA"}];
     
     //    NSDictionary* animationDictionary = @{ title : @"MPEG4 Video" , value: @{ @"CodecType" : [NSNumber numberWithInt:kCMVideoCodecType_MPEG4Video]}};
     //    [encoderArrayWithTitles addObject: animationDictionary];

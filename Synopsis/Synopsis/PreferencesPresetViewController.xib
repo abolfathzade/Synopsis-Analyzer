@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="10117" systemVersion="15G31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16E195" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="10117"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
         <capability name="box content view" minToolsVersion="7.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PreferencesPresetViewController">
@@ -42,12 +43,12 @@
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                     <subviews>
                         <customView id="heO-Sp-i5P">
-                            <rect key="frame" x="0.0" y="0.0" width="263.5" height="500"/>
+                            <rect key="frame" x="0.0" y="0.0" width="264" height="500"/>
                             <autoresizingMask key="autoresizingMask"/>
                             <subviews>
                                 <button verticalHuggingPriority="750" id="5V7-ck-4U3">
                                     <rect key="frame" x="20" y="6" width="26" height="26"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="ic_add_circle_outline" imagePosition="overlaps" alignment="center" controlSize="small" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="yOg-1e-xSu">
                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                         <font key="font" metaFont="smallSystem"/>
@@ -57,21 +58,21 @@
                                     </connections>
                                 </button>
                                 <box identifier="FuckYou" autoresizesSubviews="NO" title="Preset" id="RrZ-rz-Imh" userLabel="Preset">
-                                    <rect key="frame" x="17" y="37" width="246.5" height="463"/>
+                                    <rect key="frame" x="17" y="37" width="247" height="463"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <view key="contentView" id="YYr-xG-FrQ">
-                                        <rect key="frame" x="2" y="2" width="242.5" height="446"/>
+                                        <rect key="frame" x="2" y="2" width="243" height="446"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <subviews>
                                             <scrollView identifier="ScrollView" borderType="none" autohidesScrollers="YES" horizontalLineScroll="27" horizontalPageScroll="10" verticalLineScroll="27" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="iL8-Bs-eju">
-                                                <rect key="frame" x="0.0" y="0.0" width="242" height="446"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="242.5" height="446"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="Qfy-Fm-MUJ">
-                                                    <rect key="frame" x="0.0" y="0.0" width="242" height="446"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="242.5" height="446"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
                                                         <outlineView appearanceType="vibrantLight" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="firstColumnOnly" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" viewBased="YES" floatsGroupRows="NO" indentationPerLevel="16" autosaveExpandedItems="YES" outlineTableColumn="nib-Ee-dtW" id="JLF-lU-CXy">
-                                                            <rect key="frame" x="0.0" y="0.0" width="242" height="446"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="242.5" height="446"/>
                                                             <autoresizingMask key="autoresizingMask"/>
                                                             <size key="intercellSpacing" width="2" height="3"/>
                                                             <color key="backgroundColor" white="0.80000000000000004" alpha="0.0" colorSpace="deviceWhite"/>
@@ -99,7 +100,7 @@
                                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                                     <imageCell key="cell" controlSize="small" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSActionTemplate" id="nib-KS-mvI"/>
                                                                                 </imageView>
-                                                                                <textField verticalHuggingPriority="750" id="Z3f-ct-WGH">
+                                                                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="Z3f-ct-WGH">
                                                                                     <rect key="frame" x="30" y="5" width="213.5" height="14"/>
                                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                                     <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingTail" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" title="Table View Cell" id="VvQ-mK-9Ya">
@@ -132,12 +133,10 @@
                                             </scrollView>
                                         </subviews>
                                     </view>
-                                    <color key="borderColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="fillColor" name="textColor" catalog="System" colorSpace="catalog"/>
                                 </box>
                                 <button verticalHuggingPriority="750" id="tQe-ZU-bFo">
                                     <rect key="frame" x="54" y="6" width="26" height="26"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="ic_remove_circle_outline" imagePosition="overlaps" alignment="center" controlSize="small" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="V2y-Rk-r9O">
                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                         <font key="font" metaFont="smallSystem"/>
@@ -146,22 +145,20 @@
                             </subviews>
                         </customView>
                         <customView id="TPB-S0-kPl">
-                            <rect key="frame" x="272.5" y="0.0" width="302.5" height="500"/>
+                            <rect key="frame" x="273" y="0.0" width="302" height="500"/>
                             <autoresizingMask key="autoresizingMask"/>
                             <subviews>
-                                <customView id="BD0-hi-WyG">
-                                    <rect key="frame" x="0.0" y="0.0" width="302.5" height="500"/>
+                                <customView misplaced="YES" id="BD0-hi-WyG">
+                                    <rect key="frame" x="0.0" y="20" width="302" height="480"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <box identifier="Fuckyou2" autoresizesSubviews="NO" title="Selected Preset" id="ohq-Pm-nFc">
-                                            <rect key="frame" x="-3" y="-4" width="291.5" height="504"/>
+                                            <rect key="frame" x="-3" y="-4" width="291" height="484"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <view key="contentView" id="VCG-lS-RZ3">
-                                                <rect key="frame" x="2" y="2" width="287.5" height="487"/>
+                                                <rect key="frame" x="2" y="2" width="287" height="467"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             </view>
-                                            <color key="borderColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="fillColor" name="textColor" catalog="System" colorSpace="catalog"/>
                                         </box>
                                     </subviews>
                                 </customView>
@@ -190,16 +187,16 @@
             <subviews>
                 <tabView drawsBackground="NO" controlSize="small" id="RNt-ml-VET">
                     <rect key="frame" x="13" y="10" width="305" height="414"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                     <tabViewItems>
                         <tabViewItem label="Audio" identifier="1" id="yQS-zl-c4w">
                             <view key="view" id="beZ-Ed-cEV">
-                                <rect key="frame" x="10" y="25" width="285" height="376"/>
+                                <rect key="frame" x="10" y="29" width="285" height="372"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <subviews>
                                     <view id="alG-nm-dAK" userLabel="Audio View">
-                                        <rect key="frame" x="0.0" y="0.0" width="285" height="376"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <rect key="frame" x="0.0" y="-4" width="285" height="376"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <subviews>
                                             <button id="Tox-VS-7g3">
                                                 <rect key="frame" x="70" y="339" width="124" height="20"/>
@@ -269,7 +266,7 @@
                                                     <action selector="selectAudioQuality:" target="-2" id="lXv-6l-LKt"/>
                                                 </connections>
                                             </popUpButton>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Kjf-3d-bVi">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="Kjf-3d-bVi">
                                                 <rect key="frame" x="22" y="292" width="45" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Quality:" id="4ml-M2-HSS">
@@ -278,7 +275,7 @@
                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="foW-on-IiD">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="foW-on-IiD">
                                                 <rect key="frame" x="34" y="266" width="32" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Rate:" id="2gl-3K-WIM">
@@ -305,7 +302,7 @@
                                                     <action selector="selectAudioBitrate:" target="-2" id="W1o-8l-Ca9"/>
                                                 </connections>
                                             </popUpButton>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="zUN-ZH-XJZ">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="zUN-ZH-XJZ">
                                                 <rect key="frame" x="24" y="240" width="43" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Bitrate:" id="eVX-h0-fKK">
@@ -314,7 +311,7 @@
                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="xEq-fZ-K94">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="xEq-fZ-K94">
                                                 <rect key="frame" x="22" y="318" width="45" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Format:" id="2yK-SL-WLU">
@@ -335,7 +332,7 @@
                                 <subviews>
                                     <view id="CYX-UF-twh" userLabel="Video View">
                                         <rect key="frame" x="0.0" y="0.0" width="285" height="376"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <subviews>
                                             <popUpButton verticalHuggingPriority="750" id="wT3-U8-sSo">
                                                 <rect key="frame" x="73" y="213" width="127" height="19"/>
@@ -413,7 +410,7 @@
                                                     <action selector="selectVideoQuality:" target="-2" id="Bg6-SY-Q2R"/>
                                                 </connections>
                                             </popUpButton>
-                                            <textField verticalHuggingPriority="750" id="Nmj-ag-4jb">
+                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="Nmj-ag-4jb">
                                                 <rect key="frame" x="73" y="263" width="52" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="left" bezelStyle="round" id="eWm-fm-2aA">
@@ -425,7 +422,7 @@
                                                     <color key="backgroundColor" name="knobColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Cfu-jy-5Na">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="Cfu-jy-5Na">
                                                 <rect key="frame" x="131" y="265" width="10" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="x" id="zvI-Fp-47c">
@@ -434,7 +431,7 @@
                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <textField verticalHuggingPriority="750" id="8ks-wp-ttA">
+                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="8ks-wp-ttA">
                                                 <rect key="frame" x="148" y="263" width="52" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="left" bezelStyle="round" id="uQT-r0-Iip">
@@ -464,7 +461,7 @@
                                                     <action selector="selectVideoResolution:" target="-2" id="UQT-5O-hUd"/>
                                                 </connections>
                                             </popUpButton>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="WCd-Jy-Cfo">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="WCd-Jy-Cfo">
                                                 <rect key="frame" x="24" y="318" width="43" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Codec:" id="fwJ-VF-DXR">
@@ -473,7 +470,7 @@
                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="rz0-gG-XdP">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="rz0-gG-XdP">
                                                 <rect key="frame" x="22" y="242" width="45" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Quality:" id="XRy-VW-Mlu">
@@ -482,7 +479,7 @@
                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="TpW-y6-0Se">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="TpW-y6-0Se">
                                                 <rect key="frame" x="44" y="216" width="23" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Fill:" id="DNT-DI-Eda">
@@ -491,7 +488,7 @@
                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="WXY-lU-8hF">
+                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="WXY-lU-8hF">
                                                 <rect key="frame" x="37" y="292" width="30" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Size:" id="7CS-3S-Pdp">
@@ -515,10 +512,10 @@
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                         <subviews>
                                             <box autoresizesSubviews="NO" title="Analysis Quality" id="dSZ-uN-ReW">
-                                                <rect key="frame" x="17" y="25.000000030874318" width="273" height="143"/>
+                                                <rect key="frame" x="17" y="25" width="273" height="143"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                                                 <view key="contentView" id="AJi-ZM-pO3">
-                                                    <rect key="frame" x="2" y="1.9999999691256676" width="269" height="126"/>
+                                                    <rect key="frame" x="2" y="2" width="269" height="126"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
                                                         <popUpButton verticalHuggingPriority="750" id="5JG-lE-LID">
@@ -537,7 +534,7 @@
                                                                 </menu>
                                                             </popUpButtonCell>
                                                         </popUpButton>
-                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" id="AYw-8Z-QyR">
+                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="NO" id="AYw-8Z-QyR">
                                                             <rect key="frame" x="16" y="19" width="239" height="70"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                                                             <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" id="vEx-Vd-Bf7">
@@ -549,8 +546,6 @@
                                                         </textField>
                                                     </subviews>
                                                 </view>
-                                                <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
-                                                <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             </box>
                                         </subviews>
                                     </customView>
@@ -564,7 +559,7 @@
     </objects>
     <resources>
         <image name="NSActionTemplate" width="14" height="14"/>
-        <image name="ic_add_circle_outline" width="24" height="24"/>
-        <image name="ic_remove_circle_outline" width="24" height="24"/>
+        <image name="ic_add_circle_outline" width="48" height="48"/>
+        <image name="ic_remove_circle_outline" width="48" height="48"/>
     </resources>
 </document>
