@@ -13,8 +13,13 @@
 
 @interface PresetObject : NSObject<NSCopying>
 
-- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable NS_DESIGNATED_INITIALIZER;
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable uuid:(NSString*)UUIDString;
+
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable;
+
+- (instancetype) initWithData:(NSData *)data;
 - (instancetype) init NS_UNAVAILABLE;
+- (NSData *)copyPresetDataWithError:(NSError **)outError;
 
 @property (readwrite) NSString* title;
 @property (readwrite) PresetAudioSettings* audioSettings;
@@ -25,6 +30,7 @@
 @property (readwrite) BOOL useVideo;
 @property (readwrite) BOOL useAnalysis;
 @property (readonly) BOOL editable;
+@property (readonly) NSUUID* uuid;
 
 @end
 

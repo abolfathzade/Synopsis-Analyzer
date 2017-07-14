@@ -12,14 +12,48 @@
 #import <VideoToolbox/VTVideoEncoderList.h>
 #import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 
+#define kSynopsisAnalyzerPresetTitleKey @"Title"
+#define kSynopsisAnalyzerPresetAudioSettingsKey @"AudioSettings"
+#define kSynopsisAnalyzerPresetVideoSettingsKey @"VideoSettings"
+#define kSynopsisAnalyzerPresetAnalysisSettingsKey @"AnalysisSettings"
+#define kSynopsisAnalyzerPresetUseAudioKey @"UseAudio"
+#define kSynopsisAnalyzerPresetUseVideoKey @"UseVideo"
+#define kSynopsisAnalyzerPresetUseAnalysisKey @"Analysis"
+#define kSynopsisAnalyzerPresetEditableKey @"Editable"
+#define kSynopsisAnalyzerPresetUUIDKey @"PresetUUID"
+
 @interface PresetObject ()
 @property (readwrite) BOOL editable;
+@property (readwrite) NSUUID* uuid;
 //@property (readwrite) NSString* zero;
 //@property (readwrite) NSString* one;
 //@property (readwrite) NSString* two;
 @end
 
 @implementation PresetObject
+
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable uuid:(NSString*)UUIDString
+{
+    self = [super init];
+    if(self)
+    {
+        self.title = title;
+        
+        self.audioSettings = audioSettings;
+        self.videoSettings = videoSettings;
+        self.analyzerSettings = analyzerSettings;
+        
+        self.useAudio = useAudio;
+        self.useVideo = useVideo;
+        self.useAnalysis = useAnalysis;
+        
+        self.editable = editable;
+        self.uuid = [[NSUUID alloc] initWithUUIDString:UUIDString];
+        
+        return self;
+    }
+    return nil;
+}
 
 - (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable
 {
@@ -37,10 +71,42 @@
         self.useAnalysis = useAnalysis;
         
         self.editable = editable;
-                
+        self.uuid = [NSUUID UUID];
+        
         return self;
     }
     return nil;
+}
+
+- (instancetype) initWithData:(NSData *)data
+{
+    self = [super init];
+    if(self)
+    {
+        @try
+        {
+            NSDictionary* savedDict = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+            
+            self.title = savedDict[kSynopsisAnalyzerPresetTitleKey];
+            
+            self.audioSettings = [PresetAudioSettings settingsWithDict:savedDict[kSynopsisAnalyzerPresetAudioSettingsKey]];
+            self.videoSettings = [PresetVideoSettings settingsWithDict:savedDict[kSynopsisAnalyzerPresetVideoSettingsKey]];
+            self.analyzerSettings = [PresetAnalysisSettings settingsWithDict:savedDict[kSynopsisAnalyzerPresetAnalysisSettingsKey]];
+            
+            self.useAudio = [savedDict[kSynopsisAnalyzerPresetUseAudioKey] boolValue];
+            self.useVideo = [savedDict[kSynopsisAnalyzerPresetUseVideoKey] boolValue];
+            self.useAnalysis = [savedDict[kSynopsisAnalyzerPresetUseAnalysisKey] boolValue];
+            
+            self.editable = [savedDict[kSynopsisAnalyzerPresetEditableKey] boolValue];
+            self.uuid = [[NSUUID alloc] initWithUUIDString:savedDict[kSynopsisAnalyzerPresetUUIDKey]];
+        }
+        @catch (NSException *exception)
+        {
+            return nil;
+        }
+    }
+    
+    return self;
 }
 
 - (id) copyWithZone:(NSZone *)zone
@@ -52,33 +118,59 @@
                                                    useAudio:self.useAudio
                                                    useVideo:self.useVideo
                                                 useAnalysis:self.useAnalysis
-                                                   editable:self.editable];
+                                                   editable:self.editable
+                                                       uuid:self.uuid.UUIDString];
 }
 
-
+- (NSData *)copyPresetDataWithError:(NSError **)outError
+{
+    NSData* data = nil;
+    @try
+    {
+        NSMutableDictionary* savedDict = [NSMutableDictionary dictionary];
+        
+        savedDict[kSynopsisAnalyzerPresetTitleKey] = self.title;
+        
+        savedDict[kSynopsisAnalyzerPresetAudioSettingsKey] =  self.audioSettings.settingsDictionary;
+        savedDict[kSynopsisAnalyzerPresetVideoSettingsKey] = self.videoSettings.settingsDictionary;
+        savedDict[kSynopsisAnalyzerPresetAnalysisSettingsKey] = self.analyzerSettings.settingsDictionary;
+        
+        savedDict[kSynopsisAnalyzerPresetUseAudioKey] = @(self.useAudio);
+        savedDict[kSynopsisAnalyzerPresetUseVideoKey] = @(self.useVideo);
+        savedDict[kSynopsisAnalyzerPresetUseAnalysisKey] = @(self.useAnalysis);
+        
+        self.editable = [savedDict[kSynopsisAnalyzerPresetEditableKey] boolValue];
+        self.uuid = [[NSUUID alloc] initWithUUIDString:savedDict[kSynopsisAnalyzerPresetUUIDKey]];
+        
+        data = [NSKeyedArchiver archivedDataWithRootObject:savedDict];
+    }
+    @catch (NSException *exception)
+    {
+        NSDictionary *d = [NSDictionary dictionaryWithObject:@"Unable to archive preset" forKey:NSLocalizedFailureReasonErrorKey];
+        *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:-1 userInfo:d];
+        return nil;
+    }
+    
+    return data;
+}
 
 - (NSString*) description
 {
-    NSString* description = [self.title stringByAppendingString:@"\n\r"];
+    NSString* description = @"";
     
-    NSString* audioSettingsString = [@"• Audio Settings:\n\r" stringByAppendingString:[self audioFormatString]];
-    
-    description = [description stringByAppendingString:audioSettingsString];
-    
-    description = [description stringByAppendingString:@"\n\r"];
-    description = [description stringByAppendingString:@"\n\r"];
+    NSString* videoSettingsString = [@"Video : " stringByAppendingString:[self videoFormatString]];
+    NSString* audioSettingsString = [@"Audio : " stringByAppendingString:[self audioFormatString]];
 
-    NSString* videoSettingsString = [@"• Video Settings:\n\r" stringByAppendingString:[self videoFormatString]];
-    
     description = [description stringByAppendingString:videoSettingsString];
+    description = [description stringByAppendingString:@"\n\r"];
+    description = [description stringByAppendingString:audioSettingsString];
 
-    
     return description;
 }
 
 - (NSString*) audioFormatString
 {
-    NSString* audioFormat = @"\tAudio Format: ";
+    NSString* audioFormat = @"";
     
     if(self.useAudio == NO)
         return [audioFormat stringByAppendingString:@"None"];
@@ -100,27 +192,38 @@
         else if([self.audioSettings.settingsDictionary[AVFormatIDKey]  isEqual: @(kAudioFormatMPEG4AAC)])
             audioFormat = [audioFormat stringByAppendingString:@"AAC"];
         
-        audioFormat = [audioFormat stringByAppendingString:@"\n\r"];
-        audioFormat = [audioFormat stringByAppendingString:@"\tSampling Rate: "];
+        audioFormat = [audioFormat stringByAppendingString:@", "];
+
+        if(self.audioSettings.settingsDictionary[AVEncoderBitRateKey])
+        {
+            audioFormat = [audioFormat stringByAppendingString:[self.audioSettings.settingsDictionary[AVEncoderBitRateKey] stringValue]];
+            audioFormat = [audioFormat stringByAppendingString:@" kbps, "];
+        }
+        
         if(self.audioSettings.settingsDictionary[AVSampleRateKey] != [NSNull null] && self.audioSettings.settingsDictionary[AVSampleRateKey] != nil)
             audioFormat = [audioFormat stringByAppendingString:[self.audioSettings.settingsDictionary[AVSampleRateKey] stringValue]];
         else
-            audioFormat = [audioFormat stringByAppendingString:@"Match"];
-        
-        audioFormat = [audioFormat stringByAppendingString:@"\n\r"];
-        audioFormat = [audioFormat stringByAppendingString:@"\tNumber of Channels: "];
+            audioFormat = [audioFormat stringByAppendingString:@" Match"];
+
+        audioFormat = [audioFormat stringByAppendingString:@"khz, "];
+
         if(self.audioSettings.settingsDictionary[AVNumberOfChannelsKey] != [NSNull null] && self.audioSettings.settingsDictionary[AVNumberOfChannelsKey] != nil)
             audioFormat = [audioFormat stringByAppendingString:[self.audioSettings.settingsDictionary[AVNumberOfChannelsKey] stringValue]];
         else
             audioFormat = [audioFormat stringByAppendingString:@"Match"];
+
+        audioFormat = [audioFormat stringByAppendingString:@" Channels"];
+
     }
+    else
+        return [audioFormat stringByAppendingString:@"Passthrough"];
 
     return audioFormat;
 }
 
 - (NSString*) videoFormatString
 {
-    NSString* videoFormat = @"\tVideo Format: ";
+    NSString* videoFormat = @"";
     
     if(self.useVideo == NO)
         return [videoFormat stringByAppendingString:@"None"];
@@ -135,34 +238,41 @@
         
         CFArrayRef videoEncoders;
         VTCopyVideoEncoderList(NULL, &videoEncoders);
-        NSArray* videoEncodersArray = (__bridge NSArray*)videoEncoders;
+        NSMutableArray* videoEncodersArray = [(__bridge NSArray*)videoEncoders mutableCopy];
     
         // fourcc requires 'icod' (need to add the 's)
         OSType fourcc = NSHFSTypeCodeFromFileType([@"'" stringByAppendingString:[self.videoSettings.settingsDictionary[AVVideoCodecKey] stringByAppendingString:@"'"]]);
         NSNumber* fourccNum = [NSNumber numberWithInt:fourcc];
         
+        NSString* encoderName = nil;
         for(NSDictionary* encoder in videoEncodersArray)
         {
             NSNumber* codecType = (NSNumber*)encoder[(NSString*)kVTVideoEncoderList_CodecType];
             if([codecType isEqual:fourccNum])
             {
-                videoFormat = [videoFormat stringByAppendingString:encoder[(NSString*)kVTVideoEncoderList_DisplayName]];
+                encoderName = encoder[(NSString*)kVTVideoEncoderList_DisplayName];
                 break;
             }
         }
         
+        if(encoderName == nil)
+        {
+            // ADD HAP HERE
+        }
+        
+        if(encoderName)
+            videoFormat = [videoFormat stringByAppendingString:encoderName];
+
         if(self.videoSettings.settingsDictionary[AVVideoWidthKey] && self.videoSettings.settingsDictionary[AVVideoHeightKey])
         {
-            videoFormat = [videoFormat stringByAppendingString:@"\n\r"];
-            videoFormat = [videoFormat stringByAppendingString:@"\tDimensions: "];
+            videoFormat = [videoFormat stringByAppendingString:@" , "];
             videoFormat = [videoFormat stringByAppendingString:[self.videoSettings.settingsDictionary[AVVideoWidthKey] stringValue]];
             videoFormat = [videoFormat stringByAppendingString:@" x "];
             videoFormat = [videoFormat stringByAppendingString:[self.videoSettings.settingsDictionary[AVVideoHeightKey] stringValue]];
         }
         else
         {
-            videoFormat = [videoFormat stringByAppendingString:@"\n\r"];
-            videoFormat = [videoFormat stringByAppendingString:@"\tDimensions: Native"];
+            videoFormat = [videoFormat stringByAppendingString:@", Native Size"];
         }
     }
     return videoFormat;

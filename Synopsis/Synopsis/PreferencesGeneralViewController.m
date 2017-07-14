@@ -27,6 +27,8 @@
     self.selectedDefaultPresetDescription.stringValue = selectedPreset.description;
     
     self.defaultPreset = selectedPreset;
+    
+    [self.defaultPresetPopupButton setTitle:sender.title];
 }
 
 @end
