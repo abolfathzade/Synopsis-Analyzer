@@ -13,6 +13,7 @@
 @property (weak) IBOutlet NSPopUpButton* defaultPresetPopupButton;
 @property (copy) PresetObject* defaultPreset;
 
+
 - (IBAction)setDefaultPresetAction:(NSMenuItem*)sender;
 
 

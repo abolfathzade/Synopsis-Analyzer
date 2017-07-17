@@ -45,7 +45,14 @@ static NSInteger currentTag = 0;
     [self.preferencesGeneralViewController.defaultPresetPopupButton.menu removeAllItems];
 
     
-    [self recursiveBuildMenu:self.preferencesGeneralViewController.defaultPresetPopupButton.menu forObjects:[self.preferencesPresetViewController allPresets]];
+    NSMenuItem* defaultPresetMenuItem = nil;
+
+    [self recursiveBuildMenu:self.preferencesGeneralViewController.defaultPresetPopupButton.menu
+                  forObjects:[self.preferencesPresetViewController allPresets]
+            selectedMenuItem: &defaultPresetMenuItem];
+    
+    
+    [self.preferencesGeneralViewController setDefaultPresetAction:defaultPresetMenuItem];
 //    for(NSObject* object in [self.preferencesPresetViewController allPresets])
 //    {
 //        if([object isKindOfClass:[PresetObject class]])
@@ -65,8 +72,13 @@ static NSInteger currentTag = 0;
 //    [[self.preferencesGeneralViewController.defaultPresetPopupButton menu] performActionForItemAtIndex:0];
 }
 
-- (void) recursiveBuildMenu:(NSMenu*)menu forObjects:(NSArray*)arrayOfPresetOrGroup
+- (void) recursiveBuildMenu:(NSMenu*)menu forObjects:(NSArray*)arrayOfPresetOrGroup selectedMenuItem:(NSMenuItem **)selectedMenuItem
 {
+    NSString* defaultPresetUUIDString = [[NSUserDefaults standardUserDefaults] valueForKey:kSynopsisDefaultPresetKey];
+    NSUUID* defaultPresetUUID = [[NSUUID alloc] initWithUUIDString:defaultPresetUUIDString];
+    
+    
+    
     for(NSObject* object in arrayOfPresetOrGroup)
     {
         if([object isKindOfClass:[PresetObject class]])
@@ -78,6 +90,10 @@ static NSInteger currentTag = 0;
             presetMenuItem.target = self.preferencesGeneralViewController;
             
             [menu addItem:presetMenuItem];
+            
+            if([preset.uuid isEqual:defaultPresetUUID])
+                *selectedMenuItem = presetMenuItem;
+            
         }
         
         if ([object isKindOfClass:[PresetGroup class]])
@@ -91,9 +107,10 @@ static NSInteger currentTag = 0;
             [menu addItem:menuItem];
      
             // recurse
-            [self recursiveBuildMenu:subMenu forObjects:group.children];
+            [self recursiveBuildMenu:subMenu forObjects:group.children selectedMenuItem:selectedMenuItem];
         }
     }
+    
 }
 
 #pragma mark -

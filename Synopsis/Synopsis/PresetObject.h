@@ -11,6 +11,8 @@
 @class PresetAudioSettings;
 @class PresetAnalysisSettings;
 
+#define kSynopsisDefaultPresetKey @"kSynopsisDefaultPreset"
+
 @interface PresetObject : NSObject<NSCopying>
 
 - (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable uuid:(NSString*)UUIDString;

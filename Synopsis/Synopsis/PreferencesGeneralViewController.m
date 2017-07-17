@@ -18,6 +18,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do view setup here.
+
 }
 
 - (IBAction)setDefaultPresetAction:(NSMenuItem*)sender
@@ -29,6 +30,8 @@
     self.defaultPreset = selectedPreset;
     
     [self.defaultPresetPopupButton setTitle:sender.title];
+    
+    [[NSUserDefaults standardUserDefaults] setValue:self.defaultPreset.uuid.UUIDString forKey:kSynopsisDefaultPresetKey];
 }
 
 @end
