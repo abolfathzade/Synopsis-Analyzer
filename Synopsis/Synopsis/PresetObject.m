@@ -209,7 +209,7 @@
         
         audioFormat = [audioFormat stringByAppendingString:@", "];
 
-        if(self.audioSettings.settingsDictionary[AVEncoderBitRateKey])
+        if(self.audioSettings.settingsDictionary[AVEncoderBitRateKey] != [NSNull null] && self.audioSettings.settingsDictionary[AVEncoderBitRateKey] != nil)
         {
             audioFormat = [audioFormat stringByAppendingString:[self.audioSettings.settingsDictionary[AVEncoderBitRateKey] stringValue]];
             audioFormat = [audioFormat stringByAppendingString:@" kbps, "];

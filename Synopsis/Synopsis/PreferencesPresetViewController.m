@@ -65,6 +65,8 @@ const NSString* value = @"Value";
 @property (weak) IBOutlet NSButton* useAnalysisCheckButton;
 
 
+@property (readwrite, assign) BOOL presetChanged;
+
 // Outline View Data source
 @property (atomic, readwrite, strong) PresetGroup* standardPresets;
 @property (atomic, readwrite, strong) PresetGroup* customPresets;
@@ -712,6 +714,9 @@ const NSString* value = @"Value";
 {
     [self initVideoPrefs];
     [self initAudioPrefs];
+    
+    // We mark no here, because we only validate
+    self.presetChanged = NO;
 }
 
 - (void) initVideoPrefs
@@ -945,7 +950,8 @@ const NSString* value = @"Value";
     
     
 //    [self validateVideoPrefsUI];
-    [self buildVideoPreferences];
+//    [self buildVideoPreferences];
+    self.presetChanged = YES;
 }
 
 - (IBAction)selectVideoResolution:(id)sender
@@ -987,7 +993,9 @@ const NSString* value = @"Value";
     }
     
 //    [self validateVideoPrefsUI];
-    [self buildVideoPreferences];
+//    [self buildVideoPreferences];
+    self.presetChanged = YES;
+
 }
 
 - (IBAction)selectVideoQuality:(id)sender
@@ -995,7 +1003,9 @@ const NSString* value = @"Value";
     NSLog(@"selected Video Quality: %@", [sender representedObject]);
     
 //    [self validateVideoPrefsUI];
-    [self buildVideoPreferences];
+//    [self buildVideoPreferences];
+    self.presetChanged = YES;
+
 }
 
 - (IBAction)selectVideoAspectRatio:(id)sender
@@ -1003,7 +1013,9 @@ const NSString* value = @"Value";
     NSLog(@"selected Video Quality: %@", [sender representedObject]);
     
 //    [self validateVideoPrefsUI];
-    [self buildVideoPreferences];
+//    [self buildVideoPreferences];
+    self.presetChanged = YES;
+
 }
 
 #pragma mark - Video Prefs Validation
@@ -1012,6 +1024,7 @@ const NSString* value = @"Value";
 {
     // update UI / hack since we dont have validator code yet
     [self selectVideoEncoder:self.prefsVideoCompressor.selectedItem];
+
 }
 
 - (void) buildVideoPreferences
@@ -1117,28 +1130,36 @@ const NSString* value = @"Value";
     }
     
 //    [self validateAudioPrefsUI];
-    [self buildAudioPreferences];
+//    [self buildAudioPreferences];
+    self.presetChanged = YES;
+
 }
 
 - (IBAction)selectAudioSamplerate:(id)sender
 {
     NSLog(@"selected Audio Sampleate: %@", [sender representedObject]);
 //    [self validateAudioPrefsUI];
-    [self buildAudioPreferences];
+//    [self buildAudioPreferences];
+    self.presetChanged = YES;
+
 }
 
 - (IBAction)selectAudioQuality:(id)sender
 {
     NSLog(@"selected Audio Quality: %@", [sender representedObject]);
 //    [self validateAudioPrefsUI];
-    [self buildAudioPreferences];
+//    [self buildAudioPreferences];
+    self.presetChanged = YES;
+
 }
 
 - (IBAction)selectAudioBitrate:(id)sender
 {
     NSLog(@"selected Audio Bitrate: %@", [sender representedObject]);
 //    [self validateAudioPrefsUI];
-    [self buildAudioPreferences];
+//    [self buildAudioPreferences];
+    self.presetChanged = YES;
+
 }
 
 #pragma mark - Audio Prefs
@@ -1238,6 +1259,9 @@ const NSString* value = @"Value";
         view.textField.editable = presetItem.editable;
         view.textField.selectable = presetItem.editable;
         view.imageView.image = [NSImage imageNamed:@"ic_insert_drive_file_white"];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cellDidEditText:) name:NSControlTextDidEndEditingNotification object:view.textField];
+
     }
     else if([item isKindOfClass:[PresetAudioSettings class]])
     {
@@ -1270,9 +1294,36 @@ const NSString* value = @"Value";
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldSelectItem:(id)item
 {
-//    [self.videoContainerView removeFromSuperview];
-//    [self.audioContainerView removeFromSuperview];
-//    [self.analysisContainerView removeFromSuperview];
+    // DO we have any pending changes for a preset
+    if(self.presetChanged)
+    {
+        // Present modal alert, ask to save changes
+        NSAlert* changesAlert = [[NSAlert alloc] init];
+        changesAlert.messageText = @"You have unsaved changes to your current preset";
+        changesAlert.alertStyle = NSAlertStyleWarning;
+
+        [changesAlert addButtonWithTitle:@"Save"];
+        [changesAlert addButtonWithTitle:@"Continue"];
+
+        [changesAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+            
+            switch(returnCode)
+            {
+                case NSAlertFirstButtonReturn:
+                {
+                    [self savePreset:nil];
+                    break;
+                }
+                default:
+                    break;
+            }
+        }];
+        
+        return NO;
+    }
+    
+    
+    
     [self.overviewContainerView removeFromSuperview];
     
     if([item isKindOfClass:[PresetGroup class]])
@@ -1418,6 +1469,17 @@ const NSString* value = @"Value";
     return NO;
 }
 
+#pragma mark - Notification
+
+- (void) cellDidEditText:(NSNotification*)notification
+{
+    NSLog(@"Update Selected Preset Title");
+    NSTextField* updatedTextField = (NSTextField*)notification.object;
+    self.selectedPreset.title = updatedTextField.stringValue;
+
+    self.presetChanged = YES;
+}
+
 #pragma mark - Presets
 
 - (NSArray*) allPresets
@@ -1449,6 +1511,10 @@ const NSString* value = @"Value";
 
 - (IBAction) savePreset:(id)sender
 {
+    // Update our preferences
+    [self buildAudioPreferences];
+    [self buildVideoPreferences];
+    
     NSError* error = nil;
     NSString* fileTitle = self.selectedPreset.uuid.UUIDString;
     NSData* presetData = [self.selectedPreset copyPresetDataWithError:&error];
@@ -1472,6 +1538,8 @@ const NSString* value = @"Value";
             }
         }
     }
+    
+    self.presetChanged = NO;
 }
 
 - (void) configureOverviewContainerViewFromPreset:(PresetObject*)preset
@@ -1489,6 +1557,8 @@ const NSString* value = @"Value";
     
     self.overViewSavePresetButton.enabled = self.selectedPreset.editable;
     
+    // We mark no here, because we only just validates
+    self.presetChanged = NO;
 }
 
 - (void) configureAudioSettingsFromPreset:(PresetObject*)preset
@@ -1501,7 +1571,67 @@ const NSString* value = @"Value";
     self.prefsAudioRate.enabled = preset.editable;
 
     // set values
-//    self.prefsAudioFormat
+    if(preset.audioSettings.settingsDictionary)
+    {
+        // Audio Format
+        if(preset.audioSettings.settingsDictionary[AVFormatIDKey])
+        {
+            NSInteger index = [self.prefsAudioFormat indexOfItemWithRepresentedObject:preset.audioSettings.settingsDictionary[AVFormatIDKey]];
+            if(index > 0)
+                [self.prefsAudioFormat selectItemAtIndex:index];
+            else
+                [self.prefsAudioFormat selectItemAtIndex:0];
+        }
+        else
+            [self.prefsAudioFormat selectItemAtIndex:0];
+
+        // Audio Quality
+        if(preset.audioSettings.settingsDictionary[AVEncoderAudioQualityKey])
+        {
+            NSInteger index = [self.prefsAudioQuality indexOfItemWithRepresentedObject:preset.audioSettings.settingsDictionary[AVEncoderAudioQualityKey]];
+            if(index > 0)
+                [self.prefsAudioQuality selectItemAtIndex:index];
+            else
+                [self.prefsAudioQuality selectItemAtIndex:0];
+
+        }
+        else
+            [self.prefsAudioQuality selectItemAtIndex:0];
+
+        // Audio Rate
+        if(preset.audioSettings.settingsDictionary[AVSampleRateKey])
+        {
+            NSInteger index = [self.prefsAudioRate indexOfItemWithRepresentedObject:preset.audioSettings.settingsDictionary[AVSampleRateKey]];
+            if(index > 0)
+                [self.prefsAudioRate selectItemAtIndex:index];
+            else
+                [self.prefsAudioRate selectItemAtIndex:0];
+        }
+        else
+            [self.prefsAudioRate selectItemAtIndex:0];
+
+        
+        // Audio Bitrate
+        if(preset.audioSettings.settingsDictionary[AVEncoderBitRateKey])
+        {
+            NSInteger index = [self.prefsAudioBitrate indexOfItemWithRepresentedObject:preset.audioSettings.settingsDictionary[AVEncoderBitRateKey]];
+            if(index > 0)
+                [self.prefsAudioBitrate selectItemAtIndex:index];
+            else
+                [self.prefsAudioBitrate selectItemAtIndex:0];
+        }
+        else
+            [self.prefsAudioBitrate selectItemAtIndex:0];
+
+    }
+    // No audio settings at all = passthrough
+    else
+    {
+        [self.prefsAudioFormat selectItemAtIndex:0];
+        [self.prefsAudioQuality selectItemAtIndex:0];
+        [self.prefsAudioRate selectItemAtIndex:0];
+        [self.prefsAudioBitrate selectItemAtIndex:0];
+    }
 }
 
 - (void) configureVideoSettingsFromPreset:(PresetObject*)preset
@@ -1547,7 +1677,18 @@ const NSString* value = @"Value";
                 NSInteger index = [self.prefsVideoDimensions indexOfItemWithRepresentedObject:sizeValue];
                 
                 if(index > 0)
+                {
                     [self.prefsVideoDimensions selectItemAtIndex:index];
+                    
+                    // Update the custom size UI with the appropriate values
+                    NSSize selectedSize = [self.prefsVideoDimensions.selectedItem.representedObject sizeValue];
+                    self.prefsVideoDimensionsCustomWidth.floatValue = selectedSize.width;
+                    self.prefsVideoDimensionsCustomHeight.floatValue = selectedSize.height;
+                    
+                    self.prefsVideoDimensionsCustomWidth.enabled = NO;
+                    self.prefsVideoDimensionsCustomHeight.enabled = NO;
+
+                }
                 // Custom size
                 else
                 {
@@ -1593,8 +1734,12 @@ const NSString* value = @"Value";
     }
     // No video settings at all = passthrough
     else
+    {
         [self.prefsVideoCompressor selectItemAtIndex:0];
-
+        [self.prefsVideoDimensions selectItemAtIndex:0];
+        [self.prefsVideoQuality selectItemAtIndex:0];
+        [self.prefsVideoAspectRatio selectItemAtIndex:0];
+    }
 }
 
 - (void) configureAnalysisSettingsFromPreset:(PresetObject*)preset

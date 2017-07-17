@@ -607,7 +607,7 @@
 		1BD710A61D615E9F007D61B9 /* AVASettingsTableViewCellController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVASettingsTableViewCellController.h; sourceTree = "<group>"; };
 		1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVASettingsTableViewCellController.m; sourceTree = "<group>"; };
 		1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AVASettingsTableViewCellController.xib; sourceTree = "<group>"; };
-		1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Synopsis.app; path = "Synopsis Analyzer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BEA4D191ACB2BCC00AB57C1 /* Synopsis Analyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Synopsis Analyzer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -1632,7 +1632,7 @@
 		1BEA4D1A1ACB2BCC00AB57C1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */,
+				1BEA4D191ACB2BCC00AB57C1 /* Synopsis Analyzer.app */,
 				1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */,
 				1B007EC01B4D7D0900DE6E98 /* SynopsisImporter.mdimporter */,
 			);
@@ -1735,7 +1735,7 @@
 			);
 			name = "Synopsis Analyzer";
 			productName = MetadataTranscoderTestHarness;
-			productReference = 1BEA4D191ACB2BCC00AB57C1 /* Synopsis.app */;
+			productReference = 1BEA4D191ACB2BCC00AB57C1 /* Synopsis Analyzer.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2184,7 +2184,7 @@
 				GCC_UNROLL_LOOPS = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "info.Synopsis.Synopsis-Analyzer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2200,7 +2200,7 @@
 				GCC_UNROLL_LOOPS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "info.Synopsis.Synopsis-Analyzer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
