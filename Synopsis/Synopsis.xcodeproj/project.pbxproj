@@ -18,8 +18,6 @@
 		1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */; };
 		1B190E4C1D06806F00728443 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
 		1B190E501D06819900728443 /* libpython.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4F1D06819900728443 /* libpython.tbd */; };
-		1B1DF39A1DF70B47001A79E2 /* OperationItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B1DF3981DF70B47001A79E2 /* OperationItem.m */; };
-		1B1DF39B1DF70B47001A79E2 /* OperationItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B1DF3991DF70B47001A79E2 /* OperationItem.xib */; };
 		1B2E7C831E81DA8000EF07BC /* AtomicBoolean.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B2E7C821E81DA8000EF07BC /* AtomicBoolean.m */; };
 		1B3233C21C2E395700C9CF5E /* PreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233C11C2E395700C9CF5E /* PreferencesViewController.m */; };
 		1B3233C61C2EFDB200C9CF5E /* PreferencesGeneralViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B3233C41C2EFDB200C9CF5E /* PreferencesGeneralViewController.m */; };
@@ -96,8 +94,6 @@
 		1BC71EE21F17E8FE006DD7DC /* YCoCg.c in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71E851F17E8FE006DD7DC /* YCoCg.c */; };
 		1BC71EE91F17F042006DD7DC /* AVPlayerItemHapDXTOutput.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71E5B1F17E8FE006DD7DC /* AVPlayerItemHapDXTOutput.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		1BD4292F1D2D691E00870D2F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B190E4B1D06806F00728443 /* libz.tbd */; };
-		1BD710A81D615E9F007D61B9 /* AVASettingsTableViewCellController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */; };
-		1BD710AA1D615EC5007D61B9 /* AVASettingsTableViewCellController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -403,9 +399,6 @@
 		1B02BA491D2B07D100A4430F /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		1B190E4B1D06806F00728443 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		1B190E4F1D06819900728443 /* libpython.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libpython.tbd; path = usr/lib/libpython.tbd; sourceTree = SDKROOT; };
-		1B1DF3971DF70B47001A79E2 /* OperationItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OperationItem.h; sourceTree = "<group>"; };
-		1B1DF3981DF70B47001A79E2 /* OperationItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OperationItem.m; sourceTree = "<group>"; };
-		1B1DF3991DF70B47001A79E2 /* OperationItem.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OperationItem.xib; sourceTree = "<group>"; };
 		1B2E7C811E81DA8000EF07BC /* AtomicBoolean.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AtomicBoolean.h; sourceTree = "<group>"; };
 		1B2E7C821E81DA8000EF07BC /* AtomicBoolean.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AtomicBoolean.m; sourceTree = "<group>"; };
 		1B3233C01C2E395700C9CF5E /* PreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesViewController.h; sourceTree = "<group>"; };
@@ -604,9 +597,6 @@
 		1BC71E841F17E8FE006DD7DC /* ImageMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageMath.h; sourceTree = "<group>"; };
 		1BC71E851F17E8FE006DD7DC /* YCoCg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = YCoCg.c; sourceTree = "<group>"; };
 		1BC71E861F17E8FE006DD7DC /* YCoCg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YCoCg.h; sourceTree = "<group>"; };
-		1BD710A61D615E9F007D61B9 /* AVASettingsTableViewCellController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVASettingsTableViewCellController.h; sourceTree = "<group>"; };
-		1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVASettingsTableViewCellController.m; sourceTree = "<group>"; };
-		1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AVASettingsTableViewCellController.xib; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* Synopsis Analyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Synopsis Analyzer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -1135,16 +1125,6 @@
 			path = "site-packages";
 			sourceTree = "<group>";
 		};
-		1B1DF3961DF70B12001A79E2 /* CollectionView */ = {
-			isa = PBXGroup;
-			children = (
-				1B1DF3971DF70B47001A79E2 /* OperationItem.h */,
-				1B1DF3981DF70B47001A79E2 /* OperationItem.m */,
-				1B1DF3991DF70B47001A79E2 /* OperationItem.xib */,
-			);
-			name = CollectionView;
-			sourceTree = "<group>";
-		};
 		1B3233BC1C2E390600C9CF5E /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
@@ -1218,7 +1198,6 @@
 		1B805E381B012B5E005D7354 /* TableView & Cells */ = {
 			isa = PBXGroup;
 			children = (
-				1BD710A51D615DB1007D61B9 /* NewUI */,
 				1B805E2A1B0114D0005D7354 /* ProgressTableViewController.h */,
 				1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */,
 				1B805E301B012386005D7354 /* ProgressTableViewCellSourceController.h */,
@@ -1608,16 +1587,6 @@
 			path = YCoCg;
 			sourceTree = "<group>";
 		};
-		1BD710A51D615DB1007D61B9 /* NewUI */ = {
-			isa = PBXGroup;
-			children = (
-				1BD710A61D615E9F007D61B9 /* AVASettingsTableViewCellController.h */,
-				1BD710A91D615EC5007D61B9 /* AVASettingsTableViewCellController.xib */,
-				1BD710A71D615E9F007D61B9 /* AVASettingsTableViewCellController.m */,
-			);
-			name = NewUI;
-			sourceTree = "<group>";
-		};
 		1BEA4D101ACB2BCC00AB57C1 = {
 			isa = PBXGroup;
 			children = (
@@ -1644,7 +1613,6 @@
 			children = (
 				1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */,
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
-				1B1DF3961DF70B12001A79E2 /* CollectionView */,
 				1B805E381B012B5E005D7354 /* TableView & Cells */,
 				1B3233BC1C2E390600C9CF5E /* Preferences */,
 				1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */,
@@ -1830,9 +1798,7 @@
 				1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */,
 				1B3233D11C2EFDD300C9CF5E /* PreferencesAdvancedViewController.xib in Resources */,
 				1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */,
-				1BD710AA1D615EC5007D61B9 /* AVASettingsTableViewCellController.xib in Resources */,
 				1B3233C71C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib in Resources */,
-				1B1DF39B1DF70B47001A79E2 /* OperationItem.xib in Resources */,
 				1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1910,7 +1876,6 @@
 				1BC71EDD1F17E8FE006DD7DC /* SquishDecoder.c in Sources */,
 				1BC71EA41F17E8FE006DD7DC /* snappy.cc in Sources */,
 				1BC71EDE1F17E8FE006DD7DC /* SquishRGTC1Decoder.c in Sources */,
-				1B1DF39A1DF70B47001A79E2 /* OperationItem.m in Sources */,
 				1BC71EE01F17E8FE006DD7DC /* Utility.m in Sources */,
 				1BC71EA91F17E8FE006DD7DC /* alpha.cpp in Sources */,
 				1BC71EAF1F17E8FE006DD7DC /* colourset.cpp in Sources */,
@@ -1934,7 +1899,6 @@
 				1BC71ECD1F17E8FE006DD7DC /* AVAssetWriterHapInput.m in Sources */,
 				1B805E321B012386005D7354 /* ProgressTableViewCellSourceController.m in Sources */,
 				1B805E401B028BB6005D7354 /* LogController.m in Sources */,
-				1BD710A81D615E9F007D61B9 /* AVASettingsTableViewCellController.m in Sources */,
 				1BC71E9F1F17E8FE006DD7DC /* snappy-c.cc in Sources */,
 				1BA68C501AD02E97003B3CE9 /* BaseTranscodeOperation.m in Sources */,
 				1B3233D01C2EFDD300C9CF5E /* PreferencesAdvancedViewController.m in Sources */,
