@@ -905,6 +905,12 @@ const NSString* value = @"Value";
 
 #pragma mark - Video Prefs Actions
 
+- (IBAction)selectUseVideo:(NSButton*)sender
+{
+    self.selectedPreset.useVideo = (BOOL)sender.state;
+    self.presetChanged = YES;
+}
+
 - (IBAction)selectVideoEncoder:(id)sender
 {
     NSLog(@"selected Video Encoder: %@", [sender representedObject]);
@@ -1093,6 +1099,11 @@ const NSString* value = @"Value";
 
 #pragma mark - Audio Prefs Actions
 
+- (IBAction)selectUseAudio:(NSButton*)sender
+{
+    self.selectedPreset.useAudio = (BOOL)sender.state;
+    self.presetChanged = YES;
+}
 
 - (IBAction)selectAudioFormat:(id)sender
 {
@@ -1570,6 +1581,8 @@ const NSString* value = @"Value";
     self.prefsAudioQuality.enabled = preset.editable;
     self.prefsAudioRate.enabled = preset.editable;
 
+    self.useAudioCheckButton.state = (preset.useAudio) ? 1 : 0;
+    
     // set values
     if(preset.audioSettings.settingsDictionary)
     {
@@ -1646,6 +1659,9 @@ const NSString* value = @"Value";
     self.prefsVideoDimensionsCustomHeight.enabled = preset.editable;
     self.prefsVideoQuality.enabled = preset.editable;
     self.prefsVideoAspectRatio.enabled = preset.editable;
+    
+    self.useVideoCheckButton.state = (preset.useVideo) ? 1 : 0;
+
     
     if(preset.videoSettings.settingsDictionary)
     {
