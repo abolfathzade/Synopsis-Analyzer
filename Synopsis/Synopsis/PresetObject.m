@@ -111,6 +111,7 @@
 
 - (id) copyWithZone:(NSZone *)zone
 {
+    // Copy keeps the UUID
     return [[PresetObject allocWithZone:zone] initWithTitle:self.title
                                               audioSettings:self.audioSettings
                                               videoSettings:self.videoSettings
@@ -120,6 +121,20 @@
                                                 useAnalysis:self.useAnalysis
                                                    editable:self.editable
                                                        uuid:self.uuid.UUIDString];
+}
+
+- (id)mutableCopyWithZone:(nullable NSZone *)zone
+{
+    // Mutable copy gives us a new UUID?
+    return [[PresetObject allocWithZone:zone] initWithTitle:self.title
+                                              audioSettings:self.audioSettings
+                                              videoSettings:self.videoSettings
+                                           analyzerSettings:self.analyzerSettings
+                                                   useAudio:self.useAudio
+                                                   useVideo:self.useVideo
+                                                useAnalysis:self.useAnalysis
+                                                   editable:YES
+                                                       uuid:[NSUUID UUID].UUIDString];
 }
 
 - (NSData *)copyPresetDataWithError:(NSError **)outError
@@ -139,8 +154,8 @@
         savedDict[kSynopsisAnalyzerPresetUseVideoKey] = @(self.useVideo);
         savedDict[kSynopsisAnalyzerPresetUseAnalysisKey] = @(self.useAnalysis);
         
-        self.editable = [savedDict[kSynopsisAnalyzerPresetEditableKey] boolValue];
-        self.uuid = [[NSUUID alloc] initWithUUIDString:savedDict[kSynopsisAnalyzerPresetUUIDKey]];
+        savedDict[kSynopsisAnalyzerPresetEditableKey] = @(self.editable);
+        savedDict[kSynopsisAnalyzerPresetUUIDKey] = (self.uuid.UUIDString);
         
         data = [NSKeyedArchiver archivedDataWithRootObject:savedDict];
     }

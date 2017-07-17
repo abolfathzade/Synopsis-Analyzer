@@ -1469,7 +1469,6 @@ const NSString* value = @"Value";
                 presetURL = [presetURL URLByAppendingPathExtension:@"SynopsisPreset"];
                 
                 [presetData writeToURL:presetURL atomically:YES];
-                
             }
         }
     }
