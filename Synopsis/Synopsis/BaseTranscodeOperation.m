@@ -25,7 +25,6 @@ NSString* const kSynopsisTranscodeOperationTimeElapsedKey = @"timeelapsed"; // N
 NSString* const kSynopsisTranscodeOperationTimeRemainingKey = @"timeremaining"; // NSNumber as NSTimeInterval
 NSString* const kSynopsisTranscodeOperationMetadataKey = @"metadata";// NSDictionary of available analyzed metadata - may be nil
 
-
 // Pass 1
 NSString * const kSynopsisTranscodeVideoSettingsKey = @"kSynopsisVideoTranscodeSettings";
 NSString * const kSynopsisTranscodeAudioSettingsKey = @"kSynopsisAudioTranscodeSettings";

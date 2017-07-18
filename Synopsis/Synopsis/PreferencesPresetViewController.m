@@ -1337,22 +1337,22 @@ const NSString* value = @"Value";
     
     [self.overviewContainerView removeFromSuperview];
     
-    if([item isKindOfClass:[PresetGroup class]])
-    {
-        PresetGroup* itemGroup = (PresetGroup*)item;
-        if(itemGroup.editable)
-        {
-            self.selectedPresetGroup = item;
-        }
-        else
-        {
-            self.selectedPresetGroup = self.customPresets;
-        }
-        
-        self.selectedPreset = nil;
-
-        return YES;
-    }
+//    if([item isKindOfClass:[PresetGroup class]])
+//    {
+//        PresetGroup* itemGroup = (PresetGroup*)item;
+//        if(itemGroup.editable)
+//        {
+//            self.selectedPresetGroup = item;
+//        }
+//        else
+//        {
+//            self.selectedPresetGroup = self.customPresets;
+//        }
+//        
+//        self.selectedPreset = nil;
+//
+//        return YES;
+//    }
 
     if([item isKindOfClass:[PresetObject class]])
     {
