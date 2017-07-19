@@ -19,6 +19,7 @@
 #define kSynopsisAnalyzerPresetUseAudioKey @"UseAudio"
 #define kSynopsisAnalyzerPresetUseVideoKey @"UseVideo"
 #define kSynopsisAnalyzerPresetUseAnalysisKey @"Analysis"
+#define kSynopsisAnalyzerPresetExportJSONKey @"ExportJSON"
 #define kSynopsisAnalyzerPresetEditableKey @"Editable"
 #define kSynopsisAnalyzerPresetUUIDKey @"PresetUUID"
 
@@ -32,7 +33,7 @@
 
 @implementation PresetObject
 
-- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable uuid:(NSString*)UUIDString
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL)useAnalysis exportJSON:(BOOL)exportJSON editable:(BOOL)editable uuid:(NSString*)UUIDString
 {
     self = [super init];
     if(self)
@@ -46,7 +47,7 @@
         self.useAudio = useAudio;
         self.useVideo = useVideo;
         self.useAnalysis = useAnalysis;
-        
+        self.exportJSON = exportJSON;
         self.editable = editable;
         self.uuid = [[NSUUID alloc] initWithUUIDString:UUIDString];
         
@@ -55,7 +56,7 @@
     return nil;
 }
 
-- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL)useAnalysis exportJSON:(BOOL)exportJSON editable:(BOOL)editable
 {
     self = [super init];
     if(self)
@@ -96,7 +97,7 @@
             self.useAudio = [savedDict[kSynopsisAnalyzerPresetUseAudioKey] boolValue];
             self.useVideo = [savedDict[kSynopsisAnalyzerPresetUseVideoKey] boolValue];
             self.useAnalysis = [savedDict[kSynopsisAnalyzerPresetUseAnalysisKey] boolValue];
-            
+            self.exportJSON = [savedDict[kSynopsisAnalyzerPresetExportJSONKey] boolValue];
             self.editable = [savedDict[kSynopsisAnalyzerPresetEditableKey] boolValue];
             self.uuid = [[NSUUID alloc] initWithUUIDString:savedDict[kSynopsisAnalyzerPresetUUIDKey]];
         }
@@ -119,6 +120,7 @@
                                                    useAudio:self.useAudio
                                                    useVideo:self.useVideo
                                                 useAnalysis:self.useAnalysis
+                                                 exportJSON:self.exportJSON
                                                    editable:self.editable
                                                        uuid:self.uuid.UUIDString];
 }
@@ -133,6 +135,7 @@
                                                    useAudio:self.useAudio
                                                    useVideo:self.useVideo
                                                 useAnalysis:self.useAnalysis
+                                                 exportJSON:self.exportJSON
                                                    editable:YES
                                                        uuid:[NSUUID UUID].UUIDString];
 }
@@ -153,7 +156,8 @@
         savedDict[kSynopsisAnalyzerPresetUseAudioKey] = @(self.useAudio);
         savedDict[kSynopsisAnalyzerPresetUseVideoKey] = @(self.useVideo);
         savedDict[kSynopsisAnalyzerPresetUseAnalysisKey] = @(self.useAnalysis);
-        
+        savedDict[kSynopsisAnalyzerPresetExportJSONKey] = @(self.exportJSON);
+
         savedDict[kSynopsisAnalyzerPresetEditableKey] = @(self.editable);
         savedDict[kSynopsisAnalyzerPresetUUIDKey] = (self.uuid.UUIDString);
         

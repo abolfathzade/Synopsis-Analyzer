@@ -15,9 +15,9 @@
 
 @interface PresetObject : NSObject<NSCopying>
 
-- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable uuid:(NSString*)UUIDString;
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis exportJSON:(BOOL)exportJSON editable:(BOOL)editable uuid:(NSString*)UUIDString;
 
-- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis editable:(BOOL)editable;
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis exportJSON:(BOOL)exportJSON editable:(BOOL)editable;
 
 - (instancetype) initWithData:(NSData *)data;
 - (instancetype) init NS_UNAVAILABLE;
@@ -31,6 +31,7 @@
 @property (readwrite) BOOL useAudio;
 @property (readwrite) BOOL useVideo;
 @property (readwrite) BOOL useAnalysis;
+@property (readwrite) BOOL exportJSON;
 @property (readonly) BOOL editable;
 @property (readonly) NSUUID* uuid;
 

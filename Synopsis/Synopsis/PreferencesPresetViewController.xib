@@ -11,6 +11,7 @@
             <connections>
                 <outlet property="analysisContainerView" destination="74g-Bj-gWe" id="sdM-QO-TCW"/>
                 <outlet property="audioContainerView" destination="alG-nm-dAK" id="D2f-C9-8QS"/>
+                <outlet property="exportJSONCheckButton" destination="d74-8o-6TD" id="oLk-3P-SU2"/>
                 <outlet property="overViewSavePresetButton" destination="ukI-ft-GBe" id="gfk-3d-LWt"/>
                 <outlet property="overviewContainerView" destination="Xa5-Iy-SzP" id="JcP-Nf-N4G"/>
                 <outlet property="prefsAudioBitrate" destination="zeY-EF-YHN" id="4Zk-SM-WEL"/>
@@ -185,14 +186,6 @@
             </subviews>
             <point key="canvasLocation" x="-10.5" y="1512"/>
         </customView>
-        <button id="kYa-Zd-tia">
-            <rect key="frame" x="0.0" y="0.0" width="103" height="20"/>
-            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-            <buttonCell key="cell" type="check" title="Run Analysis" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="XUL-pg-OVg">
-                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                <font key="font" metaFont="smallSystem"/>
-            </buttonCell>
-        </button>
         <view id="Xa5-Iy-SzP" userLabel="Overview View">
             <rect key="frame" x="0.0" y="0.0" width="331" height="421"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -525,55 +518,78 @@
                                 <rect key="frame" x="10" y="25" width="285" height="376"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <subviews>
-                                    <customView id="74g-Bj-gWe" userLabel="Analysis View">
-                                        <rect key="frame" x="-11" y="173" width="307" height="177"/>
-                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                        <subviews>
-                                            <box autoresizesSubviews="NO" title="Analysis Quality" id="dSZ-uN-ReW">
-                                                <rect key="frame" x="17" y="25" width="273" height="143"/>
-                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
-                                                <view key="contentView" id="AJi-ZM-pO3">
-                                                    <rect key="frame" x="2" y="2" width="269" height="126"/>
-                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                    <subviews>
-                                                        <popUpButton verticalHuggingPriority="750" id="5JG-lE-LID">
-                                                            <rect key="frame" x="15" y="96" width="241" height="22"/>
-                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="tL4-Jk-0FB">
-                                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                                <font key="font" metaFont="smallSystem"/>
-                                                                <menu key="menu" id="oAl-AY-HVd">
-                                                                    <items>
-                                                                        <menuItem title="Low" id="lpz-Mu-xx0"/>
-                                                                        <menuItem title="Medium" id="h8b-zb-Oz8"/>
-                                                                        <menuItem title="High" id="dL6-Iq-wcg"/>
-                                                                        <menuItem title="Original" id="o7w-cM-Q2O"/>
-                                                                    </items>
-                                                                </menu>
-                                                            </popUpButtonCell>
-                                                        </popUpButton>
-                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="NO" id="AYw-8Z-QyR">
-                                                            <rect key="frame" x="16" y="19" width="239" height="70"/>
-                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
-                                                            <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" id="vEx-Vd-Bf7">
-                                                                <font key="font" metaFont="smallSystem"/>
-                                                                <string key="title">Analysis Quality reduces the frame size passed in to individual analyzer plugins, as well as hints to analyzer plugins to use higher quality (slower), or lower quality (faster) analysis techniques</string>
-                                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                            </textFieldCell>
-                                                        </textField>
-                                                    </subviews>
-                                                </view>
-                                            </box>
-                                        </subviews>
-                                    </customView>
+                                    <button misplaced="YES" id="kYa-Zd-tia">
+                                        <rect key="frame" x="70" y="334" width="103" height="20"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <buttonCell key="cell" type="check" title="Run Analysis" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="XUL-pg-OVg">
+                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                            <font key="font" metaFont="smallSystem"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="selectUseAnalysis:" target="-2" id="YyZ-io-fRj"/>
+                                        </connections>
+                                    </button>
+                                    <button misplaced="YES" id="d74-8o-6TD">
+                                        <rect key="frame" x="70" y="314" width="187" height="20"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <buttonCell key="cell" type="check" title="Export additional JSON Sidecar" bezelStyle="regularSquare" imagePosition="left" controlSize="small" inset="2" id="Yt4-AQ-dB1">
+                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                            <font key="font" metaFont="smallSystem"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="selectExportJSON:" target="-2" id="syL-Es-uRV"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                             </view>
                         </tabViewItem>
                     </tabViewItems>
                 </tabView>
             </subviews>
+            <point key="canvasLocation" x="131.5" y="168.5"/>
         </view>
+        <customView id="74g-Bj-gWe" userLabel="Analysis View">
+            <rect key="frame" x="0.0" y="0.0" width="307" height="177"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+            <subviews>
+                <box autoresizesSubviews="NO" title="Analysis Quality" id="dSZ-uN-ReW">
+                    <rect key="frame" x="17" y="25" width="273" height="143"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
+                    <view key="contentView" id="AJi-ZM-pO3">
+                        <rect key="frame" x="2" y="2" width="269" height="126"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <popUpButton verticalHuggingPriority="750" id="5JG-lE-LID">
+                                <rect key="frame" x="15" y="96" width="241" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="tL4-Jk-0FB">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="smallSystem"/>
+                                    <menu key="menu" id="oAl-AY-HVd">
+                                        <items>
+                                            <menuItem title="Low" id="lpz-Mu-xx0"/>
+                                            <menuItem title="Medium" id="h8b-zb-Oz8"/>
+                                            <menuItem title="High" id="dL6-Iq-wcg"/>
+                                            <menuItem title="Original" id="o7w-cM-Q2O"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                            </popUpButton>
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="NO" id="AYw-8Z-QyR">
+                                <rect key="frame" x="16" y="19" width="239" height="70"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
+                                <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" id="vEx-Vd-Bf7">
+                                    <font key="font" metaFont="smallSystem"/>
+                                    <string key="title">Analysis Quality reduces the frame size passed in to individual analyzer plugins, as well as hints to analyzer plugins to use higher quality (slower), or lower quality (faster) analysis techniques</string>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                    </view>
+                </box>
+            </subviews>
+        </customView>
     </objects>
     <resources>
         <image name="NSActionTemplate" width="14" height="14"/>
