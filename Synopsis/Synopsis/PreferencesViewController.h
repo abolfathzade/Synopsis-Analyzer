@@ -13,5 +13,6 @@
 
 - (PresetObject*) defaultPreset;
 - (NSArray*) availablePresets;
+- (void) buildPresetMenu;
 
 @end

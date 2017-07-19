@@ -55,6 +55,10 @@
 @interface PresetVideoSettings : PresetSettings
 @end
 
+
+extern NSString* const kSynopsisAnalysisPresetSettingQualityHintKey;
+extern NSString* const kSynopsisAnalysisPresetSettingExportJSONKey;
+
 @interface PresetAnalysisSettings : PresetSettings
 @end
 

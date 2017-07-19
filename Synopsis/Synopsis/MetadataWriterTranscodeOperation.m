@@ -91,8 +91,14 @@
             self.analyzedGlobalMetadata = self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey];
         }
         
-        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsislMetadataVersionValue];
-        
+        BOOL exportJSON = NO;
+        if(self.metadataOptions[kSynopsisAnalyzedMetadataExportToJSONKey])
+        {
+            exportJSON = [self.metadataOptions[kSynopsisAnalyzedMetadataExportToJSONKey] boolValue];
+        }
+
+        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsislMetadataVersionValue cacheJSONForExport:exportJSON];
+
         [self setupTranscodeShitSucessfullyOrDontWhatverMan];
     }
     return self;
@@ -325,7 +331,7 @@
         
         [encodedMetadata addObject:[self.metadataEncoder encodeSynopsisMetadataToTimesMetadataGroup:metadataDict timeRange:timeRange]];
     }
-
+    
     self.analyzedVideoSampleBufferMetadata = encodedMetadata;
     
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading] && !self.isCancelled)
@@ -739,6 +745,13 @@
             
             // Mark our version tag in HFS+Metadata as well, for introspection sake
             [self xattrsetPlist:@(kSynopsisMetadataHFSAttributeVersionValue) forKey:kSynopsisMetadataHFSAttributeVersionKey];
+            
+            if(self.metadataEncoder.cacheForExport)
+            {
+                NSURL* jsonDestination = [self.destinationURL URLByDeletingPathExtension];
+                jsonDestination = [jsonDestination URLByAppendingPathExtension:@"json"];
+                [self.metadataEncoder exportJSONToURL:jsonDestination];
+            }
             
             dispatch_semaphore_signal(waitForWriting);
         }];

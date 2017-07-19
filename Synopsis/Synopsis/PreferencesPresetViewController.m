@@ -5,7 +5,7 @@
 //  Created by vade on 12/26/15.
 //  Copyright (c) 2015 metavisual. All rights reserved.
 //
-
+#import "PreferencesViewController.h"
 #import "PreferencesPresetViewController.h"
 #import <AVFoundation/AVFoundation.h>
 #import <VideoToolbox/VideoToolbox.h>
@@ -1290,10 +1290,8 @@ const NSString* value = @"Value";
 
 - (void) buildAnalysisPrefs
 {
-    NSMutableDictionary* analysisSettingsDictionary = [NSMutableDictionary new];
-    
     // get our fourcc from our compressor UI represented object and convert it to a string
-    self.selectedPreset.analyzerSettings = [PresetAnalysisSettings settingsWithDict:analysisSettingsDictionary];
+    self.selectedPreset.analyzerSettings = [PresetAnalysisSettings settingsWithDict:nil];
 }
 
 #pragma mark - SplitView Delegate
@@ -1597,6 +1595,7 @@ const NSString* value = @"Value";
     self.selectedPresetGroup.children = newChildren;
     
     [self.presetOutlineView reloadData];
+    
 }
 
 - (IBAction) savePreset:(id)sender
@@ -1631,6 +1630,10 @@ const NSString* value = @"Value";
     }
     
     self.presetChanged = NO;
+    
+    PreferencesViewController* parent = (PreferencesViewController*) self.parentViewController;
+    [parent buildPresetMenu];
+
 }
 
 - (void) configureOverviewContainerViewFromPreset:(PresetObject*)preset

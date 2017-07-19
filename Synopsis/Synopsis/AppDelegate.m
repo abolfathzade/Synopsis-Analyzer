@@ -280,15 +280,17 @@ static NSTimeInterval start;
     PresetAudioSettings* audioSettings = currentPreset.audioSettings;
     PresetAnalysisSettings* analysisSettings = currentPreset.analyzerSettings;
     
+    BOOL exportJSON = currentPreset.exportJSON;
+    
     // TODO:
-    NSDictionary* placeholderAnalysisSettings = @{kSynopsisAnalysisSettingsQualityHintKey : @(SynopsisAnalysisQualityHintMedium),
+    NSDictionary* placeholderAnalysisSettings = @{kSynopsisAnalysisSettingsQualityHintKey : @(SynopsisAnalysisQualityHintLow),
                                                   kSynopsisAnalysisSettingsEnabledPluginsKey : self.analyzerPlugins,
                                                   kSynopsisAnalysisSettingsEnableConcurrencyKey : @TRUE,
                                                   };
     
     NSDictionary* transcodeOptions = @{kSynopsisTranscodeVideoSettingsKey : (videoSettings.settingsDictionary) ? videoSettings.settingsDictionary : [NSNull null],
                                        kSynopsisTranscodeAudioSettingsKey : (audioSettings.settingsDictionary) ? audioSettings.settingsDictionary : [NSNull null],
-                                       kSynopsisAnalysisSettingsKey : (analysisSettings.settingsDictionary) ? analysisSettings.settingsDictionary : placeholderAnalysisSettings,
+                                       kSynopsisAnalysisSettingsKey : placeholderAnalysisSettings,
                                        };
     
     // TODO: Just pass a copy of the current Preset directly.
@@ -312,7 +314,8 @@ static NSTimeInterval start;
                                     {
                                         NSDictionary* metadataOptions = @{kSynopsisAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
                                                                           kSynopsisAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
-                                                                          kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata
+                                                                          kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata,
+                                                                          kSynopsisAnalyzedMetadataExportToJSONKey : @(exportJSON),
                                                                           };
                                         
                                         // Inherit UUID
