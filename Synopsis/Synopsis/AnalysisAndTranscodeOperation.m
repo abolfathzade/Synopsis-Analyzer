@@ -60,8 +60,8 @@
 @property (atomic, readwrite, strong) NSDictionary* audioTranscodeSettings;
 
 // Eventually becomes our analyzed metadata - this stuff is mutated during reading of frames
-@property (atomic, readwrite, strong) NSMutableArray<AVTimedMetadataGroup*>* inFlightVideoSampleBufferMetadata;
-@property (atomic, readwrite, strong) NSMutableArray<AVTimedMetadataGroup*>* inFlightAudioSampleBufferMetadata;
+@property (atomic, readwrite, strong) NSMutableArray<NSDictionary*>* inFlightVideoSampleBufferMetadata;
+@property (atomic, readwrite, strong) NSMutableArray<NSDictionary*>* inFlightAudioSampleBufferMetadata;
 @property (atomic, readwrite, strong) NSMutableDictionary* inFlightGlobalMetadata;
 
 // Reading the original sample Data
@@ -86,8 +86,7 @@
 
 @property (atomic, readwrite, assign) SynopsisAnalysisQualityHint analysisQualityHint;
 
-@property (atomic, readwrite, strong) SynopsisMetadataEncoder* metadataEncoder;
-
+//@property (atomic, readwrite, strong) SynopsisMetadataEncoder* metadataEncoder;
 
 // Transcode Operation and Queue objects
 // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
@@ -188,7 +187,7 @@
         self.jsonEncodeQueue = [[NSOperationQueue alloc] init];
         self.jsonEncodeQueue.maxConcurrentOperationCount = 1;
         
-        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsislMetadataVersionValue];
+//        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsislMetadataVersionValue];
     }
     return self;
 }
@@ -697,15 +696,20 @@
                                               NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
                                                   
                                                   // Store out running metadata
-                                                  AVTimedMetadataGroup *group = [self.metadataEncoder encodeSynopsisMetadataToTimesMetadataGroup:aggregatedAndAnalyzedMetadata timeRange:currentSampleTimeRange];
-                                                  if(group)
+//                                                  AVTimedMetadataGroup *group = [self.metadataEncoder encodeSynopsisMetadataToTimesMetadataGroup:aggregatedAndAnalyzedMetadata timeRange:currentSampleTimeRange];
+//                                                  if(group)
                                                   {
-                                                      [self.inFlightVideoSampleBufferMetadata addObject:group];
+                                                      NSValue* timeRangeValue = [NSValue valueWithCMTimeRange:currentSampleTimeRange];
+                                                      NSDictionary* metadata = @{@"TimeRange" : timeRangeValue,
+                                                                                 @"Metadata" : aggregatedAndAnalyzedMetadata
+                                                                                 };
+                                                      
+                                                      [self.inFlightVideoSampleBufferMetadata addObject:metadata];
                                                   }
-                                                  else
-                                                  {
-                                                      [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
-                                                  }
+//                                                  else
+//                                                  {
+//                                                      [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
+//                                                  }
                                                   
                                                   self.videoProgress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
                                               }];

@@ -315,6 +315,19 @@
         self.transcodeAssetWriter.metadata = @[encodedItem];
     }
     
+    // Convert our per frame metadata and encode it
+    NSMutableArray* encodedMetadata = [NSMutableArray array];
+    
+    for(NSDictionary* dictionary in self.analyzedVideoSampleBufferMetadata)
+    {
+        CMTimeRange timeRange = [dictionary[@"TimeRange"] CMTimeRangeValue];
+        NSDictionary* metadataDict = dictionary[@"Metadata"];
+        
+        [encodedMetadata addObject:[self.metadataEncoder encodeSynopsisMetadataToTimesMetadataGroup:metadataDict timeRange:timeRange]];
+    }
+
+    self.analyzedVideoSampleBufferMetadata = encodedMetadata;
+    
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading] && !self.isCancelled)
     {
         [self.transcodeAssetWriter startSessionAtSourceTime:kCMTimeZero];
