@@ -57,18 +57,30 @@ static NSTimeInterval start;
     self = [super init];
     if(self)
     {
+        NSDictionary* standardDefaults = @{kSynopsisAnalyzerDefaultPresetPreferencesKey : @"DDCEA125-B93D-464B-B369-FB78A5E890B4",
+                                           kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey : @(YES),
+                                           kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey : @(YES),
+                                           };
+        
+        [[NSUserDefaults standardUserDefaults] registerDefaults:standardDefaults];
+        
+        // Number of simultaneous Jobs:
+        BOOL concurrentJobs = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey] boolValue];
+        
         // Serial transcode queue
         self.transcodeQueue = [[NSOperationQueue alloc] init];
-        self.transcodeQueue.maxConcurrentOperationCount = [[NSProcessInfo processInfo] activeProcessorCount] / 2; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
+        self.transcodeQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
         self.transcodeQueue.qualityOfService = NSQualityOfServiceUserInitiated;
         
         // Serial metadata / passthrough writing queue
         self.metadataQueue = [[NSOperationQueue alloc] init];
-        self.metadataQueue.maxConcurrentOperationCount = [[NSProcessInfo processInfo] activeProcessorCount] / 2; //NSOperationQueueDefaultMaxConcurrentOperationCount; //1, NSOperationQueueDefaultMaxConcurrentOperationCount
+        self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
         self.metadataQueue.qualityOfService = NSQualityOfServiceUserInitiated;
         
         self.analyzerPlugins = [NSMutableArray new];
         self.analyzerPluginsInitializedForPrefs = [NSMutableArray new];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(concurrentJobsDidChange:) name:kSynopsisAnalyzerConcurrentJobAnalysisDidChangeNotification object:nil];
     }
     return self;
 }
@@ -81,6 +93,8 @@ static NSTimeInterval start;
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    
+    
     
     // REVEAL THYSELF
     [[self window] makeKeyAndOrderFront:nil];
@@ -396,6 +410,20 @@ static BOOL isRunning = NO;
 - (IBAction) revealPreferences:(id)sender
 {
     [self revealHelper:self.prefsWindow sender:sender];
+}
+
+#pragma mark - Notifications
+
+- (void) concurrentJobsDidChange:(NSNotification*)notification
+{
+    // Number of simultaneous Jobs:
+    BOOL concurrentJobs = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey] boolValue];
+    
+    // Serial transcode queue
+    self.transcodeQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
+    
+    // Serial metadata / passthrough writing queue
+    self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
 }
 
 #pragma mark - Helpers

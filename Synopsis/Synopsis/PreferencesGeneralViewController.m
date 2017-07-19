@@ -31,7 +31,8 @@
     
     [self.defaultPresetPopupButton setTitle:sender.title];
     
-    [[NSUserDefaults standardUserDefaults] setValue:self.defaultPreset.uuid.UUIDString forKey:kSynopsisDefaultPresetKey];
+    [[NSUserDefaults standardUserDefaults] setObject:self.defaultPreset.uuid.UUIDString forKey:kSynopsisAnalyzerDefaultPresetPreferencesKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 @end

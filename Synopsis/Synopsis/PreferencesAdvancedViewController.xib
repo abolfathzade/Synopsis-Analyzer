@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16E195" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <development version="6300" identifier="xcode"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
+        <capability name="box content view" minToolsVersion="7.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PreferencesAdvancedViewController">
@@ -16,28 +18,19 @@
             <rect key="frame" x="0.0" y="0.0" width="480" height="338"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <box autoresizesSubviews="NO" title="Concurrency" borderType="line" id="ADI-Hy-IoY">
+                <box autoresizesSubviews="NO" borderType="line" title="Concurrency" id="ADI-Hy-IoY">
                     <rect key="frame" x="23" y="96" width="440" height="222"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <view key="contentView">
+                    <view key="contentView" id="dMT-ln-Gip">
                         <rect key="frame" x="1" y="1" width="438" height="206"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="07i-1b-iG6">
-                                <rect key="frame" x="16" y="171" width="163" height="14"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Number of simultaneous jobs:" id="JjK-3b-6jO">
-                                    <font key="font" metaFont="smallSystem"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" id="5I3-yT-H9o">
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="NO" id="5I3-yT-H9o">
                                 <rect key="frame" x="16" y="101" width="408" height="56"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                                 <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" id="jvI-d1-OIJ">
                                     <font key="font" metaFont="smallSystem"/>
-                                    <string key="title">The number of concurrent transcode and analysis jobs to run in parallel. Default uses all available CPUs. Lower this setting to reduce CPU usage. To maximally reduce CPU usage set this preference to 1 and disable "Analyze frames in parallel".</string>
+                                    <string key="title">Simultaneous transcode and analysis can run multiple videos in parallel. Default uses all available CPUs. Disable this setting to reduce CPU usage. To maximally reduce CPU usage set this preference to 1 and disable "Analyze frames in simultaneously" below.</string>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
@@ -45,12 +38,16 @@
                             <button id="JEQ-KR-XeX">
                                 <rect key="frame" x="15" y="63" width="361" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="check" title="Analyze frames simultaneously" bezelStyle="regularSquare" imagePosition="left" controlSize="small" enabled="NO" state="on" inset="2" id="2Yp-yZ-rBX">
+                                <buttonCell key="cell" type="check" title="Analyze frames simultaneously" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="2Yp-yZ-rBX">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="smallSystem"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="enableSimultaneousFrames:" target="-2" id="WpG-1t-Iuc"/>
+                                    <binding destination="3DR-aG-XXf" name="value" keyPath="values.ConcurrentFrameAnalysis" id="q7P-y2-MR2"/>
+                                </connections>
                             </button>
-                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" id="C4Z-Gc-iNr">
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="NO" id="C4Z-Gc-iNr">
                                 <rect key="frame" x="16" y="28" width="406" height="28"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" id="BQy-RX-FwI">
@@ -60,36 +57,25 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <popUpButton verticalHuggingPriority="750" id="a7Q-Gm-Bi3">
-                                <rect key="frame" x="180" y="166" width="101" height="22"/>
+                            <button misplaced="YES" id="4Ua-6d-pwS">
+                                <rect key="frame" x="15" y="171" width="361" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <popUpButtonCell key="cell" type="push" title="Default" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" enabled="NO" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="4Lr-nG-uGh" id="pnw-ha-cTU">
-                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                <buttonCell key="cell" type="check" title="Analyze movies simultaneously" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="cbd-y2-Ulr">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="smallSystem"/>
-                                    <menu key="menu" id="ADq-vu-OaW">
-                                        <items>
-                                            <menuItem title="Default" state="on" id="4Lr-nG-uGh">
-                                                <modifierMask key="keyEquivalentModifierMask"/>
-                                            </menuItem>
-                                            <menuItem isSeparatorItem="YES" id="Zkl-kR-SwA"/>
-                                            <menuItem title="1" id="fnu-tN-ICV"/>
-                                            <menuItem title="2" id="qkr-pf-LIS"/>
-                                            <menuItem title="3" id="7FS-uO-NLm"/>
-                                            <menuItem title="4" id="nPB-4j-2z1"/>
-                                            <menuItem title="5" id="SGf-Dx-0R0"/>
-                                        </items>
-                                    </menu>
-                                </popUpButtonCell>
-                            </popUpButton>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="enableSimultaneousJobs:" target="-2" id="PbE-ed-ovx"/>
+                                    <binding destination="3DR-aG-XXf" name="value" keyPath="values.ConcurrentJobAnalysis" id="BVO-xp-CCx"/>
+                                </connections>
+                            </button>
                         </subviews>
                     </view>
-                    <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
-                    <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                 </box>
-                <box autoresizesSubviews="NO" title="Temporary Items Directory" borderType="line" id="6WV-WX-nkY">
+                <box autoresizesSubviews="NO" borderType="line" title="Temporary Items Directory" id="6WV-WX-nkY">
                     <rect key="frame" x="23" y="16" width="440" height="76"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <view key="contentView">
+                    <view key="contentView" id="VSk-tt-P0P">
                         <rect key="frame" x="1" y="1" width="438" height="60"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -101,7 +87,7 @@
                                     <font key="font" metaFont="smallSystem"/>
                                 </buttonCell>
                             </button>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="2w1-KK-5ft">
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="2w1-KK-5ft">
                                 <rect key="frame" x="16" y="14" width="384" height="14"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="/path/to/destination" id="0dB-Nf-2wm">
@@ -111,18 +97,17 @@
                                 </textFieldCell>
                             </textField>
                             <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="tVr-OM-81F">
-                                <rect key="frame" x="406.00000011293514" y="14" width="14" height="14"/>
+                                <rect key="frame" x="406" y="14" width="14" height="14"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSFollowLinkFreestandingTemplate" id="tW4-jZ-q13"/>
                             </imageView>
                         </subviews>
                     </view>
-                    <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
-                    <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                 </box>
             </subviews>
             <point key="canvasLocation" x="247" y="403"/>
         </customView>
+        <userDefaultsController representsSharedInstance="YES" id="3DR-aG-XXf"/>
     </objects>
     <resources>
         <image name="NSFollowLinkFreestandingTemplate" width="14" height="14"/>

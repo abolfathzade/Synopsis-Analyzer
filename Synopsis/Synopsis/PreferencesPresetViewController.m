@@ -97,7 +97,8 @@ const NSString* value = @"Value";
                                                                useVideo:YES
                                                             useAnalysis:YES
                                                              exportJSON:NO
-                                                               editable:NO];
+                                                               editable:NO
+                                                                   uuid:@"DDCEA125-B93D-464B-B369-FB78A5E890B4"];
         
         PresetObject* passthroughNoAudio = [[PresetObject alloc] initWithTitle:@"Passthrough - No Audio"
                                                                  audioSettings:[PresetAudioSettings none]

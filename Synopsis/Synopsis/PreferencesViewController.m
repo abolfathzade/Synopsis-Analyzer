@@ -81,7 +81,7 @@ static NSInteger currentTag = 0;
 
 - (void) recursiveBuildMenu:(NSMenu*)menu forObjects:(NSArray*)arrayOfPresetOrGroup selectedMenuItem:(NSMenuItem **)selectedMenuItem
 {
-    NSString* defaultPresetUUIDString = [[NSUserDefaults standardUserDefaults] valueForKey:kSynopsisDefaultPresetKey];
+    NSString* defaultPresetUUIDString = [[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerDefaultPresetPreferencesKey];
     NSUUID* defaultPresetUUID = [[NSUUID alloc] initWithUUIDString:defaultPresetUUIDString];
     
     

@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
+#import "Constants.h"
 #import <Synopsis/Synopsis.h>
 #import "AnalysisAndTranscodeOperation.h"
 #import <AVFoundation/AVFoundation.h>
@@ -18,7 +19,6 @@
 #import "NSDictionary+JSONString.h"
 #import "BSON/BSONSerialization.h"
 #import "GZIP/GZIP.h"
-
 #import "AtomicBoolean.h"
 
 @interface AnalysisAndTranscodeOperation ()
@@ -178,8 +178,13 @@
         // Make a semaphor to control when our reads happen, we wait to write once we have a signal that weve read.
         self.videoDequeueSemaphore = dispatch_semaphore_create(0);
         
+        // Number of simultaneous Jobs:
+        BOOL concurrentFrames = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey] boolValue];
+        
         self.concurrentVideoAnalysisQueue = [[NSOperationQueue alloc] init];
-        self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount;
+        self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = (concurrentFrames) ? NSOperationQueueDefaultMaxConcurrentOperationCount : 1;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(concurrentFramesDidChange:) name:kSynopsisAnalyzerConcurrentFrameAnalysisDidChangeNotification object:nil];
         
         self.videoTransformQueue = [[NSOperationQueue alloc] init];
         self.videoTransformQueue.maxConcurrentOperationCount = 1;
@@ -1177,5 +1182,17 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     });
 
 }
+
+- (void) concurrentFramesDidChange:(NSNotification*)notification
+{
+    // Number of simultaneous Jobs:
+    BOOL concurrentFrames = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey] boolValue];
+    
+    // Serial transcode queue
+    self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = (concurrentFrames) ? NSOperationQueueDefaultMaxConcurrentOperationCount : 1;
+    
+}
+
+
 
 @end

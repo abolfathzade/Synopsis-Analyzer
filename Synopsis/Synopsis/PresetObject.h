@@ -7,11 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Constants.h"
+
 @class PresetVideoSettings;
 @class PresetAudioSettings;
 @class PresetAnalysisSettings;
 
-#define kSynopsisDefaultPresetKey @"kSynopsisDefaultPreset"
 
 @interface PresetObject : NSObject<NSCopying>
 
