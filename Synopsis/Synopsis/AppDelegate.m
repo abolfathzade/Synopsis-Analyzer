@@ -297,7 +297,7 @@ static NSTimeInterval start;
     BOOL exportJSON = currentPreset.exportJSON;
     
     // TODO:
-    NSDictionary* placeholderAnalysisSettings = @{kSynopsisAnalysisSettingsQualityHintKey : @(SynopsisAnalysisQualityHintLow),
+    NSDictionary* placeholderAnalysisSettings = @{kSynopsisAnalysisSettingsQualityHintKey : @(SynopsisAnalysisQualityHintMedium),
                                                   kSynopsisAnalysisSettingsEnabledPluginsKey : self.analyzerPlugins,
                                                   kSynopsisAnalysisSettingsEnableConcurrencyKey : @TRUE,
                                                   };
@@ -310,9 +310,8 @@ static NSTimeInterval start;
     // TODO: Just pass a copy of the current Preset directly.
     AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithUUID:sessionUUID
                                                                                         sourceURL:fileURL
-                                                                                        destinationURL:destinationURL
-                                                                                      transcodeOptions:transcodeOptions
-                                                                                    ];
+                                                                                   destinationURL:destinationURL
+                                                                                 transcodeOptions:transcodeOptions];
     
     assert(analysis);
     
