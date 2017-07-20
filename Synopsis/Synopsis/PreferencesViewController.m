@@ -68,6 +68,9 @@ static NSInteger currentTag = 0;
     // populate our general prefs default preset button with all available presets
     [self.preferencesGeneralViewController.defaultPresetPopupButton.menu removeAllItems];
 
+    // Fix for #76
+    [self.preferencesGeneralViewController.defaultPresetPopupButton.menu addItemWithTitle:@"Placeholder" action:NULL keyEquivalent:@""];
+    
     NSMenuItem* defaultPresetMenuItem = nil;
     
     [self recursiveBuildMenu:self.preferencesGeneralViewController.defaultPresetPopupButton.menu
@@ -91,6 +94,9 @@ static NSInteger currentTag = 0;
         if([object isKindOfClass:[PresetObject class]])
         {
             PresetObject* preset = (PresetObject*)object;
+
+            NSLog(@"adding menu item with title: %@", preset.title);
+            
             NSMenuItem* presetMenuItem = [[NSMenuItem alloc] initWithTitle:preset.title action:@selector(setDefaultPresetAction:) keyEquivalent:@""];
             
             presetMenuItem.representedObject = preset;
@@ -106,6 +112,9 @@ static NSInteger currentTag = 0;
         if ([object isKindOfClass:[PresetGroup class]])
         {
             PresetGroup* group = (PresetGroup*)object;
+            
+            NSLog(@"adding sub menu with title: %@", group.title);
+            
             NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:group.title action:NULL keyEquivalent:@""];
             
             NSMenu* subMenu = [[NSMenu alloc] initWithTitle:group.title];
