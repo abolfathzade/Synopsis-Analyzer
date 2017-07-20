@@ -1371,7 +1371,6 @@ const NSString* value = @"Value";
         // Present modal alert, ask to save changes
         NSAlert* changesAlert = [[NSAlert alloc] init];
         changesAlert.messageText = @"You have unsaved changes to your current preset";
-        changesAlert.alertStyle = NSAlertStyleWarning;
 
         [changesAlert addButtonWithTitle:@"Save"];
         [changesAlert addButtonWithTitle:@"Cancel"];

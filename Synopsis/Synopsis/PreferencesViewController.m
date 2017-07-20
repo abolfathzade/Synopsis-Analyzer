@@ -87,8 +87,6 @@ static NSInteger currentTag = 0;
     NSString* defaultPresetUUIDString = [[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerDefaultPresetPreferencesKey];
     NSUUID* defaultPresetUUID = [[NSUUID alloc] initWithUUIDString:defaultPresetUUIDString];
     
-    
-    
     for(NSObject* object in arrayOfPresetOrGroup)
     {
         if([object isKindOfClass:[PresetObject class]])
@@ -110,7 +108,7 @@ static NSInteger currentTag = 0;
         if ([object isKindOfClass:[PresetGroup class]])
         {
             PresetGroup* group = (PresetGroup*)object;
-                        
+            
             NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:group.title action:NULL keyEquivalent:@""];
             
             NSMenu* subMenu = [[NSMenu alloc] initWithTitle:group.title];
