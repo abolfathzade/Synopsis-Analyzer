@@ -744,7 +744,7 @@
             }
             
             // Mark our version tag in HFS+Metadata as well, for introspection sake
-            [self xattrsetPlist:@(kSynopsisMetadataHFSAttributeVersionValue) forKey:kSynopsisMetadataHFSAttributeVersionKey];
+            [self xattrsetPlist:@(self.metadataEncoder.version) forKey:kSynopsisMetadataHFSAttributeVersionKey];
             
             if(self.metadataEncoder.cacheForExport)
             {
