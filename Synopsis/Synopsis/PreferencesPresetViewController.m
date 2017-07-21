@@ -99,6 +99,17 @@ const NSString* value = @"Value";
                                                              exportJSON:NO
                                                                editable:NO
                                                                    uuid:@"DDCEA125-B93D-464B-B369-FB78A5E890B4"];
+      
+        PresetObject* passthroughWJSON = [[PresetObject alloc] initWithTitle:@"Passthrough - Export JSON"
+                                                          audioSettings:[PresetAudioSettings none]
+                                                          videoSettings:[PresetVideoSettings none]
+                                                       analyzerSettings:[PresetAnalysisSettings none]
+                                                               useAudio:YES
+                                                               useVideo:YES
+                                                            useAnalysis:YES
+                                                             exportJSON:YES
+                                                               editable:NO
+                                                                   uuid:@"A3986F2F-0FC2-4839-9F6D-9580066B9890"];
         
         PresetObject* passthroughNoAudio = [[PresetObject alloc] initWithTitle:@"Passthrough - No Audio"
                                                                  audioSettings:[PresetAudioSettings none]
@@ -111,7 +122,7 @@ const NSString* value = @"Value";
                                                                       editable:NO];
         
         PresetGroup* passthroughGroup = [[PresetGroup alloc] initWithTitle:@"Passthrough" editable:NO];
-        passthroughGroup.children = @[passthrough, passthroughNoAudio];
+        passthroughGroup.children = @[passthrough, passthroughWJSON, passthroughNoAudio];
 
 #pragma mark - Uncompressed
         
