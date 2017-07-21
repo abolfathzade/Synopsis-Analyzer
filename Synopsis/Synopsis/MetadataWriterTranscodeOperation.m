@@ -97,7 +97,7 @@
             exportJSON = [self.metadataOptions[kSynopsisAnalyzedMetadataExportToJSONKey] boolValue];
         }
 
-        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsislMetadataVersionValue cacheJSONForExport:exportJSON];
+        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsisMetadataVersionValue cacheJSONForExport:exportJSON];
 
         [self setupTranscodeShitSucessfullyOrDontWhatverMan];
     }
@@ -235,7 +235,7 @@
 //    
     // Metadata valid
     CMFormatDescriptionRef metadataFormatDescriptionValid = NULL;
-    NSArray *specs = @[@{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : kSynopsislMetadataIdentifier,
+    NSArray *specs = @[@{(__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_Identifier : kSynopsisMetadataIdentifier,
                          (__bridge NSString *)kCMMetadataFormatDescriptionMetadataSpecificationKey_DataType : (__bridge NSString *)kCMMetadataBaseDataType_RawData,
                          }];
     

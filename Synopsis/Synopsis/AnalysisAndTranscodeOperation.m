@@ -192,7 +192,7 @@
         self.jsonEncodeQueue = [[NSOperationQueue alloc] init];
         self.jsonEncodeQueue.maxConcurrentOperationCount = 1;
         
-//        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsislMetadataVersionValue];
+//        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsisMetadataVersionValue];
     }
     return self;
 }
@@ -910,7 +910,7 @@
                                 }
                             }
                         
-                            self.inFlightGlobalMetadata[kSynopsislMetadataVersionKey] = @(kSynopsislMetadataVersionValue);
+                            self.inFlightGlobalMetadata[kSynopsisMetadataVersionKey] = @(kSynopsisMetadataVersionValue);
                             
                             [self.transcodeAssetWriterVideo markAsFinished];
                             

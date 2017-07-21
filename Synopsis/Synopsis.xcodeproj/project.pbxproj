@@ -107,6 +107,13 @@
 			remoteGlobalIDString = 1B007EBF1B4D7D0900DE6E98;
 			remoteInfo = SpotlightImporter;
 		};
+		1B27807C1F22427000658C0B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1B7350F91DEF4FAE0053BC06 /* Synopsis-Framework.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1BFB13381F2135BF002C4651;
+			remoteInfo = "Synopsis-Decoder-macOS";
+		};
 		1B7350FD1DEF4FAF0053BC06 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1B7350F91DEF4FAE0053BC06 /* Synopsis-Framework.xcodeproj */;
@@ -487,6 +494,7 @@
 			isa = PBXGroup;
 			children = (
 				1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */,
+				1B27807D1F22427000658C0B /* Synopsis.framework */,
 				1BB08BC01EEF151F0058DFBB /* Synopsis.framework */,
 			);
 			name = Products;
@@ -1068,6 +1076,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		1B27807D1F22427000658C0B /* Synopsis.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Synopsis.framework;
+			remoteRef = 1B27807C1F22427000658C0B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -1463,6 +1478,7 @@
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = SHG3AW6YV7;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "INCLUDE_ENCODER=1";
 				GCC_UNROLL_LOOPS = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -1481,6 +1497,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = SHG3AW6YV7;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "INCLUDE_ENCODER=1";
 				GCC_UNROLL_LOOPS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";

@@ -212,7 +212,7 @@ static NSTimeInterval start;
         // Our spotlight trickery file will contain a set of keys we use
 
         // info_v002_synopsis_dominant_colors = rgb
-        NSDictionary* exampleValues = @{@"info_synopsis_version" : @(kSynopsislMetadataVersionValue),
+        NSDictionary* exampleValues = @{@"info_synopsis_version" : @(kSynopsisMetadataVersionValue),
                                          @"info_synopsis_descriptors" : @"Black",
                                         };
         
