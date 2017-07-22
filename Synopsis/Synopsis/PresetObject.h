@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "Constants.h"
+#import <Synopsis/Synopsis.h>
 
 @class PresetVideoSettings;
 @class PresetAudioSettings;
@@ -16,9 +17,9 @@
 
 @interface PresetObject : NSObject<NSCopying>
 
-- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis exportJSON:(BOOL)exportJSON editable:(BOOL)editable uuid:(NSString*)UUIDString;
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis jsonOptions:(SynopsisMetadataEncoderJSONOption)jsonOptions editable:(BOOL)editable uuid:(NSString*)UUIDString;
 
-- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis exportJSON:(BOOL)exportJSON editable:(BOOL)editable;
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis jsonOptions:(SynopsisMetadataEncoderJSONOption)jsonOptions editable:(BOOL)editable;
 
 - (instancetype) initWithData:(NSData *)data;
 - (instancetype) init NS_UNAVAILABLE;
@@ -32,7 +33,7 @@
 @property (readwrite) BOOL useAudio;
 @property (readwrite) BOOL useVideo;
 @property (readwrite) BOOL useAnalysis;
-@property (readwrite) BOOL exportJSON;
+@property (readwrite) SynopsisMetadataEncoderJSONOption jsonOptions;
 @property (readonly) BOOL editable;
 @property (readonly) NSUUID* uuid;
 

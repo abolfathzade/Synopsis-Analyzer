@@ -11,7 +11,7 @@
             <connections>
                 <outlet property="analysisContainerView" destination="74g-Bj-gWe" id="sdM-QO-TCW"/>
                 <outlet property="audioContainerView" destination="alG-nm-dAK" id="D2f-C9-8QS"/>
-                <outlet property="exportJSONCheckButton" destination="d74-8o-6TD" id="oLk-3P-SU2"/>
+                <outlet property="jsonOptionsButton" destination="8PI-Bz-YBg" id="bkT-6u-PhO"/>
                 <outlet property="overViewSavePresetButton" destination="ukI-ft-GBe" id="gfk-3d-LWt"/>
                 <outlet property="overviewContainerView" destination="Xa5-Iy-SzP" id="JcP-Nf-N4G"/>
                 <outlet property="prefsAudioBitrate" destination="zeY-EF-YHN" id="4Zk-SM-WEL"/>
@@ -196,15 +196,15 @@
                     <tabViewItems>
                         <tabViewItem label="Audio" identifier="1" id="yQS-zl-c4w">
                             <view key="view" id="beZ-Ed-cEV">
-                                <rect key="frame" x="10" y="25" width="285" height="376"/>
+                                <rect key="frame" x="10" y="29" width="285" height="372"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <subviews>
                                     <view id="alG-nm-dAK" userLabel="Audio View">
-                                        <rect key="frame" x="0.0" y="-4" width="285" height="380"/>
+                                        <rect key="frame" x="0.0" y="-4" width="285" height="376"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <subviews>
                                             <button id="Tox-VS-7g3">
-                                                <rect key="frame" x="70" y="343" width="124" height="20"/>
+                                                <rect key="frame" x="70" y="339" width="124" height="20"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="check" title="Write Audio Track" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="2Sp-dP-DZd">
                                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -215,7 +215,7 @@
                                                 </connections>
                                             </button>
                                             <popUpButton verticalHuggingPriority="750" id="OFq-eQ-pCf">
-                                                <rect key="frame" x="73" y="319" width="192" height="19"/>
+                                                <rect key="frame" x="73" y="315" width="192" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <popUpButtonCell key="cell" type="roundRect" bezelStyle="roundedRect" alignment="left" lineBreakMode="truncatingTail" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Ybs-6f-Dz2">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -233,7 +233,7 @@
                                                 </connections>
                                             </popUpButton>
                                             <popUpButton verticalHuggingPriority="750" id="rOv-mh-de1">
-                                                <rect key="frame" x="73" y="267" width="127" height="19"/>
+                                                <rect key="frame" x="73" y="263" width="127" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <popUpButtonCell key="cell" type="roundRect" bezelStyle="roundedRect" alignment="left" lineBreakMode="truncatingTail" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2Zu-rc-DUg">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -251,7 +251,7 @@
                                                 </connections>
                                             </popUpButton>
                                             <popUpButton verticalHuggingPriority="750" id="hFk-0X-eqA">
-                                                <rect key="frame" x="73" y="293" width="127" height="19"/>
+                                                <rect key="frame" x="73" y="289" width="127" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <popUpButtonCell key="cell" type="roundRect" bezelStyle="roundedRect" alignment="left" lineBreakMode="truncatingTail" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sJg-df-Ire">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -275,7 +275,7 @@
                                                 </connections>
                                             </popUpButton>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="Kjf-3d-bVi">
-                                                <rect key="frame" x="22" y="296" width="45" height="14"/>
+                                                <rect key="frame" x="22" y="292" width="45" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Quality:" id="4ml-M2-HSS">
                                                     <font key="font" metaFont="smallSystem"/>
@@ -284,7 +284,7 @@
                                                 </textFieldCell>
                                             </textField>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="foW-on-IiD">
-                                                <rect key="frame" x="34" y="270" width="32" height="14"/>
+                                                <rect key="frame" x="34" y="266" width="32" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Rate:" id="2gl-3K-WIM">
                                                     <font key="font" metaFont="smallSystem"/>
@@ -293,7 +293,7 @@
                                                 </textFieldCell>
                                             </textField>
                                             <popUpButton verticalHuggingPriority="750" id="zeY-EF-YHN">
-                                                <rect key="frame" x="73" y="241" width="127" height="19"/>
+                                                <rect key="frame" x="73" y="237" width="127" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <popUpButtonCell key="cell" type="roundRect" bezelStyle="roundedRect" alignment="left" lineBreakMode="truncatingTail" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="949-59-jbh">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -311,7 +311,7 @@
                                                 </connections>
                                             </popUpButton>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="zUN-ZH-XJZ">
-                                                <rect key="frame" x="24" y="244" width="43" height="14"/>
+                                                <rect key="frame" x="24" y="240" width="43" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Bitrate:" id="eVX-h0-fKK">
                                                     <font key="font" metaFont="smallSystem"/>
@@ -320,7 +320,7 @@
                                                 </textFieldCell>
                                             </textField>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="xEq-fZ-K94">
-                                                <rect key="frame" x="22" y="322" width="45" height="14"/>
+                                                <rect key="frame" x="22" y="318" width="45" height="14"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Format:" id="2yK-SL-WLU">
                                                     <font key="font" metaFont="smallSystem"/>
@@ -529,17 +529,33 @@
                                             <action selector="selectUseAnalysis:" target="-2" id="YyZ-io-fRj"/>
                                         </connections>
                                     </button>
-                                    <button misplaced="YES" id="d74-8o-6TD">
-                                        <rect key="frame" x="70" y="314" width="187" height="20"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        <buttonCell key="cell" type="check" title="Export additional JSON Sidecar" bezelStyle="regularSquare" imagePosition="left" controlSize="small" inset="2" id="Yt4-AQ-dB1">
-                                            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <popUpButton verticalHuggingPriority="750" misplaced="YES" id="8PI-Bz-YBg">
+                                        <rect key="frame" x="70" y="308" width="152" height="22"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <popUpButtonCell key="cell" type="push" title="No JSON Export" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="MIs-R8-U7x" id="nhy-Bb-60q">
+                                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="smallSystem"/>
-                                        </buttonCell>
+                                            <menu key="menu" id="HNP-79-mTS">
+                                                <items>
+                                                    <menuItem title="No JSON Export" state="on" id="MIs-R8-U7x"/>
+                                                    <menuItem title="Single JSON File Export" tag="1" id="UCC-R5-F2b"/>
+                                                    <menuItem title="Single JSON File Export (Global Metadata)" tag="2" id="6UX-iz-ITa">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                    <menuItem title="Frame Sequence JSON Export" tag="3" id="C0q-LC-xwg">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                    <menuItem isSeparatorItem="YES" id="sJ8-LR-AmW"/>
+                                                    <menuItem title="JSON Training data for ZSTD" tag="-1" id="9WK-ey-D1f">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </popUpButtonCell>
                                         <connections>
-                                            <action selector="selectExportJSON:" target="-2" id="syL-Es-uRV"/>
+                                            <action selector="selectExportJSON:" target="-2" id="co6-vW-f2d"/>
                                         </connections>
-                                    </button>
+                                    </popUpButton>
                                 </subviews>
                             </view>
                         </tabViewItem>
