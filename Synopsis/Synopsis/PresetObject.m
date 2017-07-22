@@ -20,7 +20,7 @@
 #define kSynopsisAnalyzerPresetUseVideoKey @"UseVideo"
 #define kSynopsisAnalyzerPresetUseAnalysisKey @"Analysis"
 
-#define kSynopsisAnalyzerPresetJSONOptionsKey @"ExportJSON"
+#define kSynopsisAnalyzerPresetExportOptionsKey @"ExportJSON"
 #define kSynopsisAnalyzerPresetExportJSONKey kSynopsisAnalyzerPresetJSONOptionsKey
 
 
@@ -37,7 +37,7 @@
 
 @implementation PresetObject
 
-- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL)useAnalysis jsonOptions:(SynopsisMetadataEncoderJSONOption)jsonOptions editable:(BOOL)editable uuid:(NSString*)UUIDString
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis exportOption:(SynopsisMetadataEncoderExportOption)exportOption editable:(BOOL)editable uuid:(NSString*)UUIDString
 {
     self = [super init];
     if(self)
@@ -51,7 +51,7 @@
         self.useAudio = useAudio;
         self.useVideo = useVideo;
         self.useAnalysis = useAnalysis;
-        self.jsonOptions = jsonOptions;
+        self.metadataExportOption = exportOption;
         self.editable = editable;
         self.uuid = [[NSUUID alloc] initWithUUIDString:UUIDString];
         
@@ -60,7 +60,7 @@
     return nil;
 }
 
-- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL)useAnalysis jsonOptions:(SynopsisMetadataEncoderJSONOption)jsonOptions editable:(BOOL)editable
+- (id) initWithTitle:(NSString*)title audioSettings:(PresetAudioSettings*)audioSettings videoSettings:(PresetVideoSettings*)videoSettings analyzerSettings:(PresetAnalysisSettings*)analyzerSettings useAudio:(BOOL)useAudio useVideo:(BOOL)useVideo useAnalysis:(BOOL) useAnalysis exportOption:(SynopsisMetadataEncoderExportOption)exportOption editable:(BOOL)editable
 {
     self = [super init];
     if(self)
@@ -78,7 +78,7 @@
         self.editable = editable;
         self.uuid = [NSUUID UUID];
         
-        self.jsonOptions = SynopsisMetadataEncoderJSONOptionNone;
+        self.metadataExportOption = SynopsisMetadataEncoderExportOptionNone;
         
         return self;
     }
@@ -103,7 +103,7 @@
             self.useAudio = [savedDict[kSynopsisAnalyzerPresetUseAudioKey] boolValue];
             self.useVideo = [savedDict[kSynopsisAnalyzerPresetUseVideoKey] boolValue];
             self.useAnalysis = [savedDict[kSynopsisAnalyzerPresetUseAnalysisKey] boolValue];
-            self.jsonOptions = [savedDict[kSynopsisAnalyzerPresetJSONOptionsKey] integerValue];
+            self.metadataExportOption = [savedDict[kSynopsisAnalyzerPresetExportOptionsKey] integerValue];
             self.editable = [savedDict[kSynopsisAnalyzerPresetEditableKey] boolValue];
             self.uuid = [[NSUUID alloc] initWithUUIDString:savedDict[kSynopsisAnalyzerPresetUUIDKey]];
         }
@@ -126,7 +126,7 @@
                                                    useAudio:self.useAudio
                                                    useVideo:self.useVideo
                                                 useAnalysis:self.useAnalysis
-                                                jsonOptions:self.jsonOptions
+                                                exportOption:self.metadataExportOption
                                                    editable:self.editable
                                                        uuid:self.uuid.UUIDString];
 }
@@ -141,7 +141,7 @@
                                                    useAudio:self.useAudio
                                                    useVideo:self.useVideo
                                                 useAnalysis:self.useAnalysis
-                                                jsonOptions:self.jsonOptions
+                                               exportOption:self.metadataExportOption
                                                    editable:YES
                                                        uuid:[NSUUID UUID].UUIDString];
 }
@@ -162,7 +162,7 @@
         savedDict[kSynopsisAnalyzerPresetUseAudioKey] = @(self.useAudio);
         savedDict[kSynopsisAnalyzerPresetUseVideoKey] = @(self.useVideo);
         savedDict[kSynopsisAnalyzerPresetUseAnalysisKey] = @(self.useAnalysis);
-        savedDict[kSynopsisAnalyzerPresetJSONOptionsKey] = @(self.jsonOptions);
+        savedDict[kSynopsisAnalyzerPresetExportOptionsKey] = @(self.metadataExportOption);
 
         savedDict[kSynopsisAnalyzerPresetEditableKey] = @(self.editable);
         savedDict[kSynopsisAnalyzerPresetUUIDKey] = (self.uuid.UUIDString);

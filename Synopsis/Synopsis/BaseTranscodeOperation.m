@@ -38,7 +38,7 @@ NSString * const kSynopsisAnalysisSettingsEnabledPluginModulesKey = @"kSynopsisA
 NSString * const kSynopsisAnalyzedVideoSampleBufferMetadataKey = @"kSynopsisAnalyzedVideoSampleBufferMetadata";
 NSString * const kSynopsisAnalyzedAudioSampleBufferMetadataKey = @"kSynopsisAnalyzedAudioSampleBufferMetadata";
 NSString * const kSynopsisAnalyzedGlobalMetadataKey = @"kSynopsisAnalyzedGlobalMetadata";
-NSString * const kSynopsisAnalyzedMetadataExportToJSONKey = @"kSynopsisAnalyzedMetadataExportToJSONKey";
+NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedMetadataExportOption";
 
 @interface BaseTranscodeOperation ()
 

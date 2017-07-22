@@ -91,13 +91,13 @@
             self.analyzedGlobalMetadata = self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey];
         }
         
-        SynopsisMetadataEncoderJSONOption jsonOption = SynopsisMetadataEncoderJSONOptionNone;
-        if(self.metadataOptions[kSynopsisAnalyzedMetadataExportToJSONKey])
+        SynopsisMetadataEncoderExportOption exportOption = SynopsisMetadataEncoderExportOptionNone;
+        if(self.metadataOptions[kSynopsisAnalyzedMetadataExportOptionKey])
         {
-            jsonOption = [self.metadataOptions[kSynopsisAnalyzedMetadataExportToJSONKey] unsignedIntegerValue];
+            exportOption = [self.metadataOptions[kSynopsisAnalyzedMetadataExportOptionKey] unsignedIntegerValue];
         }
 
-        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsisMetadataVersionValue withJSONOption:jsonOption];
+        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsisMetadataVersionValue exportOption:exportOption];
 
         [self setupTranscodeShitSucessfullyOrDontWhatverMan];
     }
@@ -746,11 +746,11 @@
             // Mark our version tag in HFS+Metadata as well, for introspection sake
             [self xattrsetPlist:@(self.metadataEncoder.version) forKey:kSynopsisMetadataHFSAttributeVersionKey];
             
-            if(self.metadataEncoder.jsonOption)
+            if(self.metadataEncoder.exportOption)
             {
                 NSURL* jsonDestination = [self.destinationURL URLByDeletingPathExtension];
                 jsonDestination = [jsonDestination URLByAppendingPathExtension:@"json"];
-                [self.metadataEncoder exportJSONToURL:jsonDestination];
+                [self.metadataEncoder exportToURL:jsonDestination];
             }
             
             dispatch_semaphore_signal(waitForWriting);
