@@ -293,8 +293,8 @@ static NSTimeInterval start;
     PresetVideoSettings* videoSettings = currentPreset.videoSettings;
     PresetAudioSettings* audioSettings = currentPreset.audioSettings;
     PresetAnalysisSettings* analysisSettings = currentPreset.analyzerSettings;
-    
-    BOOL exportJSON = currentPreset.exportJSON;
+
+    SynopsisMetadataEncoderExportOption exportOption = currentPreset.metadataExportOption;
     
     // TODO:
     NSDictionary* placeholderAnalysisSettings = @{kSynopsisAnalysisSettingsQualityHintKey : @(SynopsisAnalysisQualityHintMedium),
@@ -328,7 +328,7 @@ static NSTimeInterval start;
                                         NSDictionary* metadataOptions = @{kSynopsisAnalyzedVideoSampleBufferMetadataKey : strongAnalysis.analyzedVideoSampleBufferMetadata,
                                                                           kSynopsisAnalyzedAudioSampleBufferMetadataKey : strongAnalysis.analyzedAudioSampleBufferMetadata,
                                                                           kSynopsisAnalyzedGlobalMetadataKey : strongAnalysis.analyzedGlobalMetadata,
-                                                                          kSynopsisAnalyzedMetadataExportToJSONKey : @(exportJSON),
+                                                                          kSynopsisAnalyzedMetadataExportOptionKey : @(exportOption),
                                                                           };
                                         
                                         // Inherit UUID

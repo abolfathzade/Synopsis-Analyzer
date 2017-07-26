@@ -62,7 +62,7 @@ const NSString* value = @"Value";
 // Preferences Analysis
 @property (weak) IBOutlet NSView* analysisContainerView;
 @property (weak) IBOutlet NSButton* useAnalysisCheckButton;
-@property (weak) IBOutlet NSButton* exportJSONCheckButton;
+@property (weak) IBOutlet NSPopUpButton* jsonOptionsButton;
 
 
 @property (readwrite, assign) BOOL presetChanged;
@@ -96,9 +96,20 @@ const NSString* value = @"Value";
                                                                useAudio:YES
                                                                useVideo:YES
                                                             useAnalysis:YES
-                                                             exportJSON:NO
+                                                             exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                editable:NO
                                                                    uuid:@"DDCEA125-B93D-464B-B369-FB78A5E890B4"];
+        
+        PresetObject* passthroughWJSON = [[PresetObject alloc] initWithTitle:@"Passthrough - Export JSON"
+                                                               audioSettings:[PresetAudioSettings none]
+                                                               videoSettings:[PresetVideoSettings none]
+                                                            analyzerSettings:[PresetAnalysisSettings none]
+                                                                    useAudio:YES
+                                                                    useVideo:YES
+                                                                 useAnalysis:YES
+                                                                exportOption:SynopsisMetadataEncoderExportOptionJSONContiguous
+                                                                    editable:NO
+                                                                        uuid:@"A3986F2F-0FC2-4839-9F6D-9580066B9890"];
         
         PresetObject* passthroughNoAudio = [[PresetObject alloc] initWithTitle:@"Passthrough - No Audio"
                                                                  audioSettings:[PresetAudioSettings none]
@@ -107,11 +118,11 @@ const NSString* value = @"Value";
                                                                       useAudio:NO
                                                                       useVideo:YES
                                                                    useAnalysis:YES
-                                                                    exportJSON:NO
+                                                                  exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                       editable:NO];
         
         PresetGroup* passthroughGroup = [[PresetGroup alloc] initWithTitle:@"Passthrough" editable:NO];
-        passthroughGroup.children = @[passthrough, passthroughNoAudio];
+        passthroughGroup.children = @[passthrough, passthroughWJSON, passthroughNoAudio];
 
 #pragma mark - Uncompressed
         
@@ -141,7 +152,7 @@ const NSString* value = @"Value";
                                                                        useAudio:YES
                                                                        useVideo:YES
                                                                     useAnalysis:YES
-                                                                     exportJSON:NO
+                                                                   exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                        editable:NO
                                                                            uuid:@"DFFD849D-FAF6-4372-BF37-26E6DED926D3"];
         
@@ -165,7 +176,7 @@ const NSString* value = @"Value";
                                                               useAudio:YES
                                                               useVideo:YES
                                                            useAnalysis:YES
-                                                            exportJSON:NO
+                                                          exportOption:SynopsisMetadataEncoderExportOptionNone
                                                               editable:NO
                                                                   uuid:@"21C7330B-89F5-4742-AD8E-7574E2AFE3F1"];
         // Hap5
@@ -179,7 +190,7 @@ const NSString* value = @"Value";
                                                               useAudio:YES
                                                               useVideo:YES
                                                            useAnalysis:YES
-                                                            exportJSON:NO
+                                                          exportOption:SynopsisMetadataEncoderExportOptionNone
                                                               editable:NO
                                                                   uuid:@"A5327E1E-0BDA-4CBE-AE35-866E91932991"];
         
@@ -195,7 +206,7 @@ const NSString* value = @"Value";
                                                               useAudio:YES
                                                               useVideo:YES
                                                            useAnalysis:YES
-                                                            exportJSON:NO
+                                                          exportOption:SynopsisMetadataEncoderExportOptionNone
                                                               editable:NO
                                                                   uuid:@"46CF27AB-7503-4D98-A3A8-0FBA54FA1C5A"];
         
@@ -210,7 +221,7 @@ const NSString* value = @"Value";
                                                               useAudio:YES
                                                               useVideo:YES
                                                            useAnalysis:YES
-                                                            exportJSON:NO
+                                                          exportOption:SynopsisMetadataEncoderExportOptionNone
                                                               editable:NO
                                                                   uuid:@"A0A20F63-0147-4D06-A7CF-C6E467ADDD17"];
         
@@ -266,7 +277,7 @@ const NSString* value = @"Value";
                                                                          useAudio:YES
                                                                          useVideo:YES
                                                                       useAnalysis:YES
-                                                                       exportJSON:NO
+                                                                     exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                          editable:NO
                                                                              uuid:@"CBA4E53A-EF8A-4539-8167-4C6F4144C305"];
         
@@ -281,7 +292,7 @@ const NSString* value = @"Value";
                                                                           useAudio:YES
                                                                           useVideo:YES
                                                                        useAnalysis:YES
-                                                                        exportJSON:NO
+                                                                      exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                           editable:NO
                                                                               uuid:@"1152F200-46FF-4434-AB0E-6BC2CAFD0B6D"];
         
@@ -297,7 +308,7 @@ const NSString* value = @"Value";
                                                                         useAudio:YES
                                                                         useVideo:YES
                                                                      useAnalysis:YES
-                                                                      exportJSON:NO
+                                                                    exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                         editable:NO
                                                                             uuid:@"7595D0BC-6AF4-4D0C-8547-2BC751E7B64A"];
         
@@ -312,7 +323,7 @@ const NSString* value = @"Value";
                                                                           useAudio:YES
                                                                           useVideo:YES
                                                                        useAnalysis:YES
-                                                                        exportJSON:NO
+                                                                      exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                           editable:NO
                                                                               uuid:@"DE8F3364-1781-424F-A6CF-C8C32CAB1987"];
         
@@ -327,7 +338,7 @@ const NSString* value = @"Value";
                                                                              useAudio:YES
                                                                              useVideo:YES
                                                                           useAnalysis:YES
-                                                                           exportJSON:NO
+                                                                         exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                              editable:NO
                                                                                  uuid:@"80E6F537-41CD-4081-9065-ABA3D093F080"];
         
@@ -351,7 +362,7 @@ const NSString* value = @"Value";
                                                                            useAudio:YES
                                                                            useVideo:YES
                                                                         useAnalysis:YES
-                                                                         exportJSON:NO
+                                                                       exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                            editable:NO
                                                                                uuid:@"2444D7B8-38BC-4A2C-A4F5-434495B733D8"];
         
@@ -362,7 +373,7 @@ const NSString* value = @"Value";
                                                                                   useAudio:NO
                                                                                   useVideo:YES
                                                                                useAnalysis:YES
-                                                                                exportJSON:NO
+                                                                              exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                                   editable:NO
                                                                                       uuid:@"DE2E3324-C669-4006-8782-9AC170F29D6F"];
         
@@ -382,7 +393,7 @@ const NSString* value = @"Value";
                                                                    useAudio:YES
                                                                    useVideo:YES
                                                                 useAnalysis:YES
-                                                                 exportJSON:NO
+                                                               exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                    editable:NO
                                                                        uuid:@"6D1C20D3-8B1D-4151-A12D-3EAFDA89CD48"];
         
@@ -393,7 +404,7 @@ const NSString* value = @"Value";
                                                                           useAudio:NO
                                                                           useVideo:YES
                                                                        useAnalysis:YES
-                                                                        exportJSON:NO
+                                                                      exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                           editable:NO
                                                                               uuid:@"02BC065A-E05D-4A08-A5C8-2D768546C0CB"];
         
@@ -415,7 +426,7 @@ const NSString* value = @"Value";
                                                                 useAudio:YES
                                                                 useVideo:YES
                                                              useAnalysis:YES
-                                                              exportJSON:NO
+                                                            exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                 editable:NO
                                                                     uuid:@"54CF7EA2-DB5F-40B6-BB31-63E912550CE5"];
         
@@ -431,7 +442,7 @@ const NSString* value = @"Value";
                                                                useAudio:YES
                                                                useVideo:YES
                                                             useAnalysis:YES
-                                                             exportJSON:NO
+                                                           exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                editable:NO
                                                                    uuid:@"A0357630-5194-46D5-AFFB-F6FE86106C54"];
         
@@ -447,7 +458,7 @@ const NSString* value = @"Value";
                                                                     useAudio:YES
                                                                     useVideo:YES
                                                                  useAnalysis:YES
-                                                                  exportJSON:NO
+                                                                exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                     editable:NO
                                                                         uuid:@"9DF14B22-F079-4584-88A3-395F1ABDA846"];
         
@@ -464,7 +475,7 @@ const NSString* value = @"Value";
                                                                    useAudio:YES
                                                                    useVideo:YES
                                                                 useAnalysis:YES
-                                                                 exportJSON:NO
+                                                               exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                    editable:NO
                                                                        uuid:@"399D02B3-A5EB-4D2F-A202-8D9EC3EE9B61"];
         
@@ -487,7 +498,7 @@ const NSString* value = @"Value";
                                                                       useAudio:YES
                                                                       useVideo:YES
                                                                    useAnalysis:YES
-                                                                    exportJSON:NO
+                                                                  exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                       editable:NO
                                                                           uuid:@"31F93C3D-E4C9-42BD-984E-15E5A30814C6"];
         
@@ -506,7 +517,7 @@ const NSString* value = @"Value";
                                                                       useAudio:YES
                                                                       useVideo:YES
                                                                    useAnalysis:YES
-                                                                    exportJSON:NO
+                                                                  exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                       editable:NO
                                                                           uuid:@"4B715F46-DD97-4C0B-A4C9-5188CEFDE4A0"];
         
@@ -561,7 +572,7 @@ const NSString* value = @"Value";
                                                                        useAudio:YES
                                                                        useVideo:YES
                                                                     useAnalysis:YES
-                                                                     exportJSON:NO
+                                                                   exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                        editable:NO
                                                                            uuid:@"EC0365CE-0C56-433A-8BB3-710BE06B9D3B"];
         
@@ -580,7 +591,7 @@ const NSString* value = @"Value";
                                                                        useAudio:YES
                                                                        useVideo:YES
                                                                     useAnalysis:YES
-                                                                     exportJSON:NO
+                                                                   exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                        editable:NO
                                                                            uuid:@"9717C926-E15D-45E7-BD7E-4A300FEB1049"];
         
@@ -628,7 +639,7 @@ const NSString* value = @"Value";
                                                                            useAudio:YES
                                                                            useVideo:YES
                                                                         useAnalysis:YES
-                                                                         exportJSON:NO
+                                                                       exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                            editable:NO
                                                                                uuid:@"B9CB5486-3E7C-4BAB-8329-6ED98A4FA4BA"];
         
@@ -650,7 +661,7 @@ const NSString* value = @"Value";
                                                                        useAudio:YES
                                                                        useVideo:YES
                                                                     useAnalysis:YES
-                                                                     exportJSON:NO
+                                                                   exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                        editable:NO
                                                                            uuid:@"4A5F9F66-58FD-4464-9BD3-69C4529EF779"];
         
@@ -672,7 +683,7 @@ const NSString* value = @"Value";
                                                                        useAudio:YES
                                                                        useVideo:YES
                                                                     useAnalysis:YES
-                                                                     exportJSON:NO
+                                                                   exportOption:SynopsisMetadataEncoderExportOptionNone
                                                                        editable:NO
                                                                            uuid:@"44CE7EA4-1FF8-4E47-8AB6-ABE909FB4E6E"];
         
@@ -1278,14 +1289,14 @@ const NSString* value = @"Value";
 - (IBAction)selectUseAnalysis:(NSButton*)sender
 {
     self.selectedPreset.useAnalysis = (BOOL)sender.state;
-    self.exportJSONCheckButton.enabled = (BOOL)sender.state;
+    self.jsonOptionsButton.enabled = (BOOL)sender.state;
 
     self.presetChanged = YES;
 }
 
-- (IBAction)selectExportJSON:(NSButton*)sender
+- (IBAction)selectExportJSON:(NSPopUpButton*)sender
 {
-    self.selectedPreset.exportJSON = (BOOL)sender.state;
+    self.selectedPreset.metadataExportOption = (NSUInteger)sender.selectedTag;
     self.presetChanged = YES;
 }
 
@@ -1587,7 +1598,7 @@ const NSString* value = @"Value";
                                                    useAudio:YES
                                                    useVideo:YES
                                                 useAnalysis:YES
-                                                 exportJSON:NO
+                                               exportOption:SynopsisMetadataEncoderExportOptionNone
                                                    editable:YES];
     
     NSArray* newChildren = [[self.selectedPresetGroup children] arrayByAddingObject:new];
@@ -1842,10 +1853,10 @@ const NSString* value = @"Value";
 {
     // configure editability:
     self.useAnalysisCheckButton.enabled = preset.editable;
-    self.exportJSONCheckButton.enabled = preset.editable  && preset.useAnalysis;
+    self.jsonOptionsButton.enabled = preset.editable  && preset.useAnalysis;
 
     self.useAnalysisCheckButton.state = (preset.useAnalysis) ? 1 : 0;
-    self.exportJSONCheckButton.state = (preset.exportJSON) ? 1 : 0;
+    [self.jsonOptionsButton selectItemWithTag:(NSInteger)(preset.metadataExportOption)];
 }
 
 

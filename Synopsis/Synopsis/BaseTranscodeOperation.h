@@ -89,7 +89,7 @@ extern NSString* const kSynopsisAnalyzedAudioSampleBufferMetadataKey;
 extern NSString* const kSynopsisAnalyzedGlobalMetadataKey;
 
 // Optional - export JSON ?
-extern NSString * const kSynopsisAnalyzedMetadataExportToJSONKey;
+extern NSString * const kSynopsisAnalyzedMetadataExportOptionKey;
 
 // Base Transcode Operation ensures that its completion block runs WITHIN MAIN
 // So that you know that depended operations have the previous compltion block called.
