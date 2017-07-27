@@ -112,21 +112,25 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
 
 - (void) main
 {
-    @synchronized(self)
-    {
-        if(self.completionBlock)
+    NSActivityOptions options = NSActivityUserInitiated;
+    [[NSProcessInfo processInfo] performActivityWithOptions:options reason:@"Synopsis Analysis Session" usingBlock:^{
+        
+        @synchronized(self)
         {
-            [self setVideoProgress:1.0];
-            [self setAudioProgress:1.0];
-            
-            self.completionBlock();
-
-            // Clear so we dont run twice, fucko
-            self.completionBlock = nil;
+            if(self.completionBlock)
+            {
+                [self setVideoProgress:1.0];
+                [self setAudioProgress:1.0];
+                
+                self.completionBlock();
+                
+                // Clear so we dont run twice, fucko
+                self.completionBlock = nil;
+            }
         }
-    }
-
-    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Finish Main NSOperation %p", self, nil]];
+        
+        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Finish Main NSOperation %p", self, nil]];
+    }];
 }
 
 - (CGFloat) progress
@@ -172,9 +176,7 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
     }
     
     [self calculateEta];
-    
 }
-
 
 - (void) calculateEta
 {

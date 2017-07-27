@@ -764,6 +764,7 @@
         CMBufferQueueReset(videoPassthroughBufferQueue);
         CMBufferQueueReset(audioPassthroughBufferQueue);
 
+        // cleanup
         CFRelease(videoPassthroughBufferQueue);
         CFRelease(audioPassthroughBufferQueue);
     }
