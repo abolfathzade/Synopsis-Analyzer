@@ -726,9 +726,7 @@
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);
         
-        // Reset our queue to free anything we didnt already use.
-        CMBufferQueueReset(videoPassthroughBufferQueue);
-        
+
         dispatch_semaphore_t waitForWriting = dispatch_semaphore_create(0);
         
         [self.transcodeAssetWriter finishWritingWithCompletionHandler:^{
@@ -761,6 +759,13 @@
         
         // Wait till our finish writing completion block is done to return
         dispatch_semaphore_wait(waitForWriting, DISPATCH_TIME_FOREVER);
+        
+        // Reset our queue to free anything we didnt already use.
+        CMBufferQueueReset(videoPassthroughBufferQueue);
+        CMBufferQueueReset(audioPassthroughBufferQueue);
+
+        CFRelease(videoPassthroughBufferQueue);
+        CFRelease(audioPassthroughBufferQueue);
     }
     else
     {
