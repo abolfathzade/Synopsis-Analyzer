@@ -299,6 +299,8 @@
         {
             videoFormat = [videoFormat stringByAppendingString:@", Native Size"];
         }
+        
+        CFRelease(videoEncoders);
     }
     return videoFormat;
 }
