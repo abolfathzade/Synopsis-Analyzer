@@ -9,6 +9,8 @@
 #import "AppDelegate.h"
 
 #import <Synopsis/Synopsis.h>
+#import <VideoToolbox/VTProfessionalVideoWorkflow.h>
+#import <MediaToolbox/MediaToolbox.h>
 
 #import "DropFilesView.h"
 #import "LogController.h"
@@ -57,6 +59,10 @@ static NSTimeInterval start;
     self = [super init];
     if(self)
     {
+        MTRegisterProfessionalVideoWorkflowFormatReaders();
+        VTRegisterProfessionalVideoWorkflowVideoDecoders();
+        VTRegisterProfessionalVideoWorkflowVideoEncoders();
+
         NSDictionary* standardDefaults = @{kSynopsisAnalyzerDefaultPresetPreferencesKey : @"DDCEA125-B93D-464B-B369-FB78A5E890B4",
                                            kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey : @(YES),
                                            kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey : @(YES),
@@ -229,8 +235,12 @@ static NSTimeInterval start;
     
     [openPanel setAllowsMultipleSelection:YES];
     
-    // TODO
-    [openPanel setAllowedFileTypes:[AVMovie movieTypes]];
+    NSString * mxfUTI = (__bridge NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+                                                                                   (CFStringRef)@"MXF",
+                                                                                   NULL);
+    
+// TODO
+    [openPanel setAllowedFileTypes:[[AVMovie movieTypes] arrayByAddingObject:mxfUTI]];
     //    [openPanel setAllowedFileTypes:@[@"mov", @"mp4", @"m4v"]];
     
     [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)
@@ -274,16 +284,16 @@ static NSTimeInterval start;
     NSString* lastPassFilePath = [lastPath stringByAppendingString:@"_analyzed"];
     
     NSURL* destinationURL = [fileURL URLByDeletingLastPathComponent];
-    destinationURL = [[destinationURL URLByAppendingPathComponent:firstPassFilePath] URLByAppendingPathExtension:lastPathExtention];
+    destinationURL = [[destinationURL URLByAppendingPathComponent:firstPassFilePath] URLByAppendingPathExtension:@"mov"];
     
     NSURL* destinationURL2 = [fileURL URLByDeletingLastPathComponent];
-    destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPassFilePath] URLByAppendingPathExtension:lastPathExtention];
+    destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPassFilePath] URLByAppendingPathExtension:@"mov"];
 
     // check to see if our final pass destination URLs already exist - if so, append our sesion UUI.
     if([[NSFileManager defaultManager] fileExistsAtPath:destinationURL2.path])
     {
         destinationURL2 = [fileURL URLByDeletingLastPathComponent];
-        destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:[lastPassFilePath stringByAppendingString:[@"_" stringByAppendingString:sessionUUID.UUIDString]]] URLByAppendingPathExtension:lastPathExtention];
+        destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:[lastPassFilePath stringByAppendingString:[@"_" stringByAppendingString:sessionUUID.UUIDString]]] URLByAppendingPathExtension:@"mov"];
     }
     
     // Pass 1 is our analysis pass, and our decode pass

@@ -72,10 +72,14 @@
     if ((NSDragOperationGeneric & [sender draggingSourceOperationMask]) == NSDragOperationGeneric)
     {
 
+        NSString * mxfUTI = (__bridge NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+                                                                           (CFStringRef)@"MXF",
+                                                                           NULL);
+        
         // This thins out irrelevant items in our drag operation
         NSDictionary* searchOptions = @{NSPasteboardURLReadingFileURLsOnlyKey : @YES,
-                                        NSPasteboardURLReadingContentsConformToTypesKey : [AVMovie movieTypes]};
-        
+                                        NSPasteboardURLReadingContentsConformToTypesKey : [[AVMovie movieTypes] arrayByAddingObject: mxfUTI] };
+       
         __block NSUInteger countOfValidItems = 0;
         [sender enumerateDraggingItemsWithOptions:NSDraggingItemEnumerationClearNonenumeratedImages
                                           forView:self
@@ -113,8 +117,14 @@
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender
 {
     NSArray* classArray = @[[NSURL class]];
+    
+    NSString * mxfUTI = (__bridge NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+                                                                                   (CFStringRef)@"MXF",
+                                                                                   NULL);
+
+    
     NSDictionary* searchOptions = @{NSPasteboardURLReadingFileURLsOnlyKey : @YES,
-                                    NSPasteboardURLReadingContentsConformToTypesKey : [AVMovie movieTypes]};
+                                    NSPasteboardURLReadingContentsConformToTypesKey : [[AVMovie movieTypes] arrayByAddingObject: mxfUTI] };
 
     NSArray* urls = [[sender draggingPasteboard] readObjectsForClasses:classArray options:searchOptions];
 
