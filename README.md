@@ -65,6 +65,8 @@ See the DesignDiscussion wiki for more information about possible modules and di
 * Mac OS X 10.10 or higher
 * XCode 8 or higher
 
+It's also recommended to install [Apple's Pro Video Formats](https://support.apple.com/kb/DL1898?locale=en_US)
+
 **Dependencies**
 * Synopsis.framework (included in submodule)
 * * Tensorflow 1.1 +
