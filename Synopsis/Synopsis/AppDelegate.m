@@ -44,15 +44,9 @@ static NSTimeInterval start;
 // Toolbar
 @property (weak) IBOutlet NSToolbarItem* startPauseToolbarItem;
 
-
-
 @end
 
 @implementation AppDelegate
-
-
-//fix our giant memory leak which happened because we are probably holding on to Operations unecessarily now and not letting them go in our TableView's array of cached objects or some shit.
-
 
 - (id) init
 {
@@ -98,10 +92,8 @@ static NSTimeInterval start;
     self.prefsAnalyzerArrayController.content = self.analyzerPluginsInitializedForPrefs;
 }
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-    
-    
-    
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+{
     // REVEAL THYSELF
     [[self window] makeKeyAndOrderFront:nil];
     
