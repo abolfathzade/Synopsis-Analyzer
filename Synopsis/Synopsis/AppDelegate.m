@@ -20,6 +20,7 @@
 
 #import "PreferencesViewController.h"
 #import "PresetObject.h"
+#import "DirectoryWatcher.h"
 
 static NSTimeInterval start;
 
@@ -43,6 +44,9 @@ static NSTimeInterval start;
 
 // Toolbar
 @property (weak) IBOutlet NSToolbarItem* startPauseToolbarItem;
+
+
+@property (readwrite, strong) DirectoryWatcher* directoryWatcher;
 
 @end
 
@@ -158,6 +162,17 @@ static NSTimeInterval start;
             }
         }
     }
+    
+    BOOL useWatchFolder = true;
+    if(useWatchFolder)
+    {
+        NSURL* urlToWatch = [NSURL fileURLWithPath:@"/Users/vade/WatchTest"];
+        self.directoryWatcher = [[DirectoryWatcher alloc] initWithDirectoryAtURL:urlToWatch notificationBlock:^(NSArray<NSURL *> *changedURLS) {
+            NSLog(@"URLS Changed: %@", changedURLS);
+        }];
+        
+    }
+    
     
 //    [self initPrefs];
 }

@@ -51,6 +51,7 @@
 		1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C5F1AD5D2A1003B3CE9 /* BSONSerialization.m */; };
 		1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C6D1AD5D8D3003B3CE9 /* GZIP.m */; };
 		1BA8F8361C125DC20066BDDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */; };
+		1BB45FDE1F6AF2AB0066CB05 /* DirectoryWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BB45FDD1F6AF2AB0066CB05 /* DirectoryWatcher.m */; };
 		1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */; };
 		1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 1BC71D431F150CA6006DD7DC /* Credits.rtf */; };
 		1BC71E871F17E8FE006DD7DC /* hap.c in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71DDB1F17E8FE006DD7DC /* hap.c */; };
@@ -237,6 +238,8 @@
 		1BA68C6D1AD5D8D3003B3CE9 /* GZIP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GZIP.m; sourceTree = "<group>"; };
 		1BA8F8331C125DAA0066BDDB /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		1BB45FDC1F6AF2AB0066CB05 /* DirectoryWatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectoryWatcher.h; sourceTree = "<group>"; };
+		1BB45FDD1F6AF2AB0066CB05 /* DirectoryWatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DirectoryWatcher.m; sourceTree = "<group>"; };
 		1BB9B1A41EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoTransformScaleLinearizeHelper.h; sourceTree = "<group>"; };
 		1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoTransformScaleLinearizeHelper.m; sourceTree = "<group>"; };
 		1BC71D431F150CA6006DD7DC /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
@@ -948,6 +951,8 @@
 				1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */,
 				1B2E7C811E81DA8000EF07BC /* AtomicBoolean.h */,
 				1B2E7C821E81DA8000EF07BC /* AtomicBoolean.m */,
+				1BB45FDC1F6AF2AB0066CB05 /* DirectoryWatcher.h */,
+				1BB45FDD1F6AF2AB0066CB05 /* DirectoryWatcher.m */,
 				1BC71DD71F17E8C6006DD7DC /* Third Party */,
 				1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */,
 				1BEA4D251ACB2BCD00AB57C1 /* MainMenu.xib */,
@@ -1226,6 +1231,7 @@
 				1BC71EAE1F17E8FE006DD7DC /* colourfit.cpp in Sources */,
 				1B2E7C831E81DA8000EF07BC /* AtomicBoolean.m in Sources */,
 				1B805E3C1B01488D005D7354 /* ProgressTableViewCellRevealController.m in Sources */,
+				1BB45FDE1F6AF2AB0066CB05 /* DirectoryWatcher.m in Sources */,
 				1BA4D1991C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m in Sources */,
 				1BC71ED01F17E8FE006DD7DC /* CMBlockBufferPool.m in Sources */,
 				1BC71ECD1F17E8FE006DD7DC /* AVAssetWriterHapInput.m in Sources */,
