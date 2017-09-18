@@ -381,7 +381,7 @@ static NSTimeInterval start;
                                             
                                             // Clean up
                                             NSError* error;
-                                            if(![[NSFileManager defaultManager] removeItemAtURL:tempFileDestinationsour error:&error])
+                                            if(![[NSFileManager defaultManager] removeItemAtURL:tempFileDestination error:&error])
                                             {
                                                 [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
                                             }

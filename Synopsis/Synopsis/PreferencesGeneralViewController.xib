@@ -64,7 +64,7 @@
                 </box>
                 <box autoresizesSubviews="NO" borderType="line" title="File Preferences" id="SCB-cT-eeg">
                     <rect key="frame" x="17" y="16" width="446" height="233"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                     <view key="contentView" id="VW0-dP-tUx">
                         <rect key="frame" x="1" y="1" width="444" height="217"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

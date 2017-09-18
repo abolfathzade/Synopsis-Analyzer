@@ -114,18 +114,19 @@
 - (void) validateOutputFolderUI
 {
     NSURL* url = [self outputFolderURL];
-    
+    BOOL usingOutputFolder = [self usingOutputFolder];
+
     self.usingOutputFolderButton.state = ([self usingOutputFolder]) ? NSOnState : NSOffState;
     
-    if([self usingOutputFolder] && url)
+    if(usingOutputFolder && url)
         self.outputFolderStatus.image = [NSImage imageNamed:NSImageNameStatusAvailable];
-    else if (!url)
+    else if (usingOutputFolder && !url)
         self.outputFolderStatus.image = [NSImage imageNamed:NSImageNameStatusUnavailable];
     else
         self.outputFolderStatus.image = [NSImage imageNamed:NSImageNameStatusNone];
     
     if(url)
-        self.outputFolderDescription.stringValue = [[url absoluteString] stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+        self.outputFolderDescription.stringValue = [[[url absoluteURL] path] stringByRemovingPercentEncoding];
     else
         self.outputFolderDescription.stringValue = @"";
 }
@@ -200,15 +201,15 @@
     
     self.usingWatchFolderButton.state = ([self usingWatchFolder]) ? NSOnState : NSOffState;
     
-    if(usingWatchFolder  && watchURL)
+    if(usingWatchFolder && watchURL)
         self.watchFolderStatus.image = [NSImage imageNamed:NSImageNameStatusAvailable];
-    else if (!watchURL)
+    else if (usingWatchFolder && !watchURL)
         self.watchFolderStatus.image = [NSImage imageNamed:NSImageNameStatusUnavailable];
     else
         self.watchFolderStatus.image = [NSImage imageNamed:NSImageNameStatusNone];
     
     if(watchURL)
-        self.watchFolderDescription.stringValue = [[watchURL absoluteString] stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+        self.watchFolderDescription.stringValue = [[[watchURL absoluteURL] path] stringByRemovingPercentEncoding];
     else
         self.watchFolderDescription.stringValue = @"";
     
