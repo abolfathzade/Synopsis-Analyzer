@@ -7,9 +7,6 @@
 //
 
 #import "PreferencesViewController.h"
-#import "PreferencesGeneralViewController.h"
-#import "PreferencesPresetViewController.h"
-#import "PreferencesAdvancedViewController.h"
 #import "PresetGroup.h"
 
 @interface PreferencesViewController ()

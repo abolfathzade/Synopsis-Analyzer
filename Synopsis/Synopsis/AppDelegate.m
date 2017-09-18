@@ -20,7 +20,6 @@
 
 #import "PreferencesViewController.h"
 #import "PresetObject.h"
-#import "DirectoryWatcher.h"
 
 static NSTimeInterval start;
 
@@ -45,9 +44,6 @@ static NSTimeInterval start;
 // Toolbar
 @property (weak) IBOutlet NSToolbarItem* startPauseToolbarItem;
 
-
-@property (readwrite, strong) DirectoryWatcher* directoryWatcher;
-
 @end
 
 @implementation AppDelegate
@@ -64,6 +60,8 @@ static NSTimeInterval start;
         NSDictionary* standardDefaults = @{kSynopsisAnalyzerDefaultPresetPreferencesKey : @"DDCEA125-B93D-464B-B369-FB78A5E890B4",
                                            kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey : @(YES),
                                            kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey : @(YES),
+                                           kSynopsisAnalyzerUseOutputFolderKey : @(NO),
+                                           kSynopsisAnalyzerUseWatchFolderKey : @(NO),
                                            };
         
         [[NSUserDefaults standardUserDefaults] registerDefaults:standardDefaults];
@@ -162,32 +160,6 @@ static NSTimeInterval start;
             }
         }
     }
-    
-    BOOL useWatchFolder = true;
-    if(useWatchFolder)
-    {
-        NSURL* urlToWatch = [NSURL fileURLWithPath:@"/Users/vade/TwitterMediaDownloader"];
-        self.directoryWatcher = [[DirectoryWatcher alloc] initWithDirectoryAtURL:urlToWatch notificationBlock:^(NSArray<NSURL *> *changedURLS) {
-
-            for(NSURL* url in changedURLS)
-            {
-                NSString* uti = nil;
-                NSError* error;
-                if([url getResourceValue:&uti forKey:NSURLTypeIdentifierKey error:&error])
-                {
-                    if([[self supportedFileTypes] containsObject:uti])
-                    {
-                        [self enqueueFileForTranscode:url];
-                    }
-                }
-            }
-        
-        }];
-        
-    }
-    
-    
-//    [self initPrefs];
 }
 
 - (void) applicationWillTerminate:(NSNotification *)notification

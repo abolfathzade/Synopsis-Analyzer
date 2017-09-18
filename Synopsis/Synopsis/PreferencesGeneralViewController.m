@@ -8,6 +8,8 @@
 
 #import "PreferencesGeneralViewController.h"
 #import "PresetObject.h"
+#import "DirectoryWatcher.h"
+#import "AppDelegate.h"
 
 @interface PreferencesGeneralViewController ()
 @property (weak) IBOutlet NSTextField* selectedDefaultPresetDescription;
@@ -21,6 +23,8 @@
 @property (weak) IBOutlet NSButton* selectWatchFolder;
 @property (weak) IBOutlet NSTextField* watchFolderDescription;
 @property (weak) IBOutlet NSButton* watchFolderStatus;
+
+@property (strong) DirectoryWatcher* directoryWatcher;
 
 @end
 
@@ -177,10 +181,11 @@
 - (void) validateWatchFolderUI
 {
     NSURL* watchURL = [self watchFolderURL];
+    BOOL usingWatchFolder = [self usingWatchFolder];
     
     self.usingWatchFolderButton.state = ([self usingWatchFolder]) ? NSOnState : NSOffState;
     
-    if([self usingWatchFolder] && watchURL)
+    if(usingWatchFolder  && watchURL)
         self.watchFolderStatus.image = [NSImage imageNamed:NSImageNameStatusAvailable];
     else if (!watchURL)
         self.watchFolderStatus.image = [NSImage imageNamed:NSImageNameStatusUnavailable];
@@ -191,11 +196,40 @@
         self.watchFolderDescription.stringValue = [[watchURL absoluteString] stringByReplacingOccurrencesOfString:@"file://" withString:@""];
     else
         self.watchFolderDescription.stringValue = @"";
+    
+    AppDelegate* appDelegate = (AppDelegate*) [[NSApplication sharedApplication] delegate];
+    if(usingWatchFolder && watchURL)
+    {
+        self.directoryWatcher = [[DirectoryWatcher alloc] initWithDirectoryAtURL:watchURL notificationBlock:^(NSArray<NSURL *> *changedURLS) {
+            
+            for(NSURL* url in changedURLS)
+            {
+                NSString* uti = nil;
+                NSError* error;
+                if([url getResourceValue:&uti forKey:NSURLTypeIdentifierKey error:&error])
+                {
+                    if([[appDelegate supportedFileTypes] containsObject:uti])
+                    {
+                        [appDelegate enqueueFileForTranscode:url];
+                    }
+                }
+            }
+        }];
+    }
+    else
+    {
+        self.directoryWatcher = nil;
+    }
+
 }
 
 - (IBAction) revealWatchFolder:(id)sender
 {
     [[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs: @[ [self watchFolderURL]] ];
 }
+
+#pragma mark - Actions
+
+
 
 @end

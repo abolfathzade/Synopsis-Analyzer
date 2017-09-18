@@ -13,5 +13,10 @@
 
 // Drop File Helper Protocol
 - (void) handleDropedFiles:(NSArray *)fileURLArray;
+
+- (NSArray*) supportedFileTypes;
+- (void) enqueueFileForTranscode:(NSURL*)fileURL;
+
 @end
+
 
