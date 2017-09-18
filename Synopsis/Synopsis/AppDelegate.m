@@ -166,9 +166,22 @@ static NSTimeInterval start;
     BOOL useWatchFolder = true;
     if(useWatchFolder)
     {
-        NSURL* urlToWatch = [NSURL fileURLWithPath:@"/Users/vade/WatchTest"];
+        NSURL* urlToWatch = [NSURL fileURLWithPath:@"/Users/vade/TwitterMediaDownloader"];
         self.directoryWatcher = [[DirectoryWatcher alloc] initWithDirectoryAtURL:urlToWatch notificationBlock:^(NSArray<NSURL *> *changedURLS) {
-            NSLog(@"URLS Changed: %@", changedURLS);
+
+            for(NSURL* url in changedURLS)
+            {
+                NSString* uti = nil;
+                NSError* error;
+                if([url getResourceValue:&uti forKey:NSURLTypeIdentifierKey error:&error])
+                {
+                    if([[self supportedFileTypes] containsObject:uti])
+                    {
+                        [self enqueueFileForTranscode:url];
+                    }
+                }
+            }
+        
         }];
         
     }
@@ -235,6 +248,14 @@ static NSTimeInterval start;
 
 #pragma mark -
 
+- (NSArray*) supportedFileTypes
+{
+    NSString * mxfUTI = (__bridge NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+                                                                                   (CFStringRef)@"MXF",
+                                                                                   NULL);
+    return [[AVMovie movieTypes] arrayByAddingObject:mxfUTI];
+}
+
 - (IBAction)openMovies:(id)sender
 {
     // Open a movie or two
@@ -242,12 +263,8 @@ static NSTimeInterval start;
     
     [openPanel setAllowsMultipleSelection:YES];
     
-    NSString * mxfUTI = (__bridge NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
-                                                                                   (CFStringRef)@"MXF",
-                                                                                   NULL);
-    
-// TODO
-    [openPanel setAllowedFileTypes:[[AVMovie movieTypes] arrayByAddingObject:mxfUTI]];
+    // TODO
+    [openPanel setAllowedFileTypes:[self supportedFileTypes]];
     //    [openPanel setAllowedFileTypes:@[@"mov", @"mp4", @"m4v"]];
     
     [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)
@@ -261,6 +278,7 @@ static NSTimeInterval start;
          }
      }];
 }
+
 - (void) enqueueFileForTranscode:(NSURL*)fileURL
 {
     NSString* lastPath = [fileURL lastPathComponent];

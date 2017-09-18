@@ -8,10 +8,11 @@
 
 #import "DirectoryWatcher.h"
 
-
 @interface DirectoryWatcher (FSEventStreamCallbackSupport)
 - (void) coalescedNotificationWithChangedURLArray:(NSArray<NSURL*>*)changedUrls;
 @end
+
+#pragma mark -
 
 void mycallback(
                 ConstFSEventStreamRef streamRef,
@@ -43,6 +44,8 @@ void mycallback(
         }
     }
 }
+
+#pragma mark -
 
 @interface DirectoryWatcher ()
 {
@@ -77,7 +80,6 @@ void mycallback(
                     [self initFSEvents];
                 }
             }
-
         }
         else
         {
@@ -112,14 +114,11 @@ void mycallback(
                                       (CFArrayRef)CFBridgingRetain(paths),
                                       kFSEventStreamEventIdSinceNow,
                                       1.0,
-                                      kFSEventStreamCreateFlagNone);
-    
+                                      kFSEventStreamCreateFlagNone | kFSEventStreamCreateFlagFileEvents | kFSEventStreamCreateFlagIgnoreSelf);
     
     FSEventStreamScheduleWithRunLoop(eventStream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 
-    
     FSEventStreamStart(eventStream);
-    
 }
 
 - (void) dealloc

@@ -15,6 +15,5 @@ typedef void(^FileWatchNoticiationBlock)(NSArray<NSURL*>*);
 @property (readonly) NSURL* directoryURL;
 
 - (instancetype) initWithDirectoryAtURL:(NSURL*)url notificationBlock:(FileWatchNoticiationBlock)notificationBlock;
-- (void) coalescedNotificationWithChangedURLArray:(NSArray<NSURL*>*)changedUrls;
 
 @end

@@ -15,10 +15,14 @@
 #define kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey @"ConcurrentJobAnalysis"
 #define kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey @"ConcurrentFrameAnalysis"
 
+#define kSynopsisAnalyzerUseWatchFolderKey @"UseWatchFolder" // BOOL
+#define kSynopsisAnalyzerUseOutputFolderKey @"UseOutputFolder" // BOOL
+
+#define kSynopsisAnalyzerWatchFolderURLKey @"WatchFolder" //
+#define kSynopsisAnalyzerOutputFolderURLKey @"OutputFolder" //
 
 // Notifications
 #define kSynopsisAnalyzerConcurrentJobAnalysisDidChangeNotification @"kSynopsisAnalyzerConcurrentJobAnalysisDidChangeNotification"
 #define kSynopsisAnalyzerConcurrentFrameAnalysisDidChangeNotification @"kSynopsisAnalyzerConcurrentFrameAnalysisD"
-
 
 #endif /* Constants_h */
