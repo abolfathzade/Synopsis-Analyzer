@@ -126,8 +126,8 @@ void mycallback(
     if(eventStream)
     {
         FSEventStreamStop(eventStream);
-        FSEventStreamRelease(eventStream);
         FSEventStreamInvalidate(eventStream);
+        FSEventStreamRelease(eventStream);
         eventStream = NULL;
     }
 }

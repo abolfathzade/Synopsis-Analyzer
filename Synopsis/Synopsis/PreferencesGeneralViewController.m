@@ -99,8 +99,15 @@
 {
     NSString* outputPath = [[NSUserDefaults standardUserDefaults] valueForKey:kSynopsisAnalyzerOutputFolderURLKey];
     if(outputPath)
-        return [NSURL fileURLWithPath:outputPath];
-    
+    {
+        NSURL* outputURL = [NSURL fileURLWithPath:outputPath];
+        BOOL isDirectory = NO;
+        if([[NSFileManager defaultManager] fileExistsAtPath:outputPath isDirectory:&isDirectory])
+        {
+            if(isDirectory)
+                return outputURL;
+        }
+    }
     return nil;
 }
 
@@ -173,8 +180,16 @@
 {
     NSString* outputPath = [[NSUserDefaults standardUserDefaults] valueForKey:kSynopsisAnalyzerWatchFolderURLKey];
     if(outputPath)
-        return [NSURL fileURLWithPath:outputPath];
-    
+    {
+        NSURL* outputURL = [NSURL fileURLWithPath:outputPath];
+        BOOL isDirectory = NO;
+        if([[NSFileManager defaultManager] fileExistsAtPath:outputPath isDirectory:&isDirectory])
+        {
+            if(isDirectory)
+                return outputURL;
+        }
+    }
+
     return nil;
 }
 
@@ -220,7 +235,6 @@
     {
         self.directoryWatcher = nil;
     }
-
 }
 
 - (IBAction) revealWatchFolder:(id)sender

@@ -280,17 +280,48 @@ static NSTimeInterval start;
     NSString* firstPassFilePath = [[lastPath stringByAppendingString:@"_temp_"] stringByAppendingString:sessionUUID.UUIDString];
     NSString* lastPassFilePath = [lastPath stringByAppendingString:@"_analyzed"];
     
-    NSURL* destinationURL = [fileURL URLByDeletingLastPathComponent];
-    destinationURL = [[destinationURL URLByAppendingPathComponent:firstPassFilePath] URLByAppendingPathExtension:@"mov"];
+    // TEMP FILE LOCATION
+    NSURL* tempFileDestination = nil;
+    if([self.prefsViewController.preferencesGeneralViewController usingOutputFolder])
+    {
+        tempFileDestination = [self.prefsViewController.preferencesGeneralViewController outputFolderURL];
+
+        if(!tempFileDestination)
+        {
+            tempFileDestination = [fileURL URLByDeletingLastPathComponent];
+        }
+    }
+    else
+    {
+        tempFileDestination = [fileURL URLByDeletingLastPathComponent];
+    }
     
-    NSURL* destinationURL2 = [fileURL URLByDeletingLastPathComponent];
-    destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:lastPassFilePath] URLByAppendingPathExtension:@"mov"];
+    tempFileDestination = [[tempFileDestination URLByAppendingPathComponent:firstPassFilePath] URLByAppendingPathExtension:@"mov"];
+    
+    // OUTPUT FILE LOCATIOn
+    NSURL* destinationURL = nil;
+    if([self.prefsViewController.preferencesGeneralViewController usingOutputFolder])
+    {
+        destinationURL = [self.prefsViewController.preferencesGeneralViewController outputFolderURL];
+        
+        if(!destinationURL)
+        {
+            destinationURL = [fileURL URLByDeletingLastPathComponent];
+        }
+    }
+    else
+    {
+        destinationURL = [fileURL URLByDeletingLastPathComponent];
+    }
+
+    destinationURL = [[destinationURL URLByAppendingPathComponent:lastPassFilePath] URLByAppendingPathExtension:@"mov"];
+
 
     // check to see if our final pass destination URLs already exist - if so, append our sesion UUI.
-    if([[NSFileManager defaultManager] fileExistsAtPath:destinationURL2.path])
+    if([[NSFileManager defaultManager] fileExistsAtPath:destinationURL.path])
     {
-        destinationURL2 = [fileURL URLByDeletingLastPathComponent];
-        destinationURL2 = [[destinationURL2 URLByAppendingPathComponent:[lastPassFilePath stringByAppendingString:[@"_" stringByAppendingString:sessionUUID.UUIDString]]] URLByAppendingPathExtension:@"mov"];
+        destinationURL = [fileURL URLByDeletingLastPathComponent];
+        destinationURL = [[destinationURL URLByAppendingPathComponent:[lastPassFilePath stringByAppendingString:[@"_" stringByAppendingString:sessionUUID.UUIDString]]] URLByAppendingPathExtension:@"mov"];
     }
     
     // Pass 1 is our analysis pass, and our decode pass
@@ -317,7 +348,7 @@ static NSTimeInterval start;
     // TODO: Just pass a copy of the current Preset directly.
     AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithUUID:sessionUUID
                                                                                         sourceURL:fileURL
-                                                                                   destinationURL:destinationURL
+                                                                                   destinationURL:tempFileDestination
                                                                                  transcodeOptions:transcodeOptions];
     
     assert(analysis);
@@ -340,8 +371,8 @@ static NSTimeInterval start;
                                         
                                         // Inherit UUID
                                         MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithUUID:sessionUUID
-                                                                                                                               sourceURL:destinationURL
-                                                                                                                          destinationURL:destinationURL2
+                                                                                                                               sourceURL:tempFileDestination
+                                                                                                                          destinationURL:destinationURL
                                                                                                                          metadataOptions:metadataOptions];
                                         
                                         pass2.completionBlock = (^(void)
@@ -350,7 +381,7 @@ static NSTimeInterval start;
                                             
                                             // Clean up
                                             NSError* error;
-                                            if(![[NSFileManager defaultManager] removeItemAtURL:destinationURL error:&error])
+                                            if(![[NSFileManager defaultManager] removeItemAtURL:tempFileDestinationsour error:&error])
                                             {
                                                 [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
                                             }
