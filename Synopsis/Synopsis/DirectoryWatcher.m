@@ -14,7 +14,7 @@
 
 #pragma mark -
 
-void mycallback(
+void mycallback(u
                 ConstFSEventStreamRef streamRef,
                 void *clientCallBackInfo,
                 size_t numEvents,
@@ -33,12 +33,12 @@ void mycallback(
             
             NSMutableArray* changedURLS = [NSMutableArray new];
             
-            for (i = 0; i < numEvents; i++)
-            {
-                NSString* filePath = [[NSString alloc] initWithCString:paths[i] encoding:NSUTF8StringEncoding];
-                NSURL* fileURL = [NSURL fileURLWithPath:filePath];
-                [changedURLS addObject:fileURL];
-            }
+//            for (i = 0; i < numEvents; i++)
+//            {
+//                NSString* filePath = [[NSString alloc] initWithCString:paths[i] encoding:NSUTF8StringEncoding];
+//                NSURL* fileURL = [NSURL fileURLWithPath:filePath];
+//                [changedURLS addObject:fileURL];
+//            }
             
             [watcher coalescedNotificationWithChangedURLArray:changedURLS];
         }
@@ -53,6 +53,8 @@ void mycallback(
 }
 @property (readwrite, strong) NSURL* directoryURL;
 @property (readwrite, copy) FileWatchNoticiationBlock notificationBlock;
+
+@property (readwrite, strong) NSSet* latestDirectorySet;
 
 @end
 
@@ -74,6 +76,9 @@ void mycallback(
                 if([isDirValue boolValue])
                 {
                     self.directoryURL = url;
+                    
+                    self.latestDirectorySet = [self generateHeirarchyForURL:self.directoryURL];
+                    
                     self.notificationBlock = notificationBlock;
                     
                     //[self initDispatch];
@@ -114,7 +119,7 @@ void mycallback(
                                       (CFArrayRef)CFBridgingRetain(paths),
                                       kFSEventStreamEventIdSinceNow,
                                       1.0,
-                                      kFSEventStreamCreateFlagNone | kFSEventStreamCreateFlagFileEvents | kFSEventStreamCreateFlagIgnoreSelf);
+                                      kFSEventStreamCreateFlagNone | kFSEventStreamCreateFlagIgnoreSelf);
     
     FSEventStreamScheduleWithRunLoop(eventStream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 
@@ -132,17 +137,44 @@ void mycallback(
     }
 }
 
-- (NSArray*) enumerateDirectoryContentsReturningChanges
+- (NSSet*) generateHeirarchyForURL:(NSURL*)url;
 {
-    return nil;
+    NSMutableSet* urlSet = [[NSMutableSet alloc] init];
+    
+    NSDirectoryEnumerator* enumerator = [[NSFileManager defaultManager] enumeratorAtURL:url
+                                                             includingPropertiesForKeys:[NSArray array]
+                                                                                options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles
+                                                                           errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
+                                                                               return YES;
+                                                                           }];
+
+    
+    
+    for (NSURL* url in enumerator)
+    {
+        [urlSet addObject:url];
+    }
+    
+    return urlSet;
 }
+
+
 
 - (void) coalescedNotificationWithChangedURLArray:(NSArray<NSURL*>*)changedUrls
 {
     if(self.notificationBlock)
     {
+        NSSet* currentDirectorySet = [self generateHeirarchyForURL:self.directoryURL];
+        
+        NSMutableSet* deltaSet = [[NSMutableSet alloc] init];
+        [deltaSet setSet:[self.latestDirectorySet copy]];
+        
+        [deltaSet intersectSet:currentDirectorySet];
+        
+        self.latestDirectorySet = currentDirectorySet;
+        
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.notificationBlock(changedUrls);
+            self.notificationBlock([deltaSet allObjects]);
         });
     }
 }
