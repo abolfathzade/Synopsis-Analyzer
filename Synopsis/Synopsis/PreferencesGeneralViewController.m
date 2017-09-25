@@ -63,7 +63,8 @@
     openPanel.canChooseDirectories = YES;
     openPanel.canCreateDirectories = YES;
     openPanel.canChooseFiles = NO;
-    
+    openPanel.message = @"Select Output Folder";
+
     [openPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse result) {
        if(result == NSModalResponseOK)
        {
@@ -144,6 +145,7 @@
     openPanel.canChooseDirectories = YES;
     openPanel.canCreateDirectories = YES;
     openPanel.canChooseFiles = NO;
+    openPanel.message = @"Select Watch Folder";
     
     [openPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse result) {
         if(result == NSModalResponseOK)
