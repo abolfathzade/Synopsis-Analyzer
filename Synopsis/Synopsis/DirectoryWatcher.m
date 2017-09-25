@@ -14,7 +14,7 @@
 
 #pragma mark -
 
-void mycallback(u
+void mycallback(
                 ConstFSEventStreamRef streamRef,
                 void *clientCallBackInfo,
                 size_t numEvents,
@@ -32,6 +32,8 @@ void mycallback(u
             char **paths = eventPaths;
             
             NSMutableArray* changedURLS = [NSMutableArray new];
+            
+            NSLog(@"Recieved %i Directory Watch Events", numEvents);
             
 //            for (i = 0; i < numEvents; i++)
 //            {
@@ -167,9 +169,10 @@ void mycallback(u
         NSSet* currentDirectorySet = [self generateHeirarchyForURL:self.directoryURL];
         
         NSMutableSet* deltaSet = [[NSMutableSet alloc] init];
-        [deltaSet setSet:[self.latestDirectorySet copy]];
+        [deltaSet setSet:currentDirectorySet];
+        [deltaSet minusSet:self.latestDirectorySet];
         
-        [deltaSet intersectSet:currentDirectorySet];
+        NSLog(@"Directory Watcher found changes: %@", deltaSet);
         
         self.latestDirectorySet = currentDirectorySet;
         

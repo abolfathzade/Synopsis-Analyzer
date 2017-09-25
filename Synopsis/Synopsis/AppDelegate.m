@@ -320,7 +320,7 @@ static NSTimeInterval start;
     // check to see if our final pass destination URLs already exist - if so, append our sesion UUI.
     if([[NSFileManager defaultManager] fileExistsAtPath:destinationURL.path])
     {
-        destinationURL = [fileURL URLByDeletingLastPathComponent];
+        destinationURL = [destinationURL URLByDeletingLastPathComponent];
         destinationURL = [[destinationURL URLByAppendingPathComponent:[lastPassFilePath stringByAppendingString:[@"_" stringByAppendingString:sessionUUID.UUIDString]]] URLByAppendingPathExtension:@"mov"];
     }
     
