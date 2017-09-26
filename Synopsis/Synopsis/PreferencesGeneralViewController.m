@@ -8,7 +8,7 @@
 
 #import "PreferencesGeneralViewController.h"
 #import "PresetObject.h"
-#import "DirectoryWatcher.h"
+#import <Synopsis/Synopsis.h>
 #import "AppDelegate.h"
 
 @interface PreferencesGeneralViewController ()
@@ -24,7 +24,7 @@
 @property (weak) IBOutlet NSTextField* watchFolderDescription;
 @property (weak) IBOutlet NSButton* watchFolderStatus;
 
-@property (strong) DirectoryWatcher* directoryWatcher;
+@property (strong) SynopsisDirectoryWatcher* directoryWatcher;
 
 @end
 
@@ -218,9 +218,9 @@
     AppDelegate* appDelegate = (AppDelegate*) [[NSApplication sharedApplication] delegate];
     if(usingWatchFolder && watchURL)
     {
-        self.directoryWatcher = [[DirectoryWatcher alloc] initWithDirectoryAtURL:watchURL notificationBlock:^(NSArray<NSURL *> *changedURLS) {
+        self.directoryWatcher = [[SynopsisDirectoryWatcher alloc] initWithDirectoryAtURL:watchURL notificationBlock:^(NSArray<NSURL *> *changedURLS) {
             
-            for(NSURL* url in changedURLS)
+            for(NSURL* url in changedURLS)sour
             {
                 NSString* uti = nil;
                 NSError* error;
