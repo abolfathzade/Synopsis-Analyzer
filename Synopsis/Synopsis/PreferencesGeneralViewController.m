@@ -220,7 +220,7 @@
     {
         self.directoryWatcher = [[SynopsisDirectoryWatcher alloc] initWithDirectoryAtURL:watchURL notificationBlock:^(NSArray<NSURL *> *changedURLS) {
             
-            for(NSURL* url in changedURLS)sour
+            for(NSURL* url in changedURLS)
             {
                 NSString* uti = nil;
                 NSError* error;
