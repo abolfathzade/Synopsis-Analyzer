@@ -30,6 +30,7 @@ static NSTimeInterval start;
 
 @property (atomic, readwrite, strong) NSOperationQueue* transcodeQueue;
 @property (atomic, readwrite, strong) NSOperationQueue* metadataQueue;
+@property (atomic, readwrite, strong) NSOperationQueue* sessionComplectionQueue;
 
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPlugins;
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPluginsInitializedForPrefs;
@@ -78,6 +79,11 @@ static NSTimeInterval start;
         self.metadataQueue = [[NSOperationQueue alloc] init];
         self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
         self.metadataQueue.qualityOfService = NSQualityOfServiceUserInitiated;
+       
+        // Completion queue of group of encodes, be it a drag session, opening of a set folders with media, or a single encode operation
+        self.sessionComplectionQueue = [[NSOperationQueue alloc] init];
+        self.sessionComplectionQueue.maxConcurrentOperationCount = 1;
+        self.sessionComplectionQueue.qualityOfService = NSQualityOfServiceUtility;
         
         self.analyzerPlugins = [NSMutableArray new];
         self.analyzerPluginsInitializedForPrefs = [NSMutableArray new];
@@ -438,7 +444,7 @@ static NSTimeInterval start;
             [blockOp addDependency:operation];
         }
 				
-        [self.metadataQueue addOperation:blockOp];
+        [self.sessionComplectionQueue addOperation:blockOp];
     }
 }
 
