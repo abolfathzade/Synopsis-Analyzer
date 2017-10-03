@@ -130,9 +130,13 @@
 
     if(self.dragDelegate && [urls count])
     {
-        if([self.dragDelegate respondsToSelector:@selector(handleDropedFiles:)])
+        if([self.dragDelegate respondsToSelector:@selector(analysisSessionForFiles:sessionCompletionBlock:)])
         {
-            [self.dragDelegate handleDropedFiles:urls];
+            [self.dragDelegate analysisSessionForFiles:urls sessionCompletionBlock:^{
+                dispatch_async(dispatch_get_main_queue(),^{
+                    NSLog(@"Drag Session Completed");
+                });
+            }];
         }
     }
 

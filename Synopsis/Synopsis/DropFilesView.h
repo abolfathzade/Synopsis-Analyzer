@@ -10,7 +10,7 @@
 @protocol DropFileHelper <NSObject>
 
 @required
-- (void) handleDropedFiles:(NSArray*)fileURLArray;
+- (void) analysisSessionForFiles:(NSArray *)fileURLArray sessionCompletionBlock:(void (^)(void))completionBlock;
 @end
 
 

@@ -17,6 +17,7 @@
 
 #define kSynopsisAnalyzerUseWatchFolderKey @"UseWatchFolder" // BOOL
 #define kSynopsisAnalyzerUseOutputFolderKey @"UseOutputFolder" // BOOL
+#define kSynopsisAnalyzerMirrorFolderStructureToOutputKey @"MirrorFolderStructureToOutput" // BOOL
 
 #define kSynopsisAnalyzerWatchFolderURLKey @"WatchFolder" //
 #define kSynopsisAnalyzerOutputFolderURLKey @"OutputFolder" //

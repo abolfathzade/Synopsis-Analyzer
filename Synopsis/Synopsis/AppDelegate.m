@@ -251,7 +251,7 @@ static NSTimeInterval start;
      }];
 }
 
-- (void) enqueueFileForTranscode:(NSURL*)fileURL
+- (NSOperation*) enqueueFileForTranscode:(NSURL*)fileURL
 {
     NSString* lastPath = [fileURL lastPathComponent];
     NSString* lastPathExtention = [fileURL pathExtension];
@@ -353,9 +353,19 @@ static NSTimeInterval start;
     
     assert(analysis);
     
-    // pass2 is depended on pass one being complete, and on pass1's analyzed metadata
-    __weak AnalysisAndTranscodeOperation* weakAnalysis = analysis;
+    // Inherit UUID
+    MetadataWriterTranscodeOperation* metadata = [[MetadataWriterTranscodeOperation alloc] initWithUUID:sessionUUID
+                                                                                           sourceURL:tempFileDestination
+                                                                                      destinationURL:destinationURL];
     
+    
+    assert(metadata);
+
+
+    
+    // metadata is depended on pass one being complete, and on analysies's analyzed metadata
+    __weak AnalysisAndTranscodeOperation* weakAnalysis = analysis;
+
     analysis.completionBlock = (^(void)
                                 {
                                     // Retarded weak/strong pattern so we avoid retain loopl
@@ -369,56 +379,66 @@ static NSTimeInterval start;
                                                                           kSynopsisAnalyzedMetadataExportOptionKey : @(exportOption),
                                                                           };
                                         
-                                        // Inherit UUID
-                                        MetadataWriterTranscodeOperation* pass2 = [[MetadataWriterTranscodeOperation alloc] initWithUUID:sessionUUID
-                                                                                                                               sourceURL:tempFileDestination
-                                                                                                                          destinationURL:destinationURL
-                                                                                                                         metadataOptions:metadataOptions];
-                                        
-                                        pass2.completionBlock = (^(void)
-                                        {
-                                            [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis"];
-                                            
-                                            // Clean up
-                                            NSError* error;
-                                            if(![[NSFileManager defaultManager] removeItemAtURL:tempFileDestination error:&error])
-                                            {
-                                                [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
-                                            }
-                                        });
-                                        
-                                        [self.metadataQueue addOperation:pass2];
+                                        // Set our metadata pass'es metadata options to the result of our analysis operation
+                                        // The dependency structure as well as our custom NSOperation subclass should
+                                        // Ensure that this completion block fires before main on our metadata operation does
+                                        metadata.metadataOptions = metadataOptions;
                                     }
                                 });
 	
-    [[LogController sharedLogController] appendVerboseLog:@"Begin Transcode and Analysis"];
 	
+    metadata.completionBlock = (^(void)
+                                {
+                                    [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis"];
+                                    
+                                    // Clean up
+                                    NSError* error;
+                                    if(![[NSFileManager defaultManager] removeItemAtURL:tempFileDestination error:&error])
+                                    {
+                                        [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
+                                    }
+                                });
+    
+
+    // Ensure we fire only once anaysus completes, and its completion block is fired off
+    [metadata addDependency:analysis];
+    
     [self.transcodeQueue addOperation:analysis];
+
+    [[LogController sharedLogController] appendVerboseLog:@"Begin Transcode and Analysis"];
+
+    [self.metadataQueue addOperation:metadata];
+
+    return metadata;
 }
 
 #pragma mark - Drop File Helper
 
-- (void) handleDropedFiles:(NSArray *)fileURLArray
+- (void) analysisSessionForFiles:(NSArray *)fileURLArray sessionCompletionBlock:(void (^)(void))completionBlock
 {
-    if(fileURLArray)
+    if(fileURLArray && fileURLArray.count)
     {
         start = [NSDate timeIntervalSinceReferenceDate];
-		
-        for(NSURL* url in fileURLArray)
-        {
-            [self enqueueFileForTranscode:url];
-        }
-		
+
         NSBlockOperation* blockOp = [NSBlockOperation blockOperationWithBlock:^{
             NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
-			
+            
             [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Batch Took : %f seconds", delta]];
-			
+            
+            if(completionBlock != NULL)
+            {
+                completionBlock();
+            }
+            
         }];
-		
-        [blockOp addDependency:[self.transcodeQueue.operations lastObject]];
-		
-        [self.transcodeQueue addOperation:blockOp];
+        
+        for(NSURL* url in fileURLArray)
+        {
+            NSOperation* operation = [self enqueueFileForTranscode:url];
+            [blockOp addDependency:operation];
+        }
+				
+        [self.metadataQueue addOperation:blockOp];
     }
 }
 

@@ -11,11 +11,8 @@
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, DropFileHelper>
 
-// Drop File Helper Protocol
-- (void) handleDropedFiles:(NSArray *)fileURLArray;
-
 - (NSArray*) supportedFileTypes;
-- (void) enqueueFileForTranscode:(NSURL*)fileURL;
+- (void) analysisSessionForFiles:(NSArray *)fileURLArray sessionCompletionBlock:(void (^)(void))completionBlock;
 
 @end
 

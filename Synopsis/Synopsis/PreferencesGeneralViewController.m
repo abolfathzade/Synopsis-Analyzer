@@ -220,6 +220,8 @@
     {
         self.directoryWatcher = [[SynopsisDirectoryWatcher alloc] initWithDirectoryAtURL:watchURL notificationBlock:^(NSArray<NSURL *> *changedURLS) {
             
+            NSMutableArray<NSURL*>* changedValidURLs = [NSMutableArray array];
+            
             for(NSURL* url in changedURLS)
             {
                 NSString* uti = nil;
@@ -228,10 +230,19 @@
                 {
                     if([[appDelegate supportedFileTypes] containsObject:uti])
                     {
-                        [appDelegate enqueueFileForTranscode:url];
+                        [changedValidURLs addObject:url];
                     }
                 }
             }
+            
+            // Kick off Analysis Session
+            [appDelegate analysisSessionForFiles:changedValidURLs sessionCompletionBlock:^{
+                dispatch_async(dispatch_get_main_queue(), ^{
+                   
+                    NSLog(@"SESSION COMPLETE ALL SESSION MEDIA AND SUB FOLDERS TO OUTPUT FOLDER FROM TEMP WORKING FOLDER");
+                    
+                });
+            }];
         }];
     }
     else

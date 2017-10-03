@@ -31,8 +31,6 @@
 {
 }
 
-// Prerequisites
-@property (atomic, readwrite, strong) NSDictionary* metadataOptions;
 
 // Metadata to write
 @property (atomic, readwrite, strong) NSMutableArray* analyzedVideoSampleBufferMetadata;
@@ -61,46 +59,17 @@
 
 @implementation MetadataWriterTranscodeOperation
 
-- (id) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL metadataOptions:(NSDictionary*)metadataOptions
+- (id) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL
 {
     self = [super initWithUUID:uuid sourceURL:sourceURL destinationURL:destinationURL];
     if(self)
     {
-        if(metadataOptions == nil)
-        {
-            return nil;
-        }
+//        if(metadataOptions == nil)
+//        {
+//            return nil;
+//        }
         
-        self.metadataOptions = metadataOptions;
-        
-        self.transcodeAssetHasVideo = NO;
-        self.transcodeAssetHasAudio = NO;
-
-        if(self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey])
-        {
-            self.analyzedVideoSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey] mutableCopy];
-        }
-        
-        if(self.metadataOptions[kSynopsisAnalyzedAudioSampleBufferMetadataKey])
-        {
-            self.analyzedAudioSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedAudioSampleBufferMetadataKey] mutableCopy];
-        }
-        
-        if(self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey])
-        {
-            self.analyzedGlobalMetadata = self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey];
-        }
-        
-        SynopsisMetadataEncoderExportOption exportOption = SynopsisMetadataEncoderExportOptionNone;
-        if(self.metadataOptions[kSynopsisAnalyzedMetadataExportOptionKey])
-        {
-            exportOption = [self.metadataOptions[kSynopsisAnalyzedMetadataExportOptionKey] unsignedIntegerValue];
-        }
-
-        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsisMetadataVersionValue exportOption:exportOption];
-
-        [self setupTranscodeShitSucessfullyOrDontWhatverMan];
-    }
+           }
     return self;
 }
 
@@ -111,6 +80,36 @@
 
 - (void) main
 {
+    assert(self.metadataOptions != nil);
+    
+    self.transcodeAssetHasVideo = NO;
+    self.transcodeAssetHasAudio = NO;
+    
+    if(self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey])
+    {
+        self.analyzedVideoSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey] mutableCopy];
+    }
+    
+    if(self.metadataOptions[kSynopsisAnalyzedAudioSampleBufferMetadataKey])
+    {
+        self.analyzedAudioSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedAudioSampleBufferMetadataKey] mutableCopy];
+    }
+    
+    if(self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey])
+    {
+        self.analyzedGlobalMetadata = self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey];
+    }
+    
+    SynopsisMetadataEncoderExportOption exportOption = SynopsisMetadataEncoderExportOptionNone;
+    if(self.metadataOptions[kSynopsisAnalyzedMetadataExportOptionKey])
+    {
+        exportOption = [self.metadataOptions[kSynopsisAnalyzedMetadataExportOptionKey] unsignedIntegerValue];
+    }
+    
+    self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsisMetadataVersionValue exportOption:exportOption];
+    
+    [self setupTranscodeShitSucessfullyOrDontWhatverMan];
+
     [self transcodeAndAnalyzeAsset];
     
     [super main];
