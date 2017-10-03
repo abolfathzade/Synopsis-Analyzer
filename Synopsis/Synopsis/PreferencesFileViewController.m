@@ -23,6 +23,12 @@
 @property (weak) IBOutlet NSTextField* watchFolderDescription;
 @property (weak) IBOutlet NSButton* watchFolderStatus;
 
+@property (weak) IBOutlet NSButton* usingTempFolderButton;
+@property (weak) IBOutlet NSButton* selectTempFolder;
+@property (weak) IBOutlet NSTextField* tempFolderDescription;
+@property (weak) IBOutlet NSButton* tempFolderStatus;
+
+
 @property (strong) SynopsisDirectoryWatcher* directoryWatcher;
 
 @end
@@ -38,6 +44,7 @@
 {
     [self validateOutputFolderUI];
     [self validateWatchFolderUI];
+    [self validateTempFolderUI];
 }
 
 #pragma mark - Output Folder
@@ -114,7 +121,7 @@
     if(url)
         self.outputFolderDescription.stringValue = [[[url absoluteURL] path] stringByRemovingPercentEncoding];
     else
-        self.outputFolderDescription.stringValue = @"";
+        self.outputFolderDescription.stringValue = @"Output Folder";
 }
 
 - (IBAction)revealOutputFolder:(id)sender
@@ -198,7 +205,7 @@
     if(watchURL)
         self.watchFolderDescription.stringValue = [[[watchURL absoluteURL] path] stringByRemovingPercentEncoding];
     else
-        self.watchFolderDescription.stringValue = @"";
+        self.watchFolderDescription.stringValue = @"Watch Folder";
     
     AppDelegate* appDelegate = (AppDelegate*) [[NSApplication sharedApplication] delegate];
     if(usingWatchFolder && watchURL)
@@ -240,5 +247,90 @@
 {
     [[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs: @[ [self watchFolderURL]] ];
 }
+
+#pragma mark - Temp Folder
+
+- (IBAction)selectTempFolder:(id)sender
+{
+    NSOpenPanel* openPanel = [NSOpenPanel openPanel];
+    openPanel.canChooseDirectories = YES;
+    openPanel.canCreateDirectories = YES;
+    openPanel.canChooseFiles = NO;
+    openPanel.message = @"Select Temporary Items Folder";
+    
+    [openPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse result) {
+        if(result == NSModalResponseOK)
+        {
+            NSURL* outputFolderURL = [openPanel URL];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self updateTempFolder:outputFolderURL];
+            });
+        }
+    }];
+}
+
+- (IBAction)useTempFolder:(id)sender
+{
+    BOOL useFolder = ([sender state] == NSOnState);
+    
+    [[NSUserDefaults standardUserDefaults] setValue:@(useFolder) forKey:kSynopsisAnalyzerUseTempFolderKey];
+    
+    [self validateTempFolderUI];
+}
+
+- (void) updateTempFolder:(NSURL*)outputURL
+{
+    [[NSUserDefaults standardUserDefaults] setValue:[outputURL path] forKey:kSynopsisAnalyzerTempFolderURLKey];
+    
+    [self validateTempFolderUI];
+}
+
+- (BOOL) usingTempFolder
+{
+    return [[[NSUserDefaults standardUserDefaults] valueForKey:kSynopsisAnalyzerUseTempFolderKey] boolValue];
+}
+
+- (NSURL*) tempFolderURL
+{
+    NSString* outputPath = [[NSUserDefaults standardUserDefaults] valueForKey:kSynopsisAnalyzerTempFolderURLKey];
+    if(outputPath)
+    {
+        NSURL* outputURL = [NSURL fileURLWithPath:outputPath];
+        BOOL isDirectory = NO;
+        if([[NSFileManager defaultManager] fileExistsAtPath:outputPath isDirectory:&isDirectory])
+        {
+            if(isDirectory)
+                return outputURL;
+        }
+    }
+    
+    return nil;
+}
+
+- (void) validateTempFolderUI
+{
+    NSURL* watchURL = [self tempFolderURL];
+    BOOL usingWatchFolder = [self usingTempFolder];
+    
+    self.usingTempFolderButton.state = ([self usingTempFolder]) ? NSOnState : NSOffState;
+    
+    if(usingWatchFolder && watchURL)
+        self.tempFolderStatus.image = [NSImage imageNamed:NSImageNameStatusAvailable];
+    else if (usingWatchFolder && !watchURL)
+        self.tempFolderStatus.image = [NSImage imageNamed:NSImageNameStatusUnavailable];
+    else
+        self.tempFolderStatus.image = [NSImage imageNamed:NSImageNameStatusNone];
+    
+    if(watchURL)
+        self.tempFolderDescription.stringValue = [[[watchURL absoluteURL] path] stringByRemovingPercentEncoding];
+    else
+        self.tempFolderDescription.stringValue = @"Temporary Items Folder";
+}
+
+- (IBAction) revealTempFolder:(id)sender
+{
+    [[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs: @[ [self tempFolderURL]] ];
+}
+
 
 @end

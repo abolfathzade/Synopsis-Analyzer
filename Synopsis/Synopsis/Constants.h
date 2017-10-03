@@ -11,16 +11,20 @@
 
 #import <CoreFoundation/CoreFoundation.h>
 
-#define kSynopsisAnalyzerDefaultPresetPreferencesKey @"DefaultPreset"
-#define kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey @"ConcurrentJobAnalysis"
-#define kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey @"ConcurrentFrameAnalysis"
+#define kSynopsisAnalyzerDefaultPresetPreferencesKey @"DefaultPreset" // UUID string
+#define kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey @"ConcurrentJobAnalysis" // BOOL
+#define kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey @"ConcurrentFrameAnalysis" // BOOL
 
 #define kSynopsisAnalyzerUseWatchFolderKey @"UseWatchFolder" // BOOL
 #define kSynopsisAnalyzerUseOutputFolderKey @"UseOutputFolder" // BOOL
-#define kSynopsisAnalyzerMirrorFolderStructureToOutputKey @"MirrorFolderStructureToOutput" // BOOL
+#define kSynopsisAnalyzerUseTempFolderKey @"UseTempFolder" // BOOL
 
-#define kSynopsisAnalyzerWatchFolderURLKey @"WatchFolder" //
-#define kSynopsisAnalyzerOutputFolderURLKey @"OutputFolder" //
+#define kSynopsisAnalyzerWatchFolderURLKey @"WatchFolder" // NSString
+#define kSynopsisAnalyzerOutputFolderURLKey @"OutputFolder" // NSString
+#define kSynopsisAnalyzerTempFolderURLKey @"TempFolder" // NSString
+
+// TODO: Is this necessary or should this just be implicit if we have an output folder selected?
+#define kSynopsisAnalyzerMirrorFolderStructureToOutputKey @"MirrorFolderStructureToOutput" // BOOL
 
 // Notifications
 #define kSynopsisAnalyzerConcurrentJobAnalysisDidChangeNotification @"kSynopsisAnalyzerConcurrentJobAnalysisDidChangeNotification"

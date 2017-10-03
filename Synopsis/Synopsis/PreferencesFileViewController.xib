@@ -12,8 +12,12 @@
                 <outlet property="outputFolderDescription" destination="Hil-L7-HW7" id="E68-i9-34N"/>
                 <outlet property="outputFolderStatus" destination="tTZ-7e-W48" id="yhZ-ZA-Q2O"/>
                 <outlet property="selectOutputFolder" destination="A7C-ug-KYv" id="Mc6-h4-VEV"/>
+                <outlet property="selectTempFolder" destination="nRa-Ju-IJ0" id="NhE-sK-51R"/>
                 <outlet property="selectWatchFolder" destination="bLL-Fu-nlK" id="OHr-VE-5AS"/>
+                <outlet property="tempFolderDescription" destination="UGb-xk-trm" id="s3J-Ke-bqA"/>
+                <outlet property="tempFolderStatus" destination="xWv-NL-9Mx" id="7F7-dR-fKi"/>
                 <outlet property="usingOutputFolderButton" destination="mLx-sD-Pd9" id="Vd3-uc-SQc"/>
+                <outlet property="usingTempFolderButton" destination="9jn-x9-gTb" id="pwx-xO-TnE"/>
                 <outlet property="usingWatchFolderButton" destination="8p0-mg-LUL" id="OKW-MY-ftl"/>
                 <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
                 <outlet property="watchFolderDescription" destination="d0t-ta-LkN" id="L1Z-IX-xpw"/>
@@ -66,6 +70,9 @@
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="revealWatchFolder:" target="-2" id="CV7-7o-O6g"/>
+                                </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Hil-L7-HW7">
                                 <rect key="frame" x="40" y="249" width="371" height="11"/>
@@ -190,6 +197,9 @@
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="smallSystem"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="useTempFolder:" target="-2" id="cNf-Zj-5bF"/>
+                                </connections>
                             </button>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nRa-Ju-IJ0">
                                 <rect key="frame" x="140" y="75" width="162" height="19"/>
@@ -198,6 +208,9 @@
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="smallSystem"/>
                                 </buttonCell>
+                                <connections>
+                                    <action selector="selectTempFolder:" target="-2" id="7pS-c0-GUG"/>
+                                </connections>
                             </button>
                         </subviews>
                     </view>
