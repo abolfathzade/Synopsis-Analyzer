@@ -10,16 +10,8 @@
         <customObject id="-2" userLabel="File's Owner" customClass="PreferencesGeneralViewController">
             <connections>
                 <outlet property="defaultPresetPopupButton" destination="918-v1-aGz" id="NeX-te-bYq"/>
-                <outlet property="outputFolderDescription" destination="4J2-9r-J67" id="yP4-yb-uJ8"/>
-                <outlet property="outputFolderStatus" destination="EhV-YY-XJs" id="dhT-4k-u38"/>
-                <outlet property="selectOutputFolder" destination="tWb-u4-C2Z" id="Bmo-RO-9ge"/>
-                <outlet property="selectWatchFolder" destination="hbD-un-jLH" id="xb3-J5-1mJ"/>
                 <outlet property="selectedDefaultPresetDescription" destination="TaS-Nl-Eef" id="QH5-6f-9zy"/>
-                <outlet property="usingOutputFolderButton" destination="zhn-Nt-HBK" id="Xho-pm-7b9"/>
-                <outlet property="usingWatchFolderButton" destination="Oic-4d-g0b" id="Syn-k8-I8U"/>
                 <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
-                <outlet property="watchFolderDescription" destination="i4F-3B-s5s" id="daZ-L7-H52"/>
-                <outlet property="watchFolderStatus" destination="Bdk-Bp-OLd" id="CEj-54-wv9"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
@@ -28,15 +20,15 @@
             <rect key="frame" x="0.0" y="0.0" width="480" height="443"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <box autoresizesSubviews="NO" borderType="line" title="Default Preset" id="BzG-v1-ojR">
-                    <rect key="frame" x="17" y="262" width="446" height="161"/>
+                <box autoresizesSubviews="NO" misplaced="YES" borderType="line" title="Default Preset" id="BzG-v1-ojR">
+                    <rect key="frame" x="17" y="154" width="446" height="269"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <view key="contentView" id="gFO-T4-PX7">
-                        <rect key="frame" x="1" y="1" width="444" height="145"/>
+                        <rect key="frame" x="1" y="1" width="444" height="253"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" id="TaS-Nl-Eef">
-                                <rect key="frame" x="16" y="14" width="412" height="85"/>
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" setsMaxLayoutWidthAtFirstLayout="YES" id="TaS-Nl-Eef">
+                                <rect key="frame" x="16" y="20" width="412" height="187"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" id="tpc-gG-iNP">
                                     <font key="font" metaFont="smallSystem"/>
@@ -45,7 +37,7 @@
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" misplaced="YES" id="918-v1-aGz">
-                                <rect key="frame" x="15" y="110" width="214" height="22"/>
+                                <rect key="frame" x="15" y="218" width="214" height="22"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" pullsDown="YES" selectedItem="Ecd-tb-Sye" id="rxG-7b-dM6">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -62,142 +54,9 @@
                         </subviews>
                     </view>
                 </box>
-                <box autoresizesSubviews="NO" borderType="line" title="File Preferences" id="SCB-cT-eeg">
-                    <rect key="frame" x="17" y="16" width="446" height="233"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
-                    <view key="contentView" id="VW0-dP-tUx">
-                        <rect key="frame" x="1" y="1" width="444" height="217"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" id="i4F-3B-s5s">
-                                <rect key="frame" x="40" y="22" width="365" height="11"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" controlSize="mini" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Watch Folder" id="REA-R7-Qtr">
-                                    <font key="font" metaFont="miniSystem"/>
-                                    <color key="textColor" name="controlShadowColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" id="jgE-Z0-kEh">
-                                <rect key="frame" x="17" y="41" width="410" height="28"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" alignment="left" title="Any supported media added to any sub-directory of the watch folder will be automatically analyzed with the default preset." id="s4K-u6-ON6">
-                                    <font key="font" metaFont="smallSystem"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <button misplaced="YES" id="Bdk-Bp-OLd">
-                                <rect key="frame" x="16" y="20" width="16" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSStatusAvailable" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="D5j-nI-joe">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                            </button>
-                            <button misplaced="YES" id="7Uy-PI-59w">
-                                <rect key="frame" x="411" y="21" width="14" height="14"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSFollowLinkFreestandingTemplate" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="RnO-Td-fRW">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="revealWatchFolder:" target="-2" id="9e7-TV-y2y"/>
-                                </connections>
-                            </button>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" id="4J2-9r-J67">
-                                <rect key="frame" x="40" y="124" width="365" height="11"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" controlSize="mini" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Output Folder" id="ryN-DH-IPv">
-                                    <font key="font" metaFont="miniSystem"/>
-                                    <color key="textColor" name="controlShadowColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" id="7YY-uQ-8Ct">
-                                <rect key="frame" x="17" y="143" width="410" height="28"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" alignment="left" id="odA-gk-vcw">
-                                    <font key="font" metaFont="smallSystem"/>
-                                    <string key="title">If enabled transcoded and analyzed files will be placed in the selected directory. By default new files are placed adjacent to their originals.</string>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <button misplaced="YES" id="EhV-YY-XJs">
-                                <rect key="frame" x="16" y="122" width="16" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSStatusAvailable" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="kTk-ib-xXB">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                            </button>
-                            <button misplaced="YES" id="rBo-H0-TX6">
-                                <rect key="frame" x="411" y="123" width="14" height="14"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSFollowLinkFreestandingTemplate" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="04x-Wb-yzv">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="revealOutputFolder:" target="-2" id="s3t-mh-KqB"/>
-                                </connections>
-                            </button>
-                            <button misplaced="YES" id="Oic-4d-g0b">
-                                <rect key="frame" x="15" y="75" width="116" height="20"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="check" title="Use Watch Folder" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="yn8-uw-Lh5">
-                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="smallSystem"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="useWatchFolder:" target="-2" id="qeK-ay-11W"/>
-                                </connections>
-                            </button>
-                            <button misplaced="YES" id="zhn-Nt-HBK">
-                                <rect key="frame" x="15" y="177" width="119" height="20"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="check" title="Use Output Folder" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="neW-RM-3qQ">
-                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                    <font key="font" metaFont="smallSystem"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="useOutputFolder:" target="-2" id="zEO-02-uPq"/>
-                                </connections>
-                            </button>
-                            <button verticalHuggingPriority="750" misplaced="YES" id="hbD-un-jLH">
-                                <rect key="frame" x="140" y="75" width="125" height="19"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="roundTextured" title="Select Watch Folder" bezelStyle="texturedRounded" alignment="center" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="X7f-l3-LUe">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="smallSystem"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="selectWatchFolder:" target="-2" id="T2u-NK-3lD"/>
-                                </connections>
-                            </button>
-                            <button verticalHuggingPriority="750" misplaced="YES" id="tWb-u4-C2Z">
-                                <rect key="frame" x="140" y="178" width="125" height="19"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="roundTextured" title="Select Output Folder" bezelStyle="texturedRounded" alignment="center" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lRq-LZ-W4Z">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="smallSystem"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="selectOutFolder:" target="-2" id="1L4-vs-CBB"/>
-                                </connections>
-                            </button>
-                        </subviews>
-                    </view>
-                </box>
             </subviews>
             <point key="canvasLocation" x="247" y="455.5"/>
         </customView>
         <userDefaultsController representsSharedInstance="YES" id="qNL-dS-myo"/>
     </objects>
-    <resources>
-        <image name="NSFollowLinkFreestandingTemplate" width="14" height="14"/>
-        <image name="NSStatusAvailable" width="16" height="16"/>
-    </resources>
 </document>

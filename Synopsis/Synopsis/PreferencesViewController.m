@@ -12,6 +12,7 @@
 @interface PreferencesViewController ()
 
 @property (readwrite, nonatomic, strong) PreferencesGeneralViewController* preferencesGeneralViewController;
+@property (readwrite, nonatomic, strong) PreferencesFileViewController* preferencesFileViewController;
 @property (readwrite, nonatomic, strong) PreferencesPresetViewController* preferencesPresetViewController;
 @property (readwrite, nonatomic, strong) PreferencesAdvancedViewController* preferencesAdvancedViewController;
 
@@ -28,6 +29,7 @@ static NSInteger currentTag = 0;
     [super viewDidLoad];
     
     self.preferencesGeneralViewController = [[PreferencesGeneralViewController alloc] initWithNibName:@"PreferencesGeneralViewController" bundle:[NSBundle mainBundle]];
+    self.preferencesFileViewController = [[PreferencesFileViewController alloc] initWithNibName:@"PreferencesFileViewController" bundle:[NSBundle mainBundle]];
     self.preferencesPresetViewController = [[PreferencesPresetViewController alloc] initWithNibName:@"PreferencesPresetViewController" bundle:[NSBundle mainBundle]];
     self.preferencesAdvancedViewController = [[PreferencesAdvancedViewController alloc] initWithNibName:@"PreferencesAdvancedViewController" bundle:[NSBundle mainBundle]];
     
@@ -139,12 +141,15 @@ static NSInteger currentTag = 0;
     [self transitionToViewController:self.preferencesGeneralViewController tag:[sender tag]];
 }
 
+- (IBAction)transitionToFile:(id)sender
+{
+    [self transitionToViewController:self.preferencesFileViewController tag:[sender tag]];
+}
 
 - (IBAction)transitionToPreset:(id)sender
 {
     [self transitionToViewController:self.preferencesPresetViewController tag:[sender tag]];
 }
-
 
 - (IBAction)transitionToAdvanced:(id)sender
 {

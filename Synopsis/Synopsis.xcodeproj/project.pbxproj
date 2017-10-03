@@ -50,6 +50,8 @@
 		1BA68C571AD26696003B3CE9 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C561AD26696003B3CE9 /* CoreVideo.framework */; };
 		1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C5F1AD5D2A1003B3CE9 /* BSONSerialization.m */; };
 		1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C6D1AD5D8D3003B3CE9 /* GZIP.m */; };
+		1BA76C411F83F0C10038F6AD /* PreferencesFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA76C3F1F83F0C10038F6AD /* PreferencesFileViewController.m */; };
+		1BA76C421F83F0C10038F6AD /* PreferencesFileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BA76C401F83F0C10038F6AD /* PreferencesFileViewController.xib */; };
 		1BA8F8361C125DC20066BDDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */; };
 		1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */; };
 		1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 1BC71D431F150CA6006DD7DC /* Credits.rtf */; };
@@ -235,6 +237,9 @@
 		1BA68C601AD5D2A1003B3CE9 /* ObjectiveBSON-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ObjectiveBSON-Prefix.pch"; sourceTree = "<group>"; };
 		1BA68C6C1AD5D8D3003B3CE9 /* GZIP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GZIP.h; sourceTree = "<group>"; };
 		1BA68C6D1AD5D8D3003B3CE9 /* GZIP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GZIP.m; sourceTree = "<group>"; };
+		1BA76C3E1F83F0C10038F6AD /* PreferencesFileViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PreferencesFileViewController.h; sourceTree = "<group>"; };
+		1BA76C3F1F83F0C10038F6AD /* PreferencesFileViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PreferencesFileViewController.m; sourceTree = "<group>"; };
+		1BA76C401F83F0C10038F6AD /* PreferencesFileViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PreferencesFileViewController.xib; sourceTree = "<group>"; };
 		1BA8F8331C125DAA0066BDDB /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		1BB9B1A41EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoTransformScaleLinearizeHelper.h; sourceTree = "<group>"; };
@@ -459,6 +464,9 @@
 				1B3233C31C2EFDB200C9CF5E /* PreferencesGeneralViewController.h */,
 				1B3233C41C2EFDB200C9CF5E /* PreferencesGeneralViewController.m */,
 				1B3233C51C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib */,
+				1BA76C3E1F83F0C10038F6AD /* PreferencesFileViewController.h */,
+				1BA76C3F1F83F0C10038F6AD /* PreferencesFileViewController.m */,
+				1BA76C401F83F0C10038F6AD /* PreferencesFileViewController.xib */,
 				1B3233C81C2EFDC500C9CF5E /* PreferencesPresetViewController.h */,
 				1B3233C91C2EFDC500C9CF5E /* PreferencesPresetViewController.m */,
 				1B3233CA1C2EFDC500C9CF5E /* PreferencesPresetViewController.xib */,
@@ -1123,6 +1131,7 @@
 			files = (
 				1B3233CC1C2EFDC500C9CF5E /* PreferencesPresetViewController.xib in Resources */,
 				1B805E2F1B012309005D7354 /* ProgressTableViewCellSource.xib in Resources */,
+				1BA76C421F83F0C10038F6AD /* PreferencesFileViewController.xib in Resources */,
 				1BA4D19A1C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib in Resources */,
 				1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */,
 				1B805E341B012AA0005D7354 /* ProgressTableViewCellProgress.xib in Resources */,
@@ -1221,6 +1230,7 @@
 				1B3233C61C2EFDB200C9CF5E /* PreferencesGeneralViewController.m in Sources */,
 				1BC71EB71F17E8FE006DD7DC /* maths.cpp in Sources */,
 				1B3233DC1C31F8F200C9CF5E /* PresetGroup.m in Sources */,
+				1BA76C411F83F0C10038F6AD /* PreferencesFileViewController.m in Sources */,
 				1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */,
 				1BC71EAD1F17E8FE006DD7DC /* colourblock.cpp in Sources */,
 				1BC71EAE1F17E8FE006DD7DC /* colourfit.cpp in Sources */,

@@ -288,9 +288,9 @@ static NSTimeInterval start;
     
     // TEMP FILE LOCATION
     NSURL* tempFileDestination = nil;
-    if([self.prefsViewController.preferencesGeneralViewController usingOutputFolder])
+    if([self.prefsViewController.preferencesFileViewController usingOutputFolder])
     {
-        tempFileDestination = [self.prefsViewController.preferencesGeneralViewController outputFolderURL];
+        tempFileDestination = [self.prefsViewController.preferencesFileViewController outputFolderURL];
 
         if(!tempFileDestination)
         {
@@ -306,9 +306,9 @@ static NSTimeInterval start;
     
     // OUTPUT FILE LOCATIOn
     NSURL* destinationURL = nil;
-    if([self.prefsViewController.preferencesGeneralViewController usingOutputFolder])
+    if([self.prefsViewController.preferencesFileViewController usingOutputFolder])
     {
-        destinationURL = [self.prefsViewController.preferencesGeneralViewController outputFolderURL];
+        destinationURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
         
         if(!destinationURL)
         {
