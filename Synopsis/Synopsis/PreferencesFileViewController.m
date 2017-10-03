@@ -28,6 +28,7 @@
 @property (weak) IBOutlet NSTextField* tempFolderDescription;
 @property (weak) IBOutlet NSButton* tempFolderStatus;
 
+@property (weak) IBOutlet NSButton* usingMirroredFoldersButton;
 
 @property (strong) SynopsisDirectoryWatcher* directoryWatcher;
 
@@ -45,6 +46,7 @@
     [self validateOutputFolderUI];
     [self validateWatchFolderUI];
     [self validateTempFolderUI];
+    [self validateMirroredFoldersUI];
 }
 
 #pragma mark - Output Folder
@@ -193,7 +195,7 @@
     NSURL* watchURL = [self watchFolderURL];
     BOOL usingWatchFolder = [self usingWatchFolder];
     
-    self.usingWatchFolderButton.state = ([self usingWatchFolder]) ? NSOnState : NSOffState;
+    self.usingWatchFolderButton.state = (usingWatchFolder) ? NSOnState : NSOffState;
     
     if(usingWatchFolder && watchURL)
         self.watchFolderStatus.image = [NSImage imageNamed:NSImageNameStatusAvailable];
@@ -312,7 +314,7 @@
     NSURL* watchURL = [self tempFolderURL];
     BOOL usingWatchFolder = [self usingTempFolder];
     
-    self.usingTempFolderButton.state = ([self usingTempFolder]) ? NSOnState : NSOffState;
+    self.usingTempFolderButton.state = (usingWatchFolder) ? NSOnState : NSOffState;
     
     if(usingWatchFolder && watchURL)
         self.tempFolderStatus.image = [NSImage imageNamed:NSImageNameStatusAvailable];
@@ -332,5 +334,27 @@
     [[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs: @[ [self tempFolderURL]] ];
 }
 
+#pragma mark - Mirror prefs
+
+- (BOOL) usingMirroredFolders
+{
+    return [[[NSUserDefaults standardUserDefaults] valueForKey:kSynopsisAnalyzerMirrorFolderStructureToOutputKey] boolValue];
+}
+
+- (void) validateMirroredFoldersUI
+{
+    BOOL using = [self usingMirroredFolders];
+    
+    self.usingMirroredFoldersButton.state = (using) ? NSOnState : NSOffState;
+}
+
+- (IBAction)useMirroredFolders:(id)sender
+{
+    BOOL use = ([sender state] == NSOnState);
+    
+    [[NSUserDefaults standardUserDefaults] setValue:@(use) forKey:kSynopsisAnalyzerMirrorFolderStructureToOutputKey];
+    
+    [self validateMirroredFoldersUI];
+}
 
 @end

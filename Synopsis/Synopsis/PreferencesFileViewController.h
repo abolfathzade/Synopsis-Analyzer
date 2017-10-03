@@ -19,5 +19,7 @@
 - (BOOL) usingTempFolder;
 - (NSURL*) tempFolderURL;
 
+- (BOOL) usingMirroredFolders;
+
 
 @end

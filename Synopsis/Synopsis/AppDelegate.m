@@ -63,6 +63,8 @@ static NSTimeInterval start;
                                            kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey : @(YES),
                                            kSynopsisAnalyzerUseOutputFolderKey : @(NO),
                                            kSynopsisAnalyzerUseWatchFolderKey : @(NO),
+                                           kSynopsisAnalyzerUseTempFolderKey : @(NO),
+                                           kSynopsisAnalyzerMirrorFolderStructureToOutputKey : (@NO),
                                            };
         
         [[NSUserDefaults standardUserDefaults] registerDefaults:standardDefaults];
@@ -113,14 +115,12 @@ static NSTimeInterval start;
     // force Standard Analyzer to be a plugin
     [self.analyzerPlugins addObject:NSStringFromClass([StandardAnalyzerPlugin class])];
 
-    
     // Load our plugins
     NSString* pluginsPath = [[NSBundle mainBundle] builtInPlugInsPath];
     
     NSError* error = nil;
     
     NSArray* possiblePlugins = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:pluginsPath error:&error];
-    
     
     if(!error)
     {
@@ -136,7 +136,7 @@ static NSTimeInterval start;
                     if([pluginBundle loadAndReturnError:&loadError])
                     {
                         // Weve sucessfully loaded our bundle, time to cache our class name so we can initialize a plugin per operation
-                        // See (AnalysisAndTranscodeOperation
+                        // See AnalysisAndTranscodeOperation
                         Class pluginClass = pluginBundle.principalClass;
                         NSString* classString = NSStringFromClass(pluginClass);
                         
@@ -162,7 +162,6 @@ static NSTimeInterval start;
             else
             {
                 [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Creating Plugin : %@ : %@ %@", possiblePlugin, pluginsPath,  pluginBundle, nil]];
-
             }
         }
     }
@@ -171,7 +170,6 @@ static NSTimeInterval start;
 - (void) applicationWillTerminate:(NSNotification *)notification
 {
     // Cancel all operations and wait for completion.
-    
     for (NSOperation* op in [self.transcodeQueue operations])
     {
         [op cancel];
@@ -185,7 +183,6 @@ static NSTimeInterval start;
     }
     
     //clean bail.
-
     [self.transcodeQueue waitUntilAllOperationsAreFinished];
     [self.metadataQueue waitUntilAllOperationsAreFinished];
 }
@@ -210,7 +207,6 @@ static NSTimeInterval start;
 //            NSLog(@"Error Initting Spotlight : %@", error);
 //        }
     }
-    
     {
         // See OpenMeta for details
         // Our spotlight trickery file will contain a set of keys we use
@@ -238,101 +234,63 @@ static NSTimeInterval start;
 {
     // Open a movie or two
     NSOpenPanel* openPanel = [NSOpenPanel openPanel];
-    
     [openPanel setAllowsMultipleSelection:YES];
     
-    // TODO
     [openPanel setAllowedFileTypes:[self supportedFileTypes]];
-    //    [openPanel setAllowedFileTypes:@[@"mov", @"mp4", @"m4v"]];
     
     [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)
      {
          if (result == NSFileHandlingPanelOKButton)
          {
-             for(NSURL* fileurl in openPanel.URLs)
-             {
-                 [self enqueueFileForTranscode:fileurl];
-             }
+             [self analysisSessionForFiles:openPanel.URLs sessionCompletionBlock:^{
+                 
+             }];
          }
      }];
 }
 
-- (NSOperation*) enqueueFileForTranscode:(NSURL*)fileURL
+- (BaseTranscodeOperation*) enqueueFileForTranscode:(NSURL*)fileURL tempDirectory:(NSURL*)tempDirectory outputDirectory:(NSURL*)outputDirectory
 {
-    NSString* lastPath = [fileURL lastPathComponent];
-    NSString* lastPathExtention = [fileURL pathExtension];
+    NSUUID* encodeUUID = [NSUUID UUID];
+    
+    NSString* sourceFileName = [fileURL lastPathComponent];
+    sourceFileName = [sourceFileName stringByDeletingPathExtension];
+
+    NSString* sourceFileExtension = [fileURL pathExtension];
+    NSString* destinationFileExtension = @"mov";
     
     // Some file's may not have an extension but rely on mime type.
-    if(lastPathExtention == nil || [lastPathExtention isEqualToString:@""])
+    if(sourceFileExtension == nil || [sourceFileExtension isEqualToString:@""])
     {
         NSError* error = nil;
         NSString* type = [[NSWorkspace sharedWorkspace] typeOfFile:[fileURL path] error:&error];
         if(error == nil)
         {
-            lastPathExtention = [[NSWorkspace sharedWorkspace] preferredFilenameExtensionForType:type];
+            sourceFileExtension = [[NSWorkspace sharedWorkspace] preferredFilenameExtensionForType:type];
         }
         else
         {
-            // Take a guess?
-            lastPathExtention = @"mov";
+            sourceFileExtension = @"mov";
         }
     }
     
-    NSUUID* sessionUUID = [NSUUID UUID];
+    NSString* analysisPassFileName = [[sourceFileName stringByAppendingString:@"_temp_"] stringByAppendingString:encodeUUID.UUIDString];
+    NSString* metadataPassFileName = [sourceFileName stringByAppendingString:@"_analyzed"];
 
-    // delete our file extension
-    lastPath = [lastPath stringByDeletingPathExtension];
-    
-    NSString* firstPassFilePath = [[lastPath stringByAppendingString:@"_temp_"] stringByAppendingString:sessionUUID.UUIDString];
-    NSString* lastPassFilePath = [lastPath stringByAppendingString:@"_analyzed"];
-    
-    // TEMP FILE LOCATION
-    NSURL* tempFileDestination = nil;
-    if([self.prefsViewController.preferencesFileViewController usingTempFolder])
-    {
-        tempFileDestination = [self.prefsViewController.preferencesFileViewController tempFolderURL];
+    NSURL* analysisFileURL = [tempDirectory URLByAppendingPathComponent:analysisPassFileName];
+    analysisFileURL = [analysisFileURL URLByAppendingPathExtension:destinationFileExtension];
 
-        if(!tempFileDestination)
-        {
-            tempFileDestination = [fileURL URLByDeletingLastPathComponent];
-        }
-    }
-    else
-    {
-        tempFileDestination = [fileURL URLByDeletingLastPathComponent];
-    }
-    
-    tempFileDestination = [[tempFileDestination URLByAppendingPathComponent:firstPassFilePath] URLByAppendingPathExtension:@"mov"];
-    
-    // OUTPUT FILE LOCATIOn
-    NSURL* destinationURL = nil;
-    if([self.prefsViewController.preferencesFileViewController usingOutputFolder])
-    {
-        destinationURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
-        
-        if(!destinationURL)
-        {
-            destinationURL = [fileURL URLByDeletingLastPathComponent];
-        }
-    }
-    else
-    {
-        destinationURL = [fileURL URLByDeletingLastPathComponent];
-    }
-
-    destinationURL = [[destinationURL URLByAppendingPathComponent:lastPassFilePath] URLByAppendingPathExtension:@"mov"];
-
+    NSURL* metadataFileURL = [outputDirectory URLByAppendingPathComponent:metadataPassFileName];
+    metadataFileURL = [metadataFileURL URLByAppendingPathExtension:destinationFileExtension];
 
     // check to see if our final pass destination URLs already exist - if so, append our sesion UUI.
-    if([[NSFileManager defaultManager] fileExistsAtPath:destinationURL.path])
+    if([[NSFileManager defaultManager] fileExistsAtPath:metadataFileURL.path])
     {
-        destinationURL = [destinationURL URLByDeletingLastPathComponent];
-        destinationURL = [[destinationURL URLByAppendingPathComponent:[lastPassFilePath stringByAppendingString:[@"_" stringByAppendingString:sessionUUID.UUIDString]]] URLByAppendingPathExtension:@"mov"];
+        metadataFileURL = [metadataFileURL URLByDeletingLastPathComponent];
+        metadataFileURL = [[metadataFileURL URLByAppendingPathComponent:[metadataPassFileName stringByAppendingString:[@"_" stringByAppendingString:encodeUUID.UUIDString]]] URLByAppendingPathExtension:destinationFileExtension];
     }
     
-    // Pass 1 is our analysis pass, and our decode pass
-
-    // todo: get the selected preset and fill in the logic here
+    // TODO: Just pass a copy of the current Preset directly, and figure out what we need for analysis settings
     PresetObject* currentPreset = [self.prefsViewController defaultPreset];
     PresetVideoSettings* videoSettings = currentPreset.videoSettings;
     PresetAudioSettings* audioSettings = currentPreset.audioSettings;
@@ -340,7 +298,6 @@ static NSTimeInterval start;
 
     SynopsisMetadataEncoderExportOption exportOption = currentPreset.metadataExportOption;
     
-    // TODO:
     NSDictionary* placeholderAnalysisSettings = @{kSynopsisAnalysisSettingsQualityHintKey : @(SynopsisAnalysisQualityHintMedium),
                                                   kSynopsisAnalysisSettingsEnabledPluginsKey : self.analyzerPlugins,
                                                   kSynopsisAnalysisSettingsEnableConcurrencyKey : @TRUE,
@@ -351,30 +308,17 @@ static NSTimeInterval start;
                                        kSynopsisAnalysisSettingsKey : placeholderAnalysisSettings,
                                        };
     
-    // TODO: Just pass a copy of the current Preset directly.
-    AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithUUID:sessionUUID
-                                                                                        sourceURL:fileURL
-                                                                                   destinationURL:tempFileDestination
-                                                                                 transcodeOptions:transcodeOptions];
-    
+    AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithUUID:encodeUUID sourceURL:fileURL destinationURL:analysisFileURL transcodeOptions:transcodeOptions];
+    MetadataWriterTranscodeOperation* metadata = [[MetadataWriterTranscodeOperation alloc] initWithUUID:encodeUUID sourceURL:analysisFileURL destinationURL:metadataFileURL];
+
     assert(analysis);
-    
-    // Inherit UUID
-    MetadataWriterTranscodeOperation* metadata = [[MetadataWriterTranscodeOperation alloc] initWithUUID:sessionUUID
-                                                                                           sourceURL:tempFileDestination
-                                                                                      destinationURL:destinationURL];
-    
-    
     assert(metadata);
 
-
-    
     // metadata is depended on pass one being complete, and on analysies's analyzed metadata
     __weak AnalysisAndTranscodeOperation* weakAnalysis = analysis;
 
     analysis.completionBlock = (^(void)
                                 {
-                                    // Retarded weak/strong pattern so we avoid retain loopl
                                     __strong AnalysisAndTranscodeOperation* strongAnalysis = weakAnalysis;
                                     
                                     if (strongAnalysis.succeeded)
@@ -388,59 +332,169 @@ static NSTimeInterval start;
                                         // Set our metadata pass'es metadata options to the result of our analysis operation
                                         // The dependency structure as well as our custom NSOperation subclass should
                                         // Ensure that this completion block fires before main on our metadata operation does
+                                        // Ensuring that metadata operation has the info it needs...
                                         metadata.metadataOptions = metadataOptions;
                                     }
                                 });
-	
-	
+		
     metadata.completionBlock = (^(void)
                                 {
                                     [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis"];
                                     
+                                 
+                                    
+//                                    NSURL* destinationURL = nil;
+                                    
+                                    // If we are mirroring our folder structure, lets copy all sub-directories and ensure we output to the correct paths.
+//                                    if([self.prefsViewController.preferencesFileViewController usingOutputFolder] && [self.prefsViewController.preferencesFileViewController usingMirroredFolders])
+//                                    {
+//
+//
+//                                        NSURL* outputParentFolder = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+//
+//                                    }
+//                                    else if([self.prefsViewController.preferencesFileViewController usingOutputFolder])
+//                                    {
+//                                        destinationURL =
+//                                    }
+                                    
+                                    // Move the result of metadata operation to the final destination
+                                    
                                     // Clean up
                                     NSError* error;
-                                    if(![[NSFileManager defaultManager] removeItemAtURL:tempFileDestination error:&error])
+                                    if(![[NSFileManager defaultManager] removeItemAtURL:analysisFileURL error:&error])
                                     {
                                         [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
                                     }
                                 });
     
-
-    // Ensure we fire only once anaysus completes, and its completion block is fired off
+    // Ensure we fire only once analysis completes, and its completion block is fired off
     [metadata addDependency:analysis];
-    
-    [self.transcodeQueue addOperation:analysis];
 
     [[LogController sharedLogController] appendVerboseLog:@"Begin Transcode and Analysis"];
 
+    [self.transcodeQueue addOperation:analysis];
     [self.metadataQueue addOperation:metadata];
 
     return metadata;
 }
 
-#pragma mark - Drop File Helper
-
 - (void) analysisSessionForFiles:(NSArray *)fileURLArray sessionCompletionBlock:(void (^)(void))completionBlock
 {
+    // File Handling logic:
+    
+    // source: file (file to be analyzed / encoded)
+    // output folder: (destination for resulting files that have been analyzed and encoded)
+    // temp folder: (folder where intermediate files are created)
+    // watch folder: (folder where any file system changes are noticed and files are enqueued for auto-encode).
+    
+    // If we have an input file and no output, temp or watch folder specified.
+    // (output folder = temp folder = source folder)
+    // in:		/path/to/source.mov
+    // pass1:	/path/to/source_UUID_temp.mov
+    // pass2:	/path/to/source_analyzed.mov
+    // move: (none)
+    
+    // If we have an input file and an output folder
+    // (temp folder = output folder, output folder is manually specified)
+    // in:		/path/to/source.mov
+    // pass1:	/path/to/output/folder/source_UUID_temp.mov
+    // pass2:	/path/to/output/folder/source_analyzed.mov
+    // move: (none)
+    
+    // If we have an input file and an temp folder
+    // (output folder = source folder, temp folder manually specified)
+    // in:		/path/to/source.mov
+    // pass1:	/path/to/temp/folder/source_UUID_temp.mov
+    // pass2:	/path/to/temp/folder/source_analyzed.mov
+    // move:	/path/to/source_analyzed.mov
+    
+    // If we have an input file and an temp folder and an output folder:
+    // in:        /path/to/source.mov
+    // pass1:    /path/to/temp/folder/source_UUID_temp.mov
+    // pass2:    /path/to/temp/folder/source_analyzed.mov
+    // move:    /path/to/output/folder/source_analyzed.mov
+
+    
+    NSURL* moveDirectory = nil;
+
+    NSUUID* sessionUUID = [NSUUID UUID];
+    [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", sessionUUID.UUIDString]];
+
     if(fileURLArray && fileURLArray.count)
     {
         start = [NSDate timeIntervalSinceReferenceDate];
-
+        
+        NSURL* tempDirectory = nil;
+        NSURL* outputDirectory = nil;
+        NSMutableArray<NSURL*>* filesToMove = [NSMutableArray new];
+        
+        if([self.prefsViewController.preferencesFileViewController usingTempFolder])
+        {
+            tempDirectory = [self.prefsViewController.preferencesFileViewController tempFolderURL];
+        }
+        
+        if([self.prefsViewController.preferencesFileViewController usingOutputFolder])
+        {
+            if(tempDirectory == nil)
+            {
+                outputDirectory = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+                tempDirectory = outputDirectory;
+            }
+            else
+            {
+                outputDirectory = tempDirectory;
+                moveDirectory = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+            }
+        }
+        
         NSBlockOperation* blockOp = [NSBlockOperation blockOperationWithBlock:^{
+            
+            // Do our File Move logic if we need it here:
+            if(filesToMove.count && moveDirectory != nil)
+            {
+                for(NSURL* fileToMove in filesToMove)
+                {
+                    NSString* itemName = [fileToMove lastPathComponent];
+                    NSURL* moveDestination = [moveDirectory URLByAppendingPathComponent:itemName];
+
+                    NSError* error = nil;
+                    if(![[NSFileManager defaultManager] moveItemAtURL:fileToMove toURL:moveDestination error:&error])
+                    {
+                        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"End Moving File To Output:%@", error.localizedDescription]];
+                    }
+                }
+            }
+            
             NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
             
-            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Batch Took : %f seconds", delta]];
+            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", sessionUUID.UUIDString, delta]];
             
             if(completionBlock != NULL)
             {
                 completionBlock();
             }
-            
         }];
         
+        // Any sub-directories in our folder structure and any
         for(NSURL* url in fileURLArray)
         {
-            NSOperation* operation = [self enqueueFileForTranscode:url];
+            NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
+            if(tempDirectory == nil)
+            {
+                tempDirectory = sourceDirectory;
+            }
+            
+            if(outputDirectory == nil)
+            {
+                outputDirectory = sourceDirectory;
+            }
+
+            BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:tempDirectory outputDirectory:outputDirectory];
+            
+            // Accrue our potential output files to move
+            [filesToMove addObject:operation.destinationURL];
+            
             [blockOp addDependency:operation];
         }
 				

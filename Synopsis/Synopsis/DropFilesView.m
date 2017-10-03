@@ -8,6 +8,7 @@
 
 #import "DropFilesView.h"
 #import <AVFoundation/AVFoundation.h>
+#import <Synopsis/Synopsis.h>
 
 @interface DropFilesView ()
 @property (atomic, readwrite, assign) BOOL highLight;
@@ -118,13 +119,8 @@
 {
     NSArray* classArray = @[[NSURL class]];
     
-    NSString * mxfUTI = (__bridge NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
-                                                                                   (CFStringRef)@"MXF",
-                                                                                   NULL);
-
-    
     NSDictionary* searchOptions = @{NSPasteboardURLReadingFileURLsOnlyKey : @YES,
-                                    NSPasteboardURLReadingContentsConformToTypesKey : [[AVMovie movieTypes] arrayByAddingObject: mxfUTI] };
+                                    NSPasteboardURLReadingContentsConformToTypesKey : SynopsisSupportedFileTypes() };
 
     NSArray* urls = [[sender draggingPasteboard] readObjectsForClasses:classArray options:searchOptions];
 
