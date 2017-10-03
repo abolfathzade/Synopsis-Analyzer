@@ -16,4 +16,8 @@
 - (BOOL) usingWatchFolder;
 - (NSURL*) watchFolderURL;
 
+- (BOOL) usingTempFolder;
+- (NSURL*) tempFolderURL;
+
+
 @end
