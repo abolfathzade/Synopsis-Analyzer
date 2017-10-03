@@ -7,7 +7,6 @@
 //
 
 #import "DropFilesView.h"
-#import <AVFoundation/AVFoundation.h>
 #import <Synopsis/Synopsis.h>
 
 @interface DropFilesView ()
