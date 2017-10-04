@@ -222,21 +222,13 @@ static NSTimeInterval start;
 
 #pragma mark -
 
-- (NSArray*) supportedFileTypes
-{
-    NSString * mxfUTI = (__bridge NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
-                                                                                   (CFStringRef)@"MXF",
-                                                                                   NULL);
-    return [[AVMovie movieTypes] arrayByAddingObject:mxfUTI];
-}
-
 - (IBAction)openMovies:(id)sender
 {
     // Open a movie or two
     NSOpenPanel* openPanel = [NSOpenPanel openPanel];
     [openPanel setAllowsMultipleSelection:YES];
     
-    [openPanel setAllowedFileTypes:[self supportedFileTypes]];
+    [openPanel setAllowedFileTypes:SynopsisSupportedFileTypes()];
     
     [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)
      {
@@ -461,7 +453,11 @@ static NSTimeInterval start;
                     NSError* error = nil;
                     if(![[NSFileManager defaultManager] moveItemAtURL:fileToMove toURL:moveDestination error:&error])
                     {
-                        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"End Moving File To Output:%@", error.localizedDescription]];
+                        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Moving File To Output:%@", error.localizedDescription]];
+                    }
+                    else
+                    {
+                        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Moving File To Final Destination"]];
                     }
                 }
             }

@@ -11,7 +11,6 @@
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, DropFileHelper>
 
-- (NSArray*) supportedFileTypes;
 - (void) analysisSessionForFiles:(NSArray *)fileURLArray sessionCompletionBlock:(void (^)(void))completionBlock;
 
 @end

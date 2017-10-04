@@ -220,9 +220,17 @@
             {
                 NSString* uti = nil;
                 NSError* error;
+                NSNumber* isDirectory = @(NO);
+                
+                if(![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error])
+                {
+                    // if we cant determine if we
+                    continue;
+                }
+                    
                 if([url getResourceValue:&uti forKey:NSURLTypeIdentifierKey error:&error])
                 {
-                    if([[appDelegate supportedFileTypes] containsObject:uti])
+                    if([SynopsisSupportedFileTypes() containsObject:uti])
                     {
                         [changedValidURLs addObject:url];
                     }
