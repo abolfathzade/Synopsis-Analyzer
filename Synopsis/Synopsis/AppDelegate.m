@@ -327,6 +327,8 @@ typedef enum : NSUInteger {
     {
         for(NSURL* url in URLArray)
         {
+            NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
+
             switch ([self analysisTypeForURL:url])
             {
                 case AnalysisTypeUnknown:
@@ -334,19 +336,19 @@ typedef enum : NSUInteger {
                     
                 case AnalysisTypeFileInPlace:
                 {
-                    [self analysisSessionTypeFileInPlace:url completionOperation:sessionCompletionOperation];
+                    [self analysisTypeFileToTempToOutput:url tempFolder:sourceDirectory outputFolder:sourceDirectory completionOperation:sessionCompletionOperation];
                 }
                     break;
                     
                 case AnalysisTypeFileToTempToInPlace:
                 {
-                    [self analysisTypeFileToTempToPlace:url tempFolder:tmpFolderURL completionOperation:sessionCompletionOperation];
+                    [self analysisTypeFileToTempToOutput:url tempFolder:tmpFolderURL outputFolder:sourceDirectory completionOperation:sessionCompletionOperation];
                 }
                     break;
                
                 case AnalysisTypeFileToOutput:
                 {
-                    [self analysisTypeFileToOutput:url outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
+                    [self analysisTypeFileToTempToOutput:url tempFolder:sourceDirectory outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
                 }
                     break;
                     
@@ -379,32 +381,32 @@ typedef enum : NSUInteger {
 
 #pragma mark - Analysis Type Handling Files
 
-- (void) analysisSessionTypeFileInPlace:(NSURL*)fileToTranscode completionOperation:(NSOperation*)completionOp
-{
-    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
-    
-    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:sourceDirectory outputDirectory:sourceDirectory];
-    
-    [completionOp addDependency:operation];
-}
-
-- (void) analysisTypeFileToTempToPlace:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
-{
-    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
-    
-    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:tempFolder outputDirectory:sourceDirectory];
-    
-    [completionOp addDependency:operation];
-}
-
-- (void) analysisTypeFileToOutput:(NSURL*)fileToTranscode outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
-{
-    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
-    
-    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:sourceDirectory outputDirectory:outputFolder];
-    
-    [completionOp addDependency:operation];
-}
+//- (void) analysisSessionTypeFileInPlace:(NSURL*)fileToTranscode completionOperation:(NSOperation*)completionOp
+//{
+//    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
+//
+//    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:sourceDirectory outputDirectory:sourceDirectory];
+//
+//    [completionOp addDependency:operation];
+//}
+//
+//- (void) analysisTypeFileToTempToPlace:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
+//{
+//    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
+//
+//    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:tempFolder outputDirectory:sourceDirectory];
+//
+//    [completionOp addDependency:operation];
+//}
+//
+//- (void) analysisTypeFileToOutput:(NSURL*)fileToTranscode outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
+//{
+//    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
+//
+//    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:sourceDirectory outputDirectory:outputFolder];
+//
+//    [completionOp addDependency:operation];
+//}
 
 - (void) analysisTypeFileToTempToOutput:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
 {
