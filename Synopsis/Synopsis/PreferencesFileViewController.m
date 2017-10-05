@@ -36,9 +36,14 @@
 
 @implementation PreferencesFileViewController
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do view setup here.
+- (instancetype)initWithNibName:(nullable NSNibName)nibNameOrNil bundle:(nullable NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if(self)
+    {
+        [self initDirectoryWatcherIfNeeded];
+    }
+    return self;
 }
 
 - (void) awakeFromNib
@@ -111,7 +116,7 @@
     NSURL* url = [self outputFolderURL];
     BOOL usingOutputFolder = [self usingOutputFolder];
     
-    self.usingOutputFolderButton.state = ([self usingOutputFolder]) ? NSOnState : NSOffState;
+    self.usingOutputFolderButton.state = (usingOutputFolder) ? NSOnState : NSOffState;
     
     if(usingOutputFolder && url)
         self.outputFolderStatus.image = [NSImage imageNamed:NSImageNameStatusAvailable];
@@ -209,40 +214,23 @@
     else
         self.watchFolderDescription.stringValue = @"Watch Folder";
     
+    [self initDirectoryWatcherIfNeeded];
+}
+
+- (void) initDirectoryWatcherIfNeeded
+{
+    NSURL* watchURL = [self watchFolderURL];
+    BOOL usingWatchFolder = [self usingWatchFolder];
+
     AppDelegate* appDelegate = (AppDelegate*) [[NSApplication sharedApplication] delegate];
     if(usingWatchFolder && watchURL)
     {
-        self.directoryWatcher = [[SynopsisDirectoryWatcher alloc] initWithDirectoryAtURL:watchURL notificationBlock:^(NSArray<NSURL *> *changedURLS) {
-            
-            NSMutableArray<NSURL*>* changedValidURLs = [NSMutableArray array];
-            
-            for(NSURL* url in changedURLS)
-            {
-                NSString* uti = nil;
-                NSError* error;
-                NSNumber* isDirectory = @(NO);
-                
-                if(![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error])
-                {
-                    // if we cant determine if we
-                    continue;
-                }
-                    
-                if([url getResourceValue:&uti forKey:NSURLTypeIdentifierKey error:&error])
-                {
-                    if([SynopsisSupportedFileTypes() containsObject:uti])
-                    {
-                        [changedValidURLs addObject:url];
-                    }
-                }
-            }
-            
+        self.directoryWatcher = [[SynopsisDirectoryWatcher alloc] initWithDirectoryAtURL:watchURL ignoreSubdirectories:YES notificationBlock:^(NSArray<NSURL *> *changedURLS) {
             // Kick off Analysis Session
-            [appDelegate analysisSessionForFiles:changedValidURLs sessionCompletionBlock:^{
+            [appDelegate analysisSessionForFiles:changedURLS sessionCompletionBlock:^{
                 dispatch_async(dispatch_get_main_queue(), ^{
                     
                     NSLog(@"SESSION COMPLETE ALL SESSION MEDIA AND SUB FOLDERS TO OUTPUT FOLDER FROM TEMP WORKING FOLDER");
-                    
                 });
             }];
         }];

@@ -23,7 +23,7 @@
 
 static NSTimeInterval start;
 
-@interface AppDelegate ()
+@interface AppDelegate () <NSFileManagerDelegate>
 
 @property (weak) IBOutlet NSWindow *window;
 @property (weak) IBOutlet DropFilesView* dropFilesView;
@@ -44,6 +44,10 @@ static NSTimeInterval start;
 
 // Toolbar
 @property (weak) IBOutlet NSToolbarItem* startPauseToolbarItem;
+
+
+// State management for File Manager Delegate shit.
+@property (readwrite, assign) BOOL copyMedia;
 
 @end
 
@@ -100,6 +104,9 @@ static NSTimeInterval start;
     self.dropFilesView.dragDelegate = self;
     
     self.prefsAnalyzerArrayController.content = self.analyzerPluginsInitializedForPrefs;
+
+    // ping our view controller to load prefs UI and directory watcher etc.
+    [self.prefsViewController view];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
@@ -220,7 +227,426 @@ static NSTimeInterval start;
     }
 }
 
+#pragma mark - Analysis
+
+// Support various types of Analysis file handling
+// This might seem verbose, but its helpful for edge cases...
+// TODO: Move to flags ?
+typedef enum : NSUInteger {
+    // Bail case
+    AnalysisTypeUnknown = 0,
+
+    // temp file and output file adjacent to input file
+    AnalysisTypeFileInPlace,
+    // temp file and output file within output folder
+    AnalysisTypeFileToOutput,
+    // temp file in temp folder, output file adjacent to input file
+    AnalysisTypeFileToTempToPlace,
+    // temp file in temp folder, output file in output folder
+    AnalysisTypeFileToTempToOutput,
+    
+    // temp file and output file adjacent to input file, in any subfolder of source URL
+    AnalysisTypeFolderInPlace,
+    // temp files flat within temp folder, placed in mirrored output folder structure
+    AnalysisTypeFolderToOutput,
+    
+    // temp file flat within temp folder, output file adjacent to input file, in any subfolder of source URL
+    AnalysisTypeFolderToTempToPlace,
+    AnalysisTypeFolderToTempToOutput,
+} AnalysisType;
+
+- (AnalysisType) analysisTypeForURL:(NSURL*)url
+{
+    BOOL useTmpFolder = [self.prefsViewController.preferencesFileViewController usingTempFolder];
+    BOOL useOutFolder = [self.prefsViewController.preferencesFileViewController usingOutputFolder];
+    
+    AnalysisType analysisType = AnalysisTypeUnknown;
+    if(!url.hasDirectoryPath)
+    {
+        if(useOutFolder && !useTmpFolder)
+        {
+            analysisType = AnalysisTypeFileToOutput;
+        }
+        else if(useTmpFolder && !useOutFolder)
+        {
+            analysisType = AnalysisTypeFileToTempToPlace;
+        }
+        else if(useTmpFolder && useOutFolder)
+        {
+            analysisType = AnalysisTypeFileToTempToOutput;
+        }
+        else
+        {
+            analysisType = AnalysisTypeFileInPlace;
+        }
+    }
+    else
+    {
+        analysisType = AnalysisTypeFolderInPlace;
+        if(useOutFolder && !useTmpFolder)
+        {
+            analysisType = AnalysisTypeFolderToOutput;
+        }
+        else if(useTmpFolder && !useOutFolder)
+        {
+            analysisType = AnalysisTypeFolderToTempToPlace;
+        }
+        else if(useTmpFolder && useOutFolder)
+        {
+            analysisType = AnalysisTypeFolderToTempToOutput;
+        }
+    }
+    
+    return analysisType;
+}
+
+- (void) analysisSessionForFiles:(NSArray *)URLArray sessionCompletionBlock:(void (^)(void))completionBlock
+{
+    NSUUID* sessionUUID = [NSUUID UUID];
+    [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", sessionUUID.UUIDString]];
+
+    start = [NSDate timeIntervalSinceReferenceDate];
+
+    // Standard Completion Handler
+    NSBlockOperation* sessionCompletionOperation = [NSBlockOperation blockOperationWithBlock:^{
+    
+        NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
+        
+        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", sessionUUID.UUIDString, delta]];
+        
+        if(completionBlock != NULL)
+        {
+            completionBlock();
+        }
+    }];
+    
+    NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
+    NSURL* outFolderURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+    
+    if(URLArray && URLArray.count)
+    {
+        for(NSURL* url in URLArray)
+        {
+            switch ([self analysisTypeForURL:url])
+            {
+                case AnalysisTypeUnknown:
+                    break;
+                    
+                case AnalysisTypeFileInPlace:
+                {
+                    [self analysisSessionTypeFileInPlace:url completionOperation:sessionCompletionOperation];
+                }
+                    break;
+                    
+                case AnalysisTypeFileToTempToPlace:
+                {
+                    [self analysisTypeFileToTempToPlace:url tempFolder:tmpFolderURL completionOperation:sessionCompletionOperation];
+                }
+                    break;
+               
+                case AnalysisTypeFileToOutput:
+                {
+                    [self analysisTypeFileToOutput:url outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
+                }
+                    break;
+                    
+                    // Folders:
+                case AnalysisTypeFolderInPlace:
+                {
+                    [self analysisSessionTypeFolderInPlace:url completionOperation:sessionCompletionOperation];
+                }
+                    break;
+                    
+                case AnalysisTypeFolderToTempToPlace:
+                {
+                    [self analysisSessionTypeFolderToTempToPlace:url tempFolder:tmpFolderURL completionOperation:sessionCompletionOperation];
+                }
+                    break;
+
+            }
+        }
+    }
+    
+    // Enqueue our session completion operation now that it has dependencies on every encode operation
+    [self.sessionComplectionQueue addOperation:sessionCompletionOperation];
+}
+
+#pragma mark - Analysis Type Handling Files
+
+- (void) analysisSessionTypeFileInPlace:(NSURL*)fileToTranscode completionOperation:(NSOperation*)completionOp
+{
+    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
+    
+    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:sourceDirectory outputDirectory:sourceDirectory];
+    
+    [completionOp addDependency:operation];
+}
+
+- (void) analysisTypeFileToTempToPlace:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
+{
+    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
+    
+    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:tempFolder outputDirectory:sourceDirectory];
+    
+    [completionOp addDependency:operation];
+}
+
+- (void) analysisTypeFileToOutput:(NSURL*)fileToTranscode outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
+{
+    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
+    
+    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:sourceDirectory outputDirectory:outputFolder];
+    
+    [completionOp addDependency:operation];
+}
+
+#pragma mark - Analysis Type Handling Folders
+
+- (void) analysisSessionTypeFolderInPlace:(NSURL*)directoryToEncode completionOperation:(NSOperation*)completionOp
+{
+    NSDirectoryEnumerator* directoryEnumerator = [[NSFileManager defaultManager] enumeratorAtURL:directoryToEncode includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
+        return YES;
+    }];
+    
+    for(NSURL* url in directoryEnumerator)
+    {
+        NSNumber* isDirectory;
+        NSString* fileType;
+        NSError* error;
+        
+        if(![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error])
+        {
+            // Cant get NSURLIsDirectoryKey seems shady, silently continue
+            continue;
+        }
+        
+        if(![url getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
+        {
+            // Cant get NSURLTypeIdentifierKey seems shady too, silently continue
+            continue;
+        }
+
+        if([SynopsisSupportedFileTypes() containsObject:fileType] && (isDirectory.boolValue == FALSE))
+        {
+            NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
+          
+            BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:sourceDirectory outputDirectory:sourceDirectory];
+            [completionOp addDependency:operation];
+        }
+    }
+}
+
+- (void) analysisSessionTypeFolderToTempToPlace:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
+{
+    NSDirectoryEnumerator* directoryEnumerator = [[NSFileManager defaultManager] enumeratorAtURL:directoryToEncode includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
+        return YES;
+    }];
+    
+    for(NSURL* url in directoryEnumerator)
+    {
+        NSNumber* isDirectory;
+        NSString* fileType;
+        NSError* error;
+        
+        if(![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error])
+        {
+            // Cant get NSURLIsDirectoryKey seems shady, silently continue
+            continue;
+        }
+        
+        if(![url getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
+        {
+            // Cant get NSURLTypeIdentifierKey seems shady too, silently continue
+            continue;
+        }
+        
+        if([SynopsisSupportedFileTypes() containsObject:fileType] && (isDirectory.boolValue == FALSE))
+        {
+            NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
+            
+            BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:tempFolder outputDirectory:sourceDirectory];
+            [completionOp addDependency:operation];
+        }
+    }
+}
+
 #pragma mark -
+
+//- (void) duplicateFolderContnetsAalysisSessionForFiles:(NSArray<NSURL*>*)fileURLArray sessionCompletionBlock:(void (^)(void))completionBlock
+//{
+//    NSUUID* sessionUUID = [NSUUID UUID];
+//    [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", sessionUUID.UUIDString]];
+//
+//    if(fileURLArray && fileURLArray.count)
+//    {
+//        start = [NSDate timeIntervalSinceReferenceDate];
+//
+//        // Setup our output folders:
+//        NSURL* tempDirectory = nil;
+//        NSURL* outputDirectory = nil;
+//        NSURL* moveDirectory = nil;
+//
+//        if([self.prefsViewController.preferencesFileViewController usingTempFolder])
+//        {
+//            tempDirectory = [self.prefsViewController.preferencesFileViewController tempFolderURL];
+//        }
+//
+//        if([self.prefsViewController.preferencesFileViewController usingOutputFolder])
+//        {
+//            // If we have a temp directory, we write our temp file and our output file to it, then do a move.
+//            if(tempDirectory != nil)
+//            {
+//                outputDirectory = tempDirectory;
+//                moveDirectory = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+//            }
+//            else
+//            {
+//                outputDirectory = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+//                tempDirectory = outputDirectory;
+//            }
+//        }
+//
+//        // src and dest Transcode media
+//        NSMutableArray<NSURL*>* srcUrlsToTranscode = [NSMutableArray new];
+//        NSMutableArray<NSURL*>* dstUrlsToTranscode = [NSMutableArray new];
+//        // src and dst non-transcode media
+//        NSMutableArray<NSURL*>* srcUrlsToMove = nil; // source URL of non media
+//        NSMutableArray<NSURL*>* dstUrlsToMove = nil; // destination URL of non media to move post session completion
+//
+//        BOOL recurseDirectories = YES;
+//        BOOL copyNonMediaToOutput = YES;
+//
+//        if(copyNonMediaToOutput && moveDirectory != nil)
+//        {
+//            srcUrlsToMove = [NSMutableArray new];
+//            dstUrlsToMove = [NSMutableArray new];
+//        }
+//
+//        for(NSURL* url in fileURLArray)
+//        {
+//            NSNumber* isDirectory;
+//            NSString* fileType;
+//            NSError* error;
+//
+//            if(![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error])
+//            {
+//                // Cant get NSURLIsDirectoryKey seems shady, silently continue
+//                continue;
+//            }
+//
+//            if(![url getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
+//            {
+//                // Cant get NSURLTypeIdentifierKey seems shady too, silently continue
+//                continue;
+//            }
+//
+//            if(isDirectory.boolValue)
+//            {
+//                if(copyNonMediaToOutput && moveDirectory != nil)
+//                {
+//                    NSError* copyError;
+//                    NSURL* copyDestiation = [outputDirectory URLByAppendingPathComponent:[url lastPathComponent]];
+//
+//                    // Tells our delegate to ignore media we can transcode, so we dont duplicate MOVs for examples
+//                    self.copyMedia = NO;
+//                    [[NSFileManager defaultManager] setDelegate:self];
+//                    if([[NSFileManager defaultManager] copyItemAtURL:url toURL:copyDestiation error:&copyError])
+//                    {
+//                        // We need to move this folder to our final output move destionation:
+//                        [srcUrlsToMove addObject:copyDestiation];
+//                        [dstUrlsToMove addObject:moveDirectory];
+//                    }
+//
+//                    // Any files we DID NOT COPY within the subfolder, need should be files we can transcode
+//                    if(recurseDirectories)
+//                    {
+//                        NSDirectoryEnumerator* enumerator = [[NSFileManager defaultManager] enumeratorAtURL:url includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
+//                            return YES;
+//                        }];
+//
+//                        for(NSURL* suburl in enumerator)
+//                        {
+//                            NSString* subFileType;
+//                            if(![suburl getResourceValue:&subFileType forKey:NSURLTypeIdentifierKey error:&error])
+//                            {
+//                                // Cant get NSURLTypeIdentifierKey seems shady too, silently continue
+//                                continue;
+//                            }
+//                            if([SynopsisSupportedFileTypes() containsObject:subFileType])
+//                            {
+//                                [srcUrlsToTranscode addObject:suburl];
+//
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            else if([SynopsisSupportedFileTypes() containsObject:fileType])
+//            {
+//                [srcUrlsToTranscode addObject:url];
+//            }
+//        }
+//
+//        NSBlockOperation* blockOp = [NSBlockOperation blockOperationWithBlock:^{
+//
+//            // Do our File Move logic if we need it here:
+//            if((srcUrlsToMove.count == dstUrlsToMove.count))
+//            {
+//                [srcUrlsToMove enumerateObjectsUsingBlock:^(NSURL * _Nonnull srcURL, NSUInteger idx, BOOL * _Nonnull stop) {
+//
+//                    // Corresponding destination
+//                    NSURL* dstURL = [dstUrlsToMove objectAtIndex:idx];
+//                    NSString* itemName = [srcURL lastPathComponent];
+//                    dstURL = [dstURL URLByAppendingPathComponent:itemName];
+//
+//                    NSError* error = nil;
+//                    if(![[NSFileManager defaultManager] moveItemAtURL:srcURL toURL:dstURL error:&error])
+//                    {
+//                        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Moving File To Output:%@", error.localizedDescription]];
+//                    }
+//                    else
+//                    {
+//                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Moving File To Final Destination"]];
+//                    }
+//                }];
+//            }
+//            else
+//            {
+//                NSLog(@"Different number of urls to move fucker");
+//            }
+//
+//            NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
+//
+//            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", sessionUUID.UUIDString, delta]];
+//
+//            if(completionBlock != NULL)
+//            {
+//                completionBlock();
+//            }
+//        }];
+//
+//        // Fire Off Transcodes for URLS we *know* we want to transcode
+//        [srcUrlsToTranscode enumerateObjectsUsingBlock:^(NSURL * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop)
+//        {
+//            NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
+//            NSURL* transcodeTempDir = (tempDirectory != nil) ? tempDirectory : sourceDirectory;
+//            NSURL* transcodeOutDir = (outputDirectory != nil) ? outputDirectory : sourceDirectory;
+//
+//            BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:transcodeTempDir outputDirectory:transcodeOutDir];
+//
+//            if(copyNonMediaToOutput && moveDirectory != nil)
+//            {
+//                NSURL* moveDestination = [dstUrlsToTranscode objectAtIndex:idx];
+//                [srcUrlsToMove addObject:operation.destinationURL];
+//                [dstUrlsToMove addObject:moveDestination];
+//            }
+//
+//            [blockOp addDependency:operation];
+//        }];
+//
+//        [self.sessionComplectionQueue addOperation:blockOp];
+//    }
+//}
 
 - (IBAction)openMovies:(id)sender
 {
@@ -333,25 +759,6 @@ static NSTimeInterval start;
                                 {
                                     [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis"];
                                     
-                                 
-                                    
-//                                    NSURL* destinationURL = nil;
-                                    
-                                    // If we are mirroring our folder structure, lets copy all sub-directories and ensure we output to the correct paths.
-//                                    if([self.prefsViewController.preferencesFileViewController usingOutputFolder] && [self.prefsViewController.preferencesFileViewController usingMirroredFolders])
-//                                    {
-//
-//
-//                                        NSURL* outputParentFolder = [self.prefsViewController.preferencesFileViewController outputFolderURL];
-//
-//                                    }
-//                                    else if([self.prefsViewController.preferencesFileViewController usingOutputFolder])
-//                                    {
-//                                        destinationURL =
-//                                    }
-                                    
-                                    // Move the result of metadata operation to the final destination
-                                    
                                     // Clean up
                                     NSError* error;
                                     if(![[NSFileManager defaultManager] removeItemAtURL:analysisFileURL error:&error])
@@ -371,132 +778,6 @@ static NSTimeInterval start;
     return metadata;
 }
 
-- (void) analysisSessionForFiles:(NSArray *)fileURLArray sessionCompletionBlock:(void (^)(void))completionBlock
-{
-    // File Handling logic:
-    
-    // source: file (file to be analyzed / encoded)
-    // output folder: (destination for resulting files that have been analyzed and encoded)
-    // temp folder: (folder where intermediate files are created)
-    // watch folder: (folder where any file system changes are noticed and files are enqueued for auto-encode).
-    
-    // If we have an input file and no output, temp or watch folder specified.
-    // (output folder = temp folder = source folder)
-    // in:		/path/to/source.mov
-    // pass1:	/path/to/source_UUID_temp.mov
-    // pass2:	/path/to/source_analyzed.mov
-    // move: (none)
-    
-    // If we have an input file and an output folder
-    // (temp folder = output folder, output folder is manually specified)
-    // in:		/path/to/source.mov
-    // pass1:	/path/to/output/folder/source_UUID_temp.mov
-    // pass2:	/path/to/output/folder/source_analyzed.mov
-    // move: (none)
-    
-    // If we have an input file and an temp folder
-    // (output folder = source folder, temp folder manually specified)
-    // in:		/path/to/source.mov
-    // pass1:	/path/to/temp/folder/source_UUID_temp.mov
-    // pass2:	/path/to/temp/folder/source_analyzed.mov
-    // move:	/path/to/source_analyzed.mov
-    
-    // If we have an input file and an temp folder and an output folder:
-    // in:        /path/to/source.mov
-    // pass1:    /path/to/temp/folder/source_UUID_temp.mov
-    // pass2:    /path/to/temp/folder/source_analyzed.mov
-    // move:    /path/to/output/folder/source_analyzed.mov
-
-    
-    NSURL* moveDirectory = nil;
-
-    NSUUID* sessionUUID = [NSUUID UUID];
-    [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", sessionUUID.UUIDString]];
-
-    if(fileURLArray && fileURLArray.count)
-    {
-        start = [NSDate timeIntervalSinceReferenceDate];
-        
-        NSURL* tempDirectory = nil;
-        NSURL* outputDirectory = nil;
-        NSMutableArray<NSURL*>* filesToMove = [NSMutableArray new];
-        
-        if([self.prefsViewController.preferencesFileViewController usingTempFolder])
-        {
-            tempDirectory = [self.prefsViewController.preferencesFileViewController tempFolderURL];
-        }
-        
-        if([self.prefsViewController.preferencesFileViewController usingOutputFolder])
-        {
-            if(tempDirectory == nil)
-            {
-                outputDirectory = [self.prefsViewController.preferencesFileViewController outputFolderURL];
-                tempDirectory = outputDirectory;
-            }
-            else
-            {
-                outputDirectory = tempDirectory;
-                moveDirectory = [self.prefsViewController.preferencesFileViewController outputFolderURL];
-            }
-        }
-        
-        NSBlockOperation* blockOp = [NSBlockOperation blockOperationWithBlock:^{
-            
-            // Do our File Move logic if we need it here:
-            if(filesToMove.count && moveDirectory != nil)
-            {
-                for(NSURL* fileToMove in filesToMove)
-                {
-                    NSString* itemName = [fileToMove lastPathComponent];
-                    NSURL* moveDestination = [moveDirectory URLByAppendingPathComponent:itemName];
-
-                    NSError* error = nil;
-                    if(![[NSFileManager defaultManager] moveItemAtURL:fileToMove toURL:moveDestination error:&error])
-                    {
-                        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Moving File To Output:%@", error.localizedDescription]];
-                    }
-                    else
-                    {
-                        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Moving File To Final Destination"]];
-                    }
-                }
-            }
-            
-            NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
-            
-            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", sessionUUID.UUIDString, delta]];
-            
-            if(completionBlock != NULL)
-            {
-                completionBlock();
-            }
-        }];
-        
-        // Any sub-directories in our folder structure and any
-        for(NSURL* url in fileURLArray)
-        {
-            NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
-            if(tempDirectory == nil)
-            {
-                tempDirectory = sourceDirectory;
-            }
-            
-            if(outputDirectory == nil)
-            {
-                outputDirectory = sourceDirectory;
-            }
-
-            BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:tempDirectory outputDirectory:outputDirectory];
-            
-            // Accrue our potential output files to move
-            [filesToMove addObject:operation.destinationURL];
-            
-            [blockOp addDependency:operation];
-        }
-				
-        [self.sessionComplectionQueue addOperation:blockOp];
-    }
-}
 
 #pragma mark - Toolbar
 
@@ -551,6 +832,34 @@ static BOOL isRunning = NO;
     {
         [window makeKeyAndOrderFront:sender];
     }
+}
+
+#pragma mark - NSFileManager Delegate
+
+- (BOOL)fileManager:(NSFileManager *)fileManager shouldCopyItemAtURL:(NSURL *)srcURL toURL:(NSURL *)dstURL
+{
+    if(self.copyMedia)
+    {
+        return YES;
+    }
+    else
+    {
+        NSString* fileType;
+        NSError* error;
+        
+        if(![srcURL getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
+        {
+            // Cant get NSURLTypeIdentifierKey seems shady, return NO
+            return NO;
+        }
+        
+        if([SynopsisSupportedFileTypes() containsObject:fileType])
+        {
+            return NO;
+        }
+    }
+    
+    return YES;
 }
 
 @end

@@ -169,7 +169,7 @@
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Jjc-Ho-2WJ">
                                 <rect key="frame" x="18" y="88" width="416" height="28"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" alignment="left" title="Any supported media added to any sub-directory of the watch folder will be automatically analyzed with the default preset." id="vyf-At-CRZ">
+                                <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" alignment="left" title="Temporary files and folders are stored within this folder." id="vyf-At-CRZ">
                                     <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -216,7 +216,7 @@
                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5a5-0x-jy6">
                                 <rect key="frame" x="15" y="29" width="352" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="check" title="Mirror folder heirarchy if applicable." bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="GLr-AG-6gX">
+                                <buttonCell key="cell" type="check" title="Copy 'Non media' documents and media to output folder." bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="GLr-AG-6gX">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="smallSystem"/>
                                 </buttonCell>
