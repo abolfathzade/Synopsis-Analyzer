@@ -241,7 +241,7 @@ typedef enum : NSUInteger {
     // temp file and output file within output folder
     AnalysisTypeFileToOutput,
     // temp file in temp folder, output file adjacent to input file
-    AnalysisTypeFileToTempToPlace,
+    AnalysisTypeFileToTempToInPlace,
     // temp file in temp folder, output file in output folder
     AnalysisTypeFileToTempToOutput,
     
@@ -251,7 +251,7 @@ typedef enum : NSUInteger {
     AnalysisTypeFolderToOutput,
     
     // temp file flat within temp folder, output file adjacent to input file, in any subfolder of source URL
-    AnalysisTypeFolderToTempToPlace,
+    AnalysisTypeFolderToTempToInPlace,
     AnalysisTypeFolderToTempToOutput,
 } AnalysisType;
 
@@ -269,7 +269,7 @@ typedef enum : NSUInteger {
         }
         else if(useTmpFolder && !useOutFolder)
         {
-            analysisType = AnalysisTypeFileToTempToPlace;
+            analysisType = AnalysisTypeFileToTempToInPlace;
         }
         else if(useTmpFolder && useOutFolder)
         {
@@ -289,7 +289,7 @@ typedef enum : NSUInteger {
         }
         else if(useTmpFolder && !useOutFolder)
         {
-            analysisType = AnalysisTypeFolderToTempToPlace;
+            analysisType = AnalysisTypeFolderToTempToInPlace;
         }
         else if(useTmpFolder && useOutFolder)
         {
@@ -338,7 +338,7 @@ typedef enum : NSUInteger {
                 }
                     break;
                     
-                case AnalysisTypeFileToTempToPlace:
+                case AnalysisTypeFileToTempToInPlace:
                 {
                     [self analysisTypeFileToTempToPlace:url tempFolder:tmpFolderURL completionOperation:sessionCompletionOperation];
                 }
@@ -350,6 +350,12 @@ typedef enum : NSUInteger {
                 }
                     break;
                     
+                case AnalysisTypeFileToTempToOutput:
+                {
+                    [self analysisTypeFileToTempToOutput:url tempFolder:tmpFolderURL outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
+                }
+                    break;
+
                     // Folders:
                 case AnalysisTypeFolderInPlace:
                 {
@@ -357,7 +363,7 @@ typedef enum : NSUInteger {
                 }
                     break;
                     
-                case AnalysisTypeFolderToTempToPlace:
+                case AnalysisTypeFolderToTempToInPlace:
                 {
                     [self analysisSessionTypeFolderToTempToPlace:url tempFolder:tmpFolderURL completionOperation:sessionCompletionOperation];
                 }
@@ -396,6 +402,13 @@ typedef enum : NSUInteger {
     NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
     
     BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:sourceDirectory outputDirectory:outputFolder];
+    
+    [completionOp addDependency:operation];
+}
+
+- (void) analysisTypeFileToTempToOutput:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
+{
+    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:tempFolder outputDirectory:outputFolder];
     
     [completionOp addDependency:operation];
 }
