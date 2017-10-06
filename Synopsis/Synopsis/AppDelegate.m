@@ -47,7 +47,8 @@ static NSTimeInterval start;
 
 
 // State management for File Manager Delegate shit.
-@property (readwrite, assign) BOOL copyMedia;
+//@property (readwrite, assign) BOOL analysisDuplicatesAllFilesToOutputFolder;
+//@property (readwrite, assign) BOOL analysisDuplicatesFolderStructureOnly;
 
 @end
 
@@ -247,12 +248,11 @@ typedef enum : NSUInteger {
     
     // temp file and output file adjacent to input file, in any subfolder of source URL
     AnalysisTypeFolderInPlace,
-    // temp files flat within temp folder, placed in mirrored output folder structure
-    AnalysisTypeFolderToOutput,
-    
     // temp file flat within temp folder, output file adjacent to input file, in any subfolder of source URL
     AnalysisTypeFolderToTempToInPlace,
+    
     AnalysisTypeFolderToTempToOutput,
+    
 } AnalysisType;
 
 - (AnalysisType) analysisTypeForURL:(NSURL*)url
@@ -283,11 +283,11 @@ typedef enum : NSUInteger {
     else
     {
         analysisType = AnalysisTypeFolderInPlace;
-        if(useOutFolder && !useTmpFolder)
-        {
-            analysisType = AnalysisTypeFolderToOutput;
-        }
-        else if(useTmpFolder && !useOutFolder)
+//        if(useOutFolder && !useTmpFolder)
+//        {
+//            analysisType = AnalysisTypeFolderToOutput;
+//        }
+        if(useTmpFolder && !useOutFolder)
         {
             analysisType = AnalysisTypeFolderToTempToInPlace;
         }
@@ -370,7 +370,36 @@ typedef enum : NSUInteger {
                     [self analysisSessionTypeFolderToTempToPlace:url tempFolder:tmpFolderURL completionOperation:sessionCompletionOperation];
                 }
                     break;
-
+                case AnalysisTypeFolderToTempToOutput:
+                {
+                    
+                    
+                    // We add a 'move' operation to every 'top level folder that we encode. We
+                    // If we have folders which arrive / are updated within a from a watch folder
+                    NSBlockOperation* moveOperation = [NSBlockOperation blockOperationWithBlock:^{
+                        // if a folder was already analyzed, and resides in the destination output folder, we should rename it
+                        // TODO: Rename output folder URL with session ID
+                        
+                        NSString* folderName = [url lastPathComponent];
+                        
+                        NSError* error = nil;
+                        if([[NSFileManager defaultManager] moveItemAtURL:[tmpFolderURL URLByAppendingPathComponent:folderName]
+                                                                   toURL:[outFolderURL URLByAppendingPathComponent:folderName] error:&error])
+                        {
+                            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Moved %@ to Output Directory", folderName]];
+                        }
+                    }];
+                    
+                    [self analysisTypeFolderToTempToOutput:url tempFolder:tmpFolderURL completionOperation:moveOperation];
+                    
+                    // completion isnt complete till our move finishes
+                    [sessionCompletionOperation addDependency:moveOperation];
+                    
+                    [self.sessionComplectionQueue addOperation:moveOperation];
+                    
+                    //
+                }
+                    break;
             }
         }
     }
@@ -380,33 +409,6 @@ typedef enum : NSUInteger {
 }
 
 #pragma mark - Analysis Type Handling Files
-
-//- (void) analysisSessionTypeFileInPlace:(NSURL*)fileToTranscode completionOperation:(NSOperation*)completionOp
-//{
-//    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
-//
-//    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:sourceDirectory outputDirectory:sourceDirectory];
-//
-//    [completionOp addDependency:operation];
-//}
-//
-//- (void) analysisTypeFileToTempToPlace:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
-//{
-//    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
-//
-//    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:tempFolder outputDirectory:sourceDirectory];
-//
-//    [completionOp addDependency:operation];
-//}
-//
-//- (void) analysisTypeFileToOutput:(NSURL*)fileToTranscode outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
-//{
-//    NSURL* sourceDirectory = [fileToTranscode URLByDeletingLastPathComponent];
-//
-//    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:sourceDirectory outputDirectory:outputFolder];
-//
-//    [completionOp addDependency:operation];
-//}
 
 - (void) analysisTypeFileToTempToOutput:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
 {
@@ -482,6 +484,65 @@ typedef enum : NSUInteger {
             BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:tempFolder outputDirectory:sourceDirectory];
             [completionOp addDependency:operation];
         }
+    }
+}
+
+- (void) analysisTypeFolderToTempToOutput:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
+{
+    // Mirror the contents of our directory to encode - Our NSFileManagerDelegate handles knowing what to copy or not (only folders, or non media, or media too)
+    NSError* error = nil;
+    NSString* directoryToEncodeName = [directoryToEncode lastPathComponent];
+
+    [[NSFileManager defaultManager] setDelegate:self];
+    if([[NSFileManager defaultManager] copyItemAtURL:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error])
+    {
+        NSDirectoryEnumerator* directoryEnumerator = [[NSFileManager defaultManager] enumeratorAtURL:directoryToEncode includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
+            return YES;
+        }];
+        
+        for(NSURL* url in directoryEnumerator)
+        {
+            NSNumber* isDirectory;
+            NSString* fileType;
+            NSError* error;
+            
+            if(![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error])
+            {
+                // Cant get NSURLIsDirectoryKey seems shady, silently continue
+                continue;
+            }
+            
+            if(![url getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
+            {
+                // Cant get NSURLTypeIdentifierKey seems shady too, silently continue
+                continue;
+            }
+            
+            if([SynopsisSupportedFileTypes() containsObject:fileType] && (isDirectory.boolValue == FALSE))
+            {
+                // TODO: Deduce the correct sub-directory in the temp folder to place our media in, so we only do work 'in place' within the temp folder structure.
+
+                NSURL* newTempDir = tempFolder;
+                
+                // Remove the path components
+                NSArray<NSString*>* topFolderComponentsToRemove = [[directoryToEncode URLByDeletingLastPathComponent] pathComponents];
+                NSMutableArray<NSString*>* analysisFileComponents = [[[url URLByDeletingLastPathComponent] pathComponents] mutableCopy];
+                
+                [analysisFileComponents removeObjectsInArray:topFolderComponentsToRemove];
+                
+                for(NSString* component in analysisFileComponents)
+                {
+                    newTempDir = [newTempDir URLByAppendingPathComponent:component];
+                }
+                
+                BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:newTempDir outputDirectory:newTempDir];
+                [completionOp addDependency:operation];
+            }
+        }
+    }
+    else
+    {
+        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to copy %@, to Output Directory", [directoryToEncode lastPathComponent]]];
     }
 }
 
@@ -853,9 +914,23 @@ static BOOL isRunning = NO;
 
 - (BOOL)fileManager:(NSFileManager *)fileManager shouldCopyItemAtURL:(NSURL *)srcURL toURL:(NSURL *)dstURL
 {
-    if(self.copyMedia)
+    BOOL duplicateAllMediaToOutputFolder = NO;
+    BOOL duplicateFolderStructureOnlyToOutputFolder = NO;
+    
+    if(duplicateAllMediaToOutputFolder)
     {
         return YES;
+    }
+    
+    else if(duplicateFolderStructureOnlyToOutputFolder)
+    {
+        if(srcURL.hasDirectoryPath)
+        {
+            return YES;
+        }
+        {
+            return NO;
+        }
     }
     else
     {
