@@ -61,7 +61,6 @@ static NSTimeInterval start;
     self = [super init];
     if(self)
     {
-        
         self.fileManager = [[NSFileManager alloc] init];
         [self.fileManager setDelegate:self];
         
@@ -865,10 +864,11 @@ typedef enum : NSUInteger {
 		
     metadata.completionBlock = (^(void)
                                 {
-                                    [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis"];
+                                    [[LogController sharedLogController] appendSuccessLog:[@"Finished Analysis for " stringByAppendingString:sourceFileName]];
                                     
                                     // Clean up
                                     NSError* error;
+                                    // Note - dont use our own NSFileManager instance since this is on any thread.
                                     if(![[NSFileManager defaultManager] removeItemAtURL:analysisFileURL error:&error])
                                     {
                                         [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];

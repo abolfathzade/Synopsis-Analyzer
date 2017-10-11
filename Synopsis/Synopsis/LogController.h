@@ -12,6 +12,8 @@
 
 + (LogController*) sharedLogController;
 
+- (IBAction)changeLogLevel:(id)sender;
+
 - (void) appendLog:(NSString*)log;
 - (void) appendVerboseLog:(NSString*)log;
 - (void) appendWarningLog:(NSString*)log;

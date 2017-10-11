@@ -31,6 +31,7 @@
 {
 }
 
+@property (readwrite, assign) BOOL succeeded;
 
 // Metadata to write
 @property (atomic, readwrite, strong) NSMutableArray* analyzedVideoSampleBufferMetadata;
@@ -416,7 +417,7 @@
                 }
                 
                 [finishedReadingAllPassthroughVideo setValue:YES];
-                [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
+                [[LogController sharedLogController] appendVerboseLog:@"Finished Passthrough Video Buffers"];
                 
                 // Fire final semaphore signal to hit finalization
                 dispatch_semaphore_signal(videoDequeueSemaphore);
@@ -582,7 +583,7 @@
                              }
                              else
                              {
-                                 [[LogController sharedLogController] appendWarningLog:@"No Metadata Sample Buffer for Video Sample"];
+                                 [[LogController sharedLogController] appendVerboseLog:@"No Metadata Sample Buffer for Video Sample"];
                              }
                          }
 
@@ -766,10 +767,14 @@
         // cleanup
         CFRelease(videoPassthroughBufferQueue);
         CFRelease(audioPassthroughBufferQueue);
+        
+        self.succeeded = YES;
+        [[LogController sharedLogController] appendVerboseLog:[@"Finished Pass 2 Operation for " stringByAppendingString:[self.destinationURL lastPathComponent]]];
     }
     else
     {
-		[[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to start transcode from %@ to %@:", self.sourceURL, self.destinationURL]];
+        self.succeeded = NO;
+        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to start transcode from %@ to %@:", self.sourceURL, self.destinationURL]];
         [[LogController sharedLogController] appendErrorLog:[@"Read Error" stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
         [[LogController sharedLogController] appendErrorLog:[@"Write Error" stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
     }

@@ -16,5 +16,6 @@
 
 // Prerequisites
 @property (atomic, readwrite, strong) NSDictionary* metadataOptions;
+@property (readonly, assign) BOOL succeeded;
 
 @end

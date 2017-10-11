@@ -8,7 +8,17 @@
 
 #import "LogController.h"
 
+typedef enum : NSUInteger {
+    LogLevelNone = 0,
+    LogLevelNormal,
+    LogLevelWarning,
+    LogLevelVerbose,
+} LogLevel;
+
 @interface LogController ()
+@property (atomic, readwrite, assign) LogLevel logLevel;
+@property (strong) IBOutlet NSPopUpButton* logLevelPopUpButton;
+
 @property (strong) IBOutlet NSTextView* logTextField;
 @property (atomic, readwrite, strong) NSDateFormatter* dateFormatter;
 @property (atomic, readwrite, strong) NSDictionary* logStyle;
@@ -57,6 +67,8 @@
     self = [super init];
     if (self)
     {
+        self.logLevel = LogLevelNormal;
+        
         self.logStyle = @{ NSForegroundColorAttributeName : [NSColor lightGrayColor]};
         self.verboseStyle = @{ NSForegroundColorAttributeName : [NSColor darkGrayColor]};
         self.warningStyle = @{ NSForegroundColorAttributeName : [NSColor yellowColor]};
@@ -88,12 +100,25 @@
     return self;
 }
 
+- (IBAction)changeLogLevel:(id)sender
+{
+    NSInteger state = [sender tag];
+    
+    self.logLevel = LogLevelNormal;
+    
+    if(state == 0)
+        self.logLevel = LogLevelNormal;
+    else if(state == 1)
+        self.logLevel = LogLevelWarning;
+    else if(state == 2)
+        self.logLevel = LogLevelVerbose;
+}
+
 - (NSMutableAttributedString*) logStringWithDate
 {    
     //Get the string date
     return [[NSMutableAttributedString alloc] initWithString:[self.dateFormatter stringFromDate:[NSDate date] ] attributes:self.logStyle];
 }
-
 
 - (NSMutableAttributedString*) logString
 {
@@ -138,47 +163,53 @@
 
 - (void) appendLog:(NSString*)log
 {
-    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
-    NSMutableAttributedString* verboseString = [self logString];
-    [verboseString appendAttributedString:logString];
-    
-    dispatch_async(dispatch_get_main_queue(), ^ {
-        [self.logTextField.textStorage appendAttributedString:verboseString];
-    });
+    if(self.logLevel >= LogLevelNormal)
+    {
+        NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
+        NSMutableAttributedString* verboseString = [self logString];
+        [verboseString appendAttributedString:logString];
+        
+        dispatch_async(dispatch_get_main_queue(), ^ {
+            [self.logTextField.textStorage appendAttributedString:verboseString];
+        });
+    }
 }
 
 - (void) appendVerboseLog:(NSString*)log
 {
-    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
-    NSMutableAttributedString* verboseString = [self verboseString];
-    [verboseString appendAttributedString:logString];
-
-    dispatch_async(dispatch_get_main_queue(), ^ {
-        [self.logTextField.textStorage appendAttributedString:verboseString];
-    });
+    if(self.logLevel >= LogLevelVerbose)
+    {
+        NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.verboseStyle];
+        NSMutableAttributedString* verboseString = [self verboseString];
+        [verboseString appendAttributedString:logString];
+        
+        dispatch_async(dispatch_get_main_queue(), ^ {
+            [self.logTextField.textStorage appendAttributedString:verboseString];
+        });
+    }
 }
 
 - (void) appendWarningLog:(NSString*)log
 {
     // Always Log Warnings
     NSLog(@" [WARNING] %@", log);
-
-    NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
-    
-    NSMutableAttributedString* warningString = [self warningString];
-    [warningString appendAttributedString:logString];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.logTextField.textStorage appendAttributedString:warningString];
-    });
-
+    if(self.logLevel >= LogLevelWarning)
+    {
+        NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
+        
+        NSMutableAttributedString* warningString = [self warningString];
+        [warningString appendAttributedString:logString];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.logTextField.textStorage appendAttributedString:warningString];
+        });
+    }
 }
 
 - (void) appendErrorLog:(NSString*)log
 {
     // Always Log Errors
     NSLog(@" [ERROR] %@", log);
-    
     NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
    
     NSMutableAttributedString* errorString = [self errorString];
@@ -187,7 +218,6 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.logTextField.textStorage appendAttributedString:errorString];
     });
-  
 }
 
 - (void) appendSuccessLog:(NSString*)log

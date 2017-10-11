@@ -32,6 +32,7 @@
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <customObject id="Qmp-sv-tyW" customClass="LogController">
             <connections>
+                <outlet property="logLevelPopUpButton" destination="qdk-DR-9Gx" id="25N-ws-KGX"/>
                 <outlet property="logTextField" destination="chf-96-iDp" id="foO-nB-DW1"/>
                 <outlet property="view" destination="chf-96-iDp" id="KWF-EI-LNw"/>
             </connections>
@@ -977,7 +978,7 @@
             <point key="canvasLocation" x="77.5" y="959.5"/>
         </window>
         <window title="Log" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="3EF-QC-5lQ">
-            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES" fullSizeContentView="YES"/>
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" texturedBackground="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="196" y="240" width="480" height="270"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1177"/>
@@ -985,19 +986,19 @@
                 <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" horizontalScrollElasticity="none" scrollerKnobStyle="dark" id="3ao-qj-m8B">
-                        <rect key="frame" x="-1" y="-1" width="482" height="251"/>
+                    <scrollView misplaced="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" horizontalScrollElasticity="none" scrollerKnobStyle="dark" id="3ao-qj-m8B">
+                        <rect key="frame" x="-1" y="-1" width="482" height="272"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="HJn-Ac-fXb">
-                            <rect key="frame" x="1" y="1" width="480" height="249"/>
+                            <rect key="frame" x="1" y="1" width="480" height="270"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <textView editable="NO" drawsBackground="NO" importsGraphics="NO" horizontallyResizable="YES" verticallyResizable="YES" selectionGranularity="word" findStyle="bar" id="chf-96-iDp">
-                                    <rect key="frame" x="0.0" y="0.0" width="480" height="249"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="backgroundColor" white="1" alpha="0.0" colorSpace="calibratedWhite"/>
-                                    <size key="minSize" width="480" height="249"/>
+                                    <size key="minSize" width="480" height="270"/>
                                     <size key="maxSize" width="1000000" height="10000000"/>
                                     <color key="insertionPointColor" name="controlShadowColor" catalog="System" colorSpace="catalog"/>
                                 </textView>
@@ -1010,12 +1011,54 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="XPg-2G-KYE">
-                            <rect key="frame" x="465" y="1" width="16" height="249"/>
+                            <rect key="frame" x="465" y="1" width="16" height="270"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
                 </subviews>
             </view>
+            <toolbar key="toolbar" implicitIdentifier="C47456D8-6C51-4C84-BB6A-6950C6131FD4" autosavesConfiguration="NO" allowsUserCustomization="NO" displayMode="iconOnly" sizeMode="small" id="9cP-yP-4zt">
+                <allowedToolbarItems>
+                    <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="2nF-HT-jV6"/>
+                    <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="vi5-Tb-cmE"/>
+                    <toolbarItem implicitItemIdentifier="C645718A-A1D2-44C8-9D65-0E4D8E2E05A2" label="Log Level" paletteLabel="Log Level" id="cWi-AR-mII">
+                        <nil key="toolTip"/>
+                        <size key="minSize" width="100" height="25"/>
+                        <size key="maxSize" width="100" height="25"/>
+                        <popUpButton key="view" verticalHuggingPriority="750" id="qdk-DR-9Gx">
+                            <rect key="frame" x="0.0" y="14" width="100" height="25"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <popUpButtonCell key="cell" type="roundTextured" title="Errors Only" bezelStyle="texturedRounded" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" selectedItem="e3w-RM-T2o" id="XYm-Cv-CRJ">
+                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" metaFont="miniSystem"/>
+                                <menu key="menu" id="PYq-1j-Vfu">
+                                    <items>
+                                        <menuItem title="Errors Only" state="on" id="e3w-RM-T2o">
+                                            <connections>
+                                                <action selector="changeLogLevel:" target="Qmp-sv-tyW" id="Q6X-Y1-UEC"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Warnings" tag="1" id="jTl-tX-ufx">
+                                            <connections>
+                                                <action selector="changeLogLevel:" target="Qmp-sv-tyW" id="ZKo-Yu-N3u"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Verbose" tag="2" id="lQ2-bV-zEr">
+                                            <connections>
+                                                <action selector="changeLogLevel:" target="Qmp-sv-tyW" id="vEb-2c-T0q"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </popUpButtonCell>
+                        </popUpButton>
+                    </toolbarItem>
+                </allowedToolbarItems>
+                <defaultToolbarItems>
+                    <toolbarItem reference="cWi-AR-mII"/>
+                    <toolbarItem reference="vi5-Tb-cmE"/>
+                </defaultToolbarItems>
+            </toolbar>
             <point key="canvasLocation" x="-307" y="356"/>
         </window>
     </objects>

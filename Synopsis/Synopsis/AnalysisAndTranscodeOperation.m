@@ -29,6 +29,9 @@
 
 }
 
+@property (readwrite, assign) BOOL succeeded;
+
+
 @property (atomic, readwrite, strong) VideoTransformScaleLinearizeHelper* videoHelper;
 
 // Prerequisites
@@ -46,6 +49,7 @@
 // and make new metadata writers
 
 // If we dont, we simply create our video sample buffer readers and writers for pass 2
+
 @property (atomic, readwrite, assign) BOOL transcodingVideo;
 @property (atomic, readwrite, assign) BOOL transcodingAudio;
 @property (atomic, readwrite, assign) BOOL transcodeAssetHasVideo;
@@ -542,7 +546,7 @@
                 
                 [finishedReadingAllPassthroughVideo setValue:YES];
 
-                [[LogController sharedLogController] appendSuccessLog:@"Finished Passthrough Video Buffers"];
+                [[LogController sharedLogController] appendVerboseLog:@"Finished Passthrough Video Buffers"];
 
                 // Fire final semaphore signal to hit finalization
                 dispatch_semaphore_signal(self.videoDequeueSemaphore);
@@ -743,7 +747,7 @@
 
                 [finishedReadingAllUncompressedVideo setValue:YES];
 
-                [[LogController sharedLogController] appendSuccessLog:@"Finished Reading Uncompressed Video Buffers"];
+                [[LogController sharedLogController] appendVerboseLog:@"Finished Reading Uncompressed Video Buffers"];
                 
                 // Fire final semaphore signal to hit finalization
                 dispatch_semaphore_signal(self.videoDequeueSemaphore);
@@ -914,7 +918,7 @@
                             
                             [self.transcodeAssetWriterVideo markAsFinished];
                             
-                            [[LogController sharedLogController] appendSuccessLog:@"Finished Writing Video"];
+                            [[LogController sharedLogController] appendVerboseLog:@"Finished Writing Video"];
 
                             dispatch_group_leave(g);
                             break;
@@ -1113,7 +1117,7 @@
         self.availableAnalyzers = nil;
 		
 		self.succeeded = YES;
-        [[LogController sharedLogController] appendSuccessLog:@"Finished Analysis Operation"];
+        [[LogController sharedLogController] appendVerboseLog:[@"Finished Pass 1 Operation for " stringByAppendingString:[self.destinationURL lastPathComponent]]];
     }
     else
     {
