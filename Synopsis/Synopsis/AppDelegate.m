@@ -265,8 +265,14 @@ typedef enum : NSUInteger {
 - (AnalysisType) analysisTypeForURL:(NSURL*)url
 {
     BOOL useTmpFolder = [self.prefsViewController.preferencesFileViewController usingTempFolder];
+    NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
+
     BOOL useOutFolder = [self.prefsViewController.preferencesFileViewController usingOutputFolder];
-    
+    NSURL* outFolderURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+
+    useTmpFolder = (useTmpFolder && (tmpFolderURL != nil));
+    useOutFolder = (useOutFolder && (outFolderURL != nil));
+
     AnalysisType analysisType = AnalysisTypeUnknown;
     if(!url.hasDirectoryPath)
     {
@@ -344,25 +350,48 @@ typedef enum : NSUInteger {
     }];
     
     NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
-    [tmpFolderURL removeAllCachedResourceValues];
-    
     NSURL* outFolderURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
-    [outFolderURL removeAllCachedResourceValues];
-    
-    tmpFolderURL = [tmpFolderURL URLByAppendingPathComponent:sessionUUID.UUIDString isDirectory:YES];
     
     NSError* error = nil;
-    BOOL makeTemp = [self.fileManager createDirectoryAtURL:tmpFolderURL withIntermediateDirectories:YES attributes:nil error:&error];
+    BOOL makeTemp = NO;
+    
+    // TODO: Add test to check for existence of output and temp folder here - otherwise we throw a warning in the log and continue as if the option is not set?
+    
+    // If we have a specified temp folder, and pref is enabled, set it
+    if(tmpFolderURL != nil && [self.prefsViewController.preferencesFileViewController usingTempFolder])
+    {
+        tmpFolderURL = [tmpFolderURL URLByAppendingPathComponent:sessionUUID.UUIDString isDirectory:YES];
+        makeTemp = [self.fileManager createDirectoryAtURL:tmpFolderURL withIntermediateDirectories:YES attributes:nil error:&error];
+    }
+    else
+    {
+        // Otherwise we specify the local directory as temp, and carry on.
+        makeTemp = YES;
+    }
     
     if(URLArray && URLArray.count && makeTemp)
     {
         for(NSURL* url in URLArray)
         {
+            // Attempts to fix #84
             [url removeAllCachedResourceValues];
-            
-            NSLog(@"analysisSessionForFiles: %@", url);
-            
             NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
+
+//            NSLog(@"analysisSessionForFiles: %@", url);
+            
+            if(tmpFolderURL == nil)
+            {
+                tmpFolderURL = sourceDirectory;
+            }
+
+            if(outFolderURL == nil)
+            {
+                outFolderURL = sourceDirectory;
+            }
+
+            // Attempts to fix #84
+            [tmpFolderURL removeAllCachedResourceValues];
+            [outFolderURL removeAllCachedResourceValues];
             [sourceDirectory removeAllCachedResourceValues];
             
             switch ([self analysisTypeForURL:url])
@@ -467,6 +496,7 @@ typedef enum : NSUInteger {
 
 - (void) analysisSessionTypeFolderInPlace:(NSURL*)directoryToEncode completionOperation:(NSOperation*)completionOp
 {
+    // Attempts to fix #84
     [directoryToEncode removeAllCachedResourceValues];
     NSDirectoryEnumerator* directoryEnumerator = [self.fileManager enumeratorAtURL:directoryToEncode
                                                                       includingPropertiesForKeys:[NSArray array]
@@ -477,6 +507,7 @@ typedef enum : NSUInteger {
     
     for(NSURL* url in directoryEnumerator)
     {
+        // Attempts to fix #84
         [url removeAllCachedResourceValues];
         
         NSNumber* isDirectory;
@@ -507,6 +538,7 @@ typedef enum : NSUInteger {
 
 - (void) analysisSessionTypeFolderToTempToPlace:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
 {
+    // Attempts to fix #84
     [directoryToEncode removeAllCachedResourceValues];
     
     NSDirectoryEnumerator* directoryEnumerator = [self.fileManager enumeratorAtURL:directoryToEncode
@@ -518,6 +550,7 @@ typedef enum : NSUInteger {
     
     for(NSURL* url in directoryEnumerator)
     {
+        // Attempts to fix #84
         [url removeAllCachedResourceValues];
         NSNumber* isDirectory;
         NSString* fileType;
@@ -545,124 +578,15 @@ typedef enum : NSUInteger {
     }
 }
 
-
-int myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit(int what, int stage, copyfile_state_t state, const char * src, const char * dst, void * ctx)
-{
-    @autoreleasepool
-    {
-        NSString* srcPath = [[NSString alloc] initWithUTF8String:src];
-        NSString* dstPath = [[NSString alloc] initWithUTF8String:dst];
-        
-//        NSLog(@"CopyFileCallback %@", srcPath);
-//        NSLog(@"CopyFileCallback %@", dstPath);
-
-        if(what == COPYFILE_RECURSE_FILE)
-        {
-            // check if src contains a type we dont want to copy
-            NSURL* srcURL = [NSURL fileURLWithPath:srcPath];
-            
-            NSString* fileType;
-            NSError* error;
-            
-            if(![srcURL getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
-            {
-                // Bail on error?
-                return COPYFILE_QUIT;
-            }
-            
-            if([SynopsisSupportedFileTypes() containsObject:fileType])
-            {
-//                NSLog(@"Skipping copying %@", srcPath);
-                return COPYFILE_SKIP;
-            }
-        }
-        
-        if(what == COPYFILE_RECURSE_ERROR)
-        {
-            COPYFILE_QUIT;
-        }
-        
-        return COPYFILE_CONTINUE;
-    }
-}
-
-- (BOOL) manuallyCopyFromURLBecauseNSFileManagerIsAPieceofShit:(NSURL*)fromURL toURL:(NSURL*)toURL error:(NSError**)error
-{
-    NSString* fromString = [fromURL path];
-    NSString* toString = [toURL path];
-    
-    copyfile_flags_t flags = COPYFILE_RECURSIVE | COPYFILE_NOFOLLOW_SRC  | COPYFILE_DATA ;
-    
-    copyfile_state_t copystate = copyfile_state_alloc();
-    
-    copyfile_state_set(copystate, COPYFILE_STATE_STATUS_CB | COPYFILE_STATE_SRC_FILENAME , &myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit);
-    
-    OSStatus returnValue = copyfile([fromString cStringUsingEncoding:NSUTF8StringEncoding], [toString cStringUsingEncoding:NSUTF8StringEncoding], copystate, flags);
-    
-    copyfile_state_free(copystate);
-    
-    if(returnValue == noErr)
-    {
-        return YES;
-    }
-    
-    if(*error != nil)
-    {
-        //        TODO:set error to something descriptive
-    }
-    
-    return NO;
-}
-
-- (NSArray<NSURL*>*) manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:(NSURL*) directory// completionBlock:((void) ^(void))completionBlock
-{
-    NSString* path = directory.path;
-    DIR* dirp = opendir([path cStringUsingEncoding:NSUTF8StringEncoding]);
-
-    NSMutableArray<NSURL*>* urlArray = [NSMutableArray array];
-    
-    if (dirp == NULL)
-    {
-//        return (ERROR);
-    }
-
-    struct dirent* dp = NULL;
-    while ((dp = readdir(dirp)) != NULL)
-    {
-        NSString* name = [[NSString alloc] initWithUTF8String: dp->d_name];
-        if (dp->d_type == DT_DIR)
-        {
-            if(![name isEqualToString:@".."] && ![name isEqualToString:@"."])
-            {
-                NSURL* subDir = [directory URLByAppendingPathComponent:name isDirectory:YES];
-
-                [urlArray addObjectsFromArray: [self manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:subDir] ];
-            }
-        }
-        
-        if (dp->d_type == DT_REG)
-        {
-            NSURL* fileURL = [directory URLByAppendingPathComponent:name isDirectory:NO];
-            [urlArray addObject:fileURL];
-        }
-    
-    }
-    
-    (void)closedir(dirp);
-
-    return urlArray;
-    
-}
-
-
 - (void) analysisTypeFolderToTempToOutput:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
 {
+    // Attempts to fix #84
     [directoryToEncode removeAllCachedResourceValues];
 
     // Mirror the contents of our directory to encode - Our NSFileManagerDelegate handles knowing what to copy or not (only folders, or non media, or media too)
     NSError* error = nil;
     NSString* directoryToEncodeName = [directoryToEncode lastPathComponent];
-
+    
 //    if([self.fileManager copyItemAtURL:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error])
     if([self manuallyCopyFromURLBecauseNSFileManagerIsAPieceofShit:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error])
     {
@@ -688,6 +612,7 @@ int myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit(int what, int sta
         
         for(NSURL* url in directoryEnumerator)
         {
+            // Attempts to fix #84
             [url removeAllCachedResourceValues];
 //            NSLog(@"analysisTypeFolderToTempToOutput : %@", url);
 
@@ -736,182 +661,6 @@ int myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit(int what, int sta
 }
 
 #pragma mark -
-
-//- (void) duplicateFolderContnetsAalysisSessionForFiles:(NSArray<NSURL*>*)fileURLArray sessionCompletionBlock:(void (^)(void))completionBlock
-//{
-//    NSUUID* sessionUUID = [NSUUID UUID];
-//    [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", sessionUUID.UUIDString]];
-//
-//    if(fileURLArray && fileURLArray.count)
-//    {
-//        start = [NSDate timeIntervalSinceReferenceDate];
-//
-//        // Setup our output folders:
-//        NSURL* tempDirectory = nil;
-//        NSURL* outputDirectory = nil;
-//        NSURL* moveDirectory = nil;
-//
-//        if([self.prefsViewController.preferencesFileViewController usingTempFolder])
-//        {
-//            tempDirectory = [self.prefsViewController.preferencesFileViewController tempFolderURL];
-//        }
-//
-//        if([self.prefsViewController.preferencesFileViewController usingOutputFolder])
-//        {
-//            // If we have a temp directory, we write our temp file and our output file to it, then do a move.
-//            if(tempDirectory != nil)
-//            {
-//                outputDirectory = tempDirectory;
-//                moveDirectory = [self.prefsViewController.preferencesFileViewController outputFolderURL];
-//            }
-//            else
-//            {
-//                outputDirectory = [self.prefsViewController.preferencesFileViewController outputFolderURL];
-//                tempDirectory = outputDirectory;
-//            }
-//        }
-//
-//        // src and dest Transcode media
-//        NSMutableArray<NSURL*>* srcUrlsToTranscode = [NSMutableArray new];
-//        NSMutableArray<NSURL*>* dstUrlsToTranscode = [NSMutableArray new];
-//        // src and dst non-transcode media
-//        NSMutableArray<NSURL*>* srcUrlsToMove = nil; // source URL of non media
-//        NSMutableArray<NSURL*>* dstUrlsToMove = nil; // destination URL of non media to move post session completion
-//
-//        BOOL recurseDirectories = YES;
-//        BOOL copyNonMediaToOutput = YES;
-//
-//        if(copyNonMediaToOutput && moveDirectory != nil)
-//        {
-//            srcUrlsToMove = [NSMutableArray new];
-//            dstUrlsToMove = [NSMutableArray new];
-//        }
-//
-//        for(NSURL* url in fileURLArray)
-//        {
-//            NSNumber* isDirectory;
-//            NSString* fileType;
-//            NSError* error;
-//
-//            if(![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error])
-//            {
-//                // Cant get NSURLIsDirectoryKey seems shady, silently continue
-//                continue;
-//            }
-//
-//            if(![url getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
-//            {
-//                // Cant get NSURLTypeIdentifierKey seems shady too, silently continue
-//                continue;
-//            }
-//
-//            if(isDirectory.boolValue)
-//            {
-//                if(copyNonMediaToOutput && moveDirectory != nil)
-//                {
-//                    NSError* copyError;
-//                    NSURL* copyDestiation = [outputDirectory URLByAppendingPathComponent:[url lastPathComponent]];
-//
-//                    // Tells our delegate to ignore media we can transcode, so we dont duplicate MOVs for examples
-//                    self.copyMedia = NO;
-//                    [[NSFileManager defaultManager] setDelegate:self];
-//                    if([[NSFileManager defaultManager] copyItemAtURL:url toURL:copyDestiation error:&copyError])
-//                    {
-//                        // We need to move this folder to our final output move destionation:
-//                        [srcUrlsToMove addObject:copyDestiation];
-//                        [dstUrlsToMove addObject:moveDirectory];
-//                    }
-//
-//                    // Any files we DID NOT COPY within the subfolder, need should be files we can transcode
-//                    if(recurseDirectories)
-//                    {
-//                        NSDirectoryEnumerator* enumerator = [[NSFileManager defaultManager] enumeratorAtURL:url includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
-//                            return YES;
-//                        }];
-//
-//                        for(NSURL* suburl in enumerator)
-//                        {
-//                            NSString* subFileType;
-//                            if(![suburl getResourceValue:&subFileType forKey:NSURLTypeIdentifierKey error:&error])
-//                            {
-//                                // Cant get NSURLTypeIdentifierKey seems shady too, silently continue
-//                                continue;
-//                            }
-//                            if([SynopsisSupportedFileTypes() containsObject:subFileType])
-//                            {
-//                                [srcUrlsToTranscode addObject:suburl];
-//
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            else if([SynopsisSupportedFileTypes() containsObject:fileType])
-//            {
-//                [srcUrlsToTranscode addObject:url];
-//            }
-//        }
-//
-//        NSBlockOperation* blockOp = [NSBlockOperation blockOperationWithBlock:^{
-//
-//            // Do our File Move logic if we need it here:
-//            if((srcUrlsToMove.count == dstUrlsToMove.count))
-//            {
-//                [srcUrlsToMove enumerateObjectsUsingBlock:^(NSURL * _Nonnull srcURL, NSUInteger idx, BOOL * _Nonnull stop) {
-//
-//                    // Corresponding destination
-//                    NSURL* dstURL = [dstUrlsToMove objectAtIndex:idx];
-//                    NSString* itemName = [srcURL lastPathComponent];
-//                    dstURL = [dstURL URLByAppendingPathComponent:itemName];
-//
-//                    NSError* error = nil;
-//                    if(![[NSFileManager defaultManager] moveItemAtURL:srcURL toURL:dstURL error:&error])
-//                    {
-//                        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Error Moving File To Output:%@", error.localizedDescription]];
-//                    }
-//                    else
-//                    {
-//                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Moving File To Final Destination"]];
-//                    }
-//                }];
-//            }
-//            else
-//            {
-//                NSLog(@"Different number of urls to move fucker");
-//            }
-//
-//            NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
-//
-//            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", sessionUUID.UUIDString, delta]];
-//
-//            if(completionBlock != NULL)
-//            {
-//                completionBlock();
-//            }
-//        }];
-//
-//        // Fire Off Transcodes for URLS we *know* we want to transcode
-//        [srcUrlsToTranscode enumerateObjectsUsingBlock:^(NSURL * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop)
-//        {
-//            NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
-//            NSURL* transcodeTempDir = (tempDirectory != nil) ? tempDirectory : sourceDirectory;
-//            NSURL* transcodeOutDir = (outputDirectory != nil) ? outputDirectory : sourceDirectory;
-//
-//            BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:transcodeTempDir outputDirectory:transcodeOutDir];
-//
-//            if(copyNonMediaToOutput && moveDirectory != nil)
-//            {
-//                NSURL* moveDestination = [dstUrlsToTranscode objectAtIndex:idx];
-//                [srcUrlsToMove addObject:operation.destinationURL];
-//                [dstUrlsToMove addObject:moveDestination];
-//            }
-//
-//            [blockOp addDependency:operation];
-//        }];
-//
-//        [self.sessionComplectionQueue addOperation:blockOp];
-//    }
-//}
 
 - (IBAction)openMovies:(id)sender
 {
@@ -1100,7 +849,8 @@ static BOOL isRunning = NO;
     }
 }
 
-#pragma mark - NSFileManager Delegate
+#pragma mark - NSFileManager Delegate -
+
 - (BOOL)fileManager:(NSFileManager *)fileManager shouldCopyItemAtPath:(NSString *)srcPath toPath:(NSString *)dstPath
 {
     BOOL duplicateAllMediaToOutputFolder = NO;
@@ -1200,6 +950,149 @@ static BOOL isRunning = NO;
 {
     NSLog(@"File Manager should proceed after Error : %@, %@, %@", error, srcURL, dstURL);
     return YES;
+}
+
+#pragma mark - Replacement NSFileManager Methods -
+
+/* Why do we have this code at all you may wonder?
+ 
+ Because NSFileManager cannot be trusted to do work on remotely mounted volumes it appears.
+ 
+ It appears there is some sort of race condition that occurs when NSFIleManager moves a directory on a remote volume, and then immeidatrly attempts to enumerate it.
+ Because NSFileManager is a "good boye" and tries to copy all file meteadata along with the data itself, copies are not 'atomic' but rather may involve multiple writes/updates
+ Copy src -> dest, then update ACLs, perms, modification/create dates, info, XATTR metadata).
+ 
+ This, plus some internal caching of state, allow us to have the fun scneario where
+ 
+ * NSFIleManager successfully moves /Volume/Mount_on_Server/Parent_1/Child to /Volume/Mount_on_Server/Parent_2/Child
+ * (say user triggered manual or watch folder action, moves files into temp..)
+ * Enumeration of contents ("Child") of "Parent_2" has stale state due to unfinished updates of metadata
+ * Enumeration of directory fails because NSFIleManager *reads* stale metadata or cache and thinks its in a different folder, rather than where it just put it.
+ 
+ Attempts to fix include
+
+ * [url removeAllCachedResourceValues];
+ * Using paths rather than NSURLs to avoid run loop caching of resource value metadata
+ * Making replacements for the functions we need, which are smart enough, but not so smart they trigger the same issue
+ 
+ The latter *appears* to have worked.
+ 
+ Things to think about
+ * Resulting files from these copies *DO NOT HAVE OUR SYNOPSIS / SPOTLIGHT XATTR Data* !!!
+ * * Do we figure out if XATTR is safe in our scenario and trust out code to do the right thing
+ * * This issue only rears its ugly head when a URL is on a volume
+ * * Do we check for this, and only use our 'remote volume' safe methods when we need to?
+ * What to do about .DSStore BS?
+ * Do we care about any hidden files at all?
+ * Do we are about moving to nftw which apparently is the way to correctly do directory enumeration?
+ 
+ */
+
+int myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit(int what, int stage, copyfile_state_t state, const char * src, const char * dst, void * ctx)
+{
+    @autoreleasepool
+    {
+        NSString* srcPath = [[NSString alloc] initWithUTF8String:src];
+        NSString* dstPath = [[NSString alloc] initWithUTF8String:dst];
+        
+        //        NSLog(@"CopyFileCallback %@", srcPath);
+        //        NSLog(@"CopyFileCallback %@", dstPath);
+        
+        if(what == COPYFILE_RECURSE_FILE)
+        {
+            // check if src contains a type we dont want to copy
+            NSURL* srcURL = [NSURL fileURLWithPath:srcPath];
+            
+            NSString* fileType;
+            NSError* error;
+            
+            if(![srcURL getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
+            {
+                // Bail on error?
+                return COPYFILE_QUIT;
+            }
+            
+            if([SynopsisSupportedFileTypes() containsObject:fileType])
+            {
+                //                NSLog(@"Skipping copying %@", srcPath);
+                return COPYFILE_SKIP;
+            }
+        }
+        
+        if(what == COPYFILE_RECURSE_ERROR)
+        {
+            COPYFILE_QUIT;
+        }
+        
+        return COPYFILE_CONTINUE;
+    }
+}
+
+- (BOOL) manuallyCopyFromURLBecauseNSFileManagerIsAPieceofShit:(NSURL*)fromURL toURL:(NSURL*)toURL error:(NSError**)error
+{
+    NSString* fromString = [fromURL path];
+    NSString* toString = [toURL path];
+    
+    // TODO: Test the shit out of these flags
+    copyfile_flags_t flags = COPYFILE_RECURSIVE | COPYFILE_NOFOLLOW_SRC  | COPYFILE_DATA | COPYFILE_XATTR ;
+    
+    copyfile_state_t copystate = copyfile_state_alloc();
+    
+    copyfile_state_set(copystate, COPYFILE_STATE_STATUS_CB | COPYFILE_STATE_SRC_FILENAME , &myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit);
+    
+    OSStatus returnValue = copyfile([fromString cStringUsingEncoding:NSUTF8StringEncoding], [toString cStringUsingEncoding:NSUTF8StringEncoding], copystate, flags);
+    
+    copyfile_state_free(copystate);
+    
+    if(returnValue == noErr)
+    {
+        return YES;
+    }
+    
+    if(*error != nil)
+    {
+        //        TODO:set error to something descriptive
+    }
+    
+    return NO;
+}
+
+- (NSArray<NSURL*>*) manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:(NSURL*) directory// completionBlock:((void) ^(void))completionBlock
+{
+    NSString* path = directory.path;
+    DIR* dirp = opendir([path cStringUsingEncoding:NSUTF8StringEncoding]);
+    
+    NSMutableArray<NSURL*>* urlArray = [NSMutableArray array];
+    
+    if (dirp == NULL)
+    {
+        return nil;
+    }
+    
+    struct dirent* dp = NULL;
+    while ((dp = readdir(dirp)) != NULL)
+    {
+        NSString* name = [[NSString alloc] initWithUTF8String: dp->d_name];
+        if (dp->d_type == DT_DIR)
+        {
+            if(![name isEqualToString:@".."] && ![name isEqualToString:@"."])
+            {
+                NSURL* subDir = [directory URLByAppendingPathComponent:name isDirectory:YES];
+                
+                [urlArray addObjectsFromArray: [self manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:subDir] ];
+            }
+        }
+        
+        if (dp->d_type == DT_REG)
+        {
+            NSURL* fileURL = [directory URLByAppendingPathComponent:name isDirectory:NO];
+            [urlArray addObject:fileURL];
+        }
+    }
+    
+    (void)closedir(dirp);
+    
+    return urlArray;
 }
 
 @end
