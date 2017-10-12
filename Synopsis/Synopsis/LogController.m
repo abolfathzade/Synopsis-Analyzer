@@ -193,7 +193,7 @@ typedef enum : NSUInteger {
 {
     // Always Log Warnings
     NSLog(@" [WARNING] %@", log);
-    if(self.logLevel >= LogLevelWarning)
+//    if(self.logLevel >= LogLevelWarning)
     {
         NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
         

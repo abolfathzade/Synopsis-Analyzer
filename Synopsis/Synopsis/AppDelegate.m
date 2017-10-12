@@ -7,6 +7,8 @@
 //
 
 #import "AppDelegate.h"
+#import <copyfile.h>
+#import <dirent.h>
 
 #import <Synopsis/Synopsis.h>
 #import <VideoToolbox/VTProfessionalVideoWorkflow.h>
@@ -322,6 +324,7 @@ typedef enum : NSUInteger {
 
     NSUUID* sessionUUID = [NSUUID UUID];
     
+    // TODO: this isnt explicitely correct - this *should* be run when right before our first op actually runs
     [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", sessionUUID.UUIDString]];
     [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Got URLS: %@", [URLArray description]]];
     
@@ -341,39 +344,57 @@ typedef enum : NSUInteger {
     }];
     
     NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
-    NSURL* outFolderURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+    [tmpFolderURL removeAllCachedResourceValues];
     
-    if(URLArray && URLArray.count)
+    NSURL* outFolderURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+    [outFolderURL removeAllCachedResourceValues];
+    
+    tmpFolderURL = [tmpFolderURL URLByAppendingPathComponent:sessionUUID.UUIDString isDirectory:YES];
+    
+    NSError* error = nil;
+    BOOL makeTemp = [self.fileManager createDirectoryAtURL:tmpFolderURL withIntermediateDirectories:YES attributes:nil error:&error];
+    
+    if(URLArray && URLArray.count && makeTemp)
     {
         for(NSURL* url in URLArray)
         {
+            [url removeAllCachedResourceValues];
+            
+            NSLog(@"analysisSessionForFiles: %@", url);
+            
             NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
+            [sourceDirectory removeAllCachedResourceValues];
             
             switch ([self analysisTypeForURL:url])
             {
                 case AnalysisTypeUnknown:
+                    [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Could Not Deduce Analysis Type For %@", url]];
                     break;
                     
                 case AnalysisTypeFileInPlace:
                 {
+                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFileInPlace"]];
                     [self analysisTypeFileToTempToOutput:url tempFolder:sourceDirectory outputFolder:sourceDirectory completionOperation:sessionCompletionOperation];
                 }
                     break;
                     
                 case AnalysisTypeFileToTempToInPlace:
                 {
+                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFileToTempToInPlace"]];
                     [self analysisTypeFileToTempToOutput:url tempFolder:tmpFolderURL outputFolder:sourceDirectory completionOperation:sessionCompletionOperation];
                 }
                     break;
                     
                 case AnalysisTypeFileToOutput:
                 {
+                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFileToOutput"]];
                     [self analysisTypeFileToTempToOutput:url tempFolder:sourceDirectory outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
                 }
                     break;
                     
                 case AnalysisTypeFileToTempToOutput:
                 {
+                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFileToTempToOutput"]];
                     [self analysisTypeFileToTempToOutput:url tempFolder:tmpFolderURL outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
                 }
                     break;
@@ -381,18 +402,21 @@ typedef enum : NSUInteger {
                     // Folders:
                 case AnalysisTypeFolderInPlace:
                 {
+                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFolderInPlace"]];
                     [self analysisSessionTypeFolderInPlace:url completionOperation:sessionCompletionOperation];
                 }
                     break;
                     
                 case AnalysisTypeFolderToTempToInPlace:
                 {
+                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFolderToTempToInPlace"]];
                     [self analysisSessionTypeFolderToTempToPlace:url tempFolder:tmpFolderURL completionOperation:sessionCompletionOperation];
                 }
                     break;
                     
                 case AnalysisTypeFolderToTempToOutput:
                 {
+                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFolderToTempToOutput"]];
                     // We add a 'move' operation to every 'top level folder that we encode. We
                     // If we have folders which arrive / are updated within a from a watch folder
                     NSBlockOperation* moveOperation = [NSBlockOperation blockOperationWithBlock:^{
@@ -422,10 +446,11 @@ typedef enum : NSUInteger {
                     break;
             }
         }
+        
+        // Enqueue our session completion operation now that it has dependencies on every encode operation
+        [self.sessionComplectionQueue addOperation:sessionCompletionOperation];
     }
     
-    // Enqueue our session completion operation now that it has dependencies on every encode operation
-    [self.sessionComplectionQueue addOperation:sessionCompletionOperation];
 //    }];
 }
 
@@ -442,8 +467,9 @@ typedef enum : NSUInteger {
 
 - (void) analysisSessionTypeFolderInPlace:(NSURL*)directoryToEncode completionOperation:(NSOperation*)completionOp
 {
+    [directoryToEncode removeAllCachedResourceValues];
     NSDirectoryEnumerator* directoryEnumerator = [self.fileManager enumeratorAtURL:directoryToEncode
-                                                                      includingPropertiesForKeys:@[NSURLIsDirectoryKey, NSURLIsPackageKey, NSURLLocalizedNameKey]
+                                                                      includingPropertiesForKeys:[NSArray array]
                                                                                          options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles
                                                                                     errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
         return YES;
@@ -451,6 +477,8 @@ typedef enum : NSUInteger {
     
     for(NSURL* url in directoryEnumerator)
     {
+        [url removeAllCachedResourceValues];
+        
         NSNumber* isDirectory;
         NSString* fileType;
         NSError* error;
@@ -479,8 +507,10 @@ typedef enum : NSUInteger {
 
 - (void) analysisSessionTypeFolderToTempToPlace:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
 {
+    [directoryToEncode removeAllCachedResourceValues];
+    
     NSDirectoryEnumerator* directoryEnumerator = [self.fileManager enumeratorAtURL:directoryToEncode
-                                                                      includingPropertiesForKeys:@[NSURLIsDirectoryKey, NSURLIsPackageKey, NSURLLocalizedNameKey]
+                                                                      includingPropertiesForKeys:[NSArray array]
                                                                                          options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles
                                                                                     errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
         return YES;
@@ -488,6 +518,7 @@ typedef enum : NSUInteger {
     
     for(NSURL* url in directoryEnumerator)
     {
+        [url removeAllCachedResourceValues];
         NSNumber* isDirectory;
         NSString* fileType;
         NSError* error;
@@ -514,58 +545,185 @@ typedef enum : NSUInteger {
     }
 }
 
+
+int myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit(int what, int stage, copyfile_state_t state, const char * src, const char * dst, void * ctx)
+{
+    @autoreleasepool
+    {
+        NSString* srcPath = [[NSString alloc] initWithUTF8String:src];
+        NSString* dstPath = [[NSString alloc] initWithUTF8String:dst];
+        
+//        NSLog(@"CopyFileCallback %@", srcPath);
+//        NSLog(@"CopyFileCallback %@", dstPath);
+
+        if(what == COPYFILE_RECURSE_FILE)
+        {
+            // check if src contains a type we dont want to copy
+            NSURL* srcURL = [NSURL fileURLWithPath:srcPath];
+            
+            NSString* fileType;
+            NSError* error;
+            
+            if(![srcURL getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
+            {
+                // Bail on error?
+                return COPYFILE_QUIT;
+            }
+            
+            if([SynopsisSupportedFileTypes() containsObject:fileType])
+            {
+//                NSLog(@"Skipping copying %@", srcPath);
+                return COPYFILE_SKIP;
+            }
+        }
+        
+        if(what == COPYFILE_RECURSE_ERROR)
+        {
+            COPYFILE_QUIT;
+        }
+        
+        return COPYFILE_CONTINUE;
+    }
+}
+
+- (BOOL) manuallyCopyFromURLBecauseNSFileManagerIsAPieceofShit:(NSURL*)fromURL toURL:(NSURL*)toURL error:(NSError**)error
+{
+    NSString* fromString = [fromURL path];
+    NSString* toString = [toURL path];
+    
+    copyfile_flags_t flags = COPYFILE_RECURSIVE | COPYFILE_NOFOLLOW_SRC  | COPYFILE_DATA ;
+    
+    copyfile_state_t copystate = copyfile_state_alloc();
+    
+    copyfile_state_set(copystate, COPYFILE_STATE_STATUS_CB | COPYFILE_STATE_SRC_FILENAME , &myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit);
+    
+    OSStatus returnValue = copyfile([fromString cStringUsingEncoding:NSUTF8StringEncoding], [toString cStringUsingEncoding:NSUTF8StringEncoding], copystate, flags);
+    
+    copyfile_state_free(copystate);
+    
+    if(returnValue == noErr)
+    {
+        return YES;
+    }
+    
+    if(*error != nil)
+    {
+        //        TODO:set error to something descriptive
+    }
+    
+    return NO;
+}
+
+- (NSArray<NSURL*>*) manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:(NSURL*) directory// completionBlock:((void) ^(void))completionBlock
+{
+    NSString* path = directory.path;
+    DIR* dirp = opendir([path cStringUsingEncoding:NSUTF8StringEncoding]);
+
+    NSMutableArray<NSURL*>* urlArray = [NSMutableArray array];
+    
+    if (dirp == NULL)
+    {
+//        return (ERROR);
+    }
+
+    struct dirent* dp = NULL;
+    while ((dp = readdir(dirp)) != NULL)
+    {
+        NSString* name = [[NSString alloc] initWithUTF8String: dp->d_name];
+        if (dp->d_type == DT_DIR)
+        {
+            if(![name isEqualToString:@".."] && ![name isEqualToString:@"."])
+            {
+                NSURL* subDir = [directory URLByAppendingPathComponent:name isDirectory:YES];
+
+                [urlArray addObjectsFromArray: [self manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:subDir] ];
+            }
+        }
+        
+        if (dp->d_type == DT_REG)
+        {
+            NSURL* fileURL = [directory URLByAppendingPathComponent:name isDirectory:NO];
+            [urlArray addObject:fileURL];
+        }
+    
+    }
+    
+    (void)closedir(dirp);
+
+    return urlArray;
+    
+}
+
+
 - (void) analysisTypeFolderToTempToOutput:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
 {
+    [directoryToEncode removeAllCachedResourceValues];
+
     // Mirror the contents of our directory to encode - Our NSFileManagerDelegate handles knowing what to copy or not (only folders, or non media, or media too)
     NSError* error = nil;
     NSString* directoryToEncodeName = [directoryToEncode lastPathComponent];
 
-    NSDictionary* resourceDict = [directoryToEncode resourceValuesForKeys:@[NSURLIsDirectoryKey] error:nil];
-    NSLog(@"App Delegate Attempt to Copy URL With Attributes %@", resourceDict);
-
-    if([self.fileManager copyItemAtURL:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error])
+//    if([self.fileManager copyItemAtURL:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error])
+    if([self manuallyCopyFromURLBecauseNSFileManagerIsAPieceofShit:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error])
     {
-        NSDirectoryEnumerator* directoryEnumerator = [self.fileManager enumeratorAtURL:directoryToEncode
-                                                            includingPropertiesForKeys:@[NSURLIsDirectoryKey, NSURLIsPackageKey, NSURLLocalizedNameKey]
-                                                                               options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
-                                                                                   return YES;
-                                                                               }];
+        
+        NSArray<NSURL*>* directoryEnumerator = [self manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:directoryToEncode];
+        
+//        NSLog(@"Enumerating directory: %@", directoryToEncode);
+//        NSDirectoryEnumerator* directoryEnumerator = [self.fileManager enumeratorAtURL:directoryToEncode
+//                                                            includingPropertiesForKeys:[NSArray array]
+//                                                                               options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
+//
+//                                                                                   if(error)
+//                                                                                   {
+//                                                                                       [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to enumerate %@,  error: %@", url , error]];
+//                                                                                       return NO;
+//                                                                                   }
+//
+//                                                                                   return YES;
+//                                                                               }];
+//
+        
+        NSLog(@"DIRECTORY ENUMERATOR: %@", directoryEnumerator);
         
         for(NSURL* url in directoryEnumerator)
         {
+            [url removeAllCachedResourceValues];
+//            NSLog(@"analysisTypeFolderToTempToOutput : %@", url);
+
             NSNumber* isDirectory;
             NSString* fileType;
             NSError* error;
-            
+
             if(![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error])
             {
                 // Cant get NSURLIsDirectoryKey seems shady, silently continue
                 continue;
             }
-            
+
             if(![url getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
             {
                 // Cant get NSURLTypeIdentifierKey seems shady too, silently continue
                 continue;
             }
-            
+
             if([SynopsisSupportedFileTypes() containsObject:fileType] && (isDirectory.boolValue == FALSE))
             {
                 // TODO: Deduce the correct sub-directory in the temp folder to place our media in, so we only do work 'in place' within the temp folder structure.
-                
+
                 NSURL* newTempDir = tempFolder;
-                
+
                 // Remove the path components
                 NSArray<NSString*>* topFolderComponentsToRemove = [[directoryToEncode URLByDeletingLastPathComponent] pathComponents];
                 NSMutableArray<NSString*>* analysisFileComponents = [[[url URLByDeletingLastPathComponent] pathComponents] mutableCopy];
-                
+
                 [analysisFileComponents removeObjectsInArray:topFolderComponentsToRemove];
-                
+
                 for(NSString* component in analysisFileComponents)
                 {
                     newTempDir = [newTempDir URLByAppendingPathComponent:component];
                 }
-                
+
                 BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:newTempDir outputDirectory:newTempDir];
                 [completionOp addDependency:operation];
             }
@@ -943,27 +1101,71 @@ static BOOL isRunning = NO;
 }
 
 #pragma mark - NSFileManager Delegate
-
-- (BOOL)fileManager:(NSFileManager *)fileManager shouldCopyItemAtURL:(NSURL *)srcURL toURL:(NSURL *)dstURL
+- (BOOL)fileManager:(NSFileManager *)fileManager shouldCopyItemAtPath:(NSString *)srcPath toPath:(NSString *)dstPath
 {
     BOOL duplicateAllMediaToOutputFolder = NO;
-    BOOL duplicateFolderStructureOnlyToOutputFolder = NO;
+    //    BOOL duplicateFolderStructureOnlyToOutputFolder = NO;
     
     if(duplicateAllMediaToOutputFolder)
     {
         return YES;
     }
     
-    else if(duplicateFolderStructureOnlyToOutputFolder)
+    //    else if(duplicateFolderStructureOnlyToOutputFolder)
+    //    {
+    //        if(srcURL.hasDirectoryPath)
+    //        {
+    //            return YES;
+    //        }
+    //        {
+    //            return NO;
+    //        }
+    //    }
+    else
     {
-        if(srcURL.hasDirectoryPath)
+        NSString* fileType;
+        NSError* error;
+        
+        if(![[NSURL fileURLWithPath:srcPath] getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
         {
-            return YES;
+            // Cant get NSURLTypeIdentifierKey seems shady, return NO
+            return NO;
         }
+        
+        if([SynopsisSupportedFileTypes() containsObject:fileType])
+        {
+            return NO;
+        }
+        
+        if([[srcPath lastPathComponent] hasPrefix:@"."])
         {
             return NO;
         }
     }
+    
+    return YES;
+}
+
+- (BOOL)fileManager:(NSFileManager *)fileManager shouldCopyItemAtURL:(NSURL *)srcURL toURL:(NSURL *)dstURL
+{
+    BOOL duplicateAllMediaToOutputFolder = NO;
+//    BOOL duplicateFolderStructureOnlyToOutputFolder = NO;
+    
+    if(duplicateAllMediaToOutputFolder)
+    {
+        return YES;
+    }
+    
+//    else if(duplicateFolderStructureOnlyToOutputFolder)
+//    {
+//        if(srcURL.hasDirectoryPath)
+//        {
+//            return YES;
+//        }
+//        {
+//            return NO;
+//        }
+//    }
     else
     {
         NSString* fileType;
@@ -979,13 +1181,24 @@ static BOOL isRunning = NO;
         {
             return NO;
         }
+        
+        if([[srcURL lastPathComponent] hasPrefix:@"."])
+        {
+            return NO;
+        }
     }
     
     return YES;
 }
 
+- (BOOL)fileManager:(NSFileManager *)fileManager shouldProceedAfterError:(NSError *)error copyingItemAtPath:(NSString *)srcPath toPath:(NSString *)dstPath;
+{
+    NSLog(@"File Manager should proceed after Error : %@, %@, %@", error, srcPath, dstPath);
+    return YES;
+}
 - (BOOL)fileManager:(NSFileManager *)fileManager shouldProceedAfterError:(NSError *)error copyingItemAtURL:(NSURL *)srcURL toURL:(NSURL *)dstURL
 {
+    NSLog(@"File Manager should proceed after Error : %@, %@, %@", error, srcURL, dstURL);
     return YES;
 }
 
