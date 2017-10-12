@@ -225,7 +225,7 @@
     AppDelegate* appDelegate = (AppDelegate*) [[NSApplication sharedApplication] delegate];
     if(usingWatchFolder && watchURL)
     {
-        self.directoryWatcher = [[SynopsisDirectoryWatcher alloc] initWithDirectoryAtURL:watchURL mode:SynopsisDirectoryWatcherModePolling notificationBlock:^(NSArray<NSURL *> *changedURLS) {
+        self.directoryWatcher = [[SynopsisDirectoryWatcher alloc] initWithDirectoryAtURL:watchURL mode:SynopsisDirectoryWatcherModeDefault notificationBlock:^(NSArray<NSURL *> *changedURLS) {
             // Kick off Analysis Session
             [appDelegate analysisSessionForFiles:changedURLS sessionCompletionBlock:^{
                 dispatch_async(dispatch_get_main_queue(), ^{

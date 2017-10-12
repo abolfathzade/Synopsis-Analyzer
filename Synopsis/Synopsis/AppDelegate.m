@@ -590,7 +590,6 @@ typedef enum : NSUInteger {
 //    if([self.fileManager copyItemAtURL:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error])
     if([self manuallyCopyFromURLBecauseNSFileManagerIsAPieceofShit:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error])
     {
-        
         NSArray<NSURL*>* directoryEnumerator = [self manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:directoryToEncode];
         
 //        NSLog(@"Enumerating directory: %@", directoryToEncode);
@@ -606,8 +605,7 @@ typedef enum : NSUInteger {
 //
 //                                                                                   return YES;
 //                                                                               }];
-//
-        
+
         NSLog(@"DIRECTORY ENUMERATOR: %@", directoryEnumerator);
         
         for(NSURL* url in directoryEnumerator)
@@ -998,6 +996,12 @@ int myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit(int what, int sta
         //        NSLog(@"CopyFileCallback %@", srcPath);
         //        NSLog(@"CopyFileCallback %@", dstPath);
         
+        // Dont copy invisible files
+        if([srcPath hasPrefix:@"."])
+        {
+            return COPYFILE_SKIP;
+        }
+        
         if(what == COPYFILE_RECURSE_FILE)
         {
             // check if src contains a type we dont want to copy
@@ -1085,6 +1089,12 @@ int myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit(int what, int sta
         
         if (dp->d_type == DT_REG)
         {
+            // Dont add invisible files
+            if([name hasPrefix:@"."])
+            {
+                continue;
+            }
+            
             NSURL* fileURL = [directory URLByAppendingPathComponent:name isDirectory:NO];
             [urlArray addObject:fileURL];
         }
