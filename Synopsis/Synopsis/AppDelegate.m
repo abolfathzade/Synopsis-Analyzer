@@ -7,9 +7,6 @@
 //
 
 #import "AppDelegate.h"
-#import <copyfile.h>
-#import <dirent.h>
-
 #import <Synopsis/Synopsis.h>
 #import <VideoToolbox/VTProfessionalVideoWorkflow.h>
 #import <MediaToolbox/MediaToolbox.h>
@@ -48,6 +45,7 @@ static NSTimeInterval start;
 @property (weak) IBOutlet NSToolbarItem* startPauseToolbarItem;
 
 @property (readwrite, strong) NSFileManager* fileManager;
+@property (readwrite, strong) SynopsisRemoteFileHelper* remoteFileHelper;
 
 
 // State management for File Manager Delegate shit.
@@ -65,6 +63,8 @@ static NSTimeInterval start;
     {
         self.fileManager = [[NSFileManager alloc] init];
         [self.fileManager setDelegate:self];
+        
+        self.remoteFileHelper = [[SynopsisRemoteFileHelper alloc] init];
         
         MTRegisterProfessionalVideoWorkflowFormatReaders();
         VTRegisterProfessionalVideoWorkflowVideoDecoders();
@@ -493,6 +493,33 @@ typedef enum : NSUInteger {
 //    }];
 }
 
+- (id<NSFastEnumeration>) safeDirectoryEnumeratorForURL:(NSURL*)urlToEnumerate
+{
+    BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:urlToEnumerate];
+    id<NSFastEnumeration> directoryEnumerator = nil;
+    
+    if(useRemotePath)
+        directoryEnumerator = [self.remoteFileHelper safelyEnumerateDirectoryOnRemoteVolume:urlToEnumerate];
+    else
+    {
+        directoryEnumerator = [self.fileManager enumeratorAtURL:urlToEnumerate
+                                     includingPropertiesForKeys:[NSArray array]
+                                                        options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles
+                                                   errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
+                                                       
+                                                       if(error)
+                                                       {
+                                                           [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to enumerate %@,  error: %@", url , error]];
+                                                           return NO;
+                                                       }
+                                                       
+                                                       return YES;
+                                                   }];
+    }
+    
+    return directoryEnumerator;
+}
+
 #pragma mark - Analysis Type Handling Files
 
 - (void) analysisTypeFileToTempToOutput:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
@@ -508,13 +535,8 @@ typedef enum : NSUInteger {
 {
     // Attempts to fix #84
     [directoryToEncode removeAllCachedResourceValues];
-    NSDirectoryEnumerator* directoryEnumerator = [self.fileManager enumeratorAtURL:directoryToEncode
-                                                                      includingPropertiesForKeys:[NSArray array]
-                                                                                         options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles
-                                                                                    errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
-        return YES;
-    }];
-    
+    id<NSFastEnumeration> directoryEnumerator = [self safeDirectoryEnumeratorForURL:directoryToEncode];
+
     for(NSURL* url in directoryEnumerator)
     {
         // Attempts to fix #84
@@ -551,12 +573,7 @@ typedef enum : NSUInteger {
     // Attempts to fix #84
     [directoryToEncode removeAllCachedResourceValues];
     
-    NSDirectoryEnumerator* directoryEnumerator = [self.fileManager enumeratorAtURL:directoryToEncode
-                                                                      includingPropertiesForKeys:[NSArray array]
-                                                                                         options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles
-                                                                                    errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
-        return YES;
-    }];
+    id<NSFastEnumeration> directoryEnumerator = [self safeDirectoryEnumeratorForURL:directoryToEncode];
     
     for(NSURL* url in directoryEnumerator)
     {
@@ -594,30 +611,27 @@ typedef enum : NSUInteger {
     [directoryToEncode removeAllCachedResourceValues];
 
     // Mirror the contents of our directory to encode - Our NSFileManagerDelegate handles knowing what to copy or not (only folders, or non media, or media too)
-    NSError* error = nil;
     NSString* directoryToEncodeName = [directoryToEncode lastPathComponent];
-    
-//    if([self.fileManager copyItemAtURL:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error])
-    if([self manuallyCopyFromURLBecauseNSFileManagerIsAPieceofShit:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error])
-    {
-        NSArray<NSURL*>* directoryEnumerator = [self manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:directoryToEncode];
-        
-//        NSLog(@"Enumerating directory: %@", directoryToEncode);
-//        NSDirectoryEnumerator* directoryEnumerator = [self.fileManager enumeratorAtURL:directoryToEncode
-//                                                            includingPropertiesForKeys:[NSArray array]
-//                                                                               options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
-//
-//                                                                                   if(error)
-//                                                                                   {
-//                                                                                       [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to enumerate %@,  error: %@", url , error]];
-//                                                                                       return NO;
-//                                                                                   }
-//
-//                                                                                   return YES;
-//                                                                               }];
 
-        NSLog(@"DIRECTORY ENUMERATOR: %@", directoryEnumerator);
-        
+    BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:directoryToEncode];
+    BOOL copySuccessful = NO;
+    NSError* error = nil;
+
+    
+    if(useRemotePath)
+    {
+        [[LogController sharedLogController] appendVerboseLog:[@"Using Remote File Helper for " stringByAppendingString:directoryToEncode.path]];
+        copySuccessful = [self.remoteFileHelper safelyCopyFileURLOnRemoteFileSystem:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error];
+    }
+    else
+    {
+        copySuccessful = [self.fileManager copyItemAtURL:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error];
+    }
+    
+    if(copySuccessful)
+    {
+        id<NSFastEnumeration> directoryEnumerator = [self safeDirectoryEnumeratorForURL:directoryToEncode];
+
         for(NSURL* url in directoryEnumerator)
         {
             // Attempts to fix #84
@@ -870,51 +884,6 @@ static BOOL isRunning = NO;
 
 #pragma mark - NSFileManager Delegate -
 
-- (BOOL)fileManager:(NSFileManager *)fileManager shouldCopyItemAtPath:(NSString *)srcPath toPath:(NSString *)dstPath
-{
-    BOOL duplicateAllMediaToOutputFolder = NO;
-    //    BOOL duplicateFolderStructureOnlyToOutputFolder = NO;
-    
-    if(duplicateAllMediaToOutputFolder)
-    {
-        return YES;
-    }
-    
-    //    else if(duplicateFolderStructureOnlyToOutputFolder)
-    //    {
-    //        if(srcURL.hasDirectoryPath)
-    //        {
-    //            return YES;
-    //        }
-    //        {
-    //            return NO;
-    //        }
-    //    }
-    else
-    {
-        NSString* fileType;
-        NSError* error;
-        
-        if(![[NSURL fileURLWithPath:srcPath] getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
-        {
-            // Cant get NSURLTypeIdentifierKey seems shady, return NO
-            return NO;
-        }
-        
-        if([SynopsisSupportedFileTypes() containsObject:fileType])
-        {
-            return NO;
-        }
-        
-        if([[srcPath lastPathComponent] hasPrefix:@"."])
-        {
-            return NO;
-        }
-    }
-    
-    return YES;
-}
-
 - (BOOL)fileManager:(NSFileManager *)fileManager shouldCopyItemAtURL:(NSURL *)srcURL toURL:(NSURL *)dstURL
 {
     BOOL duplicateAllMediaToOutputFolder = NO;
@@ -959,171 +928,11 @@ static BOOL isRunning = NO;
     
     return YES;
 }
-
-- (BOOL)fileManager:(NSFileManager *)fileManager shouldProceedAfterError:(NSError *)error copyingItemAtPath:(NSString *)srcPath toPath:(NSString *)dstPath;
-{
-    NSLog(@"File Manager should proceed after Error : %@, %@, %@", error, srcPath, dstPath);
-    return YES;
-}
 - (BOOL)fileManager:(NSFileManager *)fileManager shouldProceedAfterError:(NSError *)error copyingItemAtURL:(NSURL *)srcURL toURL:(NSURL *)dstURL
 {
     NSLog(@"File Manager should proceed after Error : %@, %@, %@", error, srcURL, dstURL);
     return YES;
 }
 
-#pragma mark - Replacement NSFileManager Methods -
-
-/* Why do we have this code at all you may wonder?
- 
- Because NSFileManager cannot be trusted to do work on remotely mounted volumes it appears.
- 
- It appears there is some sort of race condition that occurs when NSFIleManager moves a directory on a remote volume, and then immeidatrly attempts to enumerate it.
- Because NSFileManager is a "good boye" and tries to copy all file meteadata along with the data itself, copies are not 'atomic' but rather may involve multiple writes/updates
- Copy src -> dest, then update ACLs, perms, modification/create dates, info, XATTR metadata).
- 
- This, plus some internal caching of state, allow us to have the fun scneario where
- 
- * NSFIleManager successfully moves /Volume/Mount_on_Server/Parent_1/Child to /Volume/Mount_on_Server/Parent_2/Child
- * (say user triggered manual or watch folder action, moves files into temp..)
- * Enumeration of contents ("Child") of "Parent_2" has stale state due to unfinished updates of metadata
- * Enumeration of directory fails because NSFIleManager *reads* stale metadata or cache and thinks its in a different folder, rather than where it just put it.
- 
- Attempts to fix include
-
- * [url removeAllCachedResourceValues];
- * Using paths rather than NSURLs to avoid run loop caching of resource value metadata
- * Making replacements for the functions we need, which are smart enough, but not so smart they trigger the same issue
- 
- The latter *appears* to have worked.
- 
- Things to think about
- * Resulting files from these copies *DO NOT HAVE OUR SYNOPSIS / SPOTLIGHT XATTR Data* !!!
- * * Do we figure out if XATTR is safe in our scenario and trust out code to do the right thing
- * * This issue only rears its ugly head when a URL is on a volume
- * * Do we check for this, and only use our 'remote volume' safe methods when we need to?
- * What to do about .DSStore BS?
- * Do we care about any hidden files at all?
- * Do we are about moving to nftw which apparently is the way to correctly do directory enumeration?
- 
- */
-
-int myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit(int what, int stage, copyfile_state_t state, const char * src, const char * dst, void * ctx)
-{
-    @autoreleasepool
-    {
-        NSString* srcPath = [[NSString alloc] initWithUTF8String:src];
-        NSString* dstPath = [[NSString alloc] initWithUTF8String:dst];
-        
-        //        NSLog(@"CopyFileCallback %@", srcPath);
-        //        NSLog(@"CopyFileCallback %@", dstPath);
-        
-        // Dont copy invisible files
-        if([srcPath hasPrefix:@"."])
-        {
-            return COPYFILE_SKIP;
-        }
-        
-        if(what == COPYFILE_RECURSE_FILE)
-        {
-            // check if src contains a type we dont want to copy
-            NSURL* srcURL = [NSURL fileURLWithPath:srcPath];
-            
-            NSString* fileType;
-            NSError* error;
-            
-            if(![srcURL getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
-            {
-                // Bail on error?
-                return COPYFILE_QUIT;
-            }
-            
-            if([SynopsisSupportedFileTypes() containsObject:fileType])
-            {
-                //                NSLog(@"Skipping copying %@", srcPath);
-                return COPYFILE_SKIP;
-            }
-        }
-        
-        if(what == COPYFILE_RECURSE_ERROR)
-        {
-            COPYFILE_QUIT;
-        }
-        
-        return COPYFILE_CONTINUE;
-    }
-}
-
-- (BOOL) manuallyCopyFromURLBecauseNSFileManagerIsAPieceofShit:(NSURL*)fromURL toURL:(NSURL*)toURL error:(NSError**)error
-{
-    NSString* fromString = [fromURL path];
-    NSString* toString = [toURL path];
-    
-    // TODO: Test the shit out of these flags
-    copyfile_flags_t flags = COPYFILE_RECURSIVE | COPYFILE_NOFOLLOW_SRC  | COPYFILE_DATA | COPYFILE_XATTR ;
-    
-    copyfile_state_t copystate = copyfile_state_alloc();
-    
-    copyfile_state_set(copystate, COPYFILE_STATE_STATUS_CB | COPYFILE_STATE_SRC_FILENAME , &myManualCopyFileCallBackBecauseNSFileManagerIsAPieceofShit);
-    
-    OSStatus returnValue = copyfile([fromString cStringUsingEncoding:NSUTF8StringEncoding], [toString cStringUsingEncoding:NSUTF8StringEncoding], copystate, flags);
-    
-    copyfile_state_free(copystate);
-    
-    if(returnValue == noErr)
-    {
-        return YES;
-    }
-    
-    if(*error != nil)
-    {
-        //        TODO:set error to something descriptive
-    }
-    
-    return NO;
-}
-
-- (NSArray<NSURL*>*) manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:(NSURL*) directory// completionBlock:((void) ^(void))completionBlock
-{
-    NSString* path = directory.path;
-    DIR* dirp = opendir([path cStringUsingEncoding:NSUTF8StringEncoding]);
-    
-    NSMutableArray<NSURL*>* urlArray = [NSMutableArray array];
-    
-    if (dirp == NULL)
-    {
-        return nil;
-    }
-    
-    struct dirent* dp = NULL;
-    while ((dp = readdir(dirp)) != NULL)
-    {
-        NSString* name = [[NSString alloc] initWithUTF8String: dp->d_name];
-        if (dp->d_type == DT_DIR)
-        {
-            if(![name isEqualToString:@".."] && ![name isEqualToString:@"."])
-            {
-                NSURL* subDir = [directory URLByAppendingPathComponent:name isDirectory:YES];
-                
-                [urlArray addObjectsFromArray: [self manuallyEnumerateDirectoryWithFuckingDarwinCodeBecauseNSFileManagerIsalsdkf:subDir] ];
-            }
-        }
-        
-        if (dp->d_type == DT_REG)
-        {
-            // Dont add invisible files
-            if([name hasPrefix:@"."])
-            {
-                continue;
-            }
-            
-            NSURL* fileURL = [directory URLByAppendingPathComponent:name isDirectory:NO];
-            [urlArray addObject:fileURL];
-        }
-    }
-    
-    (void)closedir(dirp);
-    
-    return urlArray;
-}
 
 @end
