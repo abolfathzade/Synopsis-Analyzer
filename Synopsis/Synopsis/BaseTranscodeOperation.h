@@ -110,6 +110,10 @@ extern NSString * const kSynopsisAnalyzedMetadataExportOptionKey;
 @property (atomic, readwrite) CGFloat videoProgress;
 @property (atomic, readwrite) CGFloat audioProgress;
 
+@property (readonly, assign) BOOL succeeded;
+
+@property (readonly, strong) NSError* error;
+
 //// Every progress update tick this block is fired - update your ui on the main queue here.
 //@property (copy) void (^progressBlock)(CGFloat progress);
 

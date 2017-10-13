@@ -21,6 +21,11 @@
 #import "GZIP/GZIP.h"
 #import "AtomicBoolean.h"
 
+@interface BaseTranscodeOperation (Private)
+@property (readwrite, assign) BOOL succeeded;
+@property (readwrite, strong) NSError* error;
+@end
+
 @interface AnalysisAndTranscodeOperation ()
 {
     // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
@@ -28,9 +33,6 @@
     CMBufferQueueRef videoUncompressedBufferQueue;
 
 }
-
-@property (readwrite, assign) BOOL succeeded;
-
 
 @property (atomic, readwrite, strong) VideoTransformScaleLinearizeHelper* videoHelper;
 
@@ -106,7 +108,6 @@
 @end
 
 @implementation AnalysisAndTranscodeOperation
-
 
 - (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions
 {
@@ -233,11 +234,21 @@
     
     self.availableAnalyzers = initializedAnalyzers;
 
-    [self setupTranscodeShitSucessfullyOrDontWhatverMan];
+    NSError* error = nil;
+    
+    if([self setupTranscode:&error])
+    {
+        [self transcodeAndAnalyzeAsset];
+        [super main];
+    }
+    else
+    {
+        self.succeeded = NO;
+        self.error = error;
+        [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Analysis Operation for %@, failed with error: %@", [self.sourceURL lastPathComponent], error]];
 
-    [self transcodeAndAnalyzeAsset];
-
-    [super main];
+        [self cancel];
+    }
 }
 
 - (void) cancel
@@ -251,21 +262,31 @@
     [self.videoTransformQueue cancelAllOperations];
 }
 
-- (NSError*) setupTranscodeShitSucessfullyOrDontWhatverMan
+- (BOOL) setupTranscode:(NSError * __autoreleasing *)error
 {
     CGAffineTransform prefferedTrackTransform = CGAffineTransformIdentity;
     CGSize nativeSize = CGSizeZero;
     
     self.transcodeAsset = [AVURLAsset URLAssetWithURL:self.sourceURL options:@{AVURLAssetPreferPreciseDurationAndTimingKey : @TRUE}];
     
+    BOOL readable = self.transcodeAsset.readable;
+    if(!readable)
+    {
+        if(error)
+        {
+            NSDictionary<NSErrorUserInfoKey, id>* errorInfo = @{
+                                                                NSLocalizedDescriptionKey : @"Unable to read asset file",
+                                                                };
+            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:-1 userInfo:errorInfo];
+        }
+        return NO;
+    }
+    
     self.transcodeAssetHasVideo = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual].count ? YES : NO;
     self.transcodeAssetHasAudio = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicAudible].count ? YES : NO;
     
-    // TODO: error checking / handling
-    NSError* error = nil;
-    
     // Readers
-    self.transcodeAssetReader = [AVAssetReader assetReaderWithAsset:self.transcodeAsset error:&error];
+    self.transcodeAssetReader = [AVAssetReader assetReaderWithAsset:self.transcodeAsset error:error];
     
     // Video Reader -
     if(self.transcodeAssetHasVideo)
@@ -414,7 +435,7 @@
     }
     
     // Writers
-    self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:&error];
+    self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:error];
     
     if(self.encodeHAP)
     {
@@ -449,7 +470,10 @@
         [analyzer beginMetadataAnalysisSessionWithQuality:self.analysisQualityHint];
     }
     
-    return error;
+    if(*error)
+        return NO;
+
+    return YES;
 }
 
 

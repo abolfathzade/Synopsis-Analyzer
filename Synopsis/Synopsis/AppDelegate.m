@@ -767,16 +767,27 @@ typedef enum : NSUInteger {
                                     }
                                 });
 		
+    __weak MetadataWriterTranscodeOperation* weakMetadata = metadata;
+
     metadata.completionBlock = (^(void)
                                 {
-                                    [[LogController sharedLogController] appendSuccessLog:[@"Finished Analysis for " stringByAppendingString:sourceFileName]];
-                                    
-                                    // Clean up
-                                    NSError* error;
-                                    // Note - dont use our own NSFileManager instance since this is on any thread.
-                                    if(![[NSFileManager defaultManager] removeItemAtURL:analysisFileURL error:&error])
+                                    __strong MetadataWriterTranscodeOperation* strongMetadata = weakMetadata;
+
+                                    if (strongMetadata.succeeded)
                                     {
-                                        [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
+                                        [[LogController sharedLogController] appendSuccessLog:[@"Finished Analysis for " stringByAppendingString:sourceFileName]];
+                                        
+                                        // Clean up
+                                        NSError* error;
+                                        // Note - dont use our own NSFileManager instance since this is on any thread.
+                                        if(![[NSFileManager defaultManager] removeItemAtURL:analysisFileURL error:&error])
+                                        {
+                                            [[LogController sharedLogController] appendErrorLog:[@"Error deleting temporary file: " stringByAppendingString:error.description]];
+                                        }
+                                    }
+                                    else
+                                    {
+                                        [[LogController sharedLogController] appendErrorLog:[@"Unsucessful Analysis for: " stringByAppendingString:sourceFileName]];
                                     }
                                 });
     

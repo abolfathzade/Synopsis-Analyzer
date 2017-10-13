@@ -27,11 +27,15 @@
 //  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
+@interface BaseTranscodeOperation (Private)
+@property (readwrite, assign) BOOL succeeded;
+@property (readwrite, strong) NSError* error;
+@end
+
 @interface MetadataWriterTranscodeOperation ()
 {
 }
 
-@property (readwrite, assign) BOOL succeeded;
 
 // Metadata to write
 @property (atomic, readwrite, strong) NSMutableArray* analyzedVideoSampleBufferMetadata;
@@ -81,56 +85,85 @@
 
 - (void) main
 {
-    assert(self.metadataOptions != nil);
-    
-    self.transcodeAssetHasVideo = NO;
-    self.transcodeAssetHasAudio = NO;
-    
-    if(self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey])
-    {
-        self.analyzedVideoSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey] mutableCopy];
-    }
-    
-    if(self.metadataOptions[kSynopsisAnalyzedAudioSampleBufferMetadataKey])
-    {
-        self.analyzedAudioSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedAudioSampleBufferMetadataKey] mutableCopy];
-    }
-    
-    if(self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey])
-    {
-        self.analyzedGlobalMetadata = self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey];
-    }
-    
-    SynopsisMetadataEncoderExportOption exportOption = SynopsisMetadataEncoderExportOptionNone;
-    if(self.metadataOptions[kSynopsisAnalyzedMetadataExportOptionKey])
-    {
-        exportOption = [self.metadataOptions[kSynopsisAnalyzedMetadataExportOptionKey] unsignedIntegerValue];
-    }
-    
-    self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsisMetadataVersionValue exportOption:exportOption];
-    
-    [self setupTranscodeShitSucessfullyOrDontWhatverMan];
+    NSError* error = nil;
 
-    [self transcodeAndAnalyzeAsset];
-    
-    [super main];
+    if(self.metadataOptions)
+    {
+        self.transcodeAssetHasVideo = NO;
+        self.transcodeAssetHasAudio = NO;
+        
+        if(self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey])
+        {
+            self.analyzedVideoSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedVideoSampleBufferMetadataKey] mutableCopy];
+        }
+        
+        if(self.metadataOptions[kSynopsisAnalyzedAudioSampleBufferMetadataKey])
+        {
+            self.analyzedAudioSampleBufferMetadata = [self.metadataOptions[kSynopsisAnalyzedAudioSampleBufferMetadataKey] mutableCopy];
+        }
+        
+        if(self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey])
+        {
+            self.analyzedGlobalMetadata = self.metadataOptions[kSynopsisAnalyzedGlobalMetadataKey];
+        }
+        
+        SynopsisMetadataEncoderExportOption exportOption = SynopsisMetadataEncoderExportOptionNone;
+        if(self.metadataOptions[kSynopsisAnalyzedMetadataExportOptionKey])
+        {
+            exportOption = [self.metadataOptions[kSynopsisAnalyzedMetadataExportOptionKey] unsignedIntegerValue];
+        }
+        
+        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsisMetadataVersionValue exportOption:exportOption];
+                
+        if([self setupTranscode:&error])
+        {
+            [self transcodeAndAnalyzeAsset];
+            [super main];
+        }
+        else
+        {
+            self.succeeded = NO;
+            self.error = error;
+            [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Metadata Operation for %@, failed with error: %@", [self.sourceURL lastPathComponent], error]];
+
+            [self cancel];
+        }
+    }
+    else
+    {
+        self.succeeded = NO;
+        self.error = error;
+        [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"No Analyzed Metadata for %@", [self.sourceURL lastPathComponent]]];
+        
+        [self cancel];
+    }
 }
 
-- (NSError*) setupTranscodeShitSucessfullyOrDontWhatverMan
+- (BOOL) setupTranscode:(NSError * __autoreleasing *)error
 {
     CMFormatDescriptionRef audioFormatDesc = NULL;
     CMFormatDescriptionRef videoFormatDesc = NULL;
     
     self.transcodeAsset = [AVURLAsset URLAssetWithURL:self.sourceURL options:@{AVURLAssetPreferPreciseDurationAndTimingKey : @TRUE}];
     
+    BOOL readable = self.transcodeAsset.readable;
+    if(!readable)
+    {
+        if(*error != nil)
+        {
+            NSDictionary<NSErrorUserInfoKey, id>* errorInfo = @{
+                                                                NSLocalizedDescriptionKey : @"Unable to read asset file",
+                                                                };
+            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:-1 userInfo:errorInfo];
+        }
+        return NO;
+    }
+
     self.transcodeAssetHasVideo = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicVisual].count ? YES : NO;
     self.transcodeAssetHasAudio = [self.transcodeAsset tracksWithMediaCharacteristic:AVMediaCharacteristicAudible].count ? YES : NO;
     
-    // TODO: error checking / handling
-    NSError* error = nil;
-    
     // Readers
-    self.transcodeAssetReader = [AVAssetReader assetReaderWithAsset:self.transcodeAsset error:&error];
+    self.transcodeAssetReader = [AVAssetReader assetReaderWithAsset:self.transcodeAsset error:error];
     
     CGAffineTransform preferredTransform = CGAffineTransformIdentity;
     
@@ -198,7 +231,7 @@
     }
     
     // Writers
-    self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:&error];
+    self.transcodeAssetWriter = [AVAssetWriter assetWriterWithURL:self.destinationURL fileType:AVFileTypeQuickTimeMovie error:error];
     
     // Passthrough Video and Audio
     // Use the format description for MPEG4 pass through compatibility as per asset writer docs
@@ -310,7 +343,10 @@
         // or do we move all metadata to audio if we have an audio track for higher sampling rates?
     }
     
-    return error;
+    if(*error)
+        return NO;
+    
+    return YES;
 }
 
 - (void) transcodeAndAnalyzeAsset

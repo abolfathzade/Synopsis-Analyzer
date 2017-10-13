@@ -53,6 +53,9 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
 
 @property (atomic, readwrite, assign) BOOL initted;
 
+@property (readwrite, strong) NSError* error;
+@property (readwrite, assign) BOOL succeeded;
+
 @end
 
 @implementation BaseTranscodeOperation
@@ -66,6 +69,7 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
     self = [super init];
     if(self)
     {
+        self.error = nil;
         self.initted = NO;
         self.uuid = uuid;
         self.sourceURL = sourceURL;
