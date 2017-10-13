@@ -20,16 +20,12 @@
 #import "PreferencesViewController.h"
 #import "PresetObject.h"
 
-static NSTimeInterval start;
-
 @interface AppDelegate () <NSFileManagerDelegate>
 
 @property (weak) IBOutlet NSWindow *window;
 @property (weak) IBOutlet DropFilesView* dropFilesView;
 
-@property (atomic, readwrite, strong) NSOperationQueue* transcodeQueue;
-@property (atomic, readwrite, strong) NSOperationQueue* metadataQueue;
-@property (atomic, readwrite, strong) NSOperationQueue* sessionComplectionQueue;
+@property (atomic, readwrite, strong) NSOperationQueue* synopsisAsyncQueue;
 
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPlugins;
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPluginsInitializedForPrefs;
@@ -85,19 +81,19 @@ static NSTimeInterval start;
         BOOL concurrentJobs = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey] boolValue];
         
         // Serial transcode queue
-        self.transcodeQueue = [[NSOperationQueue alloc] init];
-        self.transcodeQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
-        self.transcodeQueue.qualityOfService = NSQualityOfServiceUserInitiated;
+        self.synopsisAsyncQueue = [[NSOperationQueue alloc] init];
+        self.synopsisAsyncQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
+        self.synopsisAsyncQueue.qualityOfService = NSQualityOfServiceUserInitiated;
         
-        // Serial metadata / passthrough writing queue
-        self.metadataQueue = [[NSOperationQueue alloc] init];
-        self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
-        self.metadataQueue.qualityOfService = NSQualityOfServiceUserInitiated;
-       
-        // Completion queue of group of encodes, be it a drag session, opening of a set folders with media, or a single encode operation
-        self.sessionComplectionQueue = [[NSOperationQueue alloc] init];
-        self.sessionComplectionQueue.maxConcurrentOperationCount = 1;
-        self.sessionComplectionQueue.qualityOfService = NSQualityOfServiceUtility;
+//        // Serial metadata / passthrough writing queue
+//        self.metadataQueue = [[NSOperationQueue alloc] init];
+//        self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
+//        self.metadataQueue.qualityOfService = NSQualityOfServiceUserInitiated;
+//
+//        // Completion queue of group of encodes, be it a drag session, opening of a set folders with media, or a single encode operation
+//        self.sessionComplectionQueue = [[NSOperationQueue alloc] init];
+//        self.sessionComplectionQueue.maxConcurrentOperationCount = 1;
+//        self.sessionComplectionQueue.qualityOfService = NSQualityOfServiceUtility;
         
         self.analyzerPlugins = [NSMutableArray new];
         self.analyzerPluginsInitializedForPrefs = [NSMutableArray new];
@@ -185,21 +181,21 @@ static NSTimeInterval start;
 - (void) applicationWillTerminate:(NSNotification *)notification
 {
     // Cancel all operations and wait for completion.
-    for (NSOperation* op in [self.transcodeQueue operations])
+    for (NSOperation* op in [self.synopsisAsyncQueue operations])
     {
         [op cancel];
         op.completionBlock = nil;
     }
     
-    for (NSOperation* op in [self.metadataQueue operations])
-    {
-        [op cancel];
-        op.completionBlock = nil;
-    }
+//    for (NSOperation* op in [self.metadataQueue operations])
+//    {
+//        [op cancel];
+//        op.completionBlock = nil;
+//    }
     
     //clean bail.
-    [self.transcodeQueue waitUntilAllOperationsAreFinished];
-    [self.metadataQueue waitUntilAllOperationsAreFinished];
+    [self.synopsisAsyncQueue waitUntilAllOperationsAreFinished];
+//    [self.metadataQueue waitUntilAllOperationsAreFinished];
 }
 
 #pragma mark - Prefs
@@ -237,32 +233,7 @@ static NSTimeInterval start;
 
 #pragma mark - Analysis
 
-// Support various types of Analysis file handling
-// This might seem verbose, but its helpful for edge cases...
-// TODO: Move to flags ?
-typedef enum : NSUInteger {
-    // Bail case
-    AnalysisTypeUnknown = 0,
-
-    // temp file and output file adjacent to input file
-    AnalysisTypeFileInPlace,
-    // temp file and output file within output folder
-    AnalysisTypeFileToOutput,
-    // temp file in temp folder, output file adjacent to input file
-    AnalysisTypeFileToTempToInPlace,
-    // temp file in temp folder, output file in output folder
-    AnalysisTypeFileToTempToOutput,
-    
-    // temp file and output file adjacent to input file, in any subfolder of source URL
-    AnalysisTypeFolderInPlace,
-    // temp file flat within temp folder, output file adjacent to input file, in any subfolder of source URL
-    AnalysisTypeFolderToTempToInPlace,
-    
-    AnalysisTypeFolderToTempToOutput,
-    
-} AnalysisType;
-
-- (AnalysisType) analysisTypeForURL:(NSURL*)url
+- (SessionType) sessionTypeForURL:(NSURL*)url
 {
     BOOL useTmpFolder = [self.prefsViewController.preferencesFileViewController usingTempFolder];
     NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
@@ -273,224 +244,216 @@ typedef enum : NSUInteger {
     useTmpFolder = (useTmpFolder && (tmpFolderURL != nil));
     useOutFolder = (useOutFolder && (outFolderURL != nil));
 
-    AnalysisType analysisType = AnalysisTypeUnknown;
+    SessionType sessionType = SessionTypeUnknown;
     if(!url.hasDirectoryPath)
     {
         if(useOutFolder && !useTmpFolder)
         {
-            analysisType = AnalysisTypeFileToOutput;
+            sessionType = SessionTypeFileToOutput;
         }
         else if(useTmpFolder && !useOutFolder)
         {
-            analysisType = AnalysisTypeFileToTempToInPlace;
+            sessionType = SessionTypeFileToTempToInPlace;
         }
         else if(useTmpFolder && useOutFolder)
         {
-            analysisType = AnalysisTypeFileToTempToOutput;
+            sessionType = SessionTypeFileToTempToOutput;
         }
         else
         {
-            analysisType = AnalysisTypeFileInPlace;
+            sessionType = SessionTypeFileInPlace;
         }
     }
     else
     {
-        analysisType = AnalysisTypeFolderInPlace;
+        sessionType = SessionTypeFolderInPlace;
 //        if(useOutFolder && !useTmpFolder)
 //        {
-//            analysisType = AnalysisTypeFolderToOutput;
+//            SessionType = SessionTypeFolderToOutput;
 //        }
         if(useTmpFolder && !useOutFolder)
         {
-            analysisType = AnalysisTypeFolderToTempToInPlace;
+            sessionType = SessionTypeFolderToTempToInPlace;
         }
         else if(useTmpFolder && useOutFolder)
         {
-            analysisType = AnalysisTypeFolderToTempToOutput;
+            sessionType = SessionTypeFolderToTempToOutput;
         }
     }
     
-    return analysisType;
+    return sessionType;
 }
 
 - (void) analysisSessionForFiles:(NSArray *)URLArray sessionCompletionBlock:(void (^)(void))completionBlock
 {
-//    NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
-//
-//    NSMutableArray<NSFileAccessIntent*>* fileAccessIntentArray = [NSMutableArray arrayWithCapacity:URLArray.count];
-//
-//    for(NSURL* url in URLArray)
-//    {
-//        [fileAccessIntentArray addObject:[NSFileAccessIntent readingIntentWithURL:url options:NSFileCoordinatorReadingWithoutChanges]];
-//    }
-//
-//    [coordinator coordinateAccessWithIntents:fileAccessIntentArray
-//                                       queue:self.sessionComplectionQueue
-//                                  byAccessor:^(NSError * _Nullable error) {
 
-    NSUUID* sessionUUID = [NSUUID UUID];
-    
-    // TODO: this isnt explicitely correct - this *should* be run when right before our first op actually runs
-    [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", sessionUUID.UUIDString]];
-    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Got URLS: %@", [URLArray description]]];
-    
-    start = [NSDate timeIntervalSinceReferenceDate];
-    
-    // Standard Completion Handler
-    NSBlockOperation* sessionCompletionOperation = [NSBlockOperation blockOperationWithBlock:^{
+    NSOperation* beginAnalysisOperation = [NSBlockOperation blockOperationWithBlock:^{
+
+        NSUUID* sessionUUID = [NSUUID UUID];
         
-        NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
+        // TODO: this isnt explicitely correct - this *should* be run when right before our first op actually runs
+        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", sessionUUID.UUIDString]];
+        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Got URLS: %@", [URLArray description]]];
         
-        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", sessionUUID.UUIDString, delta]];
+         NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
         
-        if(completionBlock != NULL)
-        {
-            completionBlock();
+        // Standard Completion Handler
+        NSBlockOperation* sessionCompletionOperation = [NSBlockOperation blockOperationWithBlock:^{
             
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSUserNotification* sessionComplete = [[NSUserNotification alloc] init];
-                sessionComplete.title = @"Finished Batch";
-                sessionComplete.subtitle = @"Synopsis Analyzer finished batch";
-                sessionComplete.hasActionButton = NO;
-                sessionComplete.identifier = sessionUUID.UUIDString;
+            NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
+            
+            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", sessionUUID.UUIDString, delta]];
+            
+            if(completionBlock != NULL)
+            {
+                completionBlock();
                 
-                [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:sessionComplete];
-            });
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSUserNotification* sessionComplete = [[NSUserNotification alloc] init];
+                    sessionComplete.title = @"Finished Batch";
+                    sessionComplete.subtitle = @"Synopsis Analyzer finished batch";
+                    sessionComplete.hasActionButton = NO;
+                    sessionComplete.identifier = sessionUUID.UUIDString;
+                    
+                    [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:sessionComplete];
+                });
+            }
+        }];
+        
+        NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
+        NSURL* outFolderURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+        
+        NSError* error = nil;
+        BOOL makeTemp = NO;
+        
+        // TODO: Add test to check for existence of output and temp folder here - otherwise we throw a warning in the log and continue as if the option is not set?
+        
+        // If we have a specified temp folder, and pref is enabled, set it
+        if(tmpFolderURL != nil && [self.prefsViewController.preferencesFileViewController usingTempFolder])
+        {
+            tmpFolderURL = [tmpFolderURL URLByAppendingPathComponent:sessionUUID.UUIDString isDirectory:YES];
+            makeTemp = [self.fileManager createDirectoryAtURL:tmpFolderURL withIntermediateDirectories:YES attributes:nil error:&error];
         }
+        else
+        {
+            // Otherwise we specify the local directory as temp, and carry on.
+            makeTemp = YES;
+        }
+        
+        if(URLArray && URLArray.count && makeTemp)
+        {
+            for(NSURL* url in URLArray)
+            {
+                // Attempts to fix #84
+                [url removeAllCachedResourceValues];
+                NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
+
+    //            NSLog(@"analysisSessionForFiles: %@", url);
+                
+                if(tmpFolderURL == nil)
+                {
+                    tmpFolderURL = sourceDirectory;
+                }
+
+                if(outFolderURL == nil)
+                {
+                    outFolderURL = sourceDirectory;
+                }
+
+                // Attempts to fix #84
+                [tmpFolderURL removeAllCachedResourceValues];
+                [outFolderURL removeAllCachedResourceValues];
+                [sourceDirectory removeAllCachedResourceValues];
+                
+                switch ([self sessionTypeForURL:url])
+                {
+                    case SessionTypeUnknown:
+                        [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Could Not Deduce Analysis Type For %@", url]];
+                        break;
+                        
+                    case SessionTypeFileInPlace:
+                    {
+                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFileInPlace"]];
+                        [self SessionTypeFileToTempToOutput:url tempFolder:sourceDirectory outputFolder:sourceDirectory completionOperation:sessionCompletionOperation];
+                    }
+                        break;
+                        
+                    case SessionTypeFileToTempToInPlace:
+                    {
+                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFileToTempToInPlace"]];
+                        [self SessionTypeFileToTempToOutput:url tempFolder:tmpFolderURL outputFolder:sourceDirectory completionOperation:sessionCompletionOperation];
+                    }
+                        break;
+                        
+                    case SessionTypeFileToOutput:
+                    {
+                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFileToOutput"]];
+                        [self SessionTypeFileToTempToOutput:url tempFolder:sourceDirectory outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
+                    }
+                        break;
+                        
+                    case SessionTypeFileToTempToOutput:
+                    {
+                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFileToTempToOutput"]];
+                        [self SessionTypeFileToTempToOutput:url tempFolder:tmpFolderURL outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
+                    }
+                        break;
+                        
+                        // Folders:
+                    case SessionTypeFolderInPlace:
+                    {
+                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFolderInPlace"]];
+                        [self analysisSessionTypeFolderInPlace:url completionOperation:sessionCompletionOperation];
+                    }
+                        break;
+                        
+                    case SessionTypeFolderToTempToInPlace:
+                    {
+                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFolderToTempToInPlace"]];
+                        [self analysisSessionTypeFolderToTempToPlace:url tempFolder:tmpFolderURL completionOperation:sessionCompletionOperation];
+                    }
+                        break;
+                        
+                    case SessionTypeFolderToTempToOutput:
+                    {
+                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFolderToTempToOutput"]];
+                        // We add a 'move' operation to every 'top level folder that we encode. We
+                        // If we have folders which arrive / are updated within a from a watch folder
+                        NSBlockOperation* moveOperation = [NSBlockOperation blockOperationWithBlock:^{
+                            
+                            // if a folder was already analyzed, and resides in the destination output folder, we should rename it
+                            // TODO: Rename output folder URL with session ID
+                            // TODO: DONT move if we fail!
+                            NSString* folderName = [url lastPathComponent];
+                            
+                            NSError* error = nil;
+                            if([self.fileManager moveItemAtURL:[tmpFolderURL URLByAppendingPathComponent:folderName]
+                                                         toURL:[outFolderURL URLByAppendingPathComponent:folderName] error:&error])
+                            {
+                                [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Moved %@ to Output Directory", folderName]];
+                            }
+                        }];
+                        
+                        [self SessionTypeFolderToTempToOutput:url tempFolder:tmpFolderURL completionOperation:moveOperation];
+                        
+                        // completion isnt complete till our move finishes
+                        [sessionCompletionOperation addDependency:moveOperation];
+                        
+                        [self.synopsisAsyncQueue addOperation:moveOperation];
+                        
+                        //
+                    }
+                        break;
+                }
+            }
+            
+            // Enqueue our session completion operation now that it has dependencies on every encode operation
+            [self.synopsisAsyncQueue addOperation:sessionCompletionOperation];
+        }
+        
     }];
     
-    NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
-    NSURL* outFolderURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
-    
-    NSError* error = nil;
-    BOOL makeTemp = NO;
-    
-    // TODO: Add test to check for existence of output and temp folder here - otherwise we throw a warning in the log and continue as if the option is not set?
-    
-    // If we have a specified temp folder, and pref is enabled, set it
-    if(tmpFolderURL != nil && [self.prefsViewController.preferencesFileViewController usingTempFolder])
-    {
-        tmpFolderURL = [tmpFolderURL URLByAppendingPathComponent:sessionUUID.UUIDString isDirectory:YES];
-        makeTemp = [self.fileManager createDirectoryAtURL:tmpFolderURL withIntermediateDirectories:YES attributes:nil error:&error];
-    }
-    else
-    {
-        // Otherwise we specify the local directory as temp, and carry on.
-        makeTemp = YES;
-    }
-    
-    if(URLArray && URLArray.count && makeTemp)
-    {
-        for(NSURL* url in URLArray)
-        {
-            // Attempts to fix #84
-            [url removeAllCachedResourceValues];
-            NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
-
-//            NSLog(@"analysisSessionForFiles: %@", url);
-            
-            if(tmpFolderURL == nil)
-            {
-                tmpFolderURL = sourceDirectory;
-            }
-
-            if(outFolderURL == nil)
-            {
-                outFolderURL = sourceDirectory;
-            }
-
-            // Attempts to fix #84
-            [tmpFolderURL removeAllCachedResourceValues];
-            [outFolderURL removeAllCachedResourceValues];
-            [sourceDirectory removeAllCachedResourceValues];
-            
-            switch ([self analysisTypeForURL:url])
-            {
-                case AnalysisTypeUnknown:
-                    [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Could Not Deduce Analysis Type For %@", url]];
-                    break;
-                    
-                case AnalysisTypeFileInPlace:
-                {
-                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFileInPlace"]];
-                    [self analysisTypeFileToTempToOutput:url tempFolder:sourceDirectory outputFolder:sourceDirectory completionOperation:sessionCompletionOperation];
-                }
-                    break;
-                    
-                case AnalysisTypeFileToTempToInPlace:
-                {
-                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFileToTempToInPlace"]];
-                    [self analysisTypeFileToTempToOutput:url tempFolder:tmpFolderURL outputFolder:sourceDirectory completionOperation:sessionCompletionOperation];
-                }
-                    break;
-                    
-                case AnalysisTypeFileToOutput:
-                {
-                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFileToOutput"]];
-                    [self analysisTypeFileToTempToOutput:url tempFolder:sourceDirectory outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
-                }
-                    break;
-                    
-                case AnalysisTypeFileToTempToOutput:
-                {
-                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFileToTempToOutput"]];
-                    [self analysisTypeFileToTempToOutput:url tempFolder:tmpFolderURL outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
-                }
-                    break;
-                    
-                    // Folders:
-                case AnalysisTypeFolderInPlace:
-                {
-                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFolderInPlace"]];
-                    [self analysisSessionTypeFolderInPlace:url completionOperation:sessionCompletionOperation];
-                }
-                    break;
-                    
-                case AnalysisTypeFolderToTempToInPlace:
-                {
-                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFolderToTempToInPlace"]];
-                    [self analysisSessionTypeFolderToTempToPlace:url tempFolder:tmpFolderURL completionOperation:sessionCompletionOperation];
-                }
-                    break;
-                    
-                case AnalysisTypeFolderToTempToOutput:
-                {
-                    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting AnalysisTypeFolderToTempToOutput"]];
-                    // We add a 'move' operation to every 'top level folder that we encode. We
-                    // If we have folders which arrive / are updated within a from a watch folder
-                    NSBlockOperation* moveOperation = [NSBlockOperation blockOperationWithBlock:^{
-                        
-                        // if a folder was already analyzed, and resides in the destination output folder, we should rename it
-                        // TODO: Rename output folder URL with session ID
-                        // TODO: DONT move if we fail!
-                        NSString* folderName = [url lastPathComponent];
-                        
-                        NSError* error = nil;
-                        if([self.fileManager moveItemAtURL:[tmpFolderURL URLByAppendingPathComponent:folderName]
-                                                     toURL:[outFolderURL URLByAppendingPathComponent:folderName] error:&error])
-                        {
-                            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Moved %@ to Output Directory", folderName]];
-                        }
-                    }];
-                    
-                    [self analysisTypeFolderToTempToOutput:url tempFolder:tmpFolderURL completionOperation:moveOperation];
-                    
-                    // completion isnt complete till our move finishes
-                    [sessionCompletionOperation addDependency:moveOperation];
-                    
-                    [self.sessionComplectionQueue addOperation:moveOperation];
-                    
-                    //
-                }
-                    break;
-            }
-        }
-        
-        // Enqueue our session completion operation now that it has dependencies on every encode operation
-        [self.sessionComplectionQueue addOperation:sessionCompletionOperation];
-    }
-    
-//    }];
+    [self.synopsisAsyncQueue addOperation:beginAnalysisOperation];
 }
 
 - (id<NSFastEnumeration>) safeDirectoryEnumeratorForURL:(NSURL*)urlToEnumerate
@@ -522,7 +485,7 @@ typedef enum : NSUInteger {
 
 #pragma mark - Analysis Type Handling Files
 
-- (void) analysisTypeFileToTempToOutput:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
+- (void) SessionTypeFileToTempToOutput:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
 {
     BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:tempFolder outputDirectory:outputFolder];
     
@@ -605,7 +568,7 @@ typedef enum : NSUInteger {
     }
 }
 
-- (void) analysisTypeFolderToTempToOutput:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
+- (void) SessionTypeFolderToTempToOutput:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
 {
     // Attempts to fix #84
     [directoryToEncode removeAllCachedResourceValues];
@@ -636,7 +599,7 @@ typedef enum : NSUInteger {
         {
             // Attempts to fix #84
             [url removeAllCachedResourceValues];
-//            NSLog(@"analysisTypeFolderToTempToOutput : %@", url);
+//            NSLog(@"SessionTypeFolderToTempToOutput : %@", url);
 
             NSNumber* isDirectory;
             NSString* fileType;
@@ -820,8 +783,8 @@ typedef enum : NSUInteger {
 
     [[LogController sharedLogController] appendVerboseLog:@"Begin Transcode and Analysis"];
 
-    [self.transcodeQueue addOperation:analysis];
-    [self.metadataQueue addOperation:metadata];
+    [self.synopsisAsyncQueue addOperation:analysis];
+    [self.synopsisAsyncQueue addOperation:metadata];
 
     return metadata;
 }
@@ -862,10 +825,10 @@ static BOOL isRunning = NO;
     BOOL concurrentJobs = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey] boolValue];
     
     // Serial transcode queue
-    self.transcodeQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
+    self.synopsisAsyncQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
     
     // Serial metadata / passthrough writing queue
-    self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
+//    self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
 }
 
 #pragma mark - Helpers

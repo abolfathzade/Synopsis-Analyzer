@@ -91,7 +91,7 @@
         
         NSIndexSet* rowSet = [[NSIndexSet alloc] initWithIndex:[self.tableView numberOfRows]];
         
-        [self.tableView insertRowsAtIndexes:rowSet withAnimation:NSTableViewAnimationEffectNone];
+        [self.tableView.animator insertRowsAtIndexes:rowSet withAnimation:NSTableViewAnimationEffectGap | NSTableViewAnimationSlideDown ];
         
         [self.tableView endUpdates];
     }

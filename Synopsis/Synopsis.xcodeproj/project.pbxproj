@@ -54,6 +54,8 @@
 		1BA76C421F83F0C10038F6AD /* PreferencesFileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BA76C401F83F0C10038F6AD /* PreferencesFileViewController.xib */; };
 		1BA8F8361C125DC20066BDDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */; };
 		1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */; };
+		1BBED6331F9149E8003CE9C4 /* SessionStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */; };
+		1BBED6361F914C7D003CE9C4 /* OperationStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */; };
 		1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 1BC71D431F150CA6006DD7DC /* Credits.rtf */; };
 		1BC71E871F17E8FE006DD7DC /* hap.c in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71DDB1F17E8FE006DD7DC /* hap.c */; };
 		1BC71E9F1F17E8FE006DD7DC /* snappy-c.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71DFC1F17E8FE006DD7DC /* snappy-c.cc */; };
@@ -98,7 +100,6 @@
 		1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
 		1BEA4D421ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */; };
 		1BFB12421F1D4705002C4651 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BFB12411F1D4705002C4651 /* libz.tbd */; };
-		1BFB12471F1FDF13002C4651 /* Constants.c in Sources */ = {isa = PBXBuildFile; fileRef = 1BFB12451F1FDF13002C4651 /* Constants.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -244,6 +245,10 @@
 		1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		1BB9B1A41EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoTransformScaleLinearizeHelper.h; sourceTree = "<group>"; };
 		1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoTransformScaleLinearizeHelper.m; sourceTree = "<group>"; };
+		1BBED6311F9149E8003CE9C4 /* SessionStateWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SessionStateWrapper.h; sourceTree = "<group>"; };
+		1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionStateWrapper.m; sourceTree = "<group>"; };
+		1BBED6341F914C7D003CE9C4 /* OperationStateWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OperationStateWrapper.h; sourceTree = "<group>"; };
+		1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OperationStateWrapper.m; sourceTree = "<group>"; };
 		1BC71D431F150CA6006DD7DC /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		1BC71DDB1F17E8FE006DD7DC /* hap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hap.c; sourceTree = "<group>"; };
 		1BC71DDC1F17E8FE006DD7DC /* hap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hap.h; sourceTree = "<group>"; };
@@ -394,7 +399,6 @@
 		1BEA4D401ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnalysisAndTranscodeOperation.h; sourceTree = "<group>"; };
 		1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnalysisAndTranscodeOperation.m; sourceTree = "<group>"; };
 		1BFB12411F1D4705002C4651 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		1BFB12451F1FDF13002C4651 /* Constants.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Constants.c; sourceTree = "<group>"; };
 		1BFB12461F1FDF13002C4651 /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -563,6 +567,17 @@
 			);
 			name = GZIP;
 			path = Synopsis/GZIP;
+			sourceTree = "<group>";
+		};
+		1BBED6371F915522003CE9C4 /* OutlineView & Cells */ = {
+			isa = PBXGroup;
+			children = (
+				1BBED6311F9149E8003CE9C4 /* SessionStateWrapper.h */,
+				1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */,
+				1BBED6341F914C7D003CE9C4 /* OperationStateWrapper.h */,
+				1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */,
+			);
+			name = "OutlineView & Cells";
 			sourceTree = "<group>";
 		};
 		1BC71DD71F17E8C6006DD7DC /* Third Party */ = {
@@ -941,6 +956,7 @@
 			children = (
 				1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */,
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
+				1BBED6371F915522003CE9C4 /* OutlineView & Cells */,
 				1B805E381B012B5E005D7354 /* TableView & Cells */,
 				1B3233BC1C2E390600C9CF5E /* Preferences */,
 				1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */,
@@ -968,7 +984,6 @@
 			isa = PBXGroup;
 			children = (
 				1BFB12461F1FDF13002C4651 /* Constants.h */,
-				1BFB12451F1FDF13002C4651 /* Constants.c */,
 				1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */,
 				1BEA4D211ACB2BCD00AB57C1 /* main.m */,
 				1BC71D431F150CA6006DD7DC /* Credits.rtf */,
@@ -1187,7 +1202,7 @@
 				1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */,
 				1BC71ED61F17E8FE006DD7DC /* GLDXTEncoder.c in Sources */,
 				1BC71ED91F17E8FE006DD7DC /* SquishEncoder.c in Sources */,
-				1BFB12471F1FDF13002C4651 /* Constants.c in Sources */,
+				1BBED6361F914C7D003CE9C4 /* OperationStateWrapper.m in Sources */,
 				1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */,
 				1BC71EDB1F17E8FE006DD7DC /* YCoCgDXTEncoder.c in Sources */,
 				1BC71EA01F17E8FE006DD7DC /* snappy-sinksource.cc in Sources */,
@@ -1203,6 +1218,7 @@
 				1BC71ED51F17E8FE006DD7DC /* DXTBlocksSSSE3.c in Sources */,
 				1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */,
 				1BC71ED11F17E8FE006DD7DC /* HapDecoderFrame.m in Sources */,
+				1BBED6331F9149E8003CE9C4 /* SessionStateWrapper.m in Sources */,
 				1BC71EAB1F17E8FE006DD7DC /* clusterfit.cpp in Sources */,
 				1BC71EBA1F17E8FE006DD7DC /* singlecolourfit.cpp in Sources */,
 				1B805E371B012ADF005D7354 /* ProgressTableViewCellProgressController.m in Sources */,
