@@ -14,10 +14,10 @@
 
 - (IBAction)changeLogLevel:(id)sender;
 
-- (void) appendLog:(NSString*)log;
-- (void) appendVerboseLog:(NSString*)log;
-- (void) appendWarningLog:(NSString*)log;
-- (void) appendErrorLog:(NSString*)log;
-- (void) appendSuccessLog:(NSString*)log;
+- (void) appendLog:(NSString*)log;//, ... NS_FORMAT_FUNCTION(1,2);
+- (void) appendVerboseLog:(NSString*)log;//, ... NS_FORMAT_FUNCTION(1,2);
+- (void) appendWarningLog:(NSString*)log;//, ... NS_FORMAT_FUNCTION(1,2);
+- (void) appendErrorLog:(NSString*)log;//, ... NS_FORMAT_FUNCTION(1,2);
+- (void) appendSuccessLog:(NSString*)log;//, ... NS_FORMAT_FUNCTION(1,2);
 
 @end

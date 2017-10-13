@@ -346,6 +346,16 @@ typedef enum : NSUInteger {
         if(completionBlock != NULL)
         {
             completionBlock();
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSUserNotification* sessionComplete = [[NSUserNotification alloc] init];
+                sessionComplete.title = @"Finished Batch";
+                sessionComplete.subtitle = @"Synopsis Analyzer finished batch";
+                sessionComplete.hasActionButton = NO;
+                sessionComplete.identifier = sessionUUID.UUIDString;
+                
+                [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:sessionComplete];
+            });
         }
     }];
     

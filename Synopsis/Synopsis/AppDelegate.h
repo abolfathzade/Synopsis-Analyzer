@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Synopsis. All rights reserved.
 //
 
+#import "Constants.h"
 #import <Cocoa/Cocoa.h>
 #import "DropFilesView.h"
 

@@ -161,7 +161,7 @@ typedef enum : NSUInteger {
     return [string stringByAppendingString:[NSString stringWithCharacters:&newLine length:1]];
 }
 
-- (void) appendLog:(NSString*)log
+- (void) appendLog:(NSString*)log//, ... NS_FORMAT_FUNCTION(1,2)
 {
     if(self.logLevel >= LogLevelNormal)
     {
@@ -175,7 +175,7 @@ typedef enum : NSUInteger {
     }
 }
 
-- (void) appendVerboseLog:(NSString*)log
+- (void) appendVerboseLog:(NSString*)log//, ... NS_FORMAT_FUNCTION(1,2)
 {
     if(self.logLevel >= LogLevelVerbose)
     {
@@ -189,7 +189,7 @@ typedef enum : NSUInteger {
     }
 }
 
-- (void) appendWarningLog:(NSString*)log
+- (void) appendWarningLog:(NSString*)log//, ... NS_FORMAT_FUNCTION(1,2)
 {
     // Always Log Warnings
     NSLog(@" [WARNING] %@", log);
@@ -206,7 +206,7 @@ typedef enum : NSUInteger {
     }
 }
 
-- (void) appendErrorLog:(NSString*)log
+- (void) appendErrorLog:(NSString*)log//, ... NS_FORMAT_FUNCTION(1,2)
 {
     // Always Log Errors
     NSLog(@" [ERROR] %@", log);
@@ -220,7 +220,7 @@ typedef enum : NSUInteger {
     });
 }
 
-- (void) appendSuccessLog:(NSString*)log
+- (void) appendSuccessLog:(NSString*)log//, ... NS_FORMAT_FUNCTION(1,2)
 {
     NSAttributedString* logString = [[NSAttributedString alloc] initWithString:[self appendLine:log] attributes:self.logStyle];
     
