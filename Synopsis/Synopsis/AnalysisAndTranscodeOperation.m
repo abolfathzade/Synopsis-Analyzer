@@ -1197,20 +1197,6 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
 
 #pragma mark - Notification
 
-- (void) notifyProgress
-{
-    dispatch_async(dispatch_get_main_queue(), ^(){
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisTranscodeOperationProgressUpdate object:@{kSynopsisTranscodeOperationUUIDKey : self.uuid,
-                                                                                                                      kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
-                                                                                                                      kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
-                                                                                                                      kSynopsisTranscodeOperationProgressKey : @(self.progress),
-                                                                                                                      kSynopsisTranscodeOperationTimeElapsedKey: @(self.elapsedTime),
-                                                                                                                      kSynopsisTranscodeOperationTimeRemainingKey : @( self.remainingTime )}];
-    });
-
-}
-
 - (void) concurrentFramesDidChange:(NSNotification*)notification
 {
     // Number of simultaneous Jobs:
@@ -1218,7 +1204,6 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     
     // Serial transcode queue
     self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = (concurrentFrames) ? NSOperationQueueDefaultMaxConcurrentOperationCount : 1;
-    
 }
 
 

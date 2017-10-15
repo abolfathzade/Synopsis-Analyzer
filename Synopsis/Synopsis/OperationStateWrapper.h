@@ -7,7 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Constants.h"
+extern NSString* const kSynopsisSessionProgressUpdate;
 
 @interface OperationStateWrapper : NSObject
+
+@property (readonly, assign) OperationState operationState;
+@property (readonly, assign) NSUUID* operationID;
+@property (readonly, assign) CGFloat operationProgress;
 
 @end

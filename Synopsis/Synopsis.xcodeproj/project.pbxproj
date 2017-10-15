@@ -56,6 +56,11 @@
 		1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */; };
 		1BBED6331F9149E8003CE9C4 /* SessionStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */; };
 		1BBED6361F914C7D003CE9C4 /* OperationStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */; };
+		1BBED63A1F919F44003CE9C4 /* SessionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6391F919F44003CE9C4 /* SessionController.m */; };
+		1BBED63E1F91BE55003CE9C4 /* SessionRowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED63C1F91BE55003CE9C4 /* SessionRowController.m */; };
+		1BBED63F1F91BE55003CE9C4 /* SessionRowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BBED63D1F91BE55003CE9C4 /* SessionRowController.xib */; };
+		1BBED6431F91BE7C003CE9C4 /* OperationRowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6411F91BE7C003CE9C4 /* OperationRowController.m */; };
+		1BBED6441F91BE7C003CE9C4 /* OperationRowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BBED6421F91BE7C003CE9C4 /* OperationRowController.xib */; };
 		1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 1BC71D431F150CA6006DD7DC /* Credits.rtf */; };
 		1BC71E871F17E8FE006DD7DC /* hap.c in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71DDB1F17E8FE006DD7DC /* hap.c */; };
 		1BC71E9F1F17E8FE006DD7DC /* snappy-c.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71DFC1F17E8FE006DD7DC /* snappy-c.cc */; };
@@ -249,6 +254,14 @@
 		1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionStateWrapper.m; sourceTree = "<group>"; };
 		1BBED6341F914C7D003CE9C4 /* OperationStateWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OperationStateWrapper.h; sourceTree = "<group>"; };
 		1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OperationStateWrapper.m; sourceTree = "<group>"; };
+		1BBED6381F919F44003CE9C4 /* SessionController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SessionController.h; sourceTree = "<group>"; };
+		1BBED6391F919F44003CE9C4 /* SessionController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionController.m; sourceTree = "<group>"; };
+		1BBED63B1F91BE55003CE9C4 /* SessionRowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SessionRowController.h; sourceTree = "<group>"; };
+		1BBED63C1F91BE55003CE9C4 /* SessionRowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionRowController.m; sourceTree = "<group>"; };
+		1BBED63D1F91BE55003CE9C4 /* SessionRowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SessionRowController.xib; sourceTree = "<group>"; };
+		1BBED6401F91BE7C003CE9C4 /* OperationRowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OperationRowController.h; sourceTree = "<group>"; };
+		1BBED6411F91BE7C003CE9C4 /* OperationRowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OperationRowController.m; sourceTree = "<group>"; };
+		1BBED6421F91BE7C003CE9C4 /* OperationRowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OperationRowController.xib; sourceTree = "<group>"; };
 		1BC71D431F150CA6006DD7DC /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		1BC71DDB1F17E8FE006DD7DC /* hap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hap.c; sourceTree = "<group>"; };
 		1BC71DDC1F17E8FE006DD7DC /* hap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hap.h; sourceTree = "<group>"; };
@@ -572,6 +585,14 @@
 		1BBED6371F915522003CE9C4 /* OutlineView & Cells */ = {
 			isa = PBXGroup;
 			children = (
+				1BBED6381F919F44003CE9C4 /* SessionController.h */,
+				1BBED6391F919F44003CE9C4 /* SessionController.m */,
+				1BBED63B1F91BE55003CE9C4 /* SessionRowController.h */,
+				1BBED63C1F91BE55003CE9C4 /* SessionRowController.m */,
+				1BBED63D1F91BE55003CE9C4 /* SessionRowController.xib */,
+				1BBED6401F91BE7C003CE9C4 /* OperationRowController.h */,
+				1BBED6411F91BE7C003CE9C4 /* OperationRowController.m */,
+				1BBED6421F91BE7C003CE9C4 /* OperationRowController.xib */,
 				1BBED6311F9149E8003CE9C4 /* SessionStateWrapper.h */,
 				1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */,
 				1BBED6341F914C7D003CE9C4 /* OperationStateWrapper.h */,
@@ -1145,6 +1166,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1B3233CC1C2EFDC500C9CF5E /* PreferencesPresetViewController.xib in Resources */,
+				1BBED6441F91BE7C003CE9C4 /* OperationRowController.xib in Resources */,
+				1BBED63F1F91BE55003CE9C4 /* SessionRowController.xib in Resources */,
 				1B805E2F1B012309005D7354 /* ProgressTableViewCellSource.xib in Resources */,
 				1BA76C421F83F0C10038F6AD /* PreferencesFileViewController.xib in Resources */,
 				1BA4D19A1C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib in Resources */,
@@ -1215,6 +1238,8 @@
 				1B3233D71C306B2300C9CF5E /* PresetObject.m in Sources */,
 				1BC71ED41F17E8FE006DD7DC /* DXTBlocks.c in Sources */,
 				1BC71ECB1F17E8FE006DD7DC /* AVAssetAdditions.m in Sources */,
+				1BBED63A1F919F44003CE9C4 /* SessionController.m in Sources */,
+				1BBED63E1F91BE55003CE9C4 /* SessionRowController.m in Sources */,
 				1BC71ED51F17E8FE006DD7DC /* DXTBlocksSSSE3.c in Sources */,
 				1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */,
 				1BC71ED11F17E8FE006DD7DC /* HapDecoderFrame.m in Sources */,
@@ -1237,6 +1262,7 @@
 				1BC71EA91F17E8FE006DD7DC /* alpha.cpp in Sources */,
 				1BC71EAF1F17E8FE006DD7DC /* colourset.cpp in Sources */,
 				1BC71EA11F17E8FE006DD7DC /* snappy-stubs-internal.cc in Sources */,
+				1BBED6431F91BE7C003CE9C4 /* OperationRowController.m in Sources */,
 				1BC71EDA1F17E8FE006DD7DC /* YCoCgDXT.cpp in Sources */,
 				1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */,
 				1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */,

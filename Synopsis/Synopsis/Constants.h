@@ -55,6 +55,11 @@ typedef enum : NSUInteger {
     OperationStateSuccess,
 } OperationState;
 
+typedef enum : NSUInteger {
+    OperationPassAnalysis,
+    OperationPassFinal,
+} OperationPass;
+
 #pragma mark - Preferences -
 
 #define kSynopsisAnalyzerDefaultPresetPreferencesKey @"DefaultPreset" // UUID string

@@ -199,7 +199,15 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
 
 - (void) notifyProgress
 {
-    [self doesNotRecognizeSelector:_cmd];
+    dispatch_async(dispatch_get_main_queue(), ^(){
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisTranscodeOperationProgressUpdate object:@{kSynopsisTranscodeOperationUUIDKey : self.uuid,
+                                                                                                                      kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
+                                                                                                                      kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
+                                                                                                                      kSynopsisTranscodeOperationProgressKey : @(self.progress),
+                                                                                                                      kSynopsisTranscodeOperationTimeElapsedKey: @(self.elapsedTime),
+                                                                                                                      kSynopsisTranscodeOperationTimeRemainingKey : @( self.remainingTime )}];
+    });
 }
 
 @end

@@ -32,7 +32,7 @@
 
 - (void) awakeFromNib
 {
-    [self commonSetup];
+//    [self commonSetup];
 }
 
 - (void) dealloc

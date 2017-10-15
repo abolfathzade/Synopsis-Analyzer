@@ -7,11 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "OperationStateWrapper.h"
 #import "Constants.h"
 
 @interface SessionStateWrapper : NSObject
-- (instancetype) initWithSessionID:(NSUUID*)sessionID sessionName:(NSString*)sessionName;
+
+- (instancetype) initWithSessionOperations:(NSArray<OperationStateWrapper*>*)operations;
+
 @property (readonly, copy) NSString* sessionName;
+@property (readonly, copy) NSUUID* sessionID;
 @property (readonly, assign) SessionState sessionState;
 @property (readonly, assign) CGFloat sessionProgress;
+@property (readonly, strong) NSArray<OperationStateWrapper*>* sessionOperationStates;
+
 @end

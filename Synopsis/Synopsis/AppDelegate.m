@@ -17,6 +17,7 @@
 #import "AnalysisAndTranscodeOperation.h"
 #import "MetadataWriterTranscodeOperation.h"
 
+#import "SessionController.h"
 #import "PreferencesViewController.h"
 #import "PresetObject.h"
 
@@ -25,6 +26,7 @@
 @property (weak) IBOutlet NSWindow *window;
 @property (weak) IBOutlet DropFilesView* dropFilesView;
 
+@property (readwrite,strong) IBOutlet SessionController* sessionController;
 @property (atomic, readwrite, strong) NSOperationQueue* synopsisAsyncQueue;
 
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPlugins;
@@ -287,12 +289,30 @@
 - (void) analysisSessionForFiles:(NSArray *)URLArray sessionCompletionBlock:(void (^)(void))completionBlock
 {
 
+//    NSUUID* sessionUUID = [NSUUID UUID];
+    
+    NSMutableArray<OperationStateWrapper*>* operationStates = [NSMutableArray new];
+    for(NSURL* url in URLArray)
+    {
+        id directoryEnumerator = [self safeDirectoryEnumeratorForURL:url];
+        for(NSURL* subURL in directoryEnumerator)
+        {
+            
+            NSUUID* operationID = [[NSUUID alloc] init];
+            OperationStateWrapper* potentalOperation = [[OperationStateWrapper alloc] init];
+            [operationStates addObject:potentalOperation];
+        }
+    }
+    
+    SessionStateWrapper* session = [[SessionStateWrapper alloc] initWithSessionOperations:operationStates];
+
+    [self.sessionController addNewSession:session];
+
+    
     NSOperation* beginAnalysisOperation = [NSBlockOperation blockOperationWithBlock:^{
 
-        NSUUID* sessionUUID = [NSUUID UUID];
-        
         // TODO: this isnt explicitely correct - this *should* be run when right before our first op actually runs
-        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", sessionUUID.UUIDString]];
+        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", session.sessionID]];
         [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Got URLS: %@", [URLArray description]]];
         
          NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
@@ -302,7 +322,7 @@
             
             NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
             
-            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", sessionUUID.UUIDString, delta]];
+            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", session.sessionID, delta]];
             
             if(completionBlock != NULL)
             {
@@ -313,7 +333,7 @@
                     sessionComplete.title = @"Finished Batch";
                     sessionComplete.subtitle = @"Synopsis Analyzer finished batch";
                     sessionComplete.hasActionButton = NO;
-                    sessionComplete.identifier = sessionUUID.UUIDString;
+                    sessionComplete.identifier = session.sessionID.UUIDString;
                     
                     [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:sessionComplete];
                 });
@@ -331,7 +351,7 @@
         // If we have a specified temp folder, and pref is enabled, set it
         if(tmpFolderURL != nil && [self.prefsViewController.preferencesFileViewController usingTempFolder])
         {
-            tmpFolderURL = [tmpFolderURL URLByAppendingPathComponent:sessionUUID.UUIDString isDirectory:YES];
+            tmpFolderURL = [tmpFolderURL URLByAppendingPathComponent:session.sessionID.UUIDString isDirectory:YES];
             makeTemp = [self.fileManager createDirectoryAtURL:tmpFolderURL withIntermediateDirectories:YES attributes:nil error:&error];
         }
         else
@@ -347,8 +367,6 @@
                 // Attempts to fix #84
                 [url removeAllCachedResourceValues];
                 NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
-
-    //            NSLog(@"analysisSessionForFiles: %@", url);
                 
                 if(tmpFolderURL == nil)
                 {
@@ -453,7 +471,7 @@
         
     }];
     
-    [self.synopsisAsyncQueue addOperation:beginAnalysisOperation];
+//    [self.synopsisAsyncQueue addOperation:beginAnalysisOperation];
 }
 
 - (id<NSFastEnumeration>) safeDirectoryEnumeratorForURL:(NSURL*)urlToEnumerate
@@ -487,9 +505,12 @@
 
 - (void) SessionTypeFileToTempToOutput:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
 {
-    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:tempFolder outputDirectory:outputFolder];
+    NSArray<BaseTranscodeOperation*>* operations = [self enqueueFileForTranscode:fileToTranscode tempDirectory:tempFolder outputDirectory:outputFolder];
     
-    [completionOp addDependency:operation];
+    for(BaseTranscodeOperation* operation in operations)
+    {
+        [completionOp addDependency:operation];
+    }
 }
 
 #pragma mark - Analysis Type Handling Folders
@@ -525,8 +546,11 @@
         {
             NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
           
-            BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:sourceDirectory outputDirectory:sourceDirectory];
-            [completionOp addDependency:operation];
+            NSArray<BaseTranscodeOperation*>* operations = [self enqueueFileForTranscode:url tempDirectory:sourceDirectory outputDirectory:sourceDirectory];
+            for(BaseTranscodeOperation* operation in operations)
+            {
+                [completionOp addDependency:operation];
+            }
         }
     }
 }
@@ -562,8 +586,11 @@
         {
             NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
             
-            BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:tempFolder outputDirectory:sourceDirectory];
-            [completionOp addDependency:operation];
+            NSArray<BaseTranscodeOperation*>* operations = [self enqueueFileForTranscode:url tempDirectory:tempFolder outputDirectory:sourceDirectory];
+            for(BaseTranscodeOperation* operation in operations)
+            {
+                [completionOp addDependency:operation];
+            }
         }
     }
 }
@@ -634,8 +661,11 @@
                     newTempDir = [newTempDir URLByAppendingPathComponent:component];
                 }
 
-                BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:newTempDir outputDirectory:newTempDir];
-                [completionOp addDependency:operation];
+                NSArray<BaseTranscodeOperation*>* operations = [self enqueueFileForTranscode:url tempDirectory:newTempDir outputDirectory:newTempDir];
+                for(BaseTranscodeOperation* operation in operations)
+                {
+                    [completionOp addDependency:operation];
+                }
             }
         }
     }
@@ -666,7 +696,7 @@
      }];
 }
 
-- (BaseTranscodeOperation*) enqueueFileForTranscode:(NSURL*)fileURL tempDirectory:(NSURL*)tempDirectory outputDirectory:(NSURL*)outputDirectory
+- (NSArray<BaseTranscodeOperation*>*) enqueueFileForTranscode:(NSURL*)fileURL tempDirectory:(NSURL*)tempDirectory outputDirectory:(NSURL*)outputDirectory
 {
     NSUUID* encodeUUID = [NSUUID UUID];
     
@@ -786,7 +816,7 @@
     [self.synopsisAsyncQueue addOperation:analysis];
     [self.synopsisAsyncQueue addOperation:metadata];
 
-    return metadata;
+    return @[analysis, metadata];
 }
 
 
