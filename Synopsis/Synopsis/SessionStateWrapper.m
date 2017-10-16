@@ -10,8 +10,8 @@
 
 @interface SessionStateWrapper ()
 @property (readwrite, copy) NSUUID* sessionID;
-@property (readwrite, assign) SessionState sessionState;
-@property (readwrite, assign) CGFloat sessionProgress;
+//@property (readwrite, assign) SessionState sessionState;
+//@property (readwrite, assign) CGFloat sessionProgress;
 @end
 
 @implementation SessionStateWrapper

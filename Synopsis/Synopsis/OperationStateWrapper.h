@@ -10,7 +10,7 @@
 #import "Constants.h"
 #import "PresetObject.h"
 
-extern NSString* const kSynopsisSessionProgressUpdate;
+extern NSString * const kSynopsisOperationStateUpdate;
 
 @interface OperationStateWrapper : NSObject
 
@@ -22,12 +22,11 @@ extern NSString* const kSynopsisSessionProgressUpdate;
 @property (readonly, copy) NSURL* tempDirectory;
 @property (readonly, copy) NSURL* destinationDirectory;
 
-// Optional move source / dest for OperationTypeFolderToTempToOutput
-@property (readwrite, copy) NSURL* moveSrc;
-@property (readwrite, copy) NSURL* moveDst;
-
-@property (readonly, assign) OperationState operationState;
-@property (readonly, assign) NSUUID* operationID;
-@property (readonly, assign) CGFloat operationProgress;
+// State Tracking so our views can reflect latest operation state without needing updates
+@property (atomic, readonly, copy) NSUUID* operationID;
+@property (atomic, readwrite, assign) OperationState operationState;
+@property (atomic, readwrite, assign) CGFloat operationProgress;
+@property (atomic, readwrite, assign) NSTimeInterval elapsedTime;
+@property (atomic, readwrite, assign) NSTimeInterval remainingTime;
 
 @end 

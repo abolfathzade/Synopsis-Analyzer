@@ -81,7 +81,7 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
         self.descriptionDictionary = @{ kSynopsisTranscodeOperationUUIDKey : self.uuid,
                                         kSynopsisTranscodeOperationSourceURLKey : self.sourceURL,
                                         kSynopsisTranscodeOperationDestinationURLKey : self.destinationURL,
-                                        kSynopsisTranscodeOperationProgressKey : @(0),
+                                        kSynopsisTranscodeOperationProgressKey : @(DBL_MIN),
                                         kSynopsisTranscodeOperationTimeElapsedKey: @(0),
                                         kSynopsisTranscodeOperationTimeRemainingKey : @( DBL_MIN ),
                                         };

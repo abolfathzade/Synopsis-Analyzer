@@ -7,13 +7,13 @@
 //
 
 #import "SessionController.h"
-
-//NSString* const kSynopsisSessionAvailable = @"SynopsisSessionAvailable";
-NSString* const kSynopsisSessionProgressUpdate = @"SynopsisSessionProgressUpdate";
+#import "OperationRowView.h"
+#import "SessionRowView.h"
 
 @interface SessionController ()
 @property (readwrite, strong) IBOutlet NSOutlineView* sessionOutlineView;
 @property (readwrite, strong) NSMutableArray<SessionStateWrapper*>* sessionStates;
+
 @end
 
 @implementation SessionController
@@ -22,14 +22,11 @@ NSString* const kSynopsisSessionProgressUpdate = @"SynopsisSessionProgressUpdate
 {
     self.sessionStates = [NSMutableArray new];
     
-    // Register for Session notifications - when a session is created or updated, we add it to our tracked sessionStates
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateSession:) name:kSynopsisSessionProgressUpdate object:nil];
+    NSNib* sessionRowControllerNib = [[NSNib alloc] initWithNibNamed:@"SessionRowView" bundle:[NSBundle mainBundle]];
+    [self.sessionOutlineView registerNib:sessionRowControllerNib forIdentifier:@"SessionRowView"];
 
-    NSNib* sessionRowControllerNib = [[NSNib alloc] initWithNibNamed:@"SessionRowController" bundle:[NSBundle mainBundle]];
-    [self.sessionOutlineView registerNib:sessionRowControllerNib forIdentifier:@"SessionRow"];
-
-    NSNib* operationRowControllerNib = [[NSNib alloc] initWithNibNamed:@"OperationRowController" bundle:[NSBundle mainBundle]];
-    [self.sessionOutlineView registerNib:operationRowControllerNib forIdentifier:@"OperationRow"];
+    NSNib* operationRowControllerNib = [[NSNib alloc] initWithNibNamed:@"OperationRowView" bundle:[NSBundle mainBundle]];
+    [self.sessionOutlineView registerNib:operationRowControllerNib forIdentifier:@"OperationRowView"];
 }
 
 - (void) addNewSession:(SessionStateWrapper*)newSessionState
@@ -50,26 +47,6 @@ NSString* const kSynopsisSessionProgressUpdate = @"SynopsisSessionProgressUpdate
 - (NSArray<SessionStateWrapper*>*)sessions
 {
     return [self.sessionStates copy];
-}
-
-- (void) updateSession:(NSNotification*)notification
-{
-    SessionStateWrapper* newSessionState = notification.object;
-    
-    if(newSessionState)
-    {
-        [self.sessionOutlineView reloadItem:newSessionState reloadChildren:YES];
-    }
-}
-
-- (void) updateOperation:(NSNotification*)notification
-{
-    SessionStateWrapper* newSessionState = notification.object;
-    
-    if(newSessionState)
-    {
-        [self.sessionOutlineView reloadItem:newSessionState reloadChildren:YES];
-    }
 }
 
 #pragma mark - NSOutlineViewDataSource -
@@ -110,28 +87,36 @@ NSString* const kSynopsisSessionProgressUpdate = @"SynopsisSessionProgressUpdate
 {
     if([item isKindOfClass:[SessionStateWrapper class]])
     {
-        return 35.0;
+        return 27.0;
     }
     
-    return 40.0;
+    return 49.0;
 }
 
 #pragma mark - NSOutlineViewDelegate -
 
 - (nullable NSView *)outlineView:(NSOutlineView *)outlineView viewForTableColumn:(nullable NSTableColumn *)tableColumn item:(id)item
 {
-    NSView* view = nil;
-    
     if([item isKindOfClass:[SessionStateWrapper class]])
     {
-        view = [self.sessionOutlineView makeViewWithIdentifier:@"SessionRow" owner:self];
+        SessionStateWrapper* sessionState = (SessionStateWrapper*)item;
+        SessionRowView* view = [self.sessionOutlineView makeViewWithIdentifier:@"SessionRowView" owner:nil];
+        [view setSessionState:sessionState];
+        [view beginSessionStateListening];
+        return view;
     }
+
     else if([item isKindOfClass:[OperationStateWrapper class]])
     {
-        view = [self.sessionOutlineView makeViewWithIdentifier:@"OperationRow" owner:self];
+        OperationStateWrapper* operationState = (OperationStateWrapper*)item;
+        OperationRowView* view = [self.sessionOutlineView makeViewWithIdentifier:@"OperationRowView" owner:nil];
+        [view setOperationState:operationState];
+        [view beginOperationStateListening];
+        
+        return view;
     }
     
-    return view;
+    return nil;
 }
 
 //- (nullable NSTableRowView *)outlineView:(NSOutlineView *)outlineView rowViewForItem:(id)item
@@ -142,11 +127,25 @@ NSString* const kSynopsisSessionProgressUpdate = @"SynopsisSessionProgressUpdate
 - (void)outlineView:(NSOutlineView *)outlineView didAddRowView:(NSTableRowView *)rowView forRow:(NSInteger)row
 {
     
+    
 }
 
 - (void)outlineView:(NSOutlineView *)outlineView didRemoveRowView:(NSTableRowView *)rowView forRow:(NSInteger)row
 {
-    
+    id view = [rowView viewAtColumn:0];
+
+    if([view isKindOfClass:[SessionRowView class]])
+    {
+        SessionRowView* operationRowView = (SessionRowView*)view;
+        [operationRowView endSessionStateListening];
+    }
+
+    if([view isKindOfClass:[OperationRowView class]])
+    {
+        OperationRowView* operationRowView = (OperationRowView*)view;
+        [operationRowView endOperationStateListening];
+    }
 }
+
 
 @end

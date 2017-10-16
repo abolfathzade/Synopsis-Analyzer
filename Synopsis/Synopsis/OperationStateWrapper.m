@@ -7,6 +7,10 @@
 //
 
 #import "OperationStateWrapper.h"
+#import "BaseTranscodeOperation.h"
+
+NSString * const kSynopsisOperationStateUpdate = @"kSynopsisOperationStateUpdate";
+
 
 @interface OperationStateWrapper ()
 
@@ -16,9 +20,11 @@
 @property (readwrite, copy) NSURL* tempDirectory;
 @property (readwrite, copy) NSURL* destinationDirectory;
 
-@property (readwrite, assign) NSUUID* operationID;
-@property (readwrite, assign) OperationState operationState;
-@property (readwrite, assign) CGFloat operationProgress;
+@property (atomic, readwrite, copy) NSUUID* operationID;
+//@property (atomic, readwrite, assign) OperationState operationState;
+//@property (atomic, readwrite, assign) CGFloat operationProgress;
+//@property (atomic, readwrite, assign) NSTimeInterval elapsedTime;
+//@property (atomic, readwrite, assign) NSTimeInterval remainingTime;
 @end
 
 @implementation OperationStateWrapper
@@ -35,12 +41,34 @@
         self.destinationDirectory = destinationDirectory;
         
         self.operationState = OperationStatePending;
-        self.operationProgress = 0.0;
+        self.operationProgress = DBL_MIN;
         self.operationID = [NSUUID UUID];
+        
+        // Subscribe to notifications from our NSOperation - filter to match UUID
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(operationStateUpdate:) name:kSynopsisTranscodeOperationProgressUpdate object:nil];
+
     }
     return self;
 }
 
+- (void) operationStateUpdate:(NSNotification*)notification
+{
+    NSDictionary* updateOperationDict = (NSDictionary*)notification.object;
+    
+    if(updateOperationDict)
+    {
+        NSUUID* updateOperationUUID = updateOperationDict[kSynopsisTranscodeOperationUUIDKey];
+        
+        if(updateOperationUUID && [self.operationID isEqualTo:updateOperationUUID])
+        {
+            self.operationProgress = [updateOperationDict[kSynopsisTranscodeOperationProgressKey] doubleValue];;
+            self.remainingTime = [updateOperationDict[kSynopsisTranscodeOperationTimeRemainingKey] doubleValue];
+        }
+    }
+    
+    // Post our own update
+    [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisOperationStateUpdate object:self];
+}
 
 
 @end

@@ -27,7 +27,9 @@
 @property (weak) IBOutlet DropFilesView* dropFilesView;
 
 @property (readwrite,strong) IBOutlet SessionController* sessionController;
+
 @property (atomic, readwrite, strong) NSOperationQueue* synopsisAsyncQueue;
+@property (atomic, readwrite, strong) NSOperationQueue* synopsisFileOpQueue;
 
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPlugins;
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPluginsInitializedForPrefs;
@@ -86,6 +88,11 @@
         self.synopsisAsyncQueue = [[NSOperationQueue alloc] init];
         self.synopsisAsyncQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
         self.synopsisAsyncQueue.qualityOfService = NSQualityOfServiceUserInitiated;
+
+        self.synopsisFileOpQueue = [[NSOperationQueue alloc] init];
+        self.synopsisFileOpQueue.maxConcurrentOperationCount = 1;
+        self.synopsisFileOpQueue.qualityOfService = NSQualityOfServiceBackground;
+
         
 //        // Serial metadata / passthrough writing queue
 //        self.metadataQueue = [[NSOperationQueue alloc] init];
@@ -302,8 +309,13 @@
 
 #pragma mark - Create Session State Wrapper
 
-- (void) analysisSessionForFiles:(NSArray *)URLArray sessionCompletionBlock:(void (^)(void))completionBlock
+- (void) analysisSessionForFiles:(NSArray<NSURL*> *)URLArray sessionCompletionBlock:(void (^)(void))completionBlock
 {
+    if(!URLArray && (URLArray.count == 0))
+    {
+        return;
+    }
+       
     SessionStateWrapper* session = [[SessionStateWrapper alloc] init];
     session.sessionCompletionBlock = completionBlock;
     
@@ -331,80 +343,77 @@
         makeTemp = YES;
     }
     
-    if(URLArray && URLArray.count && makeTemp)
+    for(NSURL* url in URLArray)
     {
-        for(NSURL* url in URLArray)
+        // Attempts to fix #84
+        [url removeAllCachedResourceValues];
+        NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
+        
+        if(tmpFolderURL == nil)
         {
-            // Attempts to fix #84
-            [url removeAllCachedResourceValues];
-            NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
-            
-            if(tmpFolderURL == nil)
+            tmpFolderURL = sourceDirectory;
+        }
+        
+        if(outFolderURL == nil)
+        {
+            outFolderURL = sourceDirectory;
+        }
+        
+        // Attempts to fix #84
+        [tmpFolderURL removeAllCachedResourceValues];
+        [outFolderURL removeAllCachedResourceValues];
+        [sourceDirectory removeAllCachedResourceValues];
+        
+        OperationType operationType = [self operationTypeForURL:url];
+        
+        [[LogController sharedLogController] appendVerboseLog:[@"Starting" stringByAppendingString:[self stringForOperationType:operationType] ] ];
+
+        switch (operationType)
+        {
+            case OperationTypeUnknown:
+                [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Could Not Deduce Analysis Type For %@", url]];
+                break;
+                
+            case OperationTypeFileInPlace:
+            case OperationTypeFileToTempToInPlace:
+            case OperationTypeFileToOutput:
+            case OperationTypeFileToTempToOutput:
             {
-                tmpFolderURL = sourceDirectory;
+                OperationStateWrapper* operationState = [[OperationStateWrapper alloc] initWithSourceFileURL:url
+                                                                                               operationType:operationType
+                                                                                                      preset:[self.prefsViewController defaultPreset]
+                                                                                               tempDirectory:tmpFolderURL
+                                                                                        destinationDirectory:outFolderURL];
+                [operationStates addObject:operationState];
+                break;
             }
-            
-            if(outFolderURL == nil)
+            case OperationTypeFolderInPlace:
             {
-                outFolderURL = sourceDirectory;
+                [operationStates addObjectsFromArray:[self operationStatesFolderInPlace:url]];
+                break;
             }
-            
-            // Attempts to fix #84
-            [tmpFolderURL removeAllCachedResourceValues];
-            [outFolderURL removeAllCachedResourceValues];
-            [sourceDirectory removeAllCachedResourceValues];
-            
-            OperationType operationType = [self operationTypeForURL:url];
-            
-            [[LogController sharedLogController] appendVerboseLog:[@"Starting" stringByAppendingString:[self stringForOperationType:operationType] ] ];
-
-            switch (operationType)
+            case OperationTypeFolderToTempToInPlace:
             {
-                case OperationTypeUnknown:
-                    [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Could Not Deduce Analysis Type For %@", url]];
-                    break;
-                    
-                case OperationTypeFileInPlace:
-                case OperationTypeFileToTempToInPlace:
-                case OperationTypeFileToOutput:
-                case OperationTypeFileToTempToOutput:
-                {
-                    OperationStateWrapper* operationState = [[OperationStateWrapper alloc] initWithSourceFileURL:url
-                                                                                                   operationType:operationType
-                                                                                                          preset:[self.prefsViewController defaultPreset]
-                                                                                                   tempDirectory:tmpFolderURL
-                                                                                            destinationDirectory:outFolderURL];
-                    [operationStates addObject:operationState];
-                    break;
-                }
-                case OperationTypeFolderInPlace:
-                {
-                    [operationStates addObjectsFromArray:[self operationStatesFolderInPlace:url]];
-                    break;
-                }
-                case OperationTypeFolderToTempToInPlace:
-                {
-                    [operationStates addObjectsFromArray:[self operationStatesFolderToTempToPlace:url tempFolder:tmpFolderURL]];
-                    break;
-                }
-                case OperationTypeFolderToTempToOutput:
-                {
-                    NSString* folderName = [url lastPathComponent];
+                [operationStates addObjectsFromArray:[self operationStatesFolderToTempToPlace:url tempFolder:tmpFolderURL]];
+                break;
+            }
+            case OperationTypeFolderToTempToOutput:
+            {
+                NSString* folderName = [url lastPathComponent];
 
-                    CopyOperationStateWrapper* copyState = [[CopyOperationStateWrapper alloc] init];
-                    copyState.srcURL = url;
-                    copyState.dstURL = [tmpFolderURL URLByAppendingPathComponent:folderName];
-                    [copyStates addObject:copyState];
-                    
-                    [operationStates addObjectsFromArray:[self operationStatesFolderToTempToOutput:url tempFolder:tmpFolderURL]];
+                CopyOperationStateWrapper* copyState = [[CopyOperationStateWrapper alloc] init];
+                copyState.srcURL = url;
+                copyState.dstURL = [tmpFolderURL URLByAppendingPathComponent:folderName];
+                [copyStates addObject:copyState];
+                
+                [operationStates addObjectsFromArray:[self operationStatesFolderToTempToOutput:url tempFolder:tmpFolderURL]];
 
-                    MoveOperationStateWrapper* moveState = [[MoveOperationStateWrapper alloc] init];
-                    moveState.srcURL = [tmpFolderURL URLByAppendingPathComponent:folderName];
-                    moveState.dstURL = [outFolderURL URLByAppendingPathComponent:folderName];
-                    [moveStates addObject:moveState];
-                    
-                    break;
-                }
+                MoveOperationStateWrapper* moveState = [[MoveOperationStateWrapper alloc] init];
+                moveState.srcURL = [tmpFolderURL URLByAppendingPathComponent:folderName];
+                moveState.dstURL = [outFolderURL URLByAppendingPathComponent:folderName];
+                [moveStates addObject:moveState];
+                
+                break;
             }
         }
     }
@@ -412,6 +421,10 @@
     session.sessionOperationStates = operationStates;
     session.fileCopyOperationStates = copyStates;
     session.fileMoveOperationStates = moveStates;
+    
+    NSString* sessionName = [NSString stringWithFormat:@"%@, %lu items", [operationStates[0].sourceFileURL lastPathComponent], (unsigned long)operationStates.count];
+    session.sessionName = sessionName;
+    
     [self.sessionController addNewSession:session];
     
     // Temporary - runs analysis immediately
@@ -553,7 +566,7 @@
     // Enqueue Operations
     for(NSBlockOperation* copyOp in copyOperations)
     {
-        [self.synopsisAsyncQueue addOperation:copyOp];
+        [self.synopsisFileOpQueue addOperation:copyOp];
     }
 
     for(BaseTranscodeOperation* operation in mediaOperations)
@@ -563,18 +576,10 @@
     
     for(NSBlockOperation* moveOp in moveOperations)
     {
-        [self.synopsisAsyncQueue addOperation:moveOp];
+        [self.synopsisFileOpQueue addOperation:moveOp];
     }
     
-    [self.synopsisAsyncQueue addOperation:completionOperation];
-}
-
-- (NSArray<BaseTranscodeOperation*>*) createOperationsFromOperationState:(OperationStateWrapper*)state
-{
-    return [self enqueueFileForTranscode:state.sourceFileURL
-                                  preset:state.preset
-                           tempDirectory:state.tempDirectory
-                         outputDirectory:state.destinationDirectory];
+    [self.synopsisFileOpQueue addOperation:completionOperation];
 }
 
 #pragma mark - Create Operation State Wrappers
@@ -728,9 +733,13 @@
 
 #pragma mark - Create NSOperations
 
-- (NSArray<BaseTranscodeOperation*>*) enqueueFileForTranscode:(NSURL*)fileURL preset:(PresetObject*)currentPreset tempDirectory:(NSURL*)tempDirectory outputDirectory:(NSURL*)outputDirectory
+- (NSArray<BaseTranscodeOperation*>*) createOperationsFromOperationState:(OperationStateWrapper*)state
 {
-    NSUUID* encodeUUID = [NSUUID UUID];
+    NSUUID* encodeUUID = state.operationID;
+    NSURL* fileURL = state.sourceFileURL;
+    NSURL* tempDirectory = state.tempDirectory;
+    NSURL* outputDirectory = state.destinationDirectory;
+    PresetObject* currentPreset = state.preset;
     
     NSString* sourceFileName = [fileURL lastPathComponent];
     sourceFileName = [sourceFileName stringByDeletingPathExtension];

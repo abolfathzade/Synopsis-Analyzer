@@ -17,8 +17,8 @@
 
 @property (readwrite, copy) NSString* sessionName;
 @property (readonly, copy) NSUUID* sessionID;
-@property (readonly, assign) SessionState sessionState;
-@property (readonly, assign) CGFloat sessionProgress;
+@property (readwrite, assign) SessionState sessionState;
+@property (readwrite, assign) CGFloat sessionProgress;
 @property (readwrite, copy) NSArray<OperationStateWrapper*>* sessionOperationStates;
 @property (readwrite, copy) NSArray<CopyOperationStateWrapper*>* fileCopyOperationStates;
 @property (readwrite, copy) NSArray<MoveOperationStateWrapper*>* fileMoveOperationStates;

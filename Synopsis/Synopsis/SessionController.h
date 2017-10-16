@@ -9,8 +9,6 @@
 #import <Cocoa/Cocoa.h>
 #import "SessionStateWrapper.h"
 
-//extern NSString* const kSynopsisSessionAvailable;
-extern NSString* const kSynopsisSessionProgressUpdate;
 
 @interface SessionController : NSObject<NSOutlineViewDelegate,NSOutlineViewDataSource>
 

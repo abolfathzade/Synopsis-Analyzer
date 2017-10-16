@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13196" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13196"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+        <capability name="stacking Non-gravity area distributions on NSStackView" minToolsVersion="7.0" minSystemVersion="10.11"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner">
+            <connections>
+                <outlet property="name" destination="1hB-Dk-8aV" id="ZNc-cP-GoY"/>
+                <outlet property="progress" destination="dia-k5-ilV" id="5tG-re-fnF"/>
+                <outlet property="timeRemaining" destination="XKX-Ak-zpx" id="33I-Ps-PIA"/>
+                <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView identifier="OperationRowView" id="Hz6-mo-xeY" customClass="OperationRowView">
+            <rect key="frame" x="0.0" y="0.0" width="663" height="49"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
+            <subviews>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1hB-Dk-8aV">
+                    <rect key="frame" x="18" y="28" width="497" height="14"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label" id="BZg-sA-s0V">
+                        <font key="font" metaFont="smallSystem"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="13" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GdZ-gv-qYe">
+                    <rect key="frame" x="20" y="6" width="623" height="16"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <subviews>
+                        <progressIndicator wantsLayer="YES" maxValue="1" controlSize="small" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="dia-k5-ilV">
+                            <rect key="frame" x="0.0" y="2" width="461" height="12"/>
+                            <constraints>
+                                <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="316" id="wWJ-dn-65s"/>
+                            </constraints>
+                        </progressIndicator>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XKX-Ak-zpx">
+                            <rect key="frame" x="472" y="1" width="124" height="14"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="120" id="FUO-0d-6Dh"/>
+                            </constraints>
+                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label" id="x56-ug-prm">
+                                <font key="font" metaFont="smallSystem"/>
+                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                        <button translatesAutoresizingMaskIntoConstraints="NO" id="7qh-MJ-H3H">
+                            <rect key="frame" x="607" y="0.0" width="16" height="16"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="16" id="NEY-Vz-P1i"/>
+                                <constraint firstAttribute="width" constant="16" id="PJk-UL-7Lz"/>
+                            </constraints>
+                            <buttonCell key="cell" type="square" alternateTitle="NSFollowLinkFreestandingTemplate" bezelStyle="shadowlessSquare" image="NSFollowLinkFreestandingTemplate" imagePosition="overlaps" alignment="center" controlSize="small" imageScaling="proportionallyUpOrDown" inset="2" id="NNf-TB-ATM">
+                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" metaFont="smallSystem"/>
+                            </buttonCell>
+                        </button>
+                    </subviews>
+                    <visibilityPriorities>
+                        <integer value="1000"/>
+                        <integer value="1000"/>
+                        <integer value="1000"/>
+                    </visibilityPriorities>
+                    <customSpacing>
+                        <real value="3.4028234663852886e+38"/>
+                        <real value="3.4028234663852886e+38"/>
+                        <real value="3.4028234663852886e+38"/>
+                    </customSpacing>
+                </stackView>
+            </subviews>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="7qh-MJ-H3H" secondAttribute="trailing" constant="20" id="XPU-9F-Bga"/>
+                <constraint firstItem="dia-k5-ilV" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="20" id="wvS-Ab-gnO"/>
+            </constraints>
+            <connections>
+                <outlet property="name" destination="1hB-Dk-8aV" id="IsU-5t-Txd"/>
+                <outlet property="progress" destination="dia-k5-ilV" id="nyq-Dx-BF3"/>
+                <outlet property="timeRemaining" destination="XKX-Ak-zpx" id="aSV-5o-XlN"/>
+            </connections>
+            <point key="canvasLocation" x="-9" y="225"/>
+        </customView>
+        <userDefaultsController representsSharedInstance="YES" id="p16-0W-UcI"/>
+    </objects>
+    <resources>
+        <image name="NSFollowLinkFreestandingTemplate" width="14" height="14"/>
+    </resources>
+</document>

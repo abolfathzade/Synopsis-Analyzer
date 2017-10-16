@@ -33,6 +33,8 @@
 		1B61BD061ACF371A0013418D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1B61BD081ACF371A0013418D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
 		1B61BD091ACF37200013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
+		1B6A628F1F9523910045F1BD /* OperationRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B6A628E1F9523910045F1BD /* OperationRowView.m */; };
+		1B6A62941F953BBB0045F1BD /* SessionRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B6A62931F953BBB0045F1BD /* SessionRowView.m */; };
 		1B7351041DEF4FE40053BC06 /* Synopsis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; };
 		1B7351061DEF50300053BC06 /* Synopsis.framework in Copy Files */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B805E2C1B0114D0005D7354 /* ProgressTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */; };
@@ -57,10 +59,8 @@
 		1BBED6331F9149E8003CE9C4 /* SessionStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */; };
 		1BBED6361F914C7D003CE9C4 /* OperationStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */; };
 		1BBED63A1F919F44003CE9C4 /* SessionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6391F919F44003CE9C4 /* SessionController.m */; };
-		1BBED63E1F91BE55003CE9C4 /* SessionRowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED63C1F91BE55003CE9C4 /* SessionRowController.m */; };
-		1BBED63F1F91BE55003CE9C4 /* SessionRowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BBED63D1F91BE55003CE9C4 /* SessionRowController.xib */; };
-		1BBED6431F91BE7C003CE9C4 /* OperationRowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6411F91BE7C003CE9C4 /* OperationRowController.m */; };
-		1BBED6441F91BE7C003CE9C4 /* OperationRowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BBED6421F91BE7C003CE9C4 /* OperationRowController.xib */; };
+		1BBED63F1F91BE55003CE9C4 /* SessionRowView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BBED63D1F91BE55003CE9C4 /* SessionRowView.xib */; };
+		1BBED6441F91BE7C003CE9C4 /* OperationRowView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BBED6421F91BE7C003CE9C4 /* OperationRowView.xib */; };
 		1BBED6471F94FE54003CE9C4 /* FileOperationStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6461F94FE54003CE9C4 /* FileOperationStateWrapper.m */; };
 		1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 1BC71D431F150CA6006DD7DC /* Credits.rtf */; };
 		1BC71E871F17E8FE006DD7DC /* hap.c in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71DDB1F17E8FE006DD7DC /* hap.c */; };
@@ -217,6 +217,10 @@
 		1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+JSONString.m"; sourceTree = "<group>"; };
 		1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StandardAnalyzer.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B61BD071ACF371A0013418D /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		1B6A628D1F9523910045F1BD /* OperationRowView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OperationRowView.h; sourceTree = "<group>"; };
+		1B6A628E1F9523910045F1BD /* OperationRowView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OperationRowView.m; sourceTree = "<group>"; };
+		1B6A62921F953BBB0045F1BD /* SessionRowView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SessionRowView.h; sourceTree = "<group>"; };
+		1B6A62931F953BBB0045F1BD /* SessionRowView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionRowView.m; sourceTree = "<group>"; };
 		1B7350F91DEF4FAE0053BC06 /* Synopsis-Framework.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Synopsis-Framework.xcodeproj"; path = "Synopsis-Framework/Synopsis/Synopsis-Framework.xcodeproj"; sourceTree = "<group>"; };
 		1B805E2A1B0114D0005D7354 /* ProgressTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTableViewController.h; sourceTree = "<group>"; };
 		1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTableViewController.m; sourceTree = "<group>"; };
@@ -257,12 +261,8 @@
 		1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OperationStateWrapper.m; sourceTree = "<group>"; };
 		1BBED6381F919F44003CE9C4 /* SessionController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SessionController.h; sourceTree = "<group>"; };
 		1BBED6391F919F44003CE9C4 /* SessionController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionController.m; sourceTree = "<group>"; };
-		1BBED63B1F91BE55003CE9C4 /* SessionRowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SessionRowController.h; sourceTree = "<group>"; };
-		1BBED63C1F91BE55003CE9C4 /* SessionRowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionRowController.m; sourceTree = "<group>"; };
-		1BBED63D1F91BE55003CE9C4 /* SessionRowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SessionRowController.xib; sourceTree = "<group>"; };
-		1BBED6401F91BE7C003CE9C4 /* OperationRowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OperationRowController.h; sourceTree = "<group>"; };
-		1BBED6411F91BE7C003CE9C4 /* OperationRowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OperationRowController.m; sourceTree = "<group>"; };
-		1BBED6421F91BE7C003CE9C4 /* OperationRowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OperationRowController.xib; sourceTree = "<group>"; };
+		1BBED63D1F91BE55003CE9C4 /* SessionRowView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SessionRowView.xib; sourceTree = "<group>"; };
+		1BBED6421F91BE7C003CE9C4 /* OperationRowView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OperationRowView.xib; sourceTree = "<group>"; };
 		1BBED6451F94FE54003CE9C4 /* FileOperationStateWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileOperationStateWrapper.h; sourceTree = "<group>"; };
 		1BBED6461F94FE54003CE9C4 /* FileOperationStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileOperationStateWrapper.m; sourceTree = "<group>"; };
 		1BC71D431F150CA6006DD7DC /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
@@ -590,12 +590,20 @@
 			children = (
 				1BBED6381F919F44003CE9C4 /* SessionController.h */,
 				1BBED6391F919F44003CE9C4 /* SessionController.m */,
-				1BBED63B1F91BE55003CE9C4 /* SessionRowController.h */,
-				1BBED63C1F91BE55003CE9C4 /* SessionRowController.m */,
-				1BBED63D1F91BE55003CE9C4 /* SessionRowController.xib */,
-				1BBED6401F91BE7C003CE9C4 /* OperationRowController.h */,
-				1BBED6411F91BE7C003CE9C4 /* OperationRowController.m */,
-				1BBED6421F91BE7C003CE9C4 /* OperationRowController.xib */,
+				1B6A62921F953BBB0045F1BD /* SessionRowView.h */,
+				1B6A62931F953BBB0045F1BD /* SessionRowView.m */,
+				1BBED63D1F91BE55003CE9C4 /* SessionRowView.xib */,
+				1B6A628D1F9523910045F1BD /* OperationRowView.h */,
+				1B6A628E1F9523910045F1BD /* OperationRowView.m */,
+				1BBED6421F91BE7C003CE9C4 /* OperationRowView.xib */,
+				1BBED6481F9512BA003CE9C4 /* State Tracking */,
+			);
+			name = "OutlineView & Cells";
+			sourceTree = "<group>";
+		};
+		1BBED6481F9512BA003CE9C4 /* State Tracking */ = {
+			isa = PBXGroup;
+			children = (
 				1BBED6311F9149E8003CE9C4 /* SessionStateWrapper.h */,
 				1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */,
 				1BBED6341F914C7D003CE9C4 /* OperationStateWrapper.h */,
@@ -603,7 +611,7 @@
 				1BBED6451F94FE54003CE9C4 /* FileOperationStateWrapper.h */,
 				1BBED6461F94FE54003CE9C4 /* FileOperationStateWrapper.m */,
 			);
-			name = "OutlineView & Cells";
+			name = "State Tracking";
 			sourceTree = "<group>";
 		};
 		1BC71DD71F17E8C6006DD7DC /* Third Party */ = {
@@ -1171,8 +1179,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1B3233CC1C2EFDC500C9CF5E /* PreferencesPresetViewController.xib in Resources */,
-				1BBED6441F91BE7C003CE9C4 /* OperationRowController.xib in Resources */,
-				1BBED63F1F91BE55003CE9C4 /* SessionRowController.xib in Resources */,
+				1BBED6441F91BE7C003CE9C4 /* OperationRowView.xib in Resources */,
+				1BBED63F1F91BE55003CE9C4 /* SessionRowView.xib in Resources */,
 				1B805E2F1B012309005D7354 /* ProgressTableViewCellSource.xib in Resources */,
 				1BA76C421F83F0C10038F6AD /* PreferencesFileViewController.xib in Resources */,
 				1BA4D19A1C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib in Resources */,
@@ -1231,6 +1239,7 @@
 				1BC71ED61F17E8FE006DD7DC /* GLDXTEncoder.c in Sources */,
 				1BC71ED91F17E8FE006DD7DC /* SquishEncoder.c in Sources */,
 				1BBED6361F914C7D003CE9C4 /* OperationStateWrapper.m in Sources */,
+				1B6A62941F953BBB0045F1BD /* SessionRowView.m in Sources */,
 				1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */,
 				1BC71EDB1F17E8FE006DD7DC /* YCoCgDXTEncoder.c in Sources */,
 				1BC71EA01F17E8FE006DD7DC /* snappy-sinksource.cc in Sources */,
@@ -1245,7 +1254,6 @@
 				1BC71ED41F17E8FE006DD7DC /* DXTBlocks.c in Sources */,
 				1BC71ECB1F17E8FE006DD7DC /* AVAssetAdditions.m in Sources */,
 				1BBED63A1F919F44003CE9C4 /* SessionController.m in Sources */,
-				1BBED63E1F91BE55003CE9C4 /* SessionRowController.m in Sources */,
 				1BC71ED51F17E8FE006DD7DC /* DXTBlocksSSSE3.c in Sources */,
 				1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */,
 				1BC71ED11F17E8FE006DD7DC /* HapDecoderFrame.m in Sources */,
@@ -1268,7 +1276,6 @@
 				1BC71EA91F17E8FE006DD7DC /* alpha.cpp in Sources */,
 				1BC71EAF1F17E8FE006DD7DC /* colourset.cpp in Sources */,
 				1BC71EA11F17E8FE006DD7DC /* snappy-stubs-internal.cc in Sources */,
-				1BBED6431F91BE7C003CE9C4 /* OperationRowController.m in Sources */,
 				1BC71EDA1F17E8FE006DD7DC /* YCoCgDXT.cpp in Sources */,
 				1B006DE71B0AE1E900B7A99C /* CustomVisualEffectView.m in Sources */,
 				1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */,
@@ -1278,6 +1285,7 @@
 				1B3233C61C2EFDB200C9CF5E /* PreferencesGeneralViewController.m in Sources */,
 				1BC71EB71F17E8FE006DD7DC /* maths.cpp in Sources */,
 				1B3233DC1C31F8F200C9CF5E /* PresetGroup.m in Sources */,
+				1B6A628F1F9523910045F1BD /* OperationRowView.m in Sources */,
 				1BA76C411F83F0C10038F6AD /* PreferencesFileViewController.m in Sources */,
 				1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */,
 				1BC71EAD1F17E8FE006DD7DC /* colourblock.cpp in Sources */,
