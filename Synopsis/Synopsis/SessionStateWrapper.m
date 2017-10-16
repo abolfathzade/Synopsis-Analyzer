@@ -13,21 +13,19 @@
 @property (readwrite, copy) NSString* sessionName;
 @property (readwrite, assign) SessionState sessionState;
 @property (readwrite, assign) CGFloat sessionProgress;
-@property (readwrite, strong) NSArray<OperationStateWrapper*>* sessionOperationStates;
 @end
 
 @implementation SessionStateWrapper
 
-- (instancetype) initWithSessionOperations:(NSArray<OperationStateWrapper*>*)operations
+//- (instancetype) initWithSessionOperations:(NSArray<OperationStateWrapper*>*)operations
+- (instancetype) init
 {
     self = [super init];
     if(self)
     {
-//        self.sessionName = sessionName;
         self.sessionState = SessionStateUnknown;
         self.sessionID = [NSUUID UUID];
         self.sessionProgress = 0.0;
-        self.sessionOperationStates = operations;
         // register for
     }
     return self;

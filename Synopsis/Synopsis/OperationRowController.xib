@@ -15,7 +15,7 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView identifier="OperationRow" id="Hz6-mo-xeY">
             <rect key="frame" x="0.0" y="0.0" width="480" height="60"/>
-            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
             <subviews>
                 <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="dia-k5-ilV">
                     <rect key="frame" x="105" y="19" width="290" height="20"/>

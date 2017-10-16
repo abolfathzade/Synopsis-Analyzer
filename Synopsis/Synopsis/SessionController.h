@@ -15,5 +15,5 @@ extern NSString* const kSynopsisSessionProgressUpdate;
 @interface SessionController : NSObject<NSOutlineViewDelegate,NSOutlineViewDataSource>
 
 - (void) addNewSession:(SessionStateWrapper*)newSessionState;
-
+- (NSArray<SessionStateWrapper*>*)sessions;
 @end

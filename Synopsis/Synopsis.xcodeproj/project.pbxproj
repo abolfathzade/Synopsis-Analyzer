@@ -61,6 +61,7 @@
 		1BBED63F1F91BE55003CE9C4 /* SessionRowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BBED63D1F91BE55003CE9C4 /* SessionRowController.xib */; };
 		1BBED6431F91BE7C003CE9C4 /* OperationRowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6411F91BE7C003CE9C4 /* OperationRowController.m */; };
 		1BBED6441F91BE7C003CE9C4 /* OperationRowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BBED6421F91BE7C003CE9C4 /* OperationRowController.xib */; };
+		1BBED6471F94FE54003CE9C4 /* FileOperationStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6461F94FE54003CE9C4 /* FileOperationStateWrapper.m */; };
 		1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 1BC71D431F150CA6006DD7DC /* Credits.rtf */; };
 		1BC71E871F17E8FE006DD7DC /* hap.c in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71DDB1F17E8FE006DD7DC /* hap.c */; };
 		1BC71E9F1F17E8FE006DD7DC /* snappy-c.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71DFC1F17E8FE006DD7DC /* snappy-c.cc */; };
@@ -262,6 +263,8 @@
 		1BBED6401F91BE7C003CE9C4 /* OperationRowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OperationRowController.h; sourceTree = "<group>"; };
 		1BBED6411F91BE7C003CE9C4 /* OperationRowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OperationRowController.m; sourceTree = "<group>"; };
 		1BBED6421F91BE7C003CE9C4 /* OperationRowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OperationRowController.xib; sourceTree = "<group>"; };
+		1BBED6451F94FE54003CE9C4 /* FileOperationStateWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileOperationStateWrapper.h; sourceTree = "<group>"; };
+		1BBED6461F94FE54003CE9C4 /* FileOperationStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileOperationStateWrapper.m; sourceTree = "<group>"; };
 		1BC71D431F150CA6006DD7DC /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		1BC71DDB1F17E8FE006DD7DC /* hap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hap.c; sourceTree = "<group>"; };
 		1BC71DDC1F17E8FE006DD7DC /* hap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hap.h; sourceTree = "<group>"; };
@@ -597,6 +600,8 @@
 				1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */,
 				1BBED6341F914C7D003CE9C4 /* OperationStateWrapper.h */,
 				1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */,
+				1BBED6451F94FE54003CE9C4 /* FileOperationStateWrapper.h */,
+				1BBED6461F94FE54003CE9C4 /* FileOperationStateWrapper.m */,
 			);
 			name = "OutlineView & Cells";
 			sourceTree = "<group>";
@@ -1232,6 +1237,7 @@
 				1BC71ED81F17E8FE006DD7DC /* squish-c.cpp in Sources */,
 				1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */,
 				1BC71ED21F17E8FE006DD7DC /* HapEncoderFrame.m in Sources */,
+				1BBED6471F94FE54003CE9C4 /* FileOperationStateWrapper.m in Sources */,
 				1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */,
 				1BC71ED71F17E8FE006DD7DC /* HapCodecGL.c in Sources */,
 				1BC71EBD1F17E8FE006DD7DC /* squish.cpp in Sources */,

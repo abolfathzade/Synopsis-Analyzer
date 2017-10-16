@@ -46,6 +46,12 @@ NSString* const kSynopsisSessionProgressUpdate = @"SynopsisSessionProgressUpdate
     }
 }
 
+
+- (NSArray<SessionStateWrapper*>*)sessions
+{
+    return [self.sessionStates copy];
+}
+
 - (void) updateSession:(NSNotification*)notification
 {
     SessionStateWrapper* newSessionState = notification.object;
@@ -70,14 +76,13 @@ NSString* const kSynopsisSessionProgressUpdate = @"SynopsisSessionProgressUpdate
 
 - (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(nullable id)item
 {
-    
     if([item isKindOfClass:[SessionStateWrapper class]])
     {
         SessionStateWrapper* sessionState = (SessionStateWrapper*)item;
         return sessionState.sessionOperationStates.count;
     }
     
-        return self.sessionStates.count;
+    return self.sessionStates.count;
 }
 
 - (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(nullable id)item
@@ -109,10 +114,7 @@ NSString* const kSynopsisSessionProgressUpdate = @"SynopsisSessionProgressUpdate
     }
     
     return 40.0;
-
 }
-
-
 
 #pragma mark - NSOutlineViewDelegate -
 
