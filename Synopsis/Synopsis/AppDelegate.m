@@ -395,29 +395,6 @@
                     copyState.srcURL = url;
                     copyState.dstURL = [tmpFolderURL URLByAppendingPathComponent:folderName];
                     [copyStates addObject:copyState];
-                    //
-                    //    // Attempts to fix #84
-                    //    [directoryToEncode removeAllCachedResourceValues];
-                    //
-                    //    // Mirror the contents of our directory to encode - Our NSFileManagerDelegate handles knowing what to copy or not (only folders, or non media, or media too)
-                    //    NSString* directoryToEncodeName = [directoryToEncode lastPathComponent];
-                    //
-                    //    BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:directoryToEncode];
-                    //    BOOL copySuccessful = NO;
-                    //    NSError* error = nil;
-                    //
-                    //    if(useRemotePath)
-                    //    {
-                    //        [[LogController sharedLogController] appendVerboseLog:[@"Using Remote File Helper for " stringByAppendingString:directoryToEncode.path]];
-                    //        copySuccessful = [self.remoteFileHelper safelyCopyFileURLOnRemoteFileSystem:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error];
-                    //    }
-                    //    else
-                    //    {
-                    //        copySuccessful = [self.fileManager copyItemAtURL:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error];
-                    //    }
-                    //
-                    //    if(copySuccessful)
-                    
                     
                     [operationStates addObjectsFromArray:[self operationStatesFolderToTempToOutput:url tempFolder:tmpFolderURL]];
 
@@ -491,6 +468,8 @@
             // Attempts to fix #84
             [source removeAllCachedResourceValues];
             
+            // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
+            
             BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:source];
             BOOL copySuccessful = NO;
             NSError* error = nil;
@@ -525,7 +504,7 @@
 
         NSBlockOperation* moveOperation = [NSBlockOperation blockOperationWithBlock:^{
             
-            // TODO: This thread safe to access our File Manager instance ona BG thread?
+            // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
             NSError* error = nil;
             if([self.fileManager moveItemAtURL:source
                                          toURL:dest error:&error])
