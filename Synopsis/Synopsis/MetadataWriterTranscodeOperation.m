@@ -64,9 +64,9 @@
 
 @implementation MetadataWriterTranscodeOperation
 
-- (id) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL
+- (id) initWithOperationState:(OperationStateWrapper*)operationState sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL
 {
-    self = [super initWithUUID:uuid sourceURL:sourceURL destinationURL:destinationURL];
+    self = [super initWithOperationState:operationState sourceURL:sourceURL destinationURL:destinationURL];
     if(self)
     {
 //        if(metadataOptions == nil)

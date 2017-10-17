@@ -44,31 +44,47 @@ NSString * const kSynopsisOperationStateUpdate = @"kSynopsisOperationStateUpdate
         self.operationProgress = DBL_MIN;
         self.operationID = [NSUUID UUID];
         
-        // Subscribe to notifications from our NSOperation - filter to match UUID
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(operationStateUpdate:) name:kSynopsisTranscodeOperationProgressUpdate object:nil];
+//        // Subscribe to notifications from our NSOperation - filter to match UUID
+//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(operationStateUpdate:) name:kSynopsisTranscodeOperationProgressUpdate object:nil];
 
     }
     return self;
 }
 
-- (void) operationStateUpdate:(NSNotification*)notification
+- (BOOL)isEqual:(id)object
 {
-    NSDictionary* updateOperationDict = (NSDictionary*)notification.object;
-    
-    if(updateOperationDict)
+    if([object isKindOfClass:[OperationStateWrapper class]])
     {
-        NSUUID* updateOperationUUID = updateOperationDict[kSynopsisTranscodeOperationUUIDKey];
-        
-        if(updateOperationUUID && [self.operationID isEqualTo:updateOperationUUID])
-        {
-            self.operationProgress = [updateOperationDict[kSynopsisTranscodeOperationProgressKey] doubleValue];;
-            self.remainingTime = [updateOperationDict[kSynopsisTranscodeOperationTimeRemainingKey] doubleValue];
-        }
+        OperationStateWrapper* other = (OperationStateWrapper*)object;
+        return [self.operationID isEqual:other.operationID];
     }
-    
-    // Post our own update
-    [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisOperationStateUpdate object:self];
+
+    return NO;
 }
+
+- (void) dealloc
+{
+//    [[NSNotificationCenter defaultCenter] removeObserver:self name:kSynopsisTranscodeOperationProgressUpdate object:nil];
+}
+
+//- (void) operationStateUpdate:(NSNotification*)notification
+//{
+//    NSDictionary* updateOperationDict = (NSDictionary*)notification.object;
+//    
+//    if(updateOperationDict)
+//    {
+//        NSUUID* updateOperationUUID = updateOperationDict[kSynopsisTranscodeOperationUUIDKey];
+//        
+//        if(updateOperationUUID && [self.operationID isEqualTo:updateOperationUUID])
+//        {
+//            self.operationProgress = [updateOperationDict[kSynopsisTranscodeOperationProgressKey] doubleValue];;
+//            self.remainingTime = [updateOperationDict[kSynopsisTranscodeOperationTimeRemainingKey] doubleValue];
+//        }
+//    }
+//    
+//    // Post our own update
+//    [[NSNotificationCenter defaultCenter] postNotificationName:kSynopsisOperationStateUpdate object:self];
+//}
 
 
 @end

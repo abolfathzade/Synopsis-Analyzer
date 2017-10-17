@@ -109,9 +109,9 @@
 
 @implementation AnalysisAndTranscodeOperation
 
-- (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions
+- (instancetype) initWithOperationState:(OperationStateWrapper*)operationState sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL transcodeOptions:(NSDictionary*)transcodeOptions
 {
-    self = [super initWithUUID:uuid sourceURL:sourceURL destinationURL:destinationURL];
+    self = [super initWithOperationState:operationState sourceURL:sourceURL destinationURL:destinationURL];
     if(self)
     {
         if(transcodeOptions == nil)

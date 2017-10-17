@@ -9,27 +9,28 @@
 #import <Synopsis/Synopsis.h>
 #import <Foundation/Foundation.h>
 #import "LogController.h"
+#import "OperationStateWrapper.h"
 
 // Notification Key, used when our enqueing fires off a new operation
 
-extern NSString* const kSynopsisNewTranscodeOperationAvailable;
+//extern NSString* const kSynopsisNewTranscodeOperationAvailable;
+//extern NSString* const kSynopsisTranscodeOperationProgressUpdate;
 
 // Above Notifications sends a user info object that is our operations
 // "descriptionDictionary"
 
 // keys for descriptionDictionary
-extern NSString* const kSynopsisTranscodeOperationUUIDKey; // NSUUID
-extern NSString* const kSynopsisTranscodeOperationSourceURLKey; // NSURL
-extern NSString* const kSynopsisTranscodeOperationDestinationURLKey; // NSURL
-
-// Notification used when an transcode operation updates
-extern NSString* const kSynopsisTranscodeOperationProgressUpdate;
-
-// contains UUID key from above
-extern NSString* const kSynopsisTranscodeOperationProgressKey; // NSNumber current progress
-extern NSString* const kSynopsisTranscodeOperationTimeElapsedKey; // NSNumber as NSTimeInterval
-extern NSString* const kSynopsisTranscodeOperationTimeRemainingKey; // NSNumber as NSTimeInterval
-extern NSString* const kSynopsisTranscodeOperationMetadataKey; // NSDictionary of available analyzed metadata - may be nil
+//extern NSString* const kSynopsisTranscodeOperationUUIDKey; // NSUUID
+//extern NSString* const kSynopsisTranscodeOperationSourceURLKey; // NSURL
+//extern NSString* const kSynopsisTranscodeOperationDestinationURLKey; // NSURL
+//
+//// Notification used when an transcode operation updates
+//
+//// contains UUID key from above
+//extern NSString* const kSynopsisTranscodeOperationProgressKey; // NSNumber current progress
+//extern NSString* const kSynopsisTranscodeOperationTimeElapsedKey; // NSNumber as NSTimeInterval
+//extern NSString* const kSynopsisTranscodeOperationTimeRemainingKey; // NSNumber as NSTimeInterval
+//extern NSString* const kSynopsisTranscodeOperationMetadataKey; // NSDictionary of available analyzed metadata - may be nil
 
 
 // We have a 2 pass analysis and decode (and possibly encode) system:
@@ -98,13 +99,9 @@ extern NSString * const kSynopsisAnalyzedMetadataExportOptionKey;
 
 
 @interface BaseTranscodeOperation : NSOperation
-@property (atomic, readonly, strong) NSUUID* uuid;
-@property (atomic, readonly, strong) NSDictionary* descriptionDictionary;
 @property (atomic, readonly, strong) NSURL* sourceURL;
 @property (atomic, readonly, strong) NSURL* destinationURL;
 @property (atomic, readonly) CGFloat progress;
-@property (atomic, readonly) NSTimeInterval elapsedTime;
-@property (atomic, readonly) NSTimeInterval remainingTime;
 
 // internal use - exposed for subclasses
 @property (atomic, readwrite) CGFloat videoProgress;
@@ -117,7 +114,7 @@ extern NSString * const kSynopsisAnalyzedMetadataExportOptionKey;
 //// Every progress update tick this block is fired - update your ui on the main queue here.
 //@property (copy) void (^progressBlock)(CGFloat progress);
 
-- (instancetype) initWithUUID:(NSUUID*)uuid sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL;
+- (instancetype) initWithOperationState:(OperationStateWrapper*)operationState sourceURL:(NSURL*)sourceURL destinationURL:(NSURL*)destinationURL;
 - (void) start NS_REQUIRES_SUPER;
 - (void) main NS_REQUIRES_SUPER;
 

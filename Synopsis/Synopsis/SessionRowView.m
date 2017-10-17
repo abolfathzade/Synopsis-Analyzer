@@ -17,14 +17,17 @@
 
 - (void) beginSessionStateListening
 {
+    self.name.stringValue = self.sessionState.sessionName;
     [self updateUIFromState];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionStateUpdate:) name:kSynopsisOperationStateUpdate object:nil];
+    for(OperationStateWrapper* operationState in self.sessionState.sessionOperationStates)
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sessionStateUpdate:) name:kSynopsisOperationStateUpdate object:operationState];
 }
 
 - (void) endSessionStateListening
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:kSynopsisOperationStateUpdate object:nil];
+    for(OperationStateWrapper* operationState in self.sessionState.sessionOperationStates)
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:kSynopsisOperationStateUpdate object:operationState];
 
     self.sessionState = nil;
     self.progress.doubleValue = 0.0;
@@ -33,22 +36,22 @@
 
 - (void) sessionStateUpdate:(NSNotification*)notification
 {
-    OperationStateWrapper* updatedState = (OperationStateWrapper*)notification.object;
-
-    if(updatedState)
-    {
-        BOOL sessionContainsOperation = NO;
-        
-        for(OperationStateWrapper* operationState in self.sessionState.sessionOperationStates)
-        {
-            if([updatedState.operationID isEqual:operationState.operationID])
-            {
-                sessionContainsOperation = YES;
-                break;
-            }
-        }
-        
-        if(sessionContainsOperation)
+//    OperationStateWrapper* updatedState = (OperationStateWrapper*)notification.object;
+//
+//    if(updatedState)
+//    {
+//        BOOL sessionContainsOperation = NO;
+//
+//        for(OperationStateWrapper* operationState in self.sessionState.sessionOperationStates)
+//        {
+//            if([updatedState isEqual:operationState])
+//            {
+//                sessionContainsOperation = YES;
+//                break;
+//            }
+//        }
+//
+//        if(sessionContainsOperation)
         {
             double progress = 0.0;
             for(OperationStateWrapper* operationState in self.sessionState.sessionOperationStates)
@@ -61,12 +64,11 @@
             self.sessionState.sessionProgress = progress;
             [self updateUIFromState];
         }
-    }
+//    }
 }
 
 - (void) updateUIFromState
 {
-    self.name.stringValue = self.sessionState.sessionName;
     self.progress.doubleValue = self.sessionState.sessionProgress;
 }
 

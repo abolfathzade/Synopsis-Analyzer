@@ -793,8 +793,8 @@
                                        kSynopsisAnalysisSettingsKey : placeholderAnalysisSettings,
                                        };
     
-    AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithUUID:encodeUUID sourceURL:fileURL destinationURL:analysisFileURL transcodeOptions:transcodeOptions];
-    MetadataWriterTranscodeOperation* metadata = [[MetadataWriterTranscodeOperation alloc] initWithUUID:encodeUUID sourceURL:analysisFileURL destinationURL:metadataFileURL];
+    AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithOperationState:state sourceURL:fileURL destinationURL:analysisFileURL transcodeOptions:transcodeOptions];
+    MetadataWriterTranscodeOperation* metadata = [[MetadataWriterTranscodeOperation alloc] initWithOperationState:state sourceURL:analysisFileURL destinationURL:metadataFileURL];
 
     assert(analysis);
     assert(metadata);
@@ -862,7 +862,7 @@
     // Open a movie or two
     NSOpenPanel* openPanel = [NSOpenPanel openPanel];
     [openPanel setAllowsMultipleSelection:YES];
-    
+    [openPanel setCanChooseDirectories:YES];
     [openPanel setAllowedFileTypes:SynopsisSupportedFileTypes()];
     
     [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)

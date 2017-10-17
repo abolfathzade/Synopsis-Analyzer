@@ -18,16 +18,17 @@
 
 - (void) beginOperationStateListening
 {
+    self.name.stringValue = [self.operationState.sourceFileURL lastPathComponent];
     [self updateUIFromState];
 
     [self setTimeRemainingSeconds:self.operationState.remainingTime];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(operationStateUpdate:) name:kSynopsisOperationStateUpdate object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(operationStateUpdate:) name:kSynopsisOperationStateUpdate object:self.operationState];
 }
 
 - (void) endOperationStateListening
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:kSynopsisOperationStateUpdate object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:kSynopsisOperationStateUpdate object:self.operationState];
     
     self.operationState = nil;
     self.timeRemaining.stringValue = @"Pending";
@@ -37,23 +38,44 @@
 
 - (void) operationStateUpdate:(NSNotification*)notification
 {
-    OperationStateWrapper* updatedState = (OperationStateWrapper*)notification.object;
-    
-    if(updatedState && [self.operationState.operationID isEqualTo:updatedState.operationID])
-    {
-        self.operationState = updatedState;
-        [self updateUIFromState];
-    }
+    [self updateUIFromState];
 }
 
 - (void) updateUIFromState
 {
-    self.name.stringValue = [self.operationState.sourceFileURL lastPathComponent];
     self.progress.doubleValue = self.operationState.operationProgress;
     [self setTimeRemainingSeconds: self.operationState.remainingTime];
 }
 
 - (void) setTimeRemainingSeconds:(NSTimeInterval)timeRemaining
+{
+    NSString* timeString = @"";
+    switch(self.operationState.operationState)
+    {
+        case OperationStateUnknown:
+            timeString = @"Unknown";
+            break;
+        case OperationStatePending:
+            timeString = @"Pending";
+            break;
+        case OperationStateSuccess:
+            timeString = @"Completed";
+            break;
+        case OperationStateRunning:
+            timeString = [self calculateTimeStringFromProgress:timeRemaining];
+            break;
+        case OperationStateCancelled:
+            timeString = @"Cancelled";
+            break;
+        case OperationStateFailed:
+            timeString = @"Failed";
+            break;
+    }
+    
+    self.timeRemaining.stringValue = timeString;
+}
+
+- (NSString*) calculateTimeStringFromProgress:(NSTimeInterval)timeRemaining
 {
     NSString* timeString = @"";
     
@@ -71,16 +93,14 @@
         NSInteger minutes = (ti / 60) % 60;
         NSInteger hours = (ti / 3600);
         
-        timeString = [NSString stringWithFormat:@"%02ld:%02ld:%02ld: Remaining", (long)hours, (long)minutes, (long)seconds];
+        timeString = [NSString stringWithFormat:@"Remaining: %02ld:%02ld:%02ld", (long)hours, (long)minutes, (long)seconds];
     }
     else
     {
-        self.operationState.operationState = OperationStateSuccess;
-
         timeString = @"Completed";
     }
     
-    self.timeRemaining.stringValue = timeString;
+    return timeString;
 }
 
 - (IBAction)revealDestination:(id)sender
