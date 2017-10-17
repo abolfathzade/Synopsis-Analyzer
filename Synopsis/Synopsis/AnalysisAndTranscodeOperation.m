@@ -395,13 +395,23 @@
         {
             [self.transcodeAssetReader addOutput:self.transcodeAssetReaderVideo];
         }
-        
+        else
+        {
+            [[LogController sharedLogController] appendErrorLog:[@"Unable to add video output track to asset reader: " stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+            self.operationState.operationState = OperationStateFailed;
+        }
+
         if(!self.transcodingVideo)
         {
             if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderVideoPassthrough])
             {
                 // only add outputs if we are using them.
                 [self.transcodeAssetReader addOutput:self.transcodeAssetReaderVideoPassthrough];
+            }
+            else
+            {
+                [[LogController sharedLogController] appendErrorLog:[@"Unable to add video output track to asset reader: " stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+                self.operationState.operationState = OperationStateFailed;
             }
         }
     }
@@ -412,12 +422,22 @@
         {
             [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudio];
         }
+        else
+        {
+            [[LogController sharedLogController] appendErrorLog:[@"Unable to add audio output track to asset reader: " stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+            self.operationState.operationState = OperationStateFailed;
+        }
 
         if(!self.transcodingAudio)
         {
             if([self.transcodeAssetReader canAddOutput:self.transcodeAssetReaderAudioPassthrough])
             {
                 [self.transcodeAssetReader addOutput:self.transcodeAssetReaderAudioPassthrough];
+            }
+            else
+            {
+                [[LogController sharedLogController] appendErrorLog:[@"Unable to add audio output track to asset reader: " stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+                self.operationState.operationState = OperationStateFailed;
             }
         }
     }
@@ -453,15 +473,27 @@
     self.transcodeAssetWriterAudio.expectsMediaDataInRealTime = NO;
     
     // Assign all our specific inputs to our Writer
-    if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideo]
-       && [self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterAudio]
-       )
+    if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterVideo])
     {
         if(self.transcodeAssetHasVideo)
             [self.transcodeAssetWriter addInput:self.transcodeAssetWriterVideo];
-        
+    }
+    else
+    {
+        [[LogController sharedLogController] appendErrorLog:[@"Unable to add video output track to asset writer: " stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+        self.operationState.operationState = OperationStateFailed;
+    }
+
+    
+    if([self.transcodeAssetWriter canAddInput:self.transcodeAssetWriterAudio])
+    {
         if(self.transcodeAssetHasAudio)
             [self.transcodeAssetWriter addInput:self.transcodeAssetWriterAudio];
+    }
+    else
+    {
+        [[LogController sharedLogController] appendErrorLog:[@"Unable to add audio output track to asset writer: " stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+        self.operationState.operationState = OperationStateFailed;
     }
 
     // For every Analyzer, begin an new Analysis Session
@@ -709,8 +741,11 @@
                                                                              completionHandler:^(NSDictionary * newMetadataValue, NSError *analyzerError) {
                                                                                  if(analyzerError)
                                                                                  {
+                                                                                     // TODO: Check for Concurrency Issues?
+                                                                                     self.operationState.operationState = OperationStateFailed;
                                                                                      NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
                                                                                      [[LogController sharedLogController] appendErrorLog:errorString];
+                                                                                     
                                                                                  }
                                                                                  
                                                                                  if(newMetadataValue)
@@ -920,7 +955,7 @@
                                 {
                                     NSString* errorString = [@"Error Finalizing Analysis - bailing: " stringByAppendingString:[analyzerError description]];
                                     [[LogController sharedLogController] appendErrorLog:errorString];
-
+                                    self.operationState.operationState = OperationStateFailed;
                                     dispatch_group_leave(g);
 
                                     break;
@@ -971,6 +1006,7 @@
                         {
                             NSString* errorString = [@"Unable to append sampleBuffer: " stringByAppendingString:[self.transcodeAssetWriter.error description]];
                             [[LogController sharedLogController] appendErrorLog:errorString];
+                            self.operationState.operationState = OperationStateFailed;
                         }
                         CFRelease(videoSampleBuffer);
                     }
@@ -1141,10 +1177,13 @@
         self.availableAnalyzers = nil;
 		
 		self.succeeded = YES;
+        self.operationState.operationState = OperationStateSuccess;
+
         [[LogController sharedLogController] appendVerboseLog:[@"Finished Pass 1 Operation for " stringByAppendingString:[self.destinationURL lastPathComponent]]];
     }
     else
     {
+        self.operationState.operationState = OperationStateFailed;
         [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to start transcode from %@ to %@:", self.sourceURL, self.destinationURL]];
         if(self.transcodeAssetReader.error)
         {
@@ -1154,7 +1193,9 @@
         {
             [[LogController sharedLogController] appendErrorLog:[@"Write Error" stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
         }
-		self.succeeded = NO;
+
+        self.succeeded = NO;
+        self.operationState.operationState = OperationStateFailed;
     }
 }
 

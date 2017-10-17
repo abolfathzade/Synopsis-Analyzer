@@ -214,8 +214,8 @@
         else
         {
             [[LogController sharedLogController] appendErrorLog:[@"Unable to add video output track to asset reader: " stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+            self.operationState.operationState = OperationStateFailed;
         }
-
     }
     
     if(self.transcodeAssetHasAudio)
@@ -227,6 +227,7 @@
         else
         {
             [[LogController sharedLogController] appendErrorLog:[@"Unable to add audio output track to asset reader: " stringByAppendingString:self.transcodeAssetReader.error.debugDescription]];
+            self.operationState.operationState = OperationStateFailed;
         }
     }
     
@@ -313,6 +314,7 @@
         }
         else
         {
+            self.operationState.operationState = OperationStateFailed;
             [[LogController sharedLogController] appendErrorLog:[@"Unable to add video output track to asset writer: " stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
         }
         
@@ -324,6 +326,7 @@
             }
             else
             {
+                self.operationState.operationState = OperationStateFailed;
                 [[LogController sharedLogController] appendErrorLog:[@"Unable to add metadata output track to asset writer: " stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
             }
         }
@@ -336,6 +339,7 @@
         }
         else
         {
+            self.operationState.operationState = OperationStateFailed;
             [[LogController sharedLogController] appendErrorLog:[@"Unable to add audio output track to asset writer: " stringByAppendingString:self.transcodeAssetWriter.error.debugDescription]];
         }
         
@@ -548,6 +552,7 @@
                          
                          if(![self.transcodeAssetWriterVideoPassthrough appendSampleBuffer:passthroughVideoSampleBuffer])
                          {
+                             self.operationState.operationState = OperationStateFailed;
                              [[LogController sharedLogController] appendErrorLog:[@"Unable to append video sample to asset at time: " stringByAppendingString:CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, currentSamplePTS))]];
                          }
                          
@@ -614,6 +619,7 @@
                                      // Pop our metadata off...
                                      [self.analyzedVideoSampleBufferMetadata removeObject:group];
 
+                                     self.operationState.operationState = OperationStateFailed;
                                      [[LogController sharedLogController] appendErrorLog:[@"Unable to append metadata timed group to asset: " stringByAppendingString:self.transcodeAssetWriter.error.localizedDescription]];
                                  }
                              }
@@ -675,6 +681,7 @@
                          
                          if(![self.transcodeAssetWriterAudioPassthrough appendSampleBuffer:passthroughAudioSampleBuffer])
                          {
+                             self.operationState.operationState = OperationStateFailed;
                              [[LogController sharedLogController] appendErrorLog:[@"Unable to append audio sample to asset at time: " stringByAppendingString:CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, currentSamplePTS))]];
                          }
                          
