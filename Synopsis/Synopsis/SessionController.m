@@ -27,6 +27,9 @@
 
     NSNib* operationRowControllerNib = [[NSNib alloc] initWithNibNamed:@"OperationRowView" bundle:[NSBundle mainBundle]];
     [self.sessionOutlineView registerNib:operationRowControllerNib forIdentifier:@"OperationRowView"];
+    
+    self.sessionOutlineView.autoresizesOutlineColumn = NO;
+    self.sessionOutlineView.indentationMarkerFollowsCell = NO;
 }
 
 - (void) addNewSession:(SessionStateWrapper*)newSessionState
