@@ -83,4 +83,9 @@
     self.timeRemaining.stringValue = timeString;
 }
 
+- (IBAction)revealDestination:(id)sender
+{
+    
+}
+
 @end

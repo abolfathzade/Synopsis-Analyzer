@@ -91,9 +91,8 @@
 
         self.synopsisFileOpQueue = [[NSOperationQueue alloc] init];
         self.synopsisFileOpQueue.maxConcurrentOperationCount = 1;
-        self.synopsisFileOpQueue.qualityOfService = NSQualityOfServiceBackground;
+        self.synopsisFileOpQueue.qualityOfService = NSQualityOfServiceUtility;
 
-        
 //        // Serial metadata / passthrough writing queue
 //        self.metadataQueue = [[NSOperationQueue alloc] init];
 //        self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
@@ -256,6 +255,7 @@
         case OperationTypeFolderToTempToOutput: return @"OperationTypeFolderToTempToOutput";
     }
 }
+
 - (OperationType) operationTypeForURL:(NSURL*)url
 {
     BOOL useTmpFolder = [self.prefsViewController.preferencesFileViewController usingTempFolder];
@@ -422,7 +422,7 @@
     session.fileCopyOperationStates = copyStates;
     session.fileMoveOperationStates = moveStates;
     
-    NSString* sessionName = [NSString stringWithFormat:@"%@, %lu items", [operationStates[0].sourceFileURL lastPathComponent], (unsigned long)operationStates.count];
+    NSString* sessionName = [NSString stringWithFormat:@"%@, %lu items", [URLArray[0] lastPathComponent], (unsigned long)operationStates.count];
     session.sessionName = sessionName;
     
     [self.sessionController addNewSession:session];
@@ -482,7 +482,6 @@
             [source removeAllCachedResourceValues];
             
             // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
-            
             BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:source];
             BOOL copySuccessful = NO;
             NSError* error = nil;
@@ -519,8 +518,7 @@
             
             // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
             NSError* error = nil;
-            if([self.fileManager moveItemAtURL:source
-                                         toURL:dest error:&error])
+            if([self.fileManager moveItemAtURL:source toURL:dest error:&error])
             {
                 [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Moved %@ to Output Directory", source]];
             }

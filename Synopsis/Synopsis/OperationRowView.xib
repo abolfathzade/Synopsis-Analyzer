@@ -31,17 +31,17 @@
                     </textFieldCell>
                 </textField>
                 <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="13" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GdZ-gv-qYe">
-                    <rect key="frame" x="20" y="6" width="623" height="16"/>
+                    <rect key="frame" x="20" y="8" width="623" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <subviews>
                         <progressIndicator wantsLayer="YES" maxValue="1" controlSize="small" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="dia-k5-ilV">
-                            <rect key="frame" x="0.0" y="2" width="461" height="12"/>
+                            <rect key="frame" x="0.0" y="1" width="463" height="12"/>
                             <constraints>
                                 <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="316" id="wWJ-dn-65s"/>
                             </constraints>
                         </progressIndicator>
                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XKX-Ak-zpx">
-                            <rect key="frame" x="472" y="1" width="124" height="14"/>
+                            <rect key="frame" x="474" y="0.0" width="124" height="14"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="120" id="FUO-0d-6Dh"/>
                             </constraints>
@@ -52,15 +52,18 @@
                             </textFieldCell>
                         </textField>
                         <button translatesAutoresizingMaskIntoConstraints="NO" id="7qh-MJ-H3H">
-                            <rect key="frame" x="607" y="0.0" width="16" height="16"/>
+                            <rect key="frame" x="609" y="0.0" width="14" height="14"/>
                             <constraints>
-                                <constraint firstAttribute="height" constant="16" id="NEY-Vz-P1i"/>
-                                <constraint firstAttribute="width" constant="16" id="PJk-UL-7Lz"/>
+                                <constraint firstAttribute="height" constant="14" id="NEY-Vz-P1i"/>
+                                <constraint firstAttribute="width" constant="14" id="PJk-UL-7Lz"/>
                             </constraints>
                             <buttonCell key="cell" type="square" alternateTitle="NSFollowLinkFreestandingTemplate" bezelStyle="shadowlessSquare" image="NSFollowLinkFreestandingTemplate" imagePosition="overlaps" alignment="center" controlSize="small" imageScaling="proportionallyUpOrDown" inset="2" id="NNf-TB-ATM">
                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" metaFont="smallSystem"/>
                             </buttonCell>
+                            <connections>
+                                <action selector="revealDestination:" target="Hz6-mo-xeY" id="zXk-gW-fmV"/>
+                            </connections>
                         </button>
                     </subviews>
                     <visibilityPriorities>
