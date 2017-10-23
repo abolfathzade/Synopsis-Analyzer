@@ -28,7 +28,8 @@
 
 @property (readwrite,strong) IBOutlet SessionController* sessionController;
 
-@property (atomic, readwrite, strong) NSOperationQueue* synopsisAsyncQueue;
+@property (atomic, readwrite, strong) NSOperationQueue* synopsisAnalysisQueue;
+@property (atomic, readwrite, strong) NSOperationQueue* synopsisFinalizationQueue;
 @property (atomic, readwrite, strong) NSOperationQueue* synopsisFileOpQueue;
 
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPlugins;
@@ -72,6 +73,7 @@
 
         NSDictionary* standardDefaults = @{kSynopsisAnalyzerDefaultPresetPreferencesKey : @"DDCEA125-B93D-464B-B369-FB78A5E890B4",
                                            kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey : @(YES),
+                                           kSynopsisAnalyzerConcurrentJobCountPreferencesKey : @(-1),
                                            kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey : @(YES),
                                            kSynopsisAnalyzerUseOutputFolderKey : @(NO),
                                            kSynopsisAnalyzerUseWatchFolderKey : @(NO),
@@ -83,11 +85,30 @@
         
         // Number of simultaneous Jobs:
         BOOL concurrentJobs = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey] boolValue];
+        NSInteger jobCount = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobCountPreferencesKey] integerValue];
+       
+        NSUInteger actualJobCount = 1;
+      
+        if(concurrentJobs)
+        {
+            if (jobCount ==  -1)
+            {
+                actualJobCount =  [[NSProcessInfo processInfo] activeProcessorCount] / 3.0;
+            }
+            else
+            {
+                actualJobCount = jobCount;
+            }
+        }
         
         // Serial transcode queue
-        self.synopsisAsyncQueue = [[NSOperationQueue alloc] init];
-        self.synopsisAsyncQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
-        self.synopsisAsyncQueue.qualityOfService = NSQualityOfServiceUserInitiated;
+        self.synopsisAnalysisQueue = [[NSOperationQueue alloc] init];
+        self.synopsisAnalysisQueue.maxConcurrentOperationCount = actualJobCount;
+        self.synopsisAnalysisQueue.qualityOfService = NSQualityOfServiceUserInitiated;
+
+        self.synopsisFinalizationQueue = [[NSOperationQueue alloc] init];
+        self.synopsisFinalizationQueue.maxConcurrentOperationCount = actualJobCount;
+        self.synopsisFinalizationQueue.qualityOfService = NSQualityOfServiceUserInitiated;
 
         self.synopsisFileOpQueue = [[NSOperationQueue alloc] init];
         self.synopsisFileOpQueue.maxConcurrentOperationCount = 1;
@@ -189,21 +210,29 @@
 - (void) applicationWillTerminate:(NSNotification *)notification
 {
     // Cancel all operations and wait for completion.
-    for (NSOperation* op in [self.synopsisAsyncQueue operations])
+    for (NSOperation* op in [self.synopsisAnalysisQueue operations])
     {
-        [op cancel];
         op.completionBlock = nil;
+        [op cancel];
     }
     
-//    for (NSOperation* op in [self.metadataQueue operations])
-//    {
-//        [op cancel];
-//        op.completionBlock = nil;
-//    }
+    for (NSOperation* op in [self.synopsisFinalizationQueue operations])
+    {
+        op.completionBlock = nil;
+        [op cancel];
+    }
+
+    for (NSOperation* op in [self.synopsisFileOpQueue operations])
+    {
+        op.completionBlock = nil;
+        [op cancel];
+    }
+
     
     //clean bail.
-    [self.synopsisAsyncQueue waitUntilAllOperationsAreFinished];
-//    [self.metadataQueue waitUntilAllOperationsAreFinished];
+    [self.synopsisAnalysisQueue waitUntilAllOperationsAreFinished];
+    [self.synopsisFinalizationQueue waitUntilAllOperationsAreFinished];
+    [self.synopsisFileOpQueue waitUntilAllOperationsAreFinished];
 }
 
 #pragma mark - Prefs
@@ -435,14 +464,15 @@
 
 -(void) submitSessionOperations:(SessionStateWrapper*)session
 {
-    NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
-
+    __block NSTimeInterval start;
     // Create Begin Operation
     NSBlockOperation* beginOperation = [NSBlockOperation blockOperationWithBlock:^{
+
+        start = [NSDate timeIntervalSinceReferenceDate];
         [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", session.sessionID]];
     }];
     
-    [self.synopsisAsyncQueue addOperation:beginOperation];
+    [self.synopsisAnalysisQueue addOperation:beginOperation];
 
     // Create Completion Operation
     NSBlockOperation* completionOperation = [NSBlockOperation blockOperationWithBlock:^{
@@ -467,7 +497,9 @@
         });
     }];
 
-    NSMutableArray<BaseTranscodeOperation*>* mediaOperations = [NSMutableArray new];
+    NSMutableArray<BaseTranscodeOperation*>* analysisOperations = [NSMutableArray new];
+    NSMutableArray<BaseTranscodeOperation*>* finalizationOperations = [NSMutableArray new];
+
     NSMutableArray<NSBlockOperation*>* copyOperations = [NSMutableArray new];
     NSMutableArray<NSBlockOperation*>* moveOperations = [NSMutableArray new];
 
@@ -535,6 +567,7 @@
     for(OperationStateWrapper* operationState in session.sessionOperationStates)
     {
         NSArray<BaseTranscodeOperation*>* operations = [self createOperationsFromOperationState:operationState];
+       
         for(BaseTranscodeOperation* operation in operations)
         {
             // Every copy operation must happen first
@@ -558,7 +591,9 @@
             [completionOperation addDependency:operation];
         }
         
-        [mediaOperations addObjectsFromArray:operations];
+        // Lame Hack:
+        [analysisOperations addObject:operations[0]];
+        [finalizationOperations addObject:operations[1]];
     }
 
     // Enqueue Operations
@@ -567,11 +602,16 @@
         [self.synopsisFileOpQueue addOperation:copyOp];
     }
 
-    for(BaseTranscodeOperation* operation in mediaOperations)
+    for(BaseTranscodeOperation* operation in analysisOperations)
     {
-        [self.synopsisAsyncQueue addOperation:operation];
+        [self.synopsisAnalysisQueue addOperation:operation];
     }
-    
+
+    for(BaseTranscodeOperation* operation in finalizationOperations)
+    {
+        [self.synopsisFinalizationQueue addOperation:operation];
+    }
+
     for(NSBlockOperation* moveOp in moveOperations)
     {
         [self.synopsisFileOpQueue addOperation:moveOp];
@@ -884,12 +924,16 @@ static BOOL isRunning = NO;
     if(isRunning)
     {
         self.startPauseToolbarItem.image = [NSImage imageNamed:@"ic_pause_circle_filled"];
-        self.synopsisAsyncQueue.suspended = YES;
+        self.synopsisAnalysisQueue.suspended = YES;
+        self.synopsisFinalizationQueue.suspended = YES;
+        self.synopsisFileOpQueue.suspended = YES;
     }
     else
     {
         self.startPauseToolbarItem.image = [NSImage imageNamed:@"ic_play_circle_filled"];
-        self.synopsisAsyncQueue.suspended = NO;
+        self.synopsisAnalysisQueue.suspended = NO;
+        self.synopsisFinalizationQueue.suspended = NO;
+        self.synopsisFileOpQueue.suspended = NO;
     }
     
     for(SessionStateWrapper* session in [self.sessionController sessions])
@@ -917,12 +961,24 @@ static BOOL isRunning = NO;
 {
     // Number of simultaneous Jobs:
     BOOL concurrentJobs = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey] boolValue];
+    NSInteger jobCount = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobCountPreferencesKey] integerValue];
     
+    NSUInteger actualJobCount = 1;
+    
+    if(concurrentJobs)
+    {
+        if (jobCount ==  -1)
+        {
+            actualJobCount =  [[NSProcessInfo processInfo] activeProcessorCount] / 3.0;
+        }
+        else
+        {
+            actualJobCount = jobCount;
+        }
+    }
     // Serial transcode queue
-    self.synopsisAsyncQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
-    
-    // Serial metadata / passthrough writing queue
-//    self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
+    self.synopsisAnalysisQueue.maxConcurrentOperationCount = actualJobCount;
+    self.synopsisFinalizationQueue.maxConcurrentOperationCount = actualJobCount;
 }
 
 #pragma mark - Helpers

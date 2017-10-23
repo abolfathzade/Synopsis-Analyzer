@@ -9,6 +9,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PreferencesAdvancedViewController">
             <connections>
+                <outlet property="concurrencyCount" destination="VWw-ha-DfP" id="3dW-xm-S0Q"/>
                 <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
             </connections>
         </customObject>
@@ -58,7 +59,7 @@
                                 </textFieldCell>
                             </textField>
                             <button misplaced="YES" id="4Ua-6d-pwS">
-                                <rect key="frame" x="15" y="171" width="361" height="18"/>
+                                <rect key="frame" x="15" y="171" width="200" height="18"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="check" title="Analyze movies simultaneously" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="cbd-y2-Ulr">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -69,6 +70,21 @@
                                     <binding destination="3DR-aG-XXf" name="value" keyPath="values.ConcurrentJobAnalysis" id="BVO-xp-CCx"/>
                                 </connections>
                             </button>
+                            <popUpButton verticalHuggingPriority="750" misplaced="YES" id="VWw-ha-DfP">
+                                <rect key="frame" x="227" y="168" width="130" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <popUpButtonCell key="cell" type="push" title="Auto" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="PZm-kh-gg0" id="tBp-RA-fm0">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="smallSystem"/>
+                                    <menu key="menu" id="gjs-xL-DZY">
+                                        <items>
+                                            <menuItem title="Auto" state="on" id="PZm-kh-gg0"/>
+                                            <menuItem isSeparatorItem="YES" id="HOF-Ia-K8U"/>
+                                            <menuItem title="1" id="dOs-wf-vwa"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                            </popUpButton>
                         </subviews>
                     </view>
                 </box>

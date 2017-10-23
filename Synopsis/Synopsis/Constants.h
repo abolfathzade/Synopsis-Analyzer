@@ -65,6 +65,9 @@ typedef enum : NSUInteger {
 
 #define kSynopsisAnalyzerDefaultPresetPreferencesKey @"DefaultPreset" // UUID string
 #define kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey @"ConcurrentJobAnalysis" // BOOL
+
+#define kSynopsisAnalyzerConcurrentJobCountPreferencesKey @"ConcurrentJobCount" // NSNumber -1 = auto, anythign else = use that
+
 #define kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey @"ConcurrentFrameAnalysis" // BOOL
 
 #define kSynopsisAnalyzerUseWatchFolderKey @"UseWatchFolder" // BOOL
