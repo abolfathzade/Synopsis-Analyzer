@@ -33,18 +33,11 @@
 		1B61BD061ACF371A0013418D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1B61BD081ACF371A0013418D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B61BD071ACF371A0013418D /* CoreFoundation.framework */; };
 		1B61BD091ACF37200013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
+		1B6A628F1F9523910045F1BD /* OperationRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B6A628E1F9523910045F1BD /* OperationRowView.m */; };
+		1B6A62941F953BBB0045F1BD /* SessionRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B6A62931F953BBB0045F1BD /* SessionRowView.m */; };
 		1B7351041DEF4FE40053BC06 /* Synopsis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; };
 		1B7351061DEF50300053BC06 /* Synopsis.framework in Copy Files */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		1B805E2C1B0114D0005D7354 /* ProgressTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */; };
-		1B805E2F1B012309005D7354 /* ProgressTableViewCellSource.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B805E2E1B012309005D7354 /* ProgressTableViewCellSource.xib */; };
-		1B805E321B012386005D7354 /* ProgressTableViewCellSourceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E311B012386005D7354 /* ProgressTableViewCellSourceController.m */; };
-		1B805E341B012AA0005D7354 /* ProgressTableViewCellProgress.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B805E331B012AA0005D7354 /* ProgressTableViewCellProgress.xib */; };
-		1B805E371B012ADF005D7354 /* ProgressTableViewCellProgressController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E361B012ADF005D7354 /* ProgressTableViewCellProgressController.m */; };
-		1B805E3C1B01488D005D7354 /* ProgressTableViewCellRevealController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3A1B01488D005D7354 /* ProgressTableViewCellRevealController.m */; };
-		1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */; };
 		1B805E401B028BB6005D7354 /* LogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3F1B028BB6005D7354 /* LogController.m */; };
-		1BA4D1991C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA4D1971C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m */; };
-		1BA4D19A1C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BA4D1981C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib */; };
 		1BA68C501AD02E97003B3CE9 /* BaseTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */; };
 		1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */; };
 		1BA68C571AD26696003B3CE9 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA68C561AD26696003B3CE9 /* CoreVideo.framework */; };
@@ -56,6 +49,10 @@
 		1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */; };
 		1BBED6331F9149E8003CE9C4 /* SessionStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */; };
 		1BBED6361F914C7D003CE9C4 /* OperationStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */; };
+		1BBED63A1F919F44003CE9C4 /* SessionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6391F919F44003CE9C4 /* SessionController.m */; };
+		1BBED63F1F91BE55003CE9C4 /* SessionRowView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BBED63D1F91BE55003CE9C4 /* SessionRowView.xib */; };
+		1BBED6441F91BE7C003CE9C4 /* OperationRowView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BBED6421F91BE7C003CE9C4 /* OperationRowView.xib */; };
+		1BBED6471F94FE54003CE9C4 /* FileOperationStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6461F94FE54003CE9C4 /* FileOperationStateWrapper.m */; };
 		1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 1BC71D431F150CA6006DD7DC /* Credits.rtf */; };
 		1BC71E871F17E8FE006DD7DC /* hap.c in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71DDB1F17E8FE006DD7DC /* hap.c */; };
 		1BC71E9F1F17E8FE006DD7DC /* snappy-c.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71DFC1F17E8FE006DD7DC /* snappy-c.cc */; };
@@ -211,23 +208,13 @@
 		1B61BCF01ACF181C0013418D /* NSDictionary+JSONString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+JSONString.m"; sourceTree = "<group>"; };
 		1B61BCF91ACF26710013418D /* StandardAnalyzer.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StandardAnalyzer.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B61BD071ACF371A0013418D /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		1B6A628D1F9523910045F1BD /* OperationRowView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OperationRowView.h; sourceTree = "<group>"; };
+		1B6A628E1F9523910045F1BD /* OperationRowView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OperationRowView.m; sourceTree = "<group>"; };
+		1B6A62921F953BBB0045F1BD /* SessionRowView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SessionRowView.h; sourceTree = "<group>"; };
+		1B6A62931F953BBB0045F1BD /* SessionRowView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionRowView.m; sourceTree = "<group>"; };
 		1B7350F91DEF4FAE0053BC06 /* Synopsis-Framework.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Synopsis-Framework.xcodeproj"; path = "Synopsis-Framework/Synopsis/Synopsis-Framework.xcodeproj"; sourceTree = "<group>"; };
-		1B805E2A1B0114D0005D7354 /* ProgressTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTableViewController.h; sourceTree = "<group>"; };
-		1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTableViewController.m; sourceTree = "<group>"; };
-		1B805E2E1B012309005D7354 /* ProgressTableViewCellSource.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProgressTableViewCellSource.xib; sourceTree = "<group>"; };
-		1B805E301B012386005D7354 /* ProgressTableViewCellSourceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTableViewCellSourceController.h; sourceTree = "<group>"; };
-		1B805E311B012386005D7354 /* ProgressTableViewCellSourceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTableViewCellSourceController.m; sourceTree = "<group>"; };
-		1B805E331B012AA0005D7354 /* ProgressTableViewCellProgress.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProgressTableViewCellProgress.xib; sourceTree = "<group>"; };
-		1B805E351B012ADF005D7354 /* ProgressTableViewCellProgressController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTableViewCellProgressController.h; sourceTree = "<group>"; };
-		1B805E361B012ADF005D7354 /* ProgressTableViewCellProgressController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTableViewCellProgressController.m; sourceTree = "<group>"; };
-		1B805E391B01488D005D7354 /* ProgressTableViewCellRevealController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTableViewCellRevealController.h; sourceTree = "<group>"; };
-		1B805E3A1B01488D005D7354 /* ProgressTableViewCellRevealController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTableViewCellRevealController.m; sourceTree = "<group>"; };
-		1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProgressTableViewCellReveal.xib; sourceTree = "<group>"; };
 		1B805E3E1B028BB6005D7354 /* LogController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogController.h; sourceTree = "<group>"; };
 		1B805E3F1B028BB6005D7354 /* LogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogController.m; sourceTree = "<group>"; };
-		1BA4D1961C3AD5C1003BD135 /* ProgressTableViewCellPresetController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTableViewCellPresetController.h; sourceTree = "<group>"; };
-		1BA4D1971C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTableViewCellPresetController.m; sourceTree = "<group>"; };
-		1BA4D1981C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ProgressTableViewCellPreset.xib; sourceTree = "<group>"; };
 		1BA68C4E1AD02E97003B3CE9 /* BaseTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseTranscodeOperation.h; sourceTree = "<group>"; };
 		1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseTranscodeOperation.m; sourceTree = "<group>"; };
 		1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetadataWriterTranscodeOperation.h; sourceTree = "<group>"; };
@@ -249,6 +236,12 @@
 		1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionStateWrapper.m; sourceTree = "<group>"; };
 		1BBED6341F914C7D003CE9C4 /* OperationStateWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OperationStateWrapper.h; sourceTree = "<group>"; };
 		1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OperationStateWrapper.m; sourceTree = "<group>"; };
+		1BBED6381F919F44003CE9C4 /* SessionController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SessionController.h; sourceTree = "<group>"; };
+		1BBED6391F919F44003CE9C4 /* SessionController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionController.m; sourceTree = "<group>"; };
+		1BBED63D1F91BE55003CE9C4 /* SessionRowView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SessionRowView.xib; sourceTree = "<group>"; };
+		1BBED6421F91BE7C003CE9C4 /* OperationRowView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OperationRowView.xib; sourceTree = "<group>"; };
+		1BBED6451F94FE54003CE9C4 /* FileOperationStateWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileOperationStateWrapper.h; sourceTree = "<group>"; };
+		1BBED6461F94FE54003CE9C4 /* FileOperationStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileOperationStateWrapper.m; sourceTree = "<group>"; };
 		1BC71D431F150CA6006DD7DC /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		1BC71DDB1F17E8FE006DD7DC /* hap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hap.c; sourceTree = "<group>"; };
 		1BC71DDC1F17E8FE006DD7DC /* hap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hap.h; sourceTree = "<group>"; };
@@ -527,27 +520,6 @@
 			name = "Transcode & Analysis Operations";
 			sourceTree = "<group>";
 		};
-		1B805E381B012B5E005D7354 /* TableView & Cells */ = {
-			isa = PBXGroup;
-			children = (
-				1B805E2A1B0114D0005D7354 /* ProgressTableViewController.h */,
-				1B805E2B1B0114D0005D7354 /* ProgressTableViewController.m */,
-				1B805E301B012386005D7354 /* ProgressTableViewCellSourceController.h */,
-				1B805E311B012386005D7354 /* ProgressTableViewCellSourceController.m */,
-				1B805E2E1B012309005D7354 /* ProgressTableViewCellSource.xib */,
-				1B805E351B012ADF005D7354 /* ProgressTableViewCellProgressController.h */,
-				1B805E361B012ADF005D7354 /* ProgressTableViewCellProgressController.m */,
-				1B805E331B012AA0005D7354 /* ProgressTableViewCellProgress.xib */,
-				1B805E391B01488D005D7354 /* ProgressTableViewCellRevealController.h */,
-				1B805E3A1B01488D005D7354 /* ProgressTableViewCellRevealController.m */,
-				1B805E3B1B01488D005D7354 /* ProgressTableViewCellReveal.xib */,
-				1BA4D1961C3AD5C1003BD135 /* ProgressTableViewCellPresetController.h */,
-				1BA4D1971C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m */,
-				1BA4D1981C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib */,
-			);
-			name = "TableView & Cells";
-			sourceTree = "<group>";
-		};
 		1BA68C5D1AD5D2A1003B3CE9 /* BSON */ = {
 			isa = PBXGroup;
 			children = (
@@ -569,15 +541,33 @@
 			path = Synopsis/GZIP;
 			sourceTree = "<group>";
 		};
-		1BBED6371F915522003CE9C4 /* OutlineView & Cells */ = {
+		1BBED6371F915522003CE9C4 /* Session UI */ = {
+			isa = PBXGroup;
+			children = (
+				1BBED6381F919F44003CE9C4 /* SessionController.h */,
+				1BBED6391F919F44003CE9C4 /* SessionController.m */,
+				1B6A62921F953BBB0045F1BD /* SessionRowView.h */,
+				1B6A62931F953BBB0045F1BD /* SessionRowView.m */,
+				1BBED63D1F91BE55003CE9C4 /* SessionRowView.xib */,
+				1B6A628D1F9523910045F1BD /* OperationRowView.h */,
+				1B6A628E1F9523910045F1BD /* OperationRowView.m */,
+				1BBED6421F91BE7C003CE9C4 /* OperationRowView.xib */,
+				1BBED6481F9512BA003CE9C4 /* State Tracking */,
+			);
+			name = "Session UI";
+			sourceTree = "<group>";
+		};
+		1BBED6481F9512BA003CE9C4 /* State Tracking */ = {
 			isa = PBXGroup;
 			children = (
 				1BBED6311F9149E8003CE9C4 /* SessionStateWrapper.h */,
 				1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */,
 				1BBED6341F914C7D003CE9C4 /* OperationStateWrapper.h */,
 				1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */,
+				1BBED6451F94FE54003CE9C4 /* FileOperationStateWrapper.h */,
+				1BBED6461F94FE54003CE9C4 /* FileOperationStateWrapper.m */,
 			);
-			name = "OutlineView & Cells";
+			name = "State Tracking";
 			sourceTree = "<group>";
 		};
 		1BC71DD71F17E8C6006DD7DC /* Third Party */ = {
@@ -956,10 +946,9 @@
 			children = (
 				1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */,
 				1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */,
-				1BBED6371F915522003CE9C4 /* OutlineView & Cells */,
-				1B805E381B012B5E005D7354 /* TableView & Cells */,
-				1B3233BC1C2E390600C9CF5E /* Preferences */,
+				1BBED6371F915522003CE9C4 /* Session UI */,
 				1B805E2D1B0114DD005D7354 /* Transcode & Analysis Operations */,
+				1B3233BC1C2E390600C9CF5E /* Preferences */,
 				1B805E3E1B028BB6005D7354 /* LogController.h */,
 				1B805E3F1B028BB6005D7354 /* LogController.m */,
 				1B578C3F1B02F37E00D76F62 /* DropFilesView.h */,
@@ -1145,12 +1134,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				1B3233CC1C2EFDC500C9CF5E /* PreferencesPresetViewController.xib in Resources */,
-				1B805E2F1B012309005D7354 /* ProgressTableViewCellSource.xib in Resources */,
+				1BBED6441F91BE7C003CE9C4 /* OperationRowView.xib in Resources */,
+				1BBED63F1F91BE55003CE9C4 /* SessionRowView.xib in Resources */,
 				1BA76C421F83F0C10038F6AD /* PreferencesFileViewController.xib in Resources */,
-				1BA4D19A1C3AD5C1003BD135 /* ProgressTableViewCellPreset.xib in Resources */,
 				1B105A3C1B41FB3800997345 /* MainMenu.xib in Resources */,
-				1B805E341B012AA0005D7354 /* ProgressTableViewCellProgress.xib in Resources */,
-				1B805E3D1B01488D005D7354 /* ProgressTableViewCellReveal.xib in Resources */,
 				1B3233D11C2EFDD300C9CF5E /* PreferencesAdvancedViewController.xib in Resources */,
 				1BC71D441F150CA6006DD7DC /* Credits.rtf in Resources */,
 				1B3233C71C2EFDB200C9CF5E /* PreferencesGeneralViewController.xib in Resources */,
@@ -1203,26 +1190,27 @@
 				1BC71ED61F17E8FE006DD7DC /* GLDXTEncoder.c in Sources */,
 				1BC71ED91F17E8FE006DD7DC /* SquishEncoder.c in Sources */,
 				1BBED6361F914C7D003CE9C4 /* OperationStateWrapper.m in Sources */,
+				1B6A62941F953BBB0045F1BD /* SessionRowView.m in Sources */,
 				1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */,
 				1BC71EDB1F17E8FE006DD7DC /* YCoCgDXTEncoder.c in Sources */,
 				1BC71EA01F17E8FE006DD7DC /* snappy-sinksource.cc in Sources */,
 				1BC71ED81F17E8FE006DD7DC /* squish-c.cpp in Sources */,
 				1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */,
 				1BC71ED21F17E8FE006DD7DC /* HapEncoderFrame.m in Sources */,
+				1BBED6471F94FE54003CE9C4 /* FileOperationStateWrapper.m in Sources */,
 				1B578C411B02F37E00D76F62 /* DropFilesView.m in Sources */,
 				1BC71ED71F17E8FE006DD7DC /* HapCodecGL.c in Sources */,
 				1BC71EBD1F17E8FE006DD7DC /* squish.cpp in Sources */,
 				1B3233D71C306B2300C9CF5E /* PresetObject.m in Sources */,
 				1BC71ED41F17E8FE006DD7DC /* DXTBlocks.c in Sources */,
 				1BC71ECB1F17E8FE006DD7DC /* AVAssetAdditions.m in Sources */,
+				1BBED63A1F919F44003CE9C4 /* SessionController.m in Sources */,
 				1BC71ED51F17E8FE006DD7DC /* DXTBlocksSSSE3.c in Sources */,
 				1BA68C6E1AD5D8D3003B3CE9 /* GZIP.m in Sources */,
 				1BC71ED11F17E8FE006DD7DC /* HapDecoderFrame.m in Sources */,
 				1BBED6331F9149E8003CE9C4 /* SessionStateWrapper.m in Sources */,
 				1BC71EAB1F17E8FE006DD7DC /* clusterfit.cpp in Sources */,
 				1BC71EBA1F17E8FE006DD7DC /* singlecolourfit.cpp in Sources */,
-				1B805E371B012ADF005D7354 /* ProgressTableViewCellProgressController.m in Sources */,
-				1B805E2C1B0114D0005D7354 /* ProgressTableViewController.m in Sources */,
 				1B3233C21C2E395700C9CF5E /* PreferencesViewController.m in Sources */,
 				1BC71EE11F17E8FE006DD7DC /* ImageMath.c in Sources */,
 				1BC71EE21F17E8FE006DD7DC /* YCoCg.c in Sources */,
@@ -1246,16 +1234,14 @@
 				1B3233C61C2EFDB200C9CF5E /* PreferencesGeneralViewController.m in Sources */,
 				1BC71EB71F17E8FE006DD7DC /* maths.cpp in Sources */,
 				1B3233DC1C31F8F200C9CF5E /* PresetGroup.m in Sources */,
+				1B6A628F1F9523910045F1BD /* OperationRowView.m in Sources */,
 				1BA76C411F83F0C10038F6AD /* PreferencesFileViewController.m in Sources */,
 				1BA68C611AD5D2A1003B3CE9 /* BSONSerialization.m in Sources */,
 				1BC71EAD1F17E8FE006DD7DC /* colourblock.cpp in Sources */,
 				1BC71EAE1F17E8FE006DD7DC /* colourfit.cpp in Sources */,
 				1B2E7C831E81DA8000EF07BC /* AtomicBoolean.m in Sources */,
-				1B805E3C1B01488D005D7354 /* ProgressTableViewCellRevealController.m in Sources */,
-				1BA4D1991C3AD5C1003BD135 /* ProgressTableViewCellPresetController.m in Sources */,
 				1BC71ED01F17E8FE006DD7DC /* CMBlockBufferPool.m in Sources */,
 				1BC71ECD1F17E8FE006DD7DC /* AVAssetWriterHapInput.m in Sources */,
-				1B805E321B012386005D7354 /* ProgressTableViewCellSourceController.m in Sources */,
 				1B805E401B028BB6005D7354 /* LogController.m in Sources */,
 				1BC71E9F1F17E8FE006DD7DC /* snappy-c.cc in Sources */,
 				1BA68C501AD02E97003B3CE9 /* BaseTranscodeOperation.m in Sources */,

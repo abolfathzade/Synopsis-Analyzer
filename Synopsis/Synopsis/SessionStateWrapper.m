@@ -9,24 +9,22 @@
 #import "SessionStateWrapper.h"
 
 @interface SessionStateWrapper ()
-@property (readwrite, strong) NSUUID* sessionID;
-@property (readwrite, copy) NSString* sessionName;
-@property (readwrite, assign) SessionState sessionState;
-@property (readwrite, assign) CGFloat sessionProgress;
+@property (readwrite, copy) NSUUID* sessionID;
+//@property (readwrite, assign) SessionState sessionState;
+//@property (readwrite, assign) CGFloat sessionProgress;
 @end
 
 @implementation SessionStateWrapper
 
-- (instancetype) initWithSessionID:(NSUUID*)sessionID sessionName:(NSString*)sessionName;
+//- (instancetype) initWithSessionOperations:(NSArray<OperationStateWrapper*>*)operations
+- (instancetype) init
 {
     self = [super init];
     if(self)
     {
-        self.sessionName = sessionName;
         self.sessionState = SessionStateUnknown;
-        self.sessionID = sessionID;
+        self.sessionID = [NSUUID UUID];
         self.sessionProgress = 0.0;
-        
         // register for
     }
     return self;

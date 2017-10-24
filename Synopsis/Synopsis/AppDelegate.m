@@ -17,6 +17,7 @@
 #import "AnalysisAndTranscodeOperation.h"
 #import "MetadataWriterTranscodeOperation.h"
 
+#import "SessionController.h"
 #import "PreferencesViewController.h"
 #import "PresetObject.h"
 
@@ -25,7 +26,11 @@
 @property (weak) IBOutlet NSWindow *window;
 @property (weak) IBOutlet DropFilesView* dropFilesView;
 
-@property (atomic, readwrite, strong) NSOperationQueue* synopsisAsyncQueue;
+@property (readwrite,strong) IBOutlet SessionController* sessionController;
+
+@property (atomic, readwrite, strong) NSOperationQueue* synopsisAnalysisQueue;
+@property (atomic, readwrite, strong) NSOperationQueue* synopsisFinalizationQueue;
+@property (atomic, readwrite, strong) NSOperationQueue* synopsisFileOpQueue;
 
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPlugins;
 @property (atomic, readwrite, strong) NSMutableArray* analyzerPluginsInitializedForPrefs;
@@ -68,32 +73,46 @@
 
         NSDictionary* standardDefaults = @{kSynopsisAnalyzerDefaultPresetPreferencesKey : @"DDCEA125-B93D-464B-B369-FB78A5E890B4",
                                            kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey : @(YES),
+                                           kSynopsisAnalyzerConcurrentJobCountPreferencesKey : @(-1),
                                            kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey : @(YES),
                                            kSynopsisAnalyzerUseOutputFolderKey : @(NO),
                                            kSynopsisAnalyzerUseWatchFolderKey : @(NO),
                                            kSynopsisAnalyzerUseTempFolderKey : @(NO),
-                                           kSynopsisAnalyzerMirrorFolderStructureToOutputKey : (@NO),
+                                           kSynopsisAnalyzerMirrorFolderStructureToOutputKey : @(NO),
                                            };
         
         [[NSUserDefaults standardUserDefaults] registerDefaults:standardDefaults];
         
         // Number of simultaneous Jobs:
         BOOL concurrentJobs = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey] boolValue];
+        NSInteger jobCount = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobCountPreferencesKey] integerValue];
+       
+        NSUInteger actualJobCount = 1;
+      
+        if(concurrentJobs)
+        {
+            if (jobCount ==  -1)
+            {
+                actualJobCount =  [[NSProcessInfo processInfo] activeProcessorCount] / 3.0;
+            }
+            else
+            {
+                actualJobCount = jobCount;
+            }
+        }
         
         // Serial transcode queue
-        self.synopsisAsyncQueue = [[NSOperationQueue alloc] init];
-        self.synopsisAsyncQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
-        self.synopsisAsyncQueue.qualityOfService = NSQualityOfServiceUserInitiated;
-        
-//        // Serial metadata / passthrough writing queue
-//        self.metadataQueue = [[NSOperationQueue alloc] init];
-//        self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
-//        self.metadataQueue.qualityOfService = NSQualityOfServiceUserInitiated;
-//
-//        // Completion queue of group of encodes, be it a drag session, opening of a set folders with media, or a single encode operation
-//        self.sessionComplectionQueue = [[NSOperationQueue alloc] init];
-//        self.sessionComplectionQueue.maxConcurrentOperationCount = 1;
-//        self.sessionComplectionQueue.qualityOfService = NSQualityOfServiceUtility;
+        self.synopsisAnalysisQueue = [[NSOperationQueue alloc] init];
+        self.synopsisAnalysisQueue.maxConcurrentOperationCount = actualJobCount;
+        self.synopsisAnalysisQueue.qualityOfService = NSQualityOfServiceUserInitiated;
+
+        self.synopsisFinalizationQueue = [[NSOperationQueue alloc] init];
+        self.synopsisFinalizationQueue.maxConcurrentOperationCount = actualJobCount;
+        self.synopsisFinalizationQueue.qualityOfService = NSQualityOfServiceUserInitiated;
+
+        self.synopsisFileOpQueue = [[NSOperationQueue alloc] init];
+        self.synopsisFileOpQueue.maxConcurrentOperationCount = 1;
+        self.synopsisFileOpQueue.qualityOfService = NSQualityOfServiceUtility;
         
         self.analyzerPlugins = [NSMutableArray new];
         self.analyzerPluginsInitializedForPrefs = [NSMutableArray new];
@@ -181,21 +200,29 @@
 - (void) applicationWillTerminate:(NSNotification *)notification
 {
     // Cancel all operations and wait for completion.
-    for (NSOperation* op in [self.synopsisAsyncQueue operations])
+    for (NSOperation* op in [self.synopsisAnalysisQueue operations])
     {
-        [op cancel];
         op.completionBlock = nil;
+        [op cancel];
     }
     
-//    for (NSOperation* op in [self.metadataQueue operations])
-//    {
-//        [op cancel];
-//        op.completionBlock = nil;
-//    }
+    for (NSOperation* op in [self.synopsisFinalizationQueue operations])
+    {
+        op.completionBlock = nil;
+        [op cancel];
+    }
+
+    for (NSOperation* op in [self.synopsisFileOpQueue operations])
+    {
+        op.completionBlock = nil;
+        [op cancel];
+    }
+
     
     //clean bail.
-    [self.synopsisAsyncQueue waitUntilAllOperationsAreFinished];
-//    [self.metadataQueue waitUntilAllOperationsAreFinished];
+    [self.synopsisAnalysisQueue waitUntilAllOperationsAreFinished];
+    [self.synopsisFinalizationQueue waitUntilAllOperationsAreFinished];
+    [self.synopsisFileOpQueue waitUntilAllOperationsAreFinished];
 }
 
 #pragma mark - Prefs
@@ -231,9 +258,24 @@
     }
 }
 
-#pragma mark - Analysis
+#pragma mark - Operation State Setup
 
-- (SessionType) sessionTypeForURL:(NSURL*)url
+- (NSString*) stringForOperationType:(OperationType)type
+{
+    switch (type)
+    {
+        case OperationTypeUnknown: return @"OperationTypeUnknown";
+        case OperationTypeFileInPlace: return @"OperationTypeFileInPlace";
+        case OperationTypeFileToTempToInPlace: return @"OperationTypeFileToTempToInPlace";
+        case OperationTypeFileToOutput: return @"OperationTypeFileToOutput";
+        case OperationTypeFileToTempToOutput: return @"OperationTypeFileToTempToOutput";
+        case OperationTypeFolderInPlace: return @"OperationTypeFolderInPlace";
+        case OperationTypeFolderToTempToInPlace: return @"OperationTypeFolderToTempToInPlace";
+        case OperationTypeFolderToTempToOutput: return @"OperationTypeFolderToTempToOutput";
+    }
+}
+
+- (OperationType) operationTypeForURL:(NSURL*)url
 {
     BOOL useTmpFolder = [self.prefsViewController.preferencesFileViewController usingTempFolder];
     NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
@@ -244,258 +286,336 @@
     useTmpFolder = (useTmpFolder && (tmpFolderURL != nil));
     useOutFolder = (useOutFolder && (outFolderURL != nil));
 
-    SessionType sessionType = SessionTypeUnknown;
+    OperationType operationType = OperationTypeUnknown;
     if(!url.hasDirectoryPath)
     {
         if(useOutFolder && !useTmpFolder)
         {
-            sessionType = SessionTypeFileToOutput;
+            operationType = OperationTypeFileToOutput;
         }
         else if(useTmpFolder && !useOutFolder)
         {
-            sessionType = SessionTypeFileToTempToInPlace;
+            operationType = OperationTypeFileToTempToInPlace;
         }
         else if(useTmpFolder && useOutFolder)
         {
-            sessionType = SessionTypeFileToTempToOutput;
+            operationType = OperationTypeFileToTempToOutput;
         }
         else
         {
-            sessionType = SessionTypeFileInPlace;
+            operationType = OperationTypeFileInPlace;
         }
     }
     else
     {
-        sessionType = SessionTypeFolderInPlace;
+        operationType = OperationTypeFolderInPlace;
 //        if(useOutFolder && !useTmpFolder)
 //        {
 //            SessionType = SessionTypeFolderToOutput;
 //        }
         if(useTmpFolder && !useOutFolder)
         {
-            sessionType = SessionTypeFolderToTempToInPlace;
+            operationType = OperationTypeFolderToTempToInPlace;
         }
         else if(useTmpFolder && useOutFolder)
         {
-            sessionType = SessionTypeFolderToTempToOutput;
+            operationType = OperationTypeFolderToTempToOutput;
         }
     }
     
-    return sessionType;
+    return operationType;
 }
 
-- (void) analysisSessionForFiles:(NSArray *)URLArray sessionCompletionBlock:(void (^)(void))completionBlock
+#pragma mark - Create Session State Wrapper
+
+- (void) analysisSessionForFiles:(NSArray<NSURL*> *)URLArray sessionCompletionBlock:(void (^)(void))completionBlock
 {
+    if(!URLArray && (URLArray.count == 0))
+    {
+        return;
+    }
+       
+    SessionStateWrapper* session = [[SessionStateWrapper alloc] init];
+    session.sessionCompletionBlock = completionBlock;
+    
+    NSMutableArray<OperationStateWrapper*>* operationStates = [NSMutableArray new];
+    NSMutableArray<CopyOperationStateWrapper*>* copyStates = [NSMutableArray new];
+    NSMutableArray<MoveOperationStateWrapper*>* moveStates = [NSMutableArray new];
 
-    NSOperation* beginAnalysisOperation = [NSBlockOperation blockOperationWithBlock:^{
+    NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
+    NSURL* outFolderURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
+    
+    NSError* error = nil;
+    BOOL makeTemp = NO;
+    
+    // TODO: Add test to check for existence of output and temp folder here - otherwise we throw a warning in the log and continue as if the option is not set?
+    
+    // If we have a specified temp folder, and pref is enabled, set it
+    if(tmpFolderURL != nil && [self.prefsViewController.preferencesFileViewController usingTempFolder])
+    {
+        tmpFolderURL = [tmpFolderURL URLByAppendingPathComponent:session.sessionID.UUIDString isDirectory:YES];
+        makeTemp = [self.fileManager createDirectoryAtURL:tmpFolderURL withIntermediateDirectories:YES attributes:nil error:&error];
+    }
+    else
+    {
+        // Otherwise we specify the local directory as temp, and carry on.
+        makeTemp = YES;
+    }
+    
+    for(NSURL* url in URLArray)
+    {
+        // Attempts to fix #84
+        [url removeAllCachedResourceValues];
+        NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
+        
+        if(tmpFolderURL == nil)
+        {
+            tmpFolderURL = sourceDirectory;
+        }
+        
+        if(outFolderURL == nil)
+        {
+            outFolderURL = sourceDirectory;
+        }
+        
+        // Attempts to fix #84
+        [tmpFolderURL removeAllCachedResourceValues];
+        [outFolderURL removeAllCachedResourceValues];
+        [sourceDirectory removeAllCachedResourceValues];
+        
+        OperationType operationType = [self operationTypeForURL:url];
+        
+        [[LogController sharedLogController] appendVerboseLog:[@"Starting" stringByAppendingString:[self stringForOperationType:operationType] ] ];
 
-        NSUUID* sessionUUID = [NSUUID UUID];
-        
-        // TODO: this isnt explicitely correct - this *should* be run when right before our first op actually runs
-        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", sessionUUID.UUIDString]];
-        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Got URLS: %@", [URLArray description]]];
-        
-         NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
-        
-        // Standard Completion Handler
-        NSBlockOperation* sessionCompletionOperation = [NSBlockOperation blockOperationWithBlock:^{
-            
-            NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
-            
-            [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", sessionUUID.UUIDString, delta]];
-            
-            if(completionBlock != NULL)
-            {
-                completionBlock();
+        switch (operationType)
+        {
+            case OperationTypeUnknown:
+                [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Could Not Deduce Analysis Type For %@", url]];
+                break;
                 
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSUserNotification* sessionComplete = [[NSUserNotification alloc] init];
-                    sessionComplete.title = @"Finished Batch";
-                    sessionComplete.subtitle = @"Synopsis Analyzer finished batch";
-                    sessionComplete.hasActionButton = NO;
-                    sessionComplete.identifier = sessionUUID.UUIDString;
-                    
-                    [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:sessionComplete];
-                });
+            case OperationTypeFileInPlace:
+            case OperationTypeFileToTempToInPlace:
+            case OperationTypeFileToOutput:
+            case OperationTypeFileToTempToOutput:
+            {
+                OperationStateWrapper* operationState = [[OperationStateWrapper alloc] initWithSourceFileURL:url
+                                                                                               operationType:operationType
+                                                                                                      preset:[self.prefsViewController defaultPreset]
+                                                                                               tempDirectory:tmpFolderURL
+                                                                                        destinationDirectory:outFolderURL];
+                [operationStates addObject:operationState];
+                break;
+            }
+            case OperationTypeFolderInPlace:
+            {
+                [operationStates addObjectsFromArray:[self operationStatesFolderInPlace:url]];
+                break;
+            }
+            case OperationTypeFolderToTempToInPlace:
+            {
+                [operationStates addObjectsFromArray:[self operationStatesFolderToTempToPlace:url tempFolder:tmpFolderURL]];
+                break;
+            }
+            case OperationTypeFolderToTempToOutput:
+            {
+                NSString* folderName = [url lastPathComponent];
+
+                CopyOperationStateWrapper* copyState = [[CopyOperationStateWrapper alloc] init];
+                copyState.srcURL = url;
+                copyState.dstURL = [tmpFolderURL URLByAppendingPathComponent:folderName];
+                [copyStates addObject:copyState];
+                
+                [operationStates addObjectsFromArray:[self operationStatesFolderToTempToOutput:url tempFolder:tmpFolderURL]];
+
+                MoveOperationStateWrapper* moveState = [[MoveOperationStateWrapper alloc] init];
+                moveState.srcURL = [tmpFolderURL URLByAppendingPathComponent:folderName];
+                moveState.dstURL = [outFolderURL URLByAppendingPathComponent:folderName];
+                [moveStates addObject:moveState];
+                
+                break;
+            }
+        }
+    }
+    
+    session.sessionOperationStates = operationStates;
+    session.fileCopyOperationStates = copyStates;
+    session.fileMoveOperationStates = moveStates;
+    
+    NSString* sessionName = [NSString stringWithFormat:@"%@, %lu items", [URLArray[0] lastPathComponent], (unsigned long)operationStates.count];
+    session.sessionName = sessionName;
+    
+    [self.sessionController addNewSession:session];
+    
+    // Temporary - runs analysis immediately
+    [self submitSessionOperations:session];
+}
+
+#pragma mark - Submit Session State Wrapper
+
+-(void) submitSessionOperations:(SessionStateWrapper*)session
+{
+    __block NSTimeInterval start;
+    // Create Begin Operation
+    NSBlockOperation* beginOperation = [NSBlockOperation blockOperationWithBlock:^{
+
+        start = [NSDate timeIntervalSinceReferenceDate];
+        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", session.sessionID]];
+    }];
+    
+    [self.synopsisAnalysisQueue addOperation:beginOperation];
+
+    // Create Completion Operation
+    NSBlockOperation* completionOperation = [NSBlockOperation blockOperationWithBlock:^{
+        
+        NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
+        
+        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", session.sessionID, delta]];
+        
+        if(session.sessionCompletionBlock != NULL)
+        {
+            session.sessionCompletionBlock();
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSUserNotification* sessionComplete = [[NSUserNotification alloc] init];
+            sessionComplete.title = @"Finished Batch";
+            sessionComplete.subtitle = @"Synopsis Analyzer finished batch";
+            sessionComplete.hasActionButton = NO;
+            sessionComplete.identifier = session.sessionID.UUIDString;
+            
+            [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:sessionComplete];
+        });
+    }];
+
+    NSMutableArray<BaseTranscodeOperation*>* analysisOperations = [NSMutableArray new];
+    NSMutableArray<BaseTranscodeOperation*>* finalizationOperations = [NSMutableArray new];
+
+    NSMutableArray<NSBlockOperation*>* copyOperations = [NSMutableArray new];
+    NSMutableArray<NSBlockOperation*>* moveOperations = [NSMutableArray new];
+
+    for(CopyOperationStateWrapper* copyState in session.fileCopyOperationStates)
+    {
+        NSURL* source = copyState.srcURL;
+        NSURL* dest = copyState.dstURL;
+        
+        NSBlockOperation* copyOperation = [NSBlockOperation blockOperationWithBlock:^{
+            
+            // Attempts to fix #84
+            [source removeAllCachedResourceValues];
+            
+            // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
+            BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:source];
+            BOOL copySuccessful = NO;
+            NSError* error = nil;
+            
+            if(useRemotePath)
+            {
+                [[LogController sharedLogController] appendVerboseLog:[@"Using Remote File Helper for " stringByAppendingString:source.path]];
+                copySuccessful = [self.remoteFileHelper safelyCopyFileURLOnRemoteFileSystem:source toURL:dest error:&error];
+            }
+            else
+            {
+                copySuccessful = [self.fileManager copyItemAtURL:source toURL:dest error:&error];
+            }
+            
+            if(copySuccessful)
+            {
+                [[LogController sharedLogController] appendSuccessLog:[@"Copied file" stringByAppendingString:source.path]];
+            }
+            else
+            {
+                [[LogController sharedLogController] appendErrorLog:[@"Unable to copy file" stringByAppendingString:error.localizedDescription]];
             }
         }];
         
-        NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
-        NSURL* outFolderURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
-        
-        NSError* error = nil;
-        BOOL makeTemp = NO;
-        
-        // TODO: Add test to check for existence of output and temp folder here - otherwise we throw a warning in the log and continue as if the option is not set?
-        
-        // If we have a specified temp folder, and pref is enabled, set it
-        if(tmpFolderURL != nil && [self.prefsViewController.preferencesFileViewController usingTempFolder])
-        {
-            tmpFolderURL = [tmpFolderURL URLByAppendingPathComponent:sessionUUID.UUIDString isDirectory:YES];
-            makeTemp = [self.fileManager createDirectoryAtURL:tmpFolderURL withIntermediateDirectories:YES attributes:nil error:&error];
-        }
-        else
-        {
-            // Otherwise we specify the local directory as temp, and carry on.
-            makeTemp = YES;
-        }
-        
-        if(URLArray && URLArray.count && makeTemp)
-        {
-            for(NSURL* url in URLArray)
-            {
-                // Attempts to fix #84
-                [url removeAllCachedResourceValues];
-                NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
-
-    //            NSLog(@"analysisSessionForFiles: %@", url);
-                
-                if(tmpFolderURL == nil)
-                {
-                    tmpFolderURL = sourceDirectory;
-                }
-
-                if(outFolderURL == nil)
-                {
-                    outFolderURL = sourceDirectory;
-                }
-
-                // Attempts to fix #84
-                [tmpFolderURL removeAllCachedResourceValues];
-                [outFolderURL removeAllCachedResourceValues];
-                [sourceDirectory removeAllCachedResourceValues];
-                
-                switch ([self sessionTypeForURL:url])
-                {
-                    case SessionTypeUnknown:
-                        [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Could Not Deduce Analysis Type For %@", url]];
-                        break;
-                        
-                    case SessionTypeFileInPlace:
-                    {
-                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFileInPlace"]];
-                        [self SessionTypeFileToTempToOutput:url tempFolder:sourceDirectory outputFolder:sourceDirectory completionOperation:sessionCompletionOperation];
-                    }
-                        break;
-                        
-                    case SessionTypeFileToTempToInPlace:
-                    {
-                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFileToTempToInPlace"]];
-                        [self SessionTypeFileToTempToOutput:url tempFolder:tmpFolderURL outputFolder:sourceDirectory completionOperation:sessionCompletionOperation];
-                    }
-                        break;
-                        
-                    case SessionTypeFileToOutput:
-                    {
-                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFileToOutput"]];
-                        [self SessionTypeFileToTempToOutput:url tempFolder:sourceDirectory outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
-                    }
-                        break;
-                        
-                    case SessionTypeFileToTempToOutput:
-                    {
-                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFileToTempToOutput"]];
-                        [self SessionTypeFileToTempToOutput:url tempFolder:tmpFolderURL outputFolder:outFolderURL completionOperation:sessionCompletionOperation];
-                    }
-                        break;
-                        
-                        // Folders:
-                    case SessionTypeFolderInPlace:
-                    {
-                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFolderInPlace"]];
-                        [self analysisSessionTypeFolderInPlace:url completionOperation:sessionCompletionOperation];
-                    }
-                        break;
-                        
-                    case SessionTypeFolderToTempToInPlace:
-                    {
-                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFolderToTempToInPlace"]];
-                        [self analysisSessionTypeFolderToTempToPlace:url tempFolder:tmpFolderURL completionOperation:sessionCompletionOperation];
-                    }
-                        break;
-                        
-                    case SessionTypeFolderToTempToOutput:
-                    {
-                        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Starting SessionTypeFolderToTempToOutput"]];
-                        // We add a 'move' operation to every 'top level folder that we encode. We
-                        // If we have folders which arrive / are updated within a from a watch folder
-                        NSBlockOperation* moveOperation = [NSBlockOperation blockOperationWithBlock:^{
-                            
-                            // if a folder was already analyzed, and resides in the destination output folder, we should rename it
-                            // TODO: Rename output folder URL with session ID
-                            // TODO: DONT move if we fail!
-                            NSString* folderName = [url lastPathComponent];
-                            
-                            NSError* error = nil;
-                            if([self.fileManager moveItemAtURL:[tmpFolderURL URLByAppendingPathComponent:folderName]
-                                                         toURL:[outFolderURL URLByAppendingPathComponent:folderName] error:&error])
-                            {
-                                [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Moved %@ to Output Directory", folderName]];
-                            }
-                        }];
-                        
-                        [self SessionTypeFolderToTempToOutput:url tempFolder:tmpFolderURL completionOperation:moveOperation];
-                        
-                        // completion isnt complete till our move finishes
-                        [sessionCompletionOperation addDependency:moveOperation];
-                        
-                        [self.synopsisAsyncQueue addOperation:moveOperation];
-                        
-                        //
-                    }
-                        break;
-                }
-            }
-            
-            // Enqueue our session completion operation now that it has dependencies on every encode operation
-            [self.synopsisAsyncQueue addOperation:sessionCompletionOperation];
-        }
-        
-    }];
-    
-    [self.synopsisAsyncQueue addOperation:beginAnalysisOperation];
-}
-
-- (id<NSFastEnumeration>) safeDirectoryEnumeratorForURL:(NSURL*)urlToEnumerate
-{
-    BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:urlToEnumerate];
-    id<NSFastEnumeration> directoryEnumerator = nil;
-    
-    if(useRemotePath)
-        directoryEnumerator = [self.remoteFileHelper safelyEnumerateDirectoryOnRemoteVolume:urlToEnumerate];
-    else
-    {
-        directoryEnumerator = [self.fileManager enumeratorAtURL:urlToEnumerate
-                                     includingPropertiesForKeys:[NSArray array]
-                                                        options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles
-                                                   errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
-                                                       
-                                                       if(error)
-                                                       {
-                                                           [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to enumerate %@,  error: %@", url , error]];
-                                                           return NO;
-                                                       }
-                                                       
-                                                       return YES;
-                                                   }];
+        [copyOperations addObject:copyOperation];
     }
     
-    return directoryEnumerator;
-}
+    for(MoveOperationStateWrapper* moveState in session.fileMoveOperationStates)
+    {
+        NSURL* source = moveState.srcURL;
+        NSURL* dest = moveState.dstURL;
 
-#pragma mark - Analysis Type Handling Files
-
-- (void) SessionTypeFileToTempToOutput:(NSURL*)fileToTranscode tempFolder:(NSURL*)tempFolder outputFolder:(NSURL*)outputFolder completionOperation:(NSOperation*)completionOp
-{
-    BaseTranscodeOperation* operation = [self enqueueFileForTranscode:fileToTranscode tempDirectory:tempFolder outputDirectory:outputFolder];
+        NSBlockOperation* moveOperation = [NSBlockOperation blockOperationWithBlock:^{
+            
+            // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
+            NSError* error = nil;
+            if([self.fileManager moveItemAtURL:source toURL:dest error:&error])
+            {
+                [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Moved %@ to Output Directory", source]];
+            }
+            else
+            {
+                [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Unable to move %@ to Output Directory: %@", source, error]];
+            }
+        }];
+        
+        [moveOperations addObject:moveOperation];
+    }
     
-    [completionOp addDependency:operation];
+    // Assign Dependencies
+    for(OperationStateWrapper* operationState in session.sessionOperationStates)
+    {
+        NSArray<BaseTranscodeOperation*>* operations = [self createOperationsFromOperationState:operationState];
+       
+        for(BaseTranscodeOperation* operation in operations)
+        {
+            // Every copy operation must happen first
+            // Completion dependecies on copy
+            for(NSBlockOperation* copyOp in copyOperations)
+            {
+                [operation addDependency:copyOp];
+                [completionOperation addDependency:copyOp];
+            }
+            
+            // Every move Operation must happen after our final pass
+            // Completion requires move to finish
+            for(NSBlockOperation* moveOp in moveOperations)
+            {
+                [moveOp addDependency:operation];
+                [completionOperation addDependency:moveOp];
+            }
+            
+            // Completion has dependecies our op too, of course
+            // This is important if we dont have moves or copies
+            [completionOperation addDependency:operation];
+        }
+        
+        // Lame Hack:
+        [analysisOperations addObject:operations[0]];
+        [finalizationOperations addObject:operations[1]];
+    }
+
+    // Enqueue Operations
+    for(NSBlockOperation* copyOp in copyOperations)
+    {
+        [self.synopsisFileOpQueue addOperation:copyOp];
+    }
+
+    for(BaseTranscodeOperation* operation in analysisOperations)
+    {
+        [self.synopsisAnalysisQueue addOperation:operation];
+    }
+
+    for(BaseTranscodeOperation* operation in finalizationOperations)
+    {
+        [self.synopsisFinalizationQueue addOperation:operation];
+    }
+
+    for(NSBlockOperation* moveOp in moveOperations)
+    {
+        [self.synopsisFileOpQueue addOperation:moveOp];
+    }
+    
+    [self.synopsisFileOpQueue addOperation:completionOperation];
 }
 
-#pragma mark - Analysis Type Handling Folders
+#pragma mark - Create Operation State Wrappers
 
-- (void) analysisSessionTypeFolderInPlace:(NSURL*)directoryToEncode completionOperation:(NSOperation*)completionOp
+- (NSArray<OperationStateWrapper*>*) operationStatesFolderInPlace:(NSURL*)directoryToEncode
 {
+    NSMutableArray<OperationStateWrapper*>* operationStates = [NSMutableArray new];
+
     // Attempts to fix #84
     [directoryToEncode removeAllCachedResourceValues];
     id<NSFastEnumeration> directoryEnumerator = [self safeDirectoryEnumeratorForURL:directoryToEncode];
@@ -525,14 +645,22 @@
         {
             NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
           
-            BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:sourceDirectory outputDirectory:sourceDirectory];
-            [completionOp addDependency:operation];
+            OperationStateWrapper* operationState = [[OperationStateWrapper alloc] initWithSourceFileURL:url
+                                                                                           operationType:OperationTypeFolderInPlace
+                                                                                                  preset:[self.prefsViewController defaultPreset]
+                                                                                           tempDirectory:sourceDirectory
+                                                                                    destinationDirectory:sourceDirectory];
+            [operationStates addObject:operationState];
         }
     }
+    
+    return operationStates;
 }
 
-- (void) analysisSessionTypeFolderToTempToPlace:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
+- (NSArray<OperationStateWrapper*>*) operationStatesFolderToTempToPlace:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder
 {
+    NSMutableArray<OperationStateWrapper*>* operationStates = [NSMutableArray new];
+
     // Attempts to fix #84
     [directoryToEncode removeAllCachedResourceValues];
     
@@ -561,114 +689,85 @@
         if([SynopsisSupportedFileTypes() containsObject:fileType] && (isDirectory.boolValue == FALSE))
         {
             NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
-            
-            BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:tempFolder outputDirectory:sourceDirectory];
-            [completionOp addDependency:operation];
+            OperationStateWrapper* operationState = [[OperationStateWrapper alloc] initWithSourceFileURL:url
+                                                                                           operationType:OperationTypeFolderToTempToInPlace
+                                                                                                  preset:[self.prefsViewController defaultPreset]
+                                                                                           tempDirectory:tempFolder
+                                                                                    destinationDirectory:sourceDirectory];
+            [operationStates addObject:operationState];
         }
     }
+    
+    return operationStates;
+
 }
 
-- (void) SessionTypeFolderToTempToOutput:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder completionOperation:(NSOperation*)completionOp
+- (NSArray<OperationStateWrapper*>*) operationStatesFolderToTempToOutput:(NSURL*)directoryToEncode tempFolder:(NSURL*)tempFolder
 {
-    // Attempts to fix #84
-    [directoryToEncode removeAllCachedResourceValues];
+    NSMutableArray<OperationStateWrapper*>* operationStates = [NSMutableArray new];
 
-    // Mirror the contents of our directory to encode - Our NSFileManagerDelegate handles knowing what to copy or not (only folders, or non media, or media too)
-    NSString* directoryToEncodeName = [directoryToEncode lastPathComponent];
-
-    BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:directoryToEncode];
-    BOOL copySuccessful = NO;
-    NSError* error = nil;
-
+    id<NSFastEnumeration> directoryEnumerator = [self safeDirectoryEnumeratorForURL:directoryToEncode];
     
-    if(useRemotePath)
+    for(NSURL* url in directoryEnumerator)
     {
-        [[LogController sharedLogController] appendVerboseLog:[@"Using Remote File Helper for " stringByAppendingString:directoryToEncode.path]];
-        copySuccessful = [self.remoteFileHelper safelyCopyFileURLOnRemoteFileSystem:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error];
-    }
-    else
-    {
-        copySuccessful = [self.fileManager copyItemAtURL:directoryToEncode toURL:[tempFolder URLByAppendingPathComponent:directoryToEncodeName] error:&error];
-    }
-    
-    if(copySuccessful)
-    {
-        id<NSFastEnumeration> directoryEnumerator = [self safeDirectoryEnumeratorForURL:directoryToEncode];
-
-        for(NSURL* url in directoryEnumerator)
+        // Attempts to fix #84
+        [url removeAllCachedResourceValues];
+        //            NSLog(@"SessionTypeFolderToTempToOutput : %@", url);
+        
+        NSNumber* isDirectory;
+        NSString* fileType;
+        NSError* error;
+        
+        if(![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error])
         {
-            // Attempts to fix #84
-            [url removeAllCachedResourceValues];
-//            NSLog(@"SessionTypeFolderToTempToOutput : %@", url);
-
-            NSNumber* isDirectory;
-            NSString* fileType;
-            NSError* error;
-
-            if(![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error])
+            // Cant get NSURLIsDirectoryKey seems shady, silently continue
+            continue;
+        }
+        
+        if(![url getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
+        {
+            // Cant get NSURLTypeIdentifierKey seems shady too, silently continue
+            continue;
+        }
+        
+        if([SynopsisSupportedFileTypes() containsObject:fileType] && (isDirectory.boolValue == FALSE))
+        {
+            // TODO: Deduce the correct sub-directory in the temp folder to place our media in, so we only do work 'in place' within the temp folder structure.
+            
+            NSURL* newTempDir = tempFolder;
+            
+            // Remove the path components
+            NSArray<NSString*>* topFolderComponentsToRemove = [[directoryToEncode URLByDeletingLastPathComponent] pathComponents];
+            NSMutableArray<NSString*>* analysisFileComponents = [[[url URLByDeletingLastPathComponent] pathComponents] mutableCopy];
+            
+            [analysisFileComponents removeObjectsInArray:topFolderComponentsToRemove];
+            
+            for(NSString* component in analysisFileComponents)
             {
-                // Cant get NSURLIsDirectoryKey seems shady, silently continue
-                continue;
+                newTempDir = [newTempDir URLByAppendingPathComponent:component];
             }
-
-            if(![url getResourceValue:&fileType forKey:NSURLTypeIdentifierKey error:&error])
-            {
-                // Cant get NSURLTypeIdentifierKey seems shady too, silently continue
-                continue;
-            }
-
-            if([SynopsisSupportedFileTypes() containsObject:fileType] && (isDirectory.boolValue == FALSE))
-            {
-                // TODO: Deduce the correct sub-directory in the temp folder to place our media in, so we only do work 'in place' within the temp folder structure.
-
-                NSURL* newTempDir = tempFolder;
-
-                // Remove the path components
-                NSArray<NSString*>* topFolderComponentsToRemove = [[directoryToEncode URLByDeletingLastPathComponent] pathComponents];
-                NSMutableArray<NSString*>* analysisFileComponents = [[[url URLByDeletingLastPathComponent] pathComponents] mutableCopy];
-
-                [analysisFileComponents removeObjectsInArray:topFolderComponentsToRemove];
-
-                for(NSString* component in analysisFileComponents)
-                {
-                    newTempDir = [newTempDir URLByAppendingPathComponent:component];
-                }
-
-                BaseTranscodeOperation* operation = [self enqueueFileForTranscode:url tempDirectory:newTempDir outputDirectory:newTempDir];
-                [completionOp addDependency:operation];
-            }
+            
+            OperationStateWrapper* operationState = [[OperationStateWrapper alloc] initWithSourceFileURL:url
+                                                                                           operationType:OperationTypeFolderToTempToOutput
+                                                                                                  preset:[self.prefsViewController defaultPreset]
+                                                                                           tempDirectory:newTempDir
+                                                                                    destinationDirectory:newTempDir];
+            [operationStates addObject:operationState];
         }
     }
-    else
-    {
-        [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to copy %@, to Output Directory,  error: %@", [directoryToEncode lastPathComponent], error]];
-    }
+    
+    return operationStates;
 }
 
-#pragma mark -
+#pragma mark - Create NSOperations
 
-- (IBAction)openMovies:(id)sender
+- (NSArray<BaseTranscodeOperation*>*) createOperationsFromOperationState:(OperationStateWrapper*)state
 {
-    // Open a movie or two
-    NSOpenPanel* openPanel = [NSOpenPanel openPanel];
-    [openPanel setAllowsMultipleSelection:YES];
-    
-    [openPanel setAllowedFileTypes:SynopsisSupportedFileTypes()];
-    
-    [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)
-     {
-         if (result == NSFileHandlingPanelOKButton)
-         {
-             [self analysisSessionForFiles:openPanel.URLs sessionCompletionBlock:^{
-                 
-             }];
-         }
-     }];
-}
-
-- (BaseTranscodeOperation*) enqueueFileForTranscode:(NSURL*)fileURL tempDirectory:(NSURL*)tempDirectory outputDirectory:(NSURL*)outputDirectory
-{
-    NSUUID* encodeUUID = [NSUUID UUID];
+    NSUUID* encodeUUID = state.operationID;
+    NSURL* fileURL = state.sourceFileURL;
+    NSURL* tempDirectory = state.tempDirectory;
+    NSURL* outputDirectory = state.destinationDirectory;
+    PresetObject* currentPreset = state.preset;
     
     NSString* sourceFileName = [fileURL lastPathComponent];
     sourceFileName = [sourceFileName stringByDeletingPathExtension];
@@ -708,7 +807,6 @@
     }
     
     // TODO: Just pass a copy of the current Preset directly, and figure out what we need for analysis settings
-    PresetObject* currentPreset = [self.prefsViewController defaultPreset];
     PresetVideoSettings* videoSettings = currentPreset.videoSettings;
     PresetAudioSettings* audioSettings = currentPreset.audioSettings;
     PresetAnalysisSettings* analysisSettings = currentPreset.analyzerSettings;
@@ -725,8 +823,8 @@
                                        kSynopsisAnalysisSettingsKey : placeholderAnalysisSettings,
                                        };
     
-    AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithUUID:encodeUUID sourceURL:fileURL destinationURL:analysisFileURL transcodeOptions:transcodeOptions];
-    MetadataWriterTranscodeOperation* metadata = [[MetadataWriterTranscodeOperation alloc] initWithUUID:encodeUUID sourceURL:analysisFileURL destinationURL:metadataFileURL];
+    AnalysisAndTranscodeOperation* analysis = [[AnalysisAndTranscodeOperation alloc] initWithOperationState:state sourceURL:fileURL destinationURL:analysisFileURL transcodeOptions:transcodeOptions];
+    MetadataWriterTranscodeOperation* metadata = [[MetadataWriterTranscodeOperation alloc] initWithOperationState:state sourceURL:analysisFileURL destinationURL:metadataFileURL];
 
     assert(analysis);
     assert(metadata);
@@ -783,14 +881,30 @@
 
     [[LogController sharedLogController] appendVerboseLog:@"Begin Transcode and Analysis"];
 
-    [self.synopsisAsyncQueue addOperation:analysis];
-    [self.synopsisAsyncQueue addOperation:metadata];
-
-    return metadata;
+    return @[analysis, metadata];
 }
 
 
 #pragma mark - Toolbar
+
+- (IBAction)openMovies:(id)sender
+{
+    // Open a movie or two
+    NSOpenPanel* openPanel = [NSOpenPanel openPanel];
+    [openPanel setAllowsMultipleSelection:YES];
+    [openPanel setCanChooseDirectories:YES];
+    [openPanel setAllowedFileTypes:SynopsisSupportedFileTypes()];
+    
+    [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)
+     {
+         if (result == NSFileHandlingPanelOKButton)
+         {
+             [self analysisSessionForFiles:openPanel.URLs sessionCompletionBlock:^{
+                 
+             }];
+         }
+     }];
+}
 
 static BOOL isRunning = NO;
 - (IBAction) runAnalysisAndTranscode:(id)sender
@@ -800,10 +914,24 @@ static BOOL isRunning = NO;
     if(isRunning)
     {
         self.startPauseToolbarItem.image = [NSImage imageNamed:@"ic_pause_circle_filled"];
+        self.synopsisAnalysisQueue.suspended = YES;
+        self.synopsisFinalizationQueue.suspended = YES;
+        self.synopsisFileOpQueue.suspended = YES;
     }
     else
     {
         self.startPauseToolbarItem.image = [NSImage imageNamed:@"ic_play_circle_filled"];
+        self.synopsisAnalysisQueue.suspended = NO;
+        self.synopsisFinalizationQueue.suspended = NO;
+        self.synopsisFileOpQueue.suspended = NO;
+    }
+    
+    for(SessionStateWrapper* session in [self.sessionController sessions])
+    {
+        if(session.sessionState == SessionStatePending)
+        {
+            [self submitSessionOperations:session];
+        }
     }
 }
 
@@ -823,15 +951,54 @@ static BOOL isRunning = NO;
 {
     // Number of simultaneous Jobs:
     BOOL concurrentJobs = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobAnalysisPreferencesKey] boolValue];
+    NSInteger jobCount = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentJobCountPreferencesKey] integerValue];
     
+    NSUInteger actualJobCount = 1;
+    
+    if(concurrentJobs)
+    {
+        if (jobCount ==  -1)
+        {
+            actualJobCount =  [[NSProcessInfo processInfo] activeProcessorCount] / 3.0;
+        }
+        else
+        {
+            actualJobCount = jobCount;
+        }
+    }
     // Serial transcode queue
-    self.synopsisAsyncQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
-    
-    // Serial metadata / passthrough writing queue
-//    self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
+    self.synopsisAnalysisQueue.maxConcurrentOperationCount = actualJobCount;
+    self.synopsisFinalizationQueue.maxConcurrentOperationCount = actualJobCount;
 }
 
 #pragma mark - Helpers
+
+- (id<NSFastEnumeration>) safeDirectoryEnumeratorForURL:(NSURL*)urlToEnumerate
+{
+    BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:urlToEnumerate];
+    id<NSFastEnumeration> directoryEnumerator = nil;
+    
+    if(useRemotePath)
+        directoryEnumerator = [self.remoteFileHelper safelyEnumerateDirectoryOnRemoteVolume:urlToEnumerate];
+    else
+    {
+        directoryEnumerator = [self.fileManager enumeratorAtURL:urlToEnumerate
+                                     includingPropertiesForKeys:[NSArray array]
+                                                        options:NSDirectoryEnumerationSkipsPackageDescendants | NSDirectoryEnumerationSkipsHiddenFiles
+                                                   errorHandler:^BOOL(NSURL * _Nonnull url, NSError * _Nonnull error) {
+                                                       
+                                                       if(error)
+                                                       {
+                                                           [[LogController sharedLogController] appendErrorLog:[NSString stringWithFormat:@"Unable to enumerate %@,  error: %@", url , error]];
+                                                           return NO;
+                                                       }
+                                                       
+                                                       return YES;
+                                                   }];
+    }
+    
+    return directoryEnumerator;
+}
 
 - (void) revealHelper:(NSWindow*)window sender:(id)sender
 {
