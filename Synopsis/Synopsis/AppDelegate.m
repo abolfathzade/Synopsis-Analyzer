@@ -78,7 +78,7 @@
                                            kSynopsisAnalyzerUseOutputFolderKey : @(NO),
                                            kSynopsisAnalyzerUseWatchFolderKey : @(NO),
                                            kSynopsisAnalyzerUseTempFolderKey : @(NO),
-                                           kSynopsisAnalyzerMirrorFolderStructureToOutputKey : (@NO),
+                                           kSynopsisAnalyzerMirrorFolderStructureToOutputKey : @(NO),
                                            };
         
         [[NSUserDefaults standardUserDefaults] registerDefaults:standardDefaults];
@@ -113,16 +113,6 @@
         self.synopsisFileOpQueue = [[NSOperationQueue alloc] init];
         self.synopsisFileOpQueue.maxConcurrentOperationCount = 1;
         self.synopsisFileOpQueue.qualityOfService = NSQualityOfServiceUtility;
-
-//        // Serial metadata / passthrough writing queue
-//        self.metadataQueue = [[NSOperationQueue alloc] init];
-//        self.metadataQueue.maxConcurrentOperationCount = (concurrentJobs) ? [[NSProcessInfo processInfo] activeProcessorCount] / 2 : 1;
-//        self.metadataQueue.qualityOfService = NSQualityOfServiceUserInitiated;
-//
-//        // Completion queue of group of encodes, be it a drag session, opening of a set folders with media, or a single encode operation
-//        self.sessionComplectionQueue = [[NSOperationQueue alloc] init];
-//        self.sessionComplectionQueue.maxConcurrentOperationCount = 1;
-//        self.sessionComplectionQueue.qualityOfService = NSQualityOfServiceUtility;
         
         self.analyzerPlugins = [NSMutableArray new];
         self.analyzerPluginsInitializedForPrefs = [NSMutableArray new];
