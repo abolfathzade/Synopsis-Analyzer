@@ -12,8 +12,6 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 
-#import "VideoTransformScaleLinearizeHelper.h"
-
 #import "HapInAVFoundation.h"
 
 #import "NSDictionary+JSONString.h"
@@ -34,7 +32,7 @@
 
 }
 
-@property (atomic, readwrite, strong) VideoTransformScaleLinearizeHelper* videoHelper;
+@property (atomic, readwrite, strong) SynopsisVideoFrameConformSession* videoConformSession;
 
 // Prerequisites
 @property (atomic, readwrite, strong) NSDictionary* transcodeOptions;
@@ -102,7 +100,6 @@
 @property (readwrite, strong) NSOperationQueue* videoUncompressedDecodeQueue;
 
 @property (readwrite, strong) NSOperationQueue* concurrentVideoAnalysisQueue;
-@property (readwrite, strong) NSOperationQueue* videoTransformQueue;
 @property (readwrite, strong) NSOperationQueue* jsonEncodeQueue;
 
 @end
@@ -121,8 +118,6 @@
         
         // Nil settings provides raw undecoded samples, ie passthrough.
         // Note we still need to decode to send to our analyzers
-
-        self.videoHelper = [[VideoTransformScaleLinearizeHelper alloc] init];
         
         self.transcodeOptions = transcodeOptions;
         self.videoTranscodeSettings = nil;
@@ -191,8 +186,6 @@
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(concurrentFramesDidChange:) name:kSynopsisAnalyzerConcurrentFrameAnalysisDidChangeNotification object:nil];
         
-        self.videoTransformQueue = [[NSOperationQueue alloc] init];
-        self.videoTransformQueue.maxConcurrentOperationCount = 1;
 
         self.jsonEncodeQueue = [[NSOperationQueue alloc] init];
         self.jsonEncodeQueue.maxConcurrentOperationCount = 1;
@@ -234,6 +227,16 @@
     
     self.availableAnalyzers = initializedAnalyzers;
 
+    // Now that we've initted our analyzers, lets introspect to find the formats we need to support
+    NSMutableArray<SynopsisVideoFormatSpecifier*>* requiredSpecifiers = [NSMutableArray new];
+    
+    for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+    {
+        [requiredSpecifiers addObjectsFromArray:analyzer.pluginFormatSpecfiers];
+    }
+
+    self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers];
+    
     NSError* error = nil;
     
     if([self setupTranscode:&error])
@@ -259,7 +262,8 @@
     [self.videoUncompressedDecodeQueue cancelAllOperations];
     [self.concurrentVideoAnalysisQueue cancelAllOperations];
     [self.jsonEncodeQueue cancelAllOperations];
-    [self.videoTransformQueue cancelAllOperations];
+    
+    [self.videoConformSession cancelPendingConforms];
 }
 
 - (BOOL) setupTranscode:(NSError * __autoreleasing *)error
@@ -721,11 +725,11 @@
                             CGRect originalRect = CGRectMake(0, 0, CVPixelBufferGetWidth(pixelBuffer), CVPixelBufferGetHeight(pixelBuffer));
                             
 //                            dont vend a pixel buffer, vend an object that has cached format variants for our plugins to use.
-                            NSOperation* transformOperation = [self.videoHelper pixelBuffer:pixelBuffer
-                                                                              withTransform:self.transcodeAssetWriterVideo.transform
-                                                                                       rect:rectForQualityHint(originalRect, self.analysisQualityHint)
-                                                                            completionBlock:^(SynopsisVideoFormatConverter* converter, NSError * error){
-                                              
+                            [self.videoConformSession conformPixelBuffer:pixelBuffer
+                                                           withTransform:self.transcodeAssetWriterVideo.transform
+                                                                    rect:rectForQualityHint(originalRect, self.analysisQualityHint)
+                                                         completionBlock:^(SynopsisVideoFrameCache* converter, NSError * error){
+                                                             
                                               CFRelease(uncompressedVideoSampleBuffer);
                                                                                 
                                               // Run an analysis pass on each plugin
@@ -791,8 +795,6 @@
                                               [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
                                 }];
                             
-
-                            [self.videoTransformQueue addOperations:@[transformOperation] waitUntilFinished:YES];
                             
                         }
                         else
@@ -1140,7 +1142,8 @@
         [self.videoUncompressedDecodeQueue waitUntilAllOperationsAreFinished];
         [self.concurrentVideoAnalysisQueue waitUntilAllOperationsAreFinished];
         [self.jsonEncodeQueue waitUntilAllOperationsAreFinished];
-        [self.videoTransformQueue waitUntilAllOperationsAreFinished];
+
+        [self.videoConformSession blockForPendingConforms];
         
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);

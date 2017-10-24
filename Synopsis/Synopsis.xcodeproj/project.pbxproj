@@ -46,7 +46,6 @@
 		1BA76C411F83F0C10038F6AD /* PreferencesFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA76C3F1F83F0C10038F6AD /* PreferencesFileViewController.m */; };
 		1BA76C421F83F0C10038F6AD /* PreferencesFileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1BA76C401F83F0C10038F6AD /* PreferencesFileViewController.xib */; };
 		1BA8F8361C125DC20066BDDB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */; };
-		1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */; };
 		1BBED6331F9149E8003CE9C4 /* SessionStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */; };
 		1BBED6361F914C7D003CE9C4 /* OperationStateWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6351F914C7D003CE9C4 /* OperationStateWrapper.m */; };
 		1BBED63A1F919F44003CE9C4 /* SessionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BBED6391F919F44003CE9C4 /* SessionController.m */; };
@@ -90,7 +89,6 @@
 		1BC71EE11F17E8FE006DD7DC /* ImageMath.c in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71E831F17E8FE006DD7DC /* ImageMath.c */; };
 		1BC71EE21F17E8FE006DD7DC /* YCoCg.c in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71E851F17E8FE006DD7DC /* YCoCg.c */; };
 		1BC71EE91F17F042006DD7DC /* AVPlayerItemHapDXTOutput.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BC71E5B1F17E8FE006DD7DC /* AVPlayerItemHapDXTOutput.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		1BC98DBF1F9F919700E0F52A /* VideoTransformScaleLinearizeHelperVImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BC98DBE1F9F919700E0F52A /* VideoTransformScaleLinearizeHelperVImage.m */; };
 		1BEA4D201ACB2BCC00AB57C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D1F1ACB2BCC00AB57C1 /* AppDelegate.m */; };
 		1BEA4D221ACB2BCD00AB57C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D211ACB2BCD00AB57C1 /* main.m */; };
 		1BEA4D241ACB2BCD00AB57C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BEA4D231ACB2BCD00AB57C1 /* Images.xcassets */; };
@@ -231,8 +229,6 @@
 		1BA76C401F83F0C10038F6AD /* PreferencesFileViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PreferencesFileViewController.xib; sourceTree = "<group>"; };
 		1BA8F8331C125DAA0066BDDB /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		1BA8F8351C125DC20066BDDB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		1BB9B1A41EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoTransformScaleLinearizeHelper.h; sourceTree = "<group>"; };
-		1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoTransformScaleLinearizeHelper.m; sourceTree = "<group>"; };
 		1BBED6311F9149E8003CE9C4 /* SessionStateWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SessionStateWrapper.h; sourceTree = "<group>"; };
 		1BBED6321F9149E8003CE9C4 /* SessionStateWrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SessionStateWrapper.m; sourceTree = "<group>"; };
 		1BBED6341F914C7D003CE9C4 /* OperationStateWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OperationStateWrapper.h; sourceTree = "<group>"; };
@@ -381,8 +377,6 @@
 		1BC71E841F17E8FE006DD7DC /* ImageMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageMath.h; sourceTree = "<group>"; };
 		1BC71E851F17E8FE006DD7DC /* YCoCg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = YCoCg.c; sourceTree = "<group>"; };
 		1BC71E861F17E8FE006DD7DC /* YCoCg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YCoCg.h; sourceTree = "<group>"; };
-		1BC98DBD1F9F919700E0F52A /* VideoTransformScaleLinearizeHelperVImage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoTransformScaleLinearizeHelperVImage.h; sourceTree = "<group>"; };
-		1BC98DBE1F9F919700E0F52A /* VideoTransformScaleLinearizeHelperVImage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VideoTransformScaleLinearizeHelperVImage.m; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* Synopsis Analyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Synopsis Analyzer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -517,10 +511,6 @@
 				1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */,
 				1BA68C531AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.h */,
 				1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */,
-				1BB9B1A41EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.h */,
-				1BB9B1A51EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m */,
-				1BC98DBD1F9F919700E0F52A /* VideoTransformScaleLinearizeHelperVImage.h */,
-				1BC98DBE1F9F919700E0F52A /* VideoTransformScaleLinearizeHelperVImage.m */,
 			);
 			name = "Transcode & Analysis Operations";
 			sourceTree = "<group>";
@@ -1191,7 +1181,6 @@
 			files = (
 				1B3233CB1C2EFDC500C9CF5E /* PreferencesPresetViewController.m in Sources */,
 				1BEA4D421ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m in Sources */,
-				1BB9B1A61EF0691400F6A477 /* VideoTransformScaleLinearizeHelper.m in Sources */,
 				1BC71ED61F17E8FE006DD7DC /* GLDXTEncoder.c in Sources */,
 				1BC71ED91F17E8FE006DD7DC /* SquishEncoder.c in Sources */,
 				1BBED6361F914C7D003CE9C4 /* OperationStateWrapper.m in Sources */,
@@ -1217,7 +1206,6 @@
 				1BC71EAB1F17E8FE006DD7DC /* clusterfit.cpp in Sources */,
 				1BC71EBA1F17E8FE006DD7DC /* singlecolourfit.cpp in Sources */,
 				1B3233C21C2E395700C9CF5E /* PreferencesViewController.m in Sources */,
-				1BC98DBF1F9F919700E0F52A /* VideoTransformScaleLinearizeHelperVImage.m in Sources */,
 				1BC71EE11F17E8FE006DD7DC /* ImageMath.c in Sources */,
 				1BC71EE21F17E8FE006DD7DC /* YCoCg.c in Sources */,
 				1BC71ECC1F17E8FE006DD7DC /* AVAssetReaderHapTrackOutput.m in Sources */,
