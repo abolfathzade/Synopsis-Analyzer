@@ -343,8 +343,10 @@
     NSMutableArray<MoveOperationStateWrapper*>* moveStates = [NSMutableArray new];
 
     NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
+    BOOL usingTmpFolder = [self.prefsViewController.preferencesFileViewController usingTempFolder];
     NSURL* outFolderURL = [self.prefsViewController.preferencesFileViewController outputFolderURL];
-    
+    BOOL usingOutFolder = [self.prefsViewController.preferencesFileViewController usingOutputFolder];
+
     NSError* error = nil;
     BOOL makeTemp = NO;
     
@@ -368,12 +370,12 @@
         [url removeAllCachedResourceValues];
         NSURL* sourceDirectory = [url URLByDeletingLastPathComponent];
         
-        if(tmpFolderURL == nil)
+        if(!usingTmpFolder || (tmpFolderURL == nil))
         {
             tmpFolderURL = sourceDirectory;
         }
         
-        if(outFolderURL == nil)
+        if(!usingOutFolder || (outFolderURL == nil))
         {
             outFolderURL = sourceDirectory;
         }
