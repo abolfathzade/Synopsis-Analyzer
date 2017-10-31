@@ -12,6 +12,8 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 
+#import <Metal/Metal.h>
+
 #import "HapInAVFoundation.h"
 
 #import "NSDictionary+JSONString.h"
@@ -101,6 +103,8 @@
 
 @property (readwrite, strong) NSOperationQueue* concurrentVideoAnalysisQueue;
 @property (readwrite, strong) NSOperationQueue* jsonEncodeQueue;
+
+
 
 @end
 
@@ -235,7 +239,11 @@
         [requiredSpecifiers addObjectsFromArray:analyzer.pluginFormatSpecfiers];
     }
 
-    self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers];
+    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+    
+    id<MTLCommandQueue> commandQueue = [device newCommandQueueWithMaxCommandBufferCount:1024*1024];
+    
+    self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers commandQueue:commandQueue];
     
     NSError* error = nil;
     
@@ -307,9 +315,9 @@
             
             
         }
-        NSDictionary* HDProperties =  @{AVVideoColorPrimariesKey : AVVideoColorPrimaries_ITU_R_709_2, AVVideoTransferFunctionKey : AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey : AVVideoYCbCrMatrix_ITU_R_709_2 };
+//        NSDictionary* HDProperties =  @{AVVideoColorPrimariesKey : AVVideoColorPrimaries_ITU_R_709_2, AVVideoTransferFunctionKey : AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey : AVVideoYCbCrMatrix_ITU_R_709_2 };
 
-        NSDictionary* SDProperties =  @{AVVideoColorPrimariesKey : AVVideoColorPrimaries_SMPTE_C, AVVideoTransferFunctionKey : AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey : AVVideoYCbCrMatrix_ITU_R_601_4 };
+//        NSDictionary* SDProperties =  @{AVVideoColorPrimariesKey : AVVideoColorPrimaries_SMPTE_C, AVVideoTransferFunctionKey : AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey : AVVideoYCbCrMatrix_ITU_R_601_4 };
 
         if(self.decodeHAP)
         {
@@ -503,7 +511,7 @@
     // For every Analyzer, begin an new Analysis Session
     for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
     {
-        [analyzer beginMetadataAnalysisSessionWithQuality:self.analysisQualityHint];
+        [analyzer beginMetadataAnalysisSessionWithQuality:self.analysisQualityHint commandQueue:self.videoConformSession.commandQueue];
     }
     
     if(*error)
@@ -669,11 +677,28 @@
         
         // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
         __block AtomicBoolean* finishedReadingAllUncompressedVideo = [[AtomicBoolean alloc] init];
+        dispatch_group_t analyzedAllFramesGroup = dispatch_group_create();
         
+        
+        dispatch_group_notify(analyzedAllFramesGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            [finishedReadingAllUncompressedVideo setValue:YES];
+            
+            [[LogController sharedLogController] appendVerboseLog:@"Finished Reading Uncompressed Video Buffers"];
+            
+            // Fire final semaphore signal to hit finalization
+            dispatch_semaphore_signal(self.videoDequeueSemaphore);
+            
+            dispatch_group_leave(g);
+        });
+
+        dispatch_group_enter(analyzedAllFramesGroup);
+
         if(self.transcodeAssetHasVideo)
         {
             [self.videoUncompressedDecodeQueue addOperationWithBlock: ^{
                 
+                dispatch_group_enter(analyzedAllFramesGroup);
+
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
                 
                 BOOL hapGotFirstZerothFrameHack = NO;
@@ -685,6 +710,7 @@
                         CMSampleBufferRef uncompressedVideoSampleBuffer = [self.transcodeAssetReaderVideo copyNextSampleBuffer];
                         if(uncompressedVideoSampleBuffer)
                         {
+                            
                             if(self.decodeHAP)
                             {
                                 // Seems like on some HAP encoders, we get duplicate frames marked kCMTimeZero?
@@ -724,6 +750,8 @@
                             
                             CGRect originalRect = CGRectMake(0, 0, CVPixelBufferGetWidth(pixelBuffer), CVPixelBufferGetHeight(pixelBuffer));
                             
+                            dispatch_group_enter(analyzedAllFramesGroup);
+
 //                            dont vend a pixel buffer, vend an object that has cached format variants for our plugins to use.
                             [self.videoConformSession conformPixelBuffer:pixelBuffer
                                                            withTransform:self.transcodeAssetWriterVideo.transform
@@ -737,8 +765,10 @@
                                               
                                               for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                                               {
+                                                  dispatch_group_enter(analyzedAllFramesGroup);
+
                                                   NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock: ^{
-                                                      
+                                                  
                                                       NSString* newMetadataKey = [analyzer pluginIdentifier];
                                                       
                                                       [analyzer analyzeCurrentCVPixelBufferRef:converter
@@ -749,7 +779,6 @@
                                                                                      self.operationState.operationState = OperationStateFailed;
                                                                                      NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
                                                                                      [[LogController sharedLogController] appendErrorLog:errorString];
-                                                                                     
                                                                                  }
                                                                                  
                                                                                  if(newMetadataValue)
@@ -759,61 +788,51 @@
                                                                                      [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
                                                                                      [dictionaryLock unlock];
                                                                                  }
+                                                                                 
+                                                                                 dispatch_group_leave(analyzedAllFramesGroup);
+
                                                                              }];
                                                   }];
-                                                  
+
                                                   [analysisOperations addObject:operation];
                                               }
                                               
                                               NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
                                                   
-                                                  // Store out running metadata
-//                                                  AVTimedMetadataGroup *group = [self.metadataEncoder encodeSynopsisMetadataToTimesMetadataGroup:aggregatedAndAnalyzedMetadata timeRange:currentSampleTimeRange];
-//                                                  if(group)
-                                                  {
-                                                      NSValue* timeRangeValue = [NSValue valueWithCMTimeRange:currentSampleTimeRange];
-                                                      NSDictionary* metadata = @{@"TimeRange" : timeRangeValue,
-                                                                                 @"Metadata" : aggregatedAndAnalyzedMetadata
-                                                                                 };
-                                                      
-                                                      [self.inFlightVideoSampleBufferMetadata addObject:metadata];
-                                                  }
-//                                                  else
-//                                                  {
-//                                                      [[LogController sharedLogController] appendErrorLog:@"Unable To Convert Metadata to JSON Format, invalid object"];
-//                                                  }
+                                                  NSValue* timeRangeValue = [NSValue valueWithCMTimeRange:currentSampleTimeRange];
+                                                  NSDictionary* metadata = @{@"TimeRange" : timeRangeValue,
+                                                                             @"Metadata" : aggregatedAndAnalyzedMetadata
+                                                                             };
+                                                  
+                                                  [self.inFlightVideoSampleBufferMetadata addObject:metadata];
                                                   
                                                   self.videoProgress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
+                                                  
+                                                  dispatch_group_leave(analyzedAllFramesGroup);
                                               }];
                                               
                                               for(NSOperation* analysisOperation in analysisOperations)
                                               {
                                                   [jsonEncodeOperation addDependency:analysisOperation];
                                               }
-                                              
-                                              [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
-                                              [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
+                                                             
+                                             [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
+                                             [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
                                 }];
-                            
                             
                         }
                         else
                         {
                             // Got NULL - were done
-                            // Todo: Move Analysis Finalization here
+                            // TODO: Move Analysis Finalization here
+                            dispatch_group_leave(analyzedAllFramesGroup);
+
                             break;
                         }
                     }
+                    dispatch_group_leave(analyzedAllFramesGroup);
+
                 }
-
-                [finishedReadingAllUncompressedVideo setValue:YES];
-
-                [[LogController sharedLogController] appendVerboseLog:@"Finished Reading Uncompressed Video Buffers"];
-                
-                // Fire final semaphore signal to hit finalization
-                dispatch_semaphore_signal(self.videoDequeueSemaphore);
-
-                dispatch_group_leave(g);
             }];
         }
         
@@ -1219,21 +1238,21 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     {
         case SynopsisAnalysisQualityHintLow:
         {
-            return AVMakeRectWithAspectRatioInsideRect(originalRect.size, lowQuality);
+            return CGRectStandardize(AVMakeRectWithAspectRatioInsideRect(originalRect.size, lowQuality));
             break;
         }
         case SynopsisAnalysisQualityHintMedium:
         {
-            return AVMakeRectWithAspectRatioInsideRect(originalRect.size, mediumQuality);
+            return CGRectStandardize(AVMakeRectWithAspectRatioInsideRect(originalRect.size, mediumQuality));
             break;
         }
         case SynopsisAnalysisQualityHintHigh:
         {
-            return AVMakeRectWithAspectRatioInsideRect(originalRect.size, highQuality);
+            return CGRectStandardize(AVMakeRectWithAspectRatioInsideRect(originalRect.size, highQuality));
             break;
         }
         case SynopsisAnalysisQualityHintOriginal:
-            return originalRect;
+            return CGRectStandardize(originalRect);
             break;
     }
 
