@@ -22,6 +22,7 @@
 @property (readwrite, copy) NSArray<OperationStateWrapper*>* sessionOperationStates;
 @property (readwrite, copy) NSArray<CopyOperationStateWrapper*>* fileCopyOperationStates;
 @property (readwrite, copy) NSArray<MoveOperationStateWrapper*>* fileMoveOperationStates;
+@property (readwrite, copy) NSArray<DeleteOperationStateWrapper*>* fileDeleteOperationStates;
 
 @property (nonatomic, copy, nullable) void (^sessionCompletionBlock)(void);
 
