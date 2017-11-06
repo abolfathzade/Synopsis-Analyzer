@@ -31,7 +31,6 @@
     // Decode and Encode Queues - each pair writes or reads to a CMBufferQueue
     CMBufferQueueRef videoPassthroughBufferQueue;
     CMBufferQueueRef videoUncompressedBufferQueue;
-
 }
 
 @property (atomic, readwrite, strong) SynopsisVideoFrameConformSession* videoConformSession;
@@ -104,7 +103,7 @@
 @property (readwrite, strong) NSOperationQueue* concurrentVideoAnalysisQueue;
 @property (readwrite, strong) NSOperationQueue* jsonEncodeQueue;
 
-
+@property (readwrite, strong) id<MTLCommandQueue> commandQueue;
 
 @end
 
@@ -164,7 +163,7 @@
         
 #pragma mark - Video Requirements
 
-        CMItemCount numBuffers = 0;
+        CMItemCount numBuffers = 32;
         
         // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
@@ -186,11 +185,10 @@
         BOOL concurrentFrames = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey] boolValue];
         
         self.concurrentVideoAnalysisQueue = [[NSOperationQueue alloc] init];
-        self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = (concurrentFrames) ? NSOperationQueueDefaultMaxConcurrentOperationCount : 1;
+        self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = 1;//(concurrentFrames) ? NSOperationQueueDefaultMaxConcurrentOperationCount : 1;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(concurrentFramesDidChange:) name:kSynopsisAnalyzerConcurrentFrameAnalysisDidChangeNotification object:nil];
         
-
         self.jsonEncodeQueue = [[NSOperationQueue alloc] init];
         self.jsonEncodeQueue.maxConcurrentOperationCount = 1;
         
@@ -239,11 +237,13 @@
         [requiredSpecifiers addObjectsFromArray:analyzer.pluginFormatSpecfiers];
     }
 
-    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+    static int roundRobin = 1;
+    NSArray<id<MTLDevice>>* allDevices = MTLCopyAllDevices();
+
+    self.commandQueue = [allDevices[roundRobin] newCommandQueue];
+    self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers device:self.commandQueue.device];
     
-    id<MTLCommandQueue> commandQueue = [device newCommandQueueWithMaxCommandBufferCount:1024*1024];
-    
-    self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers commandQueue:commandQueue];
+//    roundRobin = roundRobin % allDevices.count;
     
     NSError* error = nil;
     
@@ -511,7 +511,7 @@
     // For every Analyzer, begin an new Analysis Session
     for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
     {
-        [analyzer beginMetadataAnalysisSessionWithQuality:self.analysisQualityHint commandQueue:self.videoConformSession.commandQueue];
+        [analyzer beginMetadataAnalysisSessionWithQuality:self.analysisQualityHint device:self.videoConformSession.device];
     }
     
     if(*error)
@@ -678,7 +678,8 @@
         // TODO : look at SampleTimingInfo Struct to better get a handle on this shit.
         __block AtomicBoolean* finishedReadingAllUncompressedVideo = [[AtomicBoolean alloc] init];
         dispatch_group_t analyzedAllFramesGroup = dispatch_group_create();
-        
+
+        dispatch_group_enter(analyzedAllFramesGroup);
         
         dispatch_group_notify(analyzedAllFramesGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             [finishedReadingAllUncompressedVideo setValue:YES];
@@ -691,14 +692,11 @@
             dispatch_group_leave(g);
         });
 
-        dispatch_group_enter(analyzedAllFramesGroup);
 
         if(self.transcodeAssetHasVideo)
         {
             [self.videoUncompressedDecodeQueue addOperationWithBlock: ^{
                 
-                dispatch_group_enter(analyzedAllFramesGroup);
-
                 [[LogController sharedLogController] appendVerboseLog:@"Begun Decompressing Video"];
                 
                 BOOL hapGotFirstZerothFrameHack = NO;
@@ -710,7 +708,6 @@
                         CMSampleBufferRef uncompressedVideoSampleBuffer = [self.transcodeAssetReaderVideo copyNextSampleBuffer];
                         if(uncompressedVideoSampleBuffer)
                         {
-                            
                             if(self.decodeHAP)
                             {
                                 // Seems like on some HAP encoders, we get duplicate frames marked kCMTimeZero?
@@ -750,13 +747,14 @@
                             
                             CGRect originalRect = CGRectMake(0, 0, CVPixelBufferGetWidth(pixelBuffer), CVPixelBufferGetHeight(pixelBuffer));
                             
+                            // Enter this 'frame'
                             dispatch_group_enter(analyzedAllFramesGroup);
 
 //                            dont vend a pixel buffer, vend an object that has cached format variants for our plugins to use.
                             [self.videoConformSession conformPixelBuffer:pixelBuffer
                                                            withTransform:self.transcodeAssetWriterVideo.transform
                                                                     rect:rectForQualityHint(originalRect, self.analysisQualityHint)
-                                                         completionBlock:^(SynopsisVideoFrameCache* converter, NSError * error){
+                                                         completionBlock:^(SynopsisVideoFrameCache* conformedFrameCache, NSError * error){
                                                              
                                               CFRelease(uncompressedVideoSampleBuffer);
                                                                                 
@@ -765,76 +763,69 @@
                                               
                                               for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                                               {
-                                                  dispatch_group_enter(analyzedAllFramesGroup);
-
                                                   NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock: ^{
                                                   
                                                       NSString* newMetadataKey = [analyzer pluginIdentifier];
                                                       
-                                                      [analyzer analyzeCurrentCVPixelBufferRef:converter
-                                                                             completionHandler:^(NSDictionary * newMetadataValue, NSError *analyzerError) {
-                                                                                 if(analyzerError)
-                                                                                 {
-                                                                                     // TODO: Check for Concurrency Issues?
-                                                                                     self.operationState.operationState = OperationStateFailed;
-                                                                                     NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
-                                                                                     [[LogController sharedLogController] appendErrorLog:errorString];
-                                                                                 }
-                                                                                 
-                                                                                 if(newMetadataValue)
-                                                                                 {
-                                                                                     // provide some thread safety to our now async fetches.
-                                                                                     [dictionaryLock lock];
-                                                                                     [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
-                                                                                     [dictionaryLock unlock];
-                                                                                 }
-                                                                                 
-                                                                                 dispatch_group_leave(analyzedAllFramesGroup);
-
-                                                                             }];
+                                                      [analyzer analyzeFrameCache:conformedFrameCache
+                                                                completionHandler:^(NSDictionary * newMetadataValue, NSError *analyzerError) {
+                                                                    if(analyzerError)
+                                                                    {
+                                                                        // TODO: Check for Concurrency Issues?
+                                                                        self.operationState.operationState = OperationStateFailed;
+                                                                        NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
+                                                                        [[LogController sharedLogController] appendErrorLog:errorString];
+                                                                    }
+                                                                    
+                                                                    if(newMetadataValue)
+                                                                    {
+                                                                        // provide some thread safety to our now async fetches.
+                                                                        [dictionaryLock lock];
+                                                                        [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+                                                                        [dictionaryLock unlock];
+                                                                    }
+                                                                }];
                                                   }];
 
                                                   [analysisOperations addObject:operation];
                                               }
                                               
                                               NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
-                                                  
+
                                                   NSValue* timeRangeValue = [NSValue valueWithCMTimeRange:currentSampleTimeRange];
                                                   NSDictionary* metadata = @{@"TimeRange" : timeRangeValue,
                                                                              @"Metadata" : aggregatedAndAnalyzedMetadata
                                                                              };
-                                                  
+
                                                   [self.inFlightVideoSampleBufferMetadata addObject:metadata];
-                                                  
+
                                                   self.videoProgress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
-                                                  
+
+                                                  // Leave this 'frame'
                                                   dispatch_group_leave(analyzedAllFramesGroup);
                                               }];
-                                              
+
                                               for(NSOperation* analysisOperation in analysisOperations)
                                               {
                                                   [jsonEncodeOperation addDependency:analysisOperation];
                                               }
-                                                             
+
                                              [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
-                                             [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
+                                             [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:NO];
                                 }];
-                            
                         }
                         else
                         {
                             // Got NULL - were done
                             // TODO: Move Analysis Finalization here
                             dispatch_group_leave(analyzedAllFramesGroup);
-
                             break;
                         }
                     }
-                    dispatch_group_leave(analyzedAllFramesGroup);
-
                 }
             }];
         }
+        
         
 #pragma mark - Read Audio Decompressed
         
