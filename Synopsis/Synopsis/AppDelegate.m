@@ -48,6 +48,7 @@
 @property (readwrite, strong) NSFileManager* fileManager;
 @property (readwrite, strong) SynopsisRemoteFileHelper* remoteFileHelper;
 
+@property (readwrite, strong) NSBlockOperation* lastCompletionOperation;
 
 // State management for File Manager Delegate shit.
 //@property (readwrite, assign) BOOL analysisDuplicatesAllFilesToOutputFolder;
@@ -112,7 +113,7 @@
 
         self.synopsisFileOpQueue = [[NSOperationQueue alloc] init];
         self.synopsisFileOpQueue.maxConcurrentOperationCount = 1;
-        self.synopsisFileOpQueue.qualityOfService = NSQualityOfServiceUtility;
+        self.synopsisFileOpQueue.qualityOfService = NSQualityOfServiceUserInitiated;
         
         self.analyzerPlugins = [NSMutableArray new];
         self.analyzerPluginsInitializedForPrefs = [NSMutableArray new];
@@ -341,6 +342,7 @@
     NSMutableArray<OperationStateWrapper*>* operationStates = [NSMutableArray new];
     NSMutableArray<CopyOperationStateWrapper*>* copyStates = [NSMutableArray new];
     NSMutableArray<MoveOperationStateWrapper*>* moveStates = [NSMutableArray new];
+    NSMutableArray<DeleteOperationStateWrapper*>* deleteStates = [NSMutableArray new];
 
     NSURL* tmpFolderURL = [self.prefsViewController.preferencesFileViewController tempFolderURL];
     BOOL usingTmpFolder = [self.prefsViewController.preferencesFileViewController usingTempFolder];
@@ -433,16 +435,25 @@
                 moveState.srcURL = [tmpFolderURL URLByAppendingPathComponent:folderName];
                 moveState.dstURL = [outFolderURL URLByAppendingPathComponent:folderName];
                 [moveStates addObject:moveState];
-                
+
                 break;
             }
         }
+    }
+
+    // If we have a specified temp folder, and pref is enabled, set it
+    if(tmpFolderURL != nil && [self.prefsViewController.preferencesFileViewController usingTempFolder])
+    {
+        DeleteOperationStateWrapper* deleteState = [[DeleteOperationStateWrapper alloc] init];
+        deleteState.URL = tmpFolderURL;
+        [deleteStates addObject:deleteState];
     }
     
     session.sessionOperationStates = operationStates;
     session.fileCopyOperationStates = copyStates;
     session.fileMoveOperationStates = moveStates;
-    
+    session.fileDeleteOperationStates = deleteStates;
+
     NSString* sessionName = [NSString stringWithFormat:@"%@, %lu items", [URLArray[0] lastPathComponent], (unsigned long)operationStates.count];
     session.sessionName = sessionName;
     
@@ -457,15 +468,20 @@
 -(void) submitSessionOperations:(SessionStateWrapper*)session
 {
     __block NSTimeInterval start;
+    
+    NSMutableArray<NSOperation*>* sessionDependencies = [NSMutableArray new];
+
+    if(self.lastCompletionOperation)
+        [sessionDependencies addObject:self.lastCompletionOperation];
+    
     // Create Begin Operation
     NSBlockOperation* beginOperation = [NSBlockOperation blockOperationWithBlock:^{
-
+        
         start = [NSDate timeIntervalSinceReferenceDate];
         [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", session.sessionID]];
     }];
-    
-    [self.synopsisAnalysisQueue addOperation:beginOperation];
 
+    
     // Create Completion Operation
     NSBlockOperation* completionOperation = [NSBlockOperation blockOperationWithBlock:^{
         
@@ -494,6 +510,7 @@
 
     NSMutableArray<NSBlockOperation*>* copyOperations = [NSMutableArray new];
     NSMutableArray<NSBlockOperation*>* moveOperations = [NSMutableArray new];
+    NSMutableArray<NSBlockOperation*>* deleteOperations = [NSMutableArray new];
 
     for(CopyOperationStateWrapper* copyState in session.fileCopyOperationStates)
     {
@@ -504,7 +521,8 @@
             
             // Attempts to fix #84
             [source removeAllCachedResourceValues];
-            
+            [dest removeAllCachedResourceValues];
+
             // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
             BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:source];
             BOOL copySuccessful = NO;
@@ -522,7 +540,7 @@
             
             if(copySuccessful)
             {
-                [[LogController sharedLogController] appendSuccessLog:[@"Copied file" stringByAppendingString:source.path]];
+                [[LogController sharedLogController] appendVerboseLog:[@"Copied file" stringByAppendingString:source.path]];
             }
             else
             {
@@ -533,12 +551,40 @@
         [copyOperations addObject:copyOperation];
     }
     
+    for(DeleteOperationStateWrapper* deleteState in session.fileDeleteOperationStates)
+    {
+        NSURL* deleteURL = deleteState.URL;
+        
+        NSBlockOperation* deleteOperation = [NSBlockOperation blockOperationWithBlock:^{
+            
+            // Attempts to fix #84
+            [deleteURL removeAllCachedResourceValues];
+            NSError* error = nil;
+            BOOL deleteSuccessful = [self.fileManager removeItemAtURL:deleteURL error:&error];
+            if(deleteSuccessful)
+            {
+                [[LogController sharedLogController] appendVerboseLog:[@"Deleted file" stringByAppendingString:deleteURL.path]];
+            }
+            else
+            {
+                [[LogController sharedLogController] appendErrorLog:[@"Unable to delete file" stringByAppendingString:error.localizedDescription]];
+            }
+        }];
+        
+        [deleteOperations addObject:deleteOperation];
+    }
+    
+    
     for(MoveOperationStateWrapper* moveState in session.fileMoveOperationStates)
     {
         NSURL* source = moveState.srcURL;
         NSURL* dest = moveState.dstURL;
 
         NSBlockOperation* moveOperation = [NSBlockOperation blockOperationWithBlock:^{
+            
+            // Attempts to fix #84
+            [source removeAllCachedResourceValues];
+            [dest removeAllCachedResourceValues];
             
             // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
             NSError* error = nil;
@@ -589,27 +635,64 @@
     }
 
     // Enqueue Operations
+    for(NSOperation* dependency in sessionDependencies)
+    {
+        [beginOperation addDependency:dependency];
+    }
+
+    [self.synopsisFileOpQueue addOperation:beginOperation];
+    
     for(NSBlockOperation* copyOp in copyOperations)
     {
+        for(NSOperation* dependency in sessionDependencies)
+        {
+            [copyOp addDependency:dependency];
+        }
         [self.synopsisFileOpQueue addOperation:copyOp];
     }
 
     for(BaseTranscodeOperation* operation in analysisOperations)
     {
+        for(NSOperation* dependency in sessionDependencies)
+        {
+            [operation addDependency:dependency];
+        }
         [self.synopsisAnalysisQueue addOperation:operation];
     }
 
     for(BaseTranscodeOperation* operation in finalizationOperations)
     {
+        for(NSOperation* dependency in sessionDependencies)
+        {
+            [operation addDependency:dependency];
+        }
         [self.synopsisFinalizationQueue addOperation:operation];
     }
 
     for(NSBlockOperation* moveOp in moveOperations)
     {
+        for(NSOperation* dependency in sessionDependencies)
+        {
+            [moveOp addDependency:dependency];
+        }
         [self.synopsisFileOpQueue addOperation:moveOp];
     }
     
     [self.synopsisFileOpQueue addOperation:completionOperation];
+    
+    for(NSBlockOperation* deleteOp in deleteOperations)
+    {
+        for(NSOperation* dependency in sessionDependencies)
+        {
+            [deleteOp addDependency:dependency];
+        }
+        
+        [deleteOp addDependency:completionOperation];
+        
+        [self.synopsisFileOpQueue addOperation:deleteOp];
+    }
+    
+    self.lastCompletionOperation = completionOperation;
 }
 
 #pragma mark - Create Operation State Wrappers
@@ -774,23 +857,7 @@
     NSString* sourceFileName = [fileURL lastPathComponent];
     sourceFileName = [sourceFileName stringByDeletingPathExtension];
 
-    NSString* sourceFileExtension = [fileURL pathExtension];
     NSString* destinationFileExtension = @"mov";
-    
-    // Some file's may not have an extension but rely on mime type.
-    if(sourceFileExtension == nil || [sourceFileExtension isEqualToString:@""])
-    {
-        NSError* error = nil;
-        NSString* type = [[NSWorkspace sharedWorkspace] typeOfFile:[fileURL path] error:&error];
-        if(error == nil)
-        {
-            sourceFileExtension = [[NSWorkspace sharedWorkspace] preferredFilenameExtensionForType:type];
-        }
-        else
-        {
-            sourceFileExtension = @"mov";
-        }
-    }
     
     NSString* analysisPassFileName = [[sourceFileName stringByAppendingString:@"_temp_"] stringByAppendingString:encodeUUID.UUIDString];
     NSString* metadataPassFileName = [sourceFileName stringByAppendingString:@"_analyzed"];
@@ -811,7 +878,7 @@
     // TODO: Just pass a copy of the current Preset directly, and figure out what we need for analysis settings
     PresetVideoSettings* videoSettings = currentPreset.videoSettings;
     PresetAudioSettings* audioSettings = currentPreset.audioSettings;
-    PresetAnalysisSettings* analysisSettings = currentPreset.analyzerSettings;
+//    PresetAnalysisSettings* analysisSettings = currentPreset.analyzerSettings;
 
     SynopsisMetadataEncoderExportOption exportOption = currentPreset.metadataExportOption;
     
