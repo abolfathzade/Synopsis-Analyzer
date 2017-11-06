@@ -17,3 +17,7 @@
 @property (readwrite, strong) NSURL* srcURL;
 @property (readwrite, strong) NSURL* dstURL;
 @end
+
+@interface DeleteOperationStateWrapper : NSObject
+@property (readwrite, strong) NSURL* URL;
+@end
