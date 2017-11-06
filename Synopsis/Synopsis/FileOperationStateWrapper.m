@@ -13,3 +13,6 @@
 
 @implementation MoveOperationStateWrapper
 @end
+
+@implementation DeleteOperationStateWrapper
+@end
