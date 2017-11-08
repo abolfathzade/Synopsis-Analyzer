@@ -243,6 +243,7 @@
     self.commandQueue = [allDevices[roundRobin] newCommandQueue];
     self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers device:self.commandQueue.device];
     
+//    roundRobin++;
 //    roundRobin = roundRobin % allDevices.count;
     
     NSError* error = nil;
