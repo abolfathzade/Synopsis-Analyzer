@@ -15,14 +15,14 @@
 
 //- (instancetype) initWithSessionOperations:(NSArray<OperationStateWrapper*>*)operations;
 
-@property (readwrite, copy) NSString* sessionName;
-@property (readonly, copy) NSUUID* sessionID;
+@property (readwrite, copy) NSString* _Nonnull sessionName;
+@property (readonly, copy) NSUUID* _Nonnull sessionID;
 @property (readwrite, assign) SessionState sessionState;
 @property (readwrite, assign) CGFloat sessionProgress;
-@property (readwrite, copy) NSArray<OperationStateWrapper*>* sessionOperationStates;
-@property (readwrite, copy) NSArray<CopyOperationStateWrapper*>* fileCopyOperationStates;
-@property (readwrite, copy) NSArray<MoveOperationStateWrapper*>* fileMoveOperationStates;
-@property (readwrite, copy) NSArray<DeleteOperationStateWrapper*>* fileDeleteOperationStates;
+@property (readwrite, copy) NSArray<OperationStateWrapper*>* _Nullable sessionOperationStates;
+@property (readwrite, copy) NSArray<CopyOperationStateWrapper*>* _Nullable fileCopyOperationStates;
+@property (readwrite, copy) NSArray<MoveOperationStateWrapper*>* _Nullable fileMoveOperationStates;
+@property (readwrite, copy) NSArray<DeleteOperationStateWrapper*>* _Nullable fileDeleteOperationStates;
 
 @property (nonatomic, copy, nullable) void (^sessionCompletionBlock)(void);
 
