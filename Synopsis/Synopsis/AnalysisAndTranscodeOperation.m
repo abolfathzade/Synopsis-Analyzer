@@ -320,18 +320,22 @@
 
 //        NSDictionary* SDProperties =  @{AVVideoColorPrimariesKey : AVVideoColorPrimaries_SMPTE_C, AVVideoTransferFunctionKey : AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey : AVVideoYCbCrMatrix_ITU_R_601_4 };
 
+        NSDictionary* outputSettings = @{
+                                         (NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
+                                         (NSString*)kCVPixelBufferMetalCompatibilityKey : @(YES),
+                                         (NSString*)kCVPixelBufferOpenGLCompatibilityKey : @(YES),
+//                                         (NSString*)kCVPixelBufferOpenGLTextureCacheCompatibilityKey : @(YES),
+                                         (NSString*)kCVPixelBufferIOSurfacePropertiesKey : @{},
+//                                         AVVideoColorPropertiesKey : HDProperties
+                                         };
+        
         if(self.decodeHAP)
         {
-            self.transcodeAssetReaderVideo = [[AVAssetReaderHapTrackOutput alloc] initWithTrack:firstVideoTrack outputSettings:@{(NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
-//                                                                                                                                 AVVideoColorPropertiesKey : HDProperties
-                                                                                                                                }];
+            self.transcodeAssetReaderVideo = [[AVAssetReaderHapTrackOutput alloc] initWithTrack:firstVideoTrack outputSettings:outputSettings];
         }
         else
         {
-            self.transcodeAssetReaderVideo = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack
-                                                                                        outputSettings:@{(NSString*)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
-//                                                                                                         AVVideoColorPropertiesKey : HDProperties
-                                                                                                         }];
+            self.transcodeAssetReaderVideo = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:firstVideoTrack outputSettings:outputSettings];
         }
         self.transcodeAssetReaderVideo.alwaysCopiesSampleData = NO;
         prefferedTrackTransform = firstVideoTrack.preferredTransform;
