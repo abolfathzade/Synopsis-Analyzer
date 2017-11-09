@@ -8,8 +8,8 @@
 
 #import "Constants.h"
 #import <Cocoa/Cocoa.h>
+#import "DropFilesView.h"
 
-@protocol DropFileHelper;
 @interface AppDelegate : NSObject <NSApplicationDelegate, DropFileHelper>
 
 - (void) analysisSessionForFiles:(NSArray *)fileURLArray sessionCompletionBlock:(void (^)(void))completionBlock;
