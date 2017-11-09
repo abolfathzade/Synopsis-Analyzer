@@ -816,7 +816,7 @@
                                               }
 
                                              [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
-                                             [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:NO];
+                                             [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
                                 }];
                         }
                         else
