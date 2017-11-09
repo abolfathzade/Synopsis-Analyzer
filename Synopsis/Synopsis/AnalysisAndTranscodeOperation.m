@@ -103,7 +103,7 @@
 @property (readwrite, strong) NSOperationQueue* concurrentVideoAnalysisQueue;
 @property (readwrite, strong) NSOperationQueue* jsonEncodeQueue;
 
-@property (readwrite, strong) id<MTLCommandQueue> commandQueue;
+@property (readwrite, strong) id<MTLDevice> device;
 
 @end
 
@@ -240,8 +240,8 @@
     static int roundRobin = 1;
     NSArray<id<MTLDevice>>* allDevices = MTLCopyAllDevices();
 
-    self.commandQueue = [allDevices[roundRobin] newCommandQueue];
-    self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers device:self.commandQueue.device];
+    self.device = MTLCreateSystemDefaultDevice(); //allDevices[roundRobin];
+    self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers device:self.device];
     
 //    roundRobin++;
 //    roundRobin = roundRobin % allDevices.count;
@@ -512,7 +512,7 @@
     // For every Analyzer, begin an new Analysis Session
     for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
     {
-        [analyzer beginMetadataAnalysisSessionWithQuality:self.analysisQualityHint device:self.videoConformSession.device];
+        [analyzer beginMetadataAnalysisSessionWithQuality:self.analysisQualityHint device:self.device];
     }
     
     if(*error)
