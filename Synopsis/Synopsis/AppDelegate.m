@@ -48,7 +48,7 @@
 @property (readwrite, strong) NSFileManager* fileManager;
 @property (readwrite, strong) SynopsisRemoteFileHelper* remoteFileHelper;
 
-@property (readwrite, strong) NSBlockOperation* lastCompletionOperation;
+@property (readwrite, strong)  NSBlockOperation* lastCompletionOperation;
 
 // State management for File Manager Delegate shit.
 //@property (readwrite, assign) BOOL analysisDuplicatesAllFilesToOutputFolder;
@@ -469,25 +469,23 @@
 {
     __block NSTimeInterval start;
     
-    NSMutableArray<NSOperation*>* sessionDependencies = [NSMutableArray new];
-
-    if(self.lastCompletionOperation)
-        [sessionDependencies addObject:self.lastCompletionOperation];
-    
     // Create Begin Operation
     NSBlockOperation* beginOperation = [NSBlockOperation blockOperationWithBlock:^{
         
         start = [NSDate timeIntervalSinceReferenceDate];
-        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", session.sessionID]];
+        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", session.sessionName]];
     }];
 
     
     // Create Completion Operation
-    NSBlockOperation* completionOperation = [NSBlockOperation blockOperationWithBlock:^{
+    NSBlockOperation* completionOperation = [[NSBlockOperation alloc] init];
+    
+    __weak NSBlockOperation* weakCompletionOperation = completionOperation;
+    [completionOperation addExecutionBlock:^{
         
         NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - start;
         
-        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", session.sessionID, delta]];
+        [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"End Session %@, Duration: %f seconds", session.sessionName, delta]];
         
         if(session.sessionCompletionBlock != NULL)
         {
@@ -503,8 +501,23 @@
             
             [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:sessionComplete];
         });
+        
+
+        // This Horrible hack remove a potential 'leak' by accrueing references to previous completion blocks dependencies on top of our new dependencies
+        // Meaning any dependent operation on any completion block is retained.
+        // Lame.
+        // https://nickharris.wordpress.com/2016/02/03/retain-cycle-with-nsoperation-dependencies-help-wanted/
+        __strong NSBlockOperation* strongCompletion = weakCompletionOperation;
+        if(strongCompletion)
+        {
+            for(NSOperation* dependency in strongCompletion.dependencies)
+            {
+                [strongCompletion removeDependency:dependency];
+            }
+        }
     }];
 
+    
     NSMutableArray<BaseTranscodeOperation*>* analysisOperations = [NSMutableArray new];
     NSMutableArray<BaseTranscodeOperation*>* finalizationOperations = [NSMutableArray new];
 
@@ -635,58 +648,48 @@
     }
 
     // Enqueue Operations
-    for(NSOperation* dependency in sessionDependencies)
-    {
-        [beginOperation addDependency:dependency];
-    }
 
+    // Begin wont start before last completion
+    if(self.lastCompletionOperation)
+    {
+//        self.lastCompletionOperation.dependencies = nil;
+        [beginOperation addDependency:self.lastCompletionOperation];
+    }
     [self.synopsisFileOpQueue addOperation:beginOperation];
     
+    // Copy wont start before begin
     for(NSBlockOperation* copyOp in copyOperations)
     {
-        for(NSOperation* dependency in sessionDependencies)
-        {
-            [copyOp addDependency:dependency];
-        }
+        [copyOp addDependency:beginOperation];
         [self.synopsisFileOpQueue addOperation:copyOp];
     }
 
+    // Analysis wont start before begin
     for(BaseTranscodeOperation* operation in analysisOperations)
     {
-        for(NSOperation* dependency in sessionDependencies)
-        {
-            [operation addDependency:dependency];
-        }
+        [operation addDependency:beginOperation];
         [self.synopsisAnalysisQueue addOperation:operation];
     }
 
     for(BaseTranscodeOperation* operation in finalizationOperations)
     {
-        for(NSOperation* dependency in sessionDependencies)
-        {
-            [operation addDependency:dependency];
-        }
+        [operation addDependency:beginOperation];
         [self.synopsisFinalizationQueue addOperation:operation];
     }
 
+    //
     for(NSBlockOperation* moveOp in moveOperations)
     {
-        for(NSOperation* dependency in sessionDependencies)
-        {
-            [moveOp addDependency:dependency];
-        }
+        [moveOp addDependency:beginOperation];
         [self.synopsisFileOpQueue addOperation:moveOp];
     }
     
+    // Completion cant begin before begin.
+    [completionOperation addDependency:beginOperation];
     [self.synopsisFileOpQueue addOperation:completionOperation];
     
     for(NSBlockOperation* deleteOp in deleteOperations)
     {
-        for(NSOperation* dependency in sessionDependencies)
-        {
-            [deleteOp addDependency:dependency];
-        }
-        
         [deleteOp addDependency:completionOperation];
         
         [self.synopsisFileOpQueue addOperation:deleteOp];
@@ -929,7 +932,7 @@
 
                                     if (strongMetadata.succeeded)
                                     {
-                                        [[LogController sharedLogController] appendSuccessLog:[@"Finished Analysis for " stringByAppendingString:sourceFileName]];
+                                        [[LogController sharedLogController] appendVerboseLog:[@"Finished Analysis for " stringByAppendingString:sourceFileName]];
                                         
                                         // Clean up
                                         NSError* error;
