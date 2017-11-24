@@ -163,7 +163,7 @@
         
 #pragma mark - Video Requirements
 
-        CMItemCount numBuffers = 32;
+        CMItemCount numBuffers = 0;
         
         // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
@@ -185,7 +185,7 @@
         BOOL concurrentFrames = [[[NSUserDefaults standardUserDefaults] objectForKey:kSynopsisAnalyzerConcurrentFrameAnalysisPreferencesKey] boolValue];
         
         self.concurrentVideoAnalysisQueue = [[NSOperationQueue alloc] init];
-        self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = 1;//(concurrentFrames) ? NSOperationQueueDefaultMaxConcurrentOperationCount : 1;
+        self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = 1;//NSOperationQueueDefaultMaxConcurrentOperationCount;//(concurrentFrames) ? NSOperationQueueDefaultMaxConcurrentOperationCount : 1;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(concurrentFramesDidChange:) name:kSynopsisAnalyzerConcurrentFrameAnalysisDidChangeNotification object:nil];
         
@@ -237,11 +237,11 @@
         [requiredSpecifiers addObjectsFromArray:analyzer.pluginFormatSpecfiers];
     }
 
-    static int roundRobin = 1;
-    NSArray<id<MTLDevice>>* allDevices = MTLCopyAllDevices();
+//    static int roundRobin = 1;
+//    NSArray<id<MTLDevice>>* allDevices = MTLCopyAllDevices();
 
     self.device = MTLCreateSystemDefaultDevice(); //allDevices[roundRobin];
-    self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers device:self.device];
+    self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers device:self.device inFlightBuffers:3];
     
 //    roundRobin++;
 //    roundRobin = roundRobin % allDevices.count;
