@@ -513,6 +513,8 @@
 {
     CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
     
+    [self.inFlightGlobalMetadata addEntriesFromDictionary:@{ @"ContainerFormatMetadata" : [self generateContainerMetadata]}];
+    
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading] && !self.isCancelled)
     {
         [self.transcodeAssetWriter startSessionAtSourceTime:kCMTimeZero];
@@ -525,7 +527,6 @@
         // Probably want to throttle this and set a small usleep to keep threads happy
         // Or use the CMBufferqueue callbacks with a semaphore signal
         CMItemCount numBuffers = 0;
-        
 
         if(self.transcodeAssetHasVideo)
         {
@@ -1156,7 +1157,7 @@
         
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);
-
+        
         self.analyzedGlobalMetadata = self.inFlightGlobalMetadata;
         self.analyzedVideoSampleBufferMetadata = self.inFlightVideoSampleBufferMetadata;
         self.analyzedAudioSampleBufferMetadata = self.inFlightAudioSampleBufferMetadata;
@@ -1247,6 +1248,24 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = (concurrentFrames) ? NSOperationQueueDefaultMaxConcurrentOperationCount : 1;
 }
 
+- (NSDictionary*) generateContainerMetadata
+{
+    NSMutableDictionary* containerFormatMetadata = [NSMutableDictionary new];
+    [containerFormatMetadata setValue:@( CMTimeGetSeconds(self.transcodeAsset.duration) * 1000.0 ) forKey:@"Duration"];
+
+    if(self.transcodeAssetHasVideo && ( self.transcodeAssetReaderVideo.track != nil) )
+    {
+        CGSize naturalSize = [self.transcodeAssetReaderVideo.track naturalSize];
+        float fps = [self.transcodeAssetReaderVideo.track nominalFrameRate];
+        
+        [containerFormatMetadata setValue:@(naturalSize.width) forKey:@"Width"];
+        [containerFormatMetadata setValue:@(naturalSize.height) forKey:@"Height"];
+        [containerFormatMetadata setValue:@(fps) forKey:@"FPS"];
+    }
+    
+    return containerFormatMetadata;
+}
 
 
 @end
+
