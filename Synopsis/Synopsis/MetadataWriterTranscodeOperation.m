@@ -357,6 +357,30 @@
 {
     CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
     
+    // Output a thumbnail if we need to
+    BOOL generateThumbnail = YES;
+    if(generateThumbnail)
+    {
+        AVAssetImageGenerator* imageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:self.transcodeAsset];
+        imageGenerator.appliesPreferredTrackTransform = YES;
+        imageGenerator.maximumSize = CGSizeMake(128, 128);
+        CGImageRef posterImage = [imageGenerator copyCGImageAtTime:kCMTimeZero actualTime:NULL error:nil];
+        
+        if(posterImage)
+        {
+            NSImage* posterNSImage = [[NSImage alloc] initWithCGImage:posterImage
+                                                                 size:NSMakeSize(CGImageGetWidth(posterImage), CGImageGetHeight(posterImage))];
+            
+            NSData *imageData = [posterNSImage TIFFRepresentation];
+            NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData:imageData];
+            NSDictionary *imageProps = [NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:1.0] forKey:NSImageCompressionFactor];
+            imageData = [imageRep representationUsingType:NSJPEGFileType properties:imageProps];
+            
+            NSURL* imageURL = [[self.destinationURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"png"];
+            [imageData writeToURL:imageURL atomically:NO];
+        }
+    }
+    
     // Convert our global metadata to a valid top level AVMetadata item
     if(self.analyzedGlobalMetadata)
     {
