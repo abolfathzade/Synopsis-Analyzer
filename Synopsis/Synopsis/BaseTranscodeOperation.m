@@ -25,6 +25,8 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
 
 @interface BaseTranscodeOperation ()
 
+@property (atomic, readwrite, strong) id processInfoActivity;
+
 @property (atomic, readwrite, strong) NSURL* sourceURL;
 @property (atomic, readwrite, strong) NSURL* destinationURL;
 
@@ -65,6 +67,9 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
         });
         
         self.initted = YES;
+        
+            NSActivityOptions options = NSActivityUserInitiated;
+        self.processInfoActivity = [[NSProcessInfo processInfo] beginActivityWithOptions:options reason:@"Synopsis Analysis Session Started"];
     }
 
     return self;
@@ -90,28 +95,27 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
 
 - (void) main
 {
-    NSActivityOptions options = NSActivityUserInitiated;
-    [[NSProcessInfo processInfo] performActivityWithOptions:options reason:@"Synopsis Analysis Session" usingBlock:^{
-        
-        @synchronized(self)
+    
+    @synchronized(self)
+    {
+        if(self.completionBlock)
         {
-            if(self.completionBlock)
-            {
-                self.operationState.operationState = OperationStateSuccess;
-
-                [self setVideoProgress:1.0];
-                [self setAudioProgress:1.0];
-                [self notifyProgress];
-                
-                self.completionBlock();
-                
-                // Clear so we dont run twice, fucko
-                self.completionBlock = nil;
-            }
+            self.operationState.operationState = OperationStateSuccess;
+            
+            [self setVideoProgress:1.0];
+            [self setAudioProgress:1.0];
+            [self notifyProgress];
+            
+            self.completionBlock();
+            
+            // Clear so we dont run twice, fucko
+            self.completionBlock = nil;
         }
-        
-        [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Finish Main NSOperation %p", self, nil]];
-    }];
+    }
+    
+    [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Finish Main NSOperation %p", self, nil]];
+    
+    [[NSProcessInfo processInfo] endActivity:self.processInfoActivity];
 }
 
 - (void) cancel
