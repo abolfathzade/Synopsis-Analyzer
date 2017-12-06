@@ -202,6 +202,28 @@
     return self;
 }
 
+// Because we have long dependency chains of other NSOperations, we want to release as many resources prior to dealloc as we can.
+// Note: we do not release our calculated metadata, our dependent operations need that!
+- (void) earlyRelease
+{
+    NSLog(@"Early Release %@", [self className]);
+    // release analyzers
+    self.availableAnalyzers = nil;
+    
+    // release readers
+    self.transcodeAsset = nil;
+    self.transcodeAssetReader = nil;
+    self.transcodeAssetReaderVideo = nil;
+    self.transcodeAssetReaderAudio = nil;
+    self.transcodeAssetReaderVideoPassthrough = nil;
+    self.transcodeAssetReaderAudioPassthrough = nil;
+    
+    // release writers
+    self.transcodeAssetWriter = nil;
+    self.transcodeAssetWriterVideo = nil;
+    self.transcodeAssetWriterAudio = nil;
+}
+
 - (NSString*) description
 {
     return [NSString stringWithFormat:@"Transcode Operation: %p, Source: %@, Destination: %@, options: %@", self, self.sourceURL, self.destinationURL, self.transcodeOptions];
@@ -249,6 +271,8 @@
 
         [self cancel];
     }
+    
+    [self earlyRelease];
 }
 
 - (void) cancel
