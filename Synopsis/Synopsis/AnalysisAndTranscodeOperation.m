@@ -174,7 +174,7 @@
         self.videoPassthroughDecodeQueue = [[NSOperationQueue alloc] init];
         self.videoPassthroughDecodeQueue.maxConcurrentOperationCount = 1;
         
-        self.videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
+        self.videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
         self.videoUncompressedDecodeQueue = [[NSOperationQueue alloc] init];
@@ -465,9 +465,7 @@
             }
         }
     }
-    
-    NSLog(@"Final Audio Settings: %@", self.audioTranscodeSettings);
-    
+        
     // check if we need to use our natural size - we might not have AVVideoHeightKey or AVVideoWidthKey
     if(!self.videoTranscodeSettings[AVVideoHeightKey] || !self.videoTranscodeSettings[AVVideoWidthKey])
     {
@@ -568,16 +566,16 @@
         CMBufferQueueRef audioUncompressedBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &audioUncompressedBufferQueue);
 
-        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", 0);
+        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
-        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", 0);
+        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
@@ -1289,7 +1287,6 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     
     return containerFormatMetadata;
 }
-
 
 @end
 
