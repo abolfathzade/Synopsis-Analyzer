@@ -53,6 +53,8 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
     self = [super init];
     if(self)
     {
+        NSLog(@"Alloc Operation %@", [self className]);
+
         self.error = nil;
         self.initted = NO;
         self.operationState = operationState;
@@ -77,6 +79,8 @@ NSString * const kSynopsisAnalyzedMetadataExportOptionKey = @"kSynopsisAnalyzedM
 
 - (void) dealloc
 {
+    NSLog(@"Dealloc Operation %@", [self className]);
+
     [[LogController sharedLogController] appendVerboseLog:[NSString stringWithFormat:@"Dealloc NSOperation %p", self, nil]];
 }
 
