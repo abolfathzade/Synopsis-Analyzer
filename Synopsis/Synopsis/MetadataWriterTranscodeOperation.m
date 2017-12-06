@@ -78,6 +78,32 @@
     return self;
 }
 
+// Because we have long dependency chains of other NSOperations, we want to release as many resources prior to dealloc as we can.
+- (void) earlyRelease
+{
+    NSLog(@"Early Release %@", [self className]);
+
+    // release readers
+    self.transcodeAsset = nil;
+    self.transcodeAssetReader = nil;
+    self.transcodeAssetReaderVideoPassthrough = nil;
+    self.transcodeAssetReaderAudioPassthrough = nil;
+    
+    // release writers
+    self.transcodeAssetWriter = nil;
+    self.transcodeAssetWriterVideoPassthrough = nil;
+    self.transcodeAssetWriterAudioPassthrough = nil;
+    self.transcodeAssetWriterMetadata = nil;
+    self.transcodeAssetWriterMetadataAdaptor = nil;
+ 
+    // It should be safe to release our metadata:
+    self.metadataEncoder = nil;
+    self.analyzedVideoSampleBufferMetadata = nil;
+    self.analyzedAudioSampleBufferMetadata = nil;
+    self.analyzedGlobalMetadata = nil;
+
+}
+
 - (NSString*) description
 {
     return [NSString stringWithFormat:@"Transcode Operation: %p, Source: %@, Destination: %@", self, self.sourceURL, self.destinationURL];
@@ -137,6 +163,8 @@
         
         [self cancel];
     }
+    
+    [self earlyRelease];
 }
 
 - (BOOL) setupTranscode:(NSError * __autoreleasing *)error
