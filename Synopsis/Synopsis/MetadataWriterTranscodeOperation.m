@@ -401,11 +401,13 @@
             
             NSData *imageData = [posterNSImage TIFFRepresentation];
             NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData:imageData];
-            NSDictionary *imageProps = [NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:1.0] forKey:NSImageCompressionFactor];
+            NSDictionary *imageProps = [NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:0.5] forKey:NSImageCompressionFactor];
             imageData = [imageRep representationUsingType:NSJPEGFileType properties:imageProps];
             
-            NSURL* imageURL = [[self.destinationURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"png"];
+            NSURL* imageURL = [[self.destinationURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"jpg"];
             [imageData writeToURL:imageURL atomically:NO];
+            
+            CGImageRelease(posterImage);
         }
     }
     
