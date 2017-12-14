@@ -56,6 +56,9 @@
 
 @end
 
+static NSUInteger kAnalysisOperationIndex = 0;
+static NSUInteger kMetadataOperationIndex = 1;
+
 @implementation AppDelegate
 
 - (id) init
@@ -470,10 +473,26 @@
     __block NSTimeInterval start;
     
     // Create Begin Operation
-    NSBlockOperation* beginOperation = [NSBlockOperation blockOperationWithBlock:^{
-        
+    NSBlockOperation* beginOperation = [[NSBlockOperation alloc] init];
+
+    __weak NSBlockOperation* weakBeginOperation = beginOperation;
+    [beginOperation addExecutionBlock:^{
+
         start = [NSDate timeIntervalSinceReferenceDate];
         [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Begin Session %@", session.sessionName]];
+        
+        // This Horrible hack remove a potential 'leak' by accrueing references to previous completion blocks dependencies on top of our new dependencies
+        // Meaning any dependent operation on any completion block is retained.
+        // Lame.
+        // https://nickharris.wordpress.com/2016/02/03/retain-cycle-with-nsoperation-dependencies-help-wanted/
+        __strong NSBlockOperation* strongCompletion = weakBeginOperation;
+        if(strongCompletion)
+        {
+            for(NSOperation* dependency in strongCompletion.dependencies)
+            {
+                [strongCompletion removeDependency:dependency];
+            }
+        }
     }];
 
     
@@ -519,132 +538,38 @@
 
     
     NSMutableArray<BaseTranscodeOperation*>* analysisOperations = [NSMutableArray new];
-    NSMutableArray<BaseTranscodeOperation*>* finalizationOperations = [NSMutableArray new];
+    NSMutableArray<BaseTranscodeOperation*>* metadataOperations = [NSMutableArray new];
 
     NSMutableArray<NSBlockOperation*>* copyOperations = [NSMutableArray new];
     NSMutableArray<NSBlockOperation*>* moveOperations = [NSMutableArray new];
     NSMutableArray<NSBlockOperation*>* deleteOperations = [NSMutableArray new];
-
-    for(CopyOperationStateWrapper* copyState in session.fileCopyOperationStates)
-    {
-        NSURL* source = copyState.srcURL;
-        NSURL* dest = copyState.dstURL;
-        
-        NSBlockOperation* copyOperation = [NSBlockOperation blockOperationWithBlock:^{
-            
-            // Attempts to fix #84
-            [source removeAllCachedResourceValues];
-            [dest removeAllCachedResourceValues];
-
-            // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
-            BOOL useRemotePath = [self.remoteFileHelper fileURLIsRemote:source];
-            BOOL copySuccessful = NO;
-            NSError* error = nil;
-            
-            if(useRemotePath)
-            {
-                [[LogController sharedLogController] appendVerboseLog:[@"Using Remote File Helper for " stringByAppendingString:source.path]];
-                copySuccessful = [self.remoteFileHelper safelyCopyFileURLOnRemoteFileSystem:source toURL:dest error:&error];
-            }
-            else
-            {
-                copySuccessful = [self.fileManager copyItemAtURL:source toURL:dest error:&error];
-            }
-            
-            if(copySuccessful)
-            {
-                [[LogController sharedLogController] appendVerboseLog:[@"Copied file" stringByAppendingString:source.path]];
-            }
-            else
-            {
-                [[LogController sharedLogController] appendErrorLog:[@"Unable to copy file" stringByAppendingString:error.localizedDescription]];
-            }
-        }];
-        
-        [copyOperations addObject:copyOperation];
-    }
     
     for(DeleteOperationStateWrapper* deleteState in session.fileDeleteOperationStates)
     {
-        NSURL* deleteURL = deleteState.URL;
-        
-        NSBlockOperation* deleteOperation = [NSBlockOperation blockOperationWithBlock:^{
-            
-            // Attempts to fix #84
-            [deleteURL removeAllCachedResourceValues];
-            NSError* error = nil;
-            BOOL deleteSuccessful = [self.fileManager removeItemAtURL:deleteURL error:&error];
-            if(deleteSuccessful)
-            {
-                [[LogController sharedLogController] appendVerboseLog:[@"Deleted file" stringByAppendingString:deleteURL.path]];
-            }
-            else
-            {
-                [[LogController sharedLogController] appendErrorLog:[@"Unable to delete file" stringByAppendingString:error.localizedDescription]];
-            }
-        }];
-        
-        [deleteOperations addObject:deleteOperation];
+        [deleteOperations addObject:[self createDeleteOperationFromDeleteState:deleteState]];
     }
-    
+   
+    for(CopyOperationStateWrapper* copyState in session.fileCopyOperationStates)
+    {
+        [copyOperations addObject:[self createCopyOperationFromCopyState:copyState]];
+    }
     
     for(MoveOperationStateWrapper* moveState in session.fileMoveOperationStates)
     {
-        NSURL* source = moveState.srcURL;
-        NSURL* dest = moveState.dstURL;
-
-        NSBlockOperation* moveOperation = [NSBlockOperation blockOperationWithBlock:^{
-            
-            // Attempts to fix #84
-            [source removeAllCachedResourceValues];
-            [dest removeAllCachedResourceValues];
-            
-            // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
-            NSError* error = nil;
-            if([self.fileManager moveItemAtURL:source toURL:dest error:&error])
-            {
-                [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Moved %@ to Output Directory", source]];
-            }
-            else
-            {
-                [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Unable to move %@ to Output Directory: %@", source, error]];
-            }
-        }];
-        
-        [moveOperations addObject:moveOperation];
+        [moveOperations addObject:[self createMoveOperationFromMoveState:moveState]];
     }
-    
+
     // Assign Dependencies
     for(OperationStateWrapper* operationState in session.sessionOperationStates)
     {
+        // These 2 operations already have their mutual dependencies set in the method below:
         NSArray<BaseTranscodeOperation*>* operations = [self createOperationsFromOperationState:operationState];
        
-        for(BaseTranscodeOperation* operation in operations)
-        {
-            // Every copy operation must happen first
-            // Completion dependecies on copy
-            for(NSBlockOperation* copyOp in copyOperations)
-            {
-                [operation addDependency:copyOp];
-                [completionOperation addDependency:copyOp];
-            }
-            
-            // Every move Operation must happen after our final pass
-            // Completion requires move to finish
-            for(NSBlockOperation* moveOp in moveOperations)
-            {
-                [moveOp addDependency:operation];
-                [completionOperation addDependency:moveOp];
-            }
-            
-            // Completion has dependecies our op too, of course
-            // This is important if we dont have moves or copies
-            [completionOperation addDependency:operation];
-        }
+        BaseTranscodeOperation* analysisOperation = operations[kAnalysisOperationIndex];
+        BaseTranscodeOperation* metadataOperation = operations[kMetadataOperationIndex];
         
-        // Lame Hack:
-        [analysisOperations addObject:operations[0]];
-        [finalizationOperations addObject:operations[1]];
+        [analysisOperations addObject:analysisOperation];
+        [metadataOperations addObject:metadataOperation];
     }
 
     // Enqueue Operations
@@ -652,46 +577,71 @@
     // Begin wont start before last completion
     if(self.lastCompletionOperation)
     {
-//        self.lastCompletionOperation.dependencies = nil;
         [beginOperation addDependency:self.lastCompletionOperation];
     }
+
     [self.synopsisFileOpQueue addOperation:beginOperation];
-    
-    // Copy wont start before begin
+
     for(NSBlockOperation* copyOp in copyOperations)
     {
+        // Copy wont start before begin
         [copyOp addDependency:beginOperation];
         [self.synopsisFileOpQueue addOperation:copyOp];
     }
-
-    // Analysis wont start before begin
+    
     for(BaseTranscodeOperation* operation in analysisOperations)
     {
-        [operation addDependency:beginOperation];
+        // All analysis operations must wait until our initial copy finishes
+        for(NSBlockOperation* copyOp in copyOperations)
+        {
+            [operation addDependency:copyOp];
+        }
+        
         [self.synopsisAnalysisQueue addOperation:operation];
     }
 
-    for(BaseTranscodeOperation* operation in finalizationOperations)
+    for(BaseTranscodeOperation* operation in metadataOperations)
     {
-        [operation addDependency:beginOperation];
+        // All moves must ensure our metadata operation has completed
+        for(NSBlockOperation* moveOp in moveOperations)
+        {
+            [moveOp addDependency:operation];
+        }
+
         [self.synopsisFinalizationQueue addOperation:operation];
+        [completionOperation addDependency:operation];
     }
 
-    //
     for(NSBlockOperation* moveOp in moveOperations)
     {
-        [moveOp addDependency:beginOperation];
         [self.synopsisFileOpQueue addOperation:moveOp];
     }
-    
+
+    // We can have 'n' operations running based on our operation queues num of concurrent ops.
+//    // Any one of those could take the longest to complete.
+//    // So rather than make a dependency on every operation, we just choose the last 'n' operations
+//    // For our completion block to be dependend on.
+//
+//    // something I am doing here is not releasing references to operations so we never dealloc them... :(
+//    NSInteger metaCount = MIN(metadataOperations.count, self.synopsisFinalizationQueue.maxConcurrentOperationCount);
+//    NSInteger moveCount = MIN(moveOperations.count, self.synopsisFinalizationQueue.maxConcurrentOperationCount);
+//
+//    NSArray<BaseTranscodeOperation*>* lastMetaOperations = [metadataOperations subarrayWithRange:NSMakeRange(metadataOperations.count - metaCount, metaCount)];
+//    for(BaseTranscodeOperation* op in lastMetaOperations)
+//        [completionOperation addDependency:op];
+//
+//    NSArray<NSBlockOperation*>* lastMoveOperations = [moveOperations subarrayWithRange:NSMakeRange(metadataOperations.count - moveCount, moveCount)];
+//    for(NSBlockOperation* op in lastMoveOperations)
+//        [completionOperation addDependency:op];
+
     // Completion cant begin before begin.
     [completionOperation addDependency:beginOperation];
+
     [self.synopsisFileOpQueue addOperation:completionOperation];
     
     for(NSBlockOperation* deleteOp in deleteOperations)
     {
         [deleteOp addDependency:completionOperation];
-        
         [self.synopsisFileOpQueue addOperation:deleteOp];
     }
     
@@ -848,6 +798,159 @@
 }
 
 #pragma mark - Create NSOperations
+
+- (NSBlockOperation*) createCopyOperationFromCopyState:(CopyOperationStateWrapper*)copyState
+{
+    NSURL* source = copyState.srcURL;
+    NSURL* dest = copyState.dstURL;
+    
+    NSBlockOperation* copyOperation = [[NSBlockOperation alloc] init];
+    
+    __weak NSBlockOperation* weakCopyOperation = copyOperation;
+    __weak typeof(self) weakSelf = self;
+    [copyOperation addExecutionBlock:^{
+        
+        __strong typeof(self) strongSelf = weakSelf;
+        if(strongSelf)
+        {
+            // Attempts to fix #84
+            [source removeAllCachedResourceValues];
+            [dest removeAllCachedResourceValues];
+            
+            // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
+            BOOL useRemotePath = [strongSelf.remoteFileHelper fileURLIsRemote:source];
+            BOOL copySuccessful = NO;
+            NSError* error = nil;
+            
+            if(useRemotePath)
+            {
+                [[LogController sharedLogController] appendVerboseLog:[@"Using Remote File Helper for " stringByAppendingString:source.path]];
+                copySuccessful = [strongSelf.remoteFileHelper safelyCopyFileURLOnRemoteFileSystem:source toURL:dest error:&error];
+            }
+            else
+            {
+                copySuccessful = [strongSelf.fileManager copyItemAtURL:source toURL:dest error:&error];
+            }
+            
+            if(copySuccessful)
+            {
+                [[LogController sharedLogController] appendVerboseLog:[@"Copied file" stringByAppendingString:source.path]];
+            }
+            else
+            {
+                [[LogController sharedLogController] appendErrorLog:[@"Unable to copy file" stringByAppendingString:error.localizedDescription]];
+            }
+        }
+        
+        // This Horrible hack remove a potential 'leak' by accrueing references to previous completion blocks dependencies on top of our new dependencies
+        // Meaning any dependent operation on any completion block is retained.
+        // Lame.
+        // https://nickharris.wordpress.com/2016/02/03/retain-cycle-with-nsoperation-dependencies-help-wanted/
+        __strong NSBlockOperation* strongCompletion = weakCopyOperation;
+        if(strongCompletion)
+        {
+            for(NSOperation* dependency in strongCompletion.dependencies)
+            {
+                [strongCompletion removeDependency:dependency];
+            }
+        }
+    }];
+    
+    return copyOperation;
+}
+
+- (NSBlockOperation*) createMoveOperationFromMoveState:(MoveOperationStateWrapper*)moveState
+{
+    NSURL* source = moveState.srcURL;
+    NSURL* dest = moveState.dstURL;
+    
+    NSBlockOperation* moveOperation = [[NSBlockOperation alloc] init];
+    
+    __weak NSBlockOperation* weakMoveOperation = moveOperation;
+    __weak typeof(self) weakSelf = self;
+    
+    [moveOperation addExecutionBlock:^{
+        
+        __strong typeof(self) strongSelf = weakSelf;
+        if(strongSelf)
+        {
+            // Attempts to fix #84
+            [source removeAllCachedResourceValues];
+            [dest removeAllCachedResourceValues];
+            
+            // TODO: Thread Safe NSFileManager / remoteFileHelper invocation?
+            NSError* error = nil;
+            if([strongSelf.fileManager moveItemAtURL:source toURL:dest error:&error])
+            {
+                [[LogController sharedLogController] appendSuccessLog:[NSString stringWithFormat:@"Moved %@ to Output Directory", source]];
+            }
+            else
+            {
+                [[LogController sharedLogController] appendWarningLog:[NSString stringWithFormat:@"Unable to move %@ to Output Directory: %@", source, error]];
+            }
+        }
+        
+        // This Horrible hack remove a potential 'leak' by accrueing references to previous completion blocks dependencies on top of our new dependencies
+        // Meaning any dependent operation on any completion block is retained.
+        // Lame.
+        // https://nickharris.wordpress.com/2016/02/03/retain-cycle-with-nsoperation-dependencies-help-wanted/
+        __strong NSBlockOperation* strongCompletion = weakMoveOperation;
+        if(strongCompletion)
+        {
+            for(NSOperation* dependency in strongCompletion.dependencies)
+            {
+                [strongCompletion removeDependency:dependency];
+            }
+        }
+    }];
+    
+    return moveOperation;
+}
+
+- (NSBlockOperation*) createDeleteOperationFromDeleteState:(DeleteOperationStateWrapper*)deleteState
+{
+    NSURL* deleteURL = deleteState.URL;
+
+    NSBlockOperation* deleteOperation = [[NSBlockOperation alloc] init];
+    
+    __weak NSBlockOperation* weakDeleteOperation = deleteOperation;
+    __weak typeof(self) weakSelf = self;
+    
+    [deleteOperation addExecutionBlock:^{
+        
+        __strong typeof(self) strongSelf = weakSelf;
+        if(strongSelf)
+        {
+            // Attempts to fix #84
+            [deleteURL removeAllCachedResourceValues];
+            NSError* error = nil;
+            BOOL deleteSuccessful = [strongSelf.fileManager removeItemAtURL:deleteURL error:&error];
+            if(deleteSuccessful)
+            {
+                [[LogController sharedLogController] appendVerboseLog:[@"Deleted file" stringByAppendingString:deleteURL.path]];
+            }
+            else
+            {
+                [[LogController sharedLogController] appendErrorLog:[@"Unable to delete file" stringByAppendingString:error.localizedDescription]];
+            }
+        }
+        
+        // This Horrible hack remove a potential 'leak' by accrueing references to previous completion blocks dependencies on top of our new dependencies
+        // Meaning any dependent operation on any completion block is retained.
+        // Lame.
+        // https://nickharris.wordpress.com/2016/02/03/retain-cycle-with-nsoperation-dependencies-help-wanted/
+        __strong NSBlockOperation* strongCompletion = weakDeleteOperation;
+        if(strongCompletion)
+        {
+            for(NSOperation* dependency in strongCompletion.dependencies)
+            {
+                [strongCompletion removeDependency:dependency];
+            }
+        }
+    }];
+    
+    return deleteOperation;
+}
 
 - (NSArray<BaseTranscodeOperation*>*) createOperationsFromOperationState:(OperationStateWrapper*)state
 {

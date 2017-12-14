@@ -29,4 +29,4 @@ extern NSString * const kSynopsisOperationStateUpdate;
 @property (atomic, readwrite, assign) NSTimeInterval elapsedTime;
 @property (atomic, readwrite, assign) NSTimeInterval remainingTime;
 
-@end 
+@end

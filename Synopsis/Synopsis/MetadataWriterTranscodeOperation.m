@@ -78,6 +78,32 @@
     return self;
 }
 
+// Because we have long dependency chains of other NSOperations, we want to release as many resources prior to dealloc as we can.
+- (void) earlyRelease
+{
+    NSLog(@"Early Release %@", [self className]);
+
+    // release readers
+    self.transcodeAsset = nil;
+    self.transcodeAssetReader = nil;
+    self.transcodeAssetReaderVideoPassthrough = nil;
+    self.transcodeAssetReaderAudioPassthrough = nil;
+    
+    // release writers
+    self.transcodeAssetWriter = nil;
+    self.transcodeAssetWriterVideoPassthrough = nil;
+    self.transcodeAssetWriterAudioPassthrough = nil;
+    self.transcodeAssetWriterMetadata = nil;
+    self.transcodeAssetWriterMetadataAdaptor = nil;
+ 
+    // It should be safe to release our metadata:
+    self.metadataEncoder = nil;
+    self.analyzedVideoSampleBufferMetadata = nil;
+    self.analyzedAudioSampleBufferMetadata = nil;
+    self.analyzedGlobalMetadata = nil;
+
+}
+
 - (NSString*) description
 {
     return [NSString stringWithFormat:@"Transcode Operation: %p, Source: %@, Destination: %@", self, self.sourceURL, self.destinationURL];
@@ -137,6 +163,8 @@
         
         [self cancel];
     }
+    
+    [self earlyRelease];
 }
 
 - (BOOL) setupTranscode:(NSError * __autoreleasing *)error
@@ -357,6 +385,32 @@
 {
     CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
     
+    // Output a thumbnail if we need to
+    BOOL generateThumbnail = YES;
+    if(generateThumbnail)
+    {
+        AVAssetImageGenerator* imageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:self.transcodeAsset];
+        imageGenerator.appliesPreferredTrackTransform = YES;
+        imageGenerator.maximumSize = CGSizeMake(128, 128);
+        CGImageRef posterImage = [imageGenerator copyCGImageAtTime:kCMTimeZero actualTime:NULL error:nil];
+        
+        if(posterImage)
+        {
+            NSImage* posterNSImage = [[NSImage alloc] initWithCGImage:posterImage
+                                                                 size:NSMakeSize(CGImageGetWidth(posterImage), CGImageGetHeight(posterImage))];
+            
+            NSData *imageData = [posterNSImage TIFFRepresentation];
+            NSBitmapImageRep *imageRep = [NSBitmapImageRep imageRepWithData:imageData];
+            NSDictionary *imageProps = [NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:0.5] forKey:NSImageCompressionFactor];
+            imageData = [imageRep representationUsingType:NSJPEGFileType properties:imageProps];
+            
+            NSURL* imageURL = [[self.destinationURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"jpg"];
+            [imageData writeToURL:imageURL atomically:NO];
+            
+            CGImageRelease(posterImage);
+        }
+    }
+    
     // Convert our global metadata to a valid top level AVMetadata item
     if(self.analyzedGlobalMetadata)
     {
@@ -398,11 +452,11 @@
         // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
         
-        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t videoPassthroughDecodeQueue = dispatch_queue_create("videoPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
-        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasVideo)
             dispatch_group_enter(g);
         
@@ -414,11 +468,11 @@
         CMBufferQueueRef audioPassthroughBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &audioPassthroughBufferQueue);
         
-        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
-        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         

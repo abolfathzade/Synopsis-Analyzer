@@ -172,7 +172,7 @@
         self.videoPassthroughDecodeQueue = [[NSOperationQueue alloc] init];
         self.videoPassthroughDecodeQueue.maxConcurrentOperationCount = 1;
         
-        self.videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL);
+        self.videoPassthroughEncodeQueue = dispatch_queue_create("videoPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
         self.videoUncompressedDecodeQueue = [[NSOperationQueue alloc] init];
@@ -195,6 +195,28 @@
 //        self.metadataEncoder = [[SynopsisMetadataEncoder alloc] initWithVersion:kSynopsisMetadataVersionValue];
     }
     return self;
+}
+
+// Because we have long dependency chains of other NSOperations, we want to release as many resources prior to dealloc as we can.
+// Note: we do not release our calculated metadata, our dependent operations need that!
+- (void) earlyRelease
+{
+    NSLog(@"Early Release %@", [self className]);
+    // release analyzers
+    self.availableAnalyzers = nil;
+    
+    // release readers
+    self.transcodeAsset = nil;
+    self.transcodeAssetReader = nil;
+    self.transcodeAssetReaderVideo = nil;
+    self.transcodeAssetReaderAudio = nil;
+    self.transcodeAssetReaderVideoPassthrough = nil;
+    self.transcodeAssetReaderAudioPassthrough = nil;
+    
+    // release writers
+    self.transcodeAssetWriter = nil;
+    self.transcodeAssetWriterVideo = nil;
+    self.transcodeAssetWriterAudio = nil;
 }
 
 - (NSString*) description
@@ -261,6 +283,8 @@
 
         [self cancel];
     }
+    
+    [self earlyRelease];
 }
 
 - (void) cancel
@@ -458,9 +482,7 @@
             }
         }
     }
-    
-    NSLog(@"Final Audio Settings: %@", self.audioTranscodeSettings);
-    
+        
     // check if we need to use our natural size - we might not have AVVideoHeightKey or AVVideoWidthKey
     if(!self.videoTranscodeSettings[AVVideoHeightKey] || !self.videoTranscodeSettings[AVVideoWidthKey])
     {
@@ -530,6 +552,8 @@
 {
     CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
     
+    [self.inFlightGlobalMetadata addEntriesFromDictionary:@{ @"ContainerFormatMetadata" : [self generateContainerMetadata]}];
+    
     if([self.transcodeAssetWriter startWriting] && [self.transcodeAssetReader startReading] && !self.isCancelled)
     {
         [self.transcodeAssetWriter startSessionAtSourceTime:kCMTimeZero];
@@ -542,7 +566,6 @@
         // Probably want to throttle this and set a small usleep to keep threads happy
         // Or use the CMBufferqueue callbacks with a semaphore signal
         CMItemCount numBuffers = 0;
-        
 
         if(self.transcodeAssetHasVideo)
         {
@@ -560,16 +583,16 @@
         CMBufferQueueRef audioUncompressedBufferQueue;
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForSampleBuffersSortedByOutputPTS(), &audioUncompressedBufferQueue);
 
-        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", 0);
+        dispatch_queue_t audioPassthroughDecodeQueue = dispatch_queue_create("audioPassthroughDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
-        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", 0);
+        dispatch_queue_t audioPassthroughEncodeQueue = dispatch_queue_create("audioPassthroughEncodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
         // We always need to decode uncompressed frames to send to our analysis plugins
-        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t audioUncompressedDecodeQueue = dispatch_queue_create("audioUncompressedDecodeQueue", DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL);
         if(self.transcodeAssetHasAudio)
             dispatch_group_enter(g);
         
@@ -1174,7 +1197,7 @@
         
         // Wait until every queue is finished processing
         dispatch_group_wait(g, DISPATCH_TIME_FOREVER);
-
+        
         self.analyzedGlobalMetadata = self.inFlightGlobalMetadata;
         self.analyzedVideoSampleBufferMetadata = self.inFlightVideoSampleBufferMetadata;
         self.analyzedAudioSampleBufferMetadata = self.inFlightAudioSampleBufferMetadata;
@@ -1265,6 +1288,23 @@ static inline CGRect rectForQualityHint(CGRect originalRect, SynopsisAnalysisQua
     self.concurrentVideoAnalysisQueue.maxConcurrentOperationCount = (concurrentFrames) ? NSOperationQueueDefaultMaxConcurrentOperationCount : 1;
 }
 
+- (NSDictionary*) generateContainerMetadata
+{
+    NSMutableDictionary* containerFormatMetadata = [NSMutableDictionary new];
+    [containerFormatMetadata setValue:@( CMTimeGetSeconds(self.transcodeAsset.duration) * 1000.0 ) forKey:@"Duration"];
 
+    if(self.transcodeAssetHasVideo && ( self.transcodeAssetReaderVideo.track != nil) )
+    {
+        CGSize naturalSize = [self.transcodeAssetReaderVideo.track naturalSize];
+        float fps = [self.transcodeAssetReaderVideo.track nominalFrameRate];
+        
+        [containerFormatMetadata setValue:@(naturalSize.width) forKey:@"Width"];
+        [containerFormatMetadata setValue:@(naturalSize.height) forKey:@"Height"];
+        [containerFormatMetadata setValue:@(fps) forKey:@"FPS"];
+    }
+    
+    return containerFormatMetadata;
+}
 
 @end
+
