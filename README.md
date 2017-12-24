@@ -5,7 +5,7 @@
 
 ### Overview
 
-Synopsis is video analysis and transcoding tool, as well as a metadata format for embeddeding advanced analyzed metadata within .MOV and (in testing) .MP4 video files. 
+Synopsis is a video analysis and transcoding tool, as well as a metadata format for embeddeding advanced analyzed metadata within .MOV and (in testing) .MP4 video files. 
 
 Please note Synopsis Analyzer (and related tools and frameworks) are under heavy development. This means specific analysis modules and metadata format are undergoing changes - and thus previous analyzed video may not be compatible with newer releases as things change. Things are changing fast, but once we hit 1.0 we plan on having a stable analysis feature set. 
 
