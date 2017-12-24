@@ -30,7 +30,7 @@ Please note Synopsis Analyzer (and related tools and frameworks) are under heavy
 * Motion amount, direction, smoothness and key word tagging for similarity and sorting.
 * Feature tracking
 
-### Workflow Opporunities:
+### Workflow Opportunities:
 
 **Archival**: 
 * Analyze your media archive, optionally transcoding to an appropriate archival video format like H.264.
