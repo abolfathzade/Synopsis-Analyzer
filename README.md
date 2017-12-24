@@ -16,7 +16,7 @@ Please note Synopsis Analyzer (and related tools and frameworks) are under heavy
 * Presets for encoding settings
 * Optional Analysis stage during transcode
 * Spotlight integration for tag based searching of analyzed content.
-* Export analsysis files to JSON sidecar or embed into supported video container formats.
+* Export analysis files to JSON sidecar or embed into supported video container formats.
 * Supports 3rd party analysis plugins that implement the Synopsis Plugin standard.
 
 ### Included video analysis following metadata:
