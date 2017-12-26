@@ -5,7 +5,7 @@
 
 ### Overview
 
-Synopsis is video analysis and transcoding tool, as well as a metadata format for embeddeding advanced analyzed metadata within .MOV and (in testing) .MP4 video files. 
+Synopsis is a video analysis and transcoding tool, as well as a metadata format for embeddeding advanced analyzed metadata within .MOV and (in testing) .MP4 video files. 
 
 Please note Synopsis Analyzer (and related tools and frameworks) are under heavy development. This means specific analysis modules and metadata format are undergoing changes - and thus previous analyzed video may not be compatible with newer releases as things change. Things are changing fast, but once we hit 1.0 we plan on having a stable analysis feature set. 
 
@@ -16,7 +16,7 @@ Please note Synopsis Analyzer (and related tools and frameworks) are under heavy
 * Presets for encoding settings
 * Optional Analysis stage during transcode
 * Spotlight integration for tag based searching of analyzed content.
-* Export analsysis files to JSON sidecar or embed into supported video container formats.
+* Export analysis files to JSON sidecar or embed into supported video container formats.
 * Supports 3rd party analysis plugins that implement the Synopsis Plugin standard.
 
 ### Included video analysis following metadata:
@@ -30,7 +30,7 @@ Please note Synopsis Analyzer (and related tools and frameworks) are under heavy
 * Motion amount, direction, smoothness and key word tagging for similarity and sorting.
 * Feature tracking
 
-### Workflow Opporunities:
+### Workflow Opportunities:
 
 **Archival**: 
 * Analyze your media archive, optionally transcoding to an appropriate archival video format like H.264.
