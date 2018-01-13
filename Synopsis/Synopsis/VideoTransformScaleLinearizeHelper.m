@@ -18,7 +18,7 @@
 {
     CVPixelBufferPoolRef transformPixelBufferPool;
     CVPixelBufferPoolRef scaledPixelBufferPool;
-    vImageConverterRef toLinearConverter;
+//    vImageConverterRef toLinearConverter;
 
 }
 @property (readwrite, strong) NSOperationQueue* queue;
@@ -34,7 +34,7 @@
     {
         transformPixelBufferPool = NULL;
         scaledPixelBufferPool = NULL;
-        toLinearConverter = NULL;
+//        toLinearConverter = NULL;
 
         self.queue = [[NSOperationQueue alloc] init];
         self.queue.maxConcurrentOperationCount = 1;
@@ -57,10 +57,10 @@
         scaledPixelBufferPool = NULL;
     }
     
-    if(toLinearConverter != NULL)
-    {
-        CFRelease(toLinearConverter);
-    }
+//    if(toLinearConverter != NULL)
+//    {
+//        CFRelease(toLinearConverter);
+//    }
 }
 
 - (NSBlockOperation*) pixelBuffer:(CVPixelBufferRef)pixelBuffer
@@ -135,91 +135,91 @@
     inBuff.data = baseAddress;
     
     // Convert in buff to linear
-    if(toLinearConverter == NULL)
-    {
-        // TODO: Introspect to confirm we are 709 / 601 / 2020 / P3 etc etc
-        // Fuck Video
-        
-        ColorSyncProfileRef rec709 = ColorSyncProfileCreateWithName(kColorSyncITUR709Profile);
-        //        ColorSyncProfileRef linearProfile = ColorSyncProfileCreateWithName(kColorSyncACESCGLinearProfile);
-        ColorSyncProfileRef linearProfile = [self linearRGBProfile];
-        
-        const void *keys[] = {kColorSyncProfile, kColorSyncRenderingIntent, kColorSyncTransformTag};
-        
-        const void *srcVals[] = {rec709,  kColorSyncRenderingIntentPerceptual, kColorSyncTransformPCSToPCS};
-        const void *dstVals[] = {linearProfile,  kColorSyncRenderingIntentPerceptual, kColorSyncTransformPCSToPCS};
-        
-        CFDictionaryRef srcDict = CFDictionaryCreate (
-                                                      NULL,
-                                                      (const void **)keys,
-                                                      (const void **)srcVals,
-                                                      3,
-                                                      &kCFTypeDictionaryKeyCallBacks,
-                                                      &kCFTypeDictionaryValueCallBacks);
-        
-        
-        CFDictionaryRef dstDict = CFDictionaryCreate (
-                                                      NULL,
-                                                      (const void **)keys,
-                                                      (const void **)dstVals,
-                                                      3,
-                                                      &kCFTypeDictionaryKeyCallBacks,
-                                                      &kCFTypeDictionaryValueCallBacks);
-        
-        const void* arrayVals[] = {srcDict, dstDict, NULL};
-        
-        CFArrayRef profileSequence = CFArrayCreate(NULL, (const void **)arrayVals, 2, &kCFTypeArrayCallBacks);
-        
-        ColorSyncTransformRef transform = ColorSyncTransformCreate(profileSequence, NULL);
-        
-        CFTypeRef codeFragment = NULL;
-        codeFragment = ColorSyncTransformCopyProperty(transform, kColorSyncTransformFullConversionData, NULL);
-        
-        if (transform)
-            CFRelease (transform);
-        
-        vImage_CGImageFormat inputFormat;
-        inputFormat.bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Little;
-        inputFormat.renderingIntent = kCGRenderingIntentPerceptual;
-        inputFormat.colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceITUR_709);
-        inputFormat.bitsPerPixel = 32;
-        inputFormat.bitsPerComponent = 8;
-        inputFormat.decode = NULL;
-        inputFormat.version = 0;
-        
-        vImage_CGImageFormat desiredFormat;
-        desiredFormat.bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Little;
-        desiredFormat.renderingIntent = kCGRenderingIntentPerceptual;
-        desiredFormat.colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
-        desiredFormat.bitsPerPixel = 32;
-        desiredFormat.bitsPerComponent = 8;
-        desiredFormat.decode = NULL;
-        desiredFormat.version = 0;
-        
-        const CGFloat backColorF[4] = {0.0};
-        
-        toLinearConverter = vImageConverter_CreateWithColorSyncCodeFragment(codeFragment, &inputFormat, &desiredFormat, backColorF, SynopsisvImageTileFlag, &err);
-        
-        CFRelease(codeFragment);
-        CFRelease(srcDict);
-        CFRelease(dstDict);
-        CFRelease(profileSequence);
-        CFRelease(rec709);
-        CFRelease(linearProfile);
-    }
-    
-    // TODO: Create linear pixel buffer pool / reuse memory
-    vImage_Buffer linear;
-    linear.data = malloc(CVPixelBufferGetDataSize(pixelBuffer));
-    linear.height = CVPixelBufferGetHeight(pixelBuffer);
-    linear.width = CVPixelBufferGetWidth(pixelBuffer);
-    linear.rowBytes = bytesPerRow;
-    
-    // TODO: Use temp buffer not NULL
-    
-    err = vImageConvert_AnyToAny(toLinearConverter, &inBuff, &linear, NULL, SynopsisvImageTileFlag);
-    if (err != kvImageNoError)
-        NSLog(@" error %ld", err);
+//    if(toLinearConverter == NULL)
+//    {
+//        // TODO: Introspect to confirm we are 709 / 601 / 2020 / P3 etc etc
+//        // Fuck Video
+//
+//        ColorSyncProfileRef rec709 = ColorSyncProfileCreateWithName(kColorSyncITUR709Profile);
+//        //        ColorSyncProfileRef linearProfile = ColorSyncProfileCreateWithName(kColorSyncACESCGLinearProfile);
+//        ColorSyncProfileRef linearProfile = [self linearRGBProfile];
+//
+//        const void *keys[] = {kColorSyncProfile, kColorSyncRenderingIntent, kColorSyncTransformTag};
+//
+//        const void *srcVals[] = {rec709,  kColorSyncRenderingIntentPerceptual, kColorSyncTransformPCSToPCS};
+//        const void *dstVals[] = {linearProfile,  kColorSyncRenderingIntentPerceptual, kColorSyncTransformPCSToPCS};
+//
+//        CFDictionaryRef srcDict = CFDictionaryCreate (
+//                                                      NULL,
+//                                                      (const void **)keys,
+//                                                      (const void **)srcVals,
+//                                                      3,
+//                                                      &kCFTypeDictionaryKeyCallBacks,
+//                                                      &kCFTypeDictionaryValueCallBacks);
+//
+//
+//        CFDictionaryRef dstDict = CFDictionaryCreate (
+//                                                      NULL,
+//                                                      (const void **)keys,
+//                                                      (const void **)dstVals,
+//                                                      3,
+//                                                      &kCFTypeDictionaryKeyCallBacks,
+//                                                      &kCFTypeDictionaryValueCallBacks);
+//
+//        const void* arrayVals[] = {srcDict, dstDict, NULL};
+//
+//        CFArrayRef profileSequence = CFArrayCreate(NULL, (const void **)arrayVals, 2, &kCFTypeArrayCallBacks);
+//
+//        ColorSyncTransformRef transform = ColorSyncTransformCreate(profileSequence, NULL);
+//
+//        CFTypeRef codeFragment = NULL;
+//        codeFragment = ColorSyncTransformCopyProperty(transform, kColorSyncTransformFullConversionData, NULL);
+//
+//        if (transform)
+//            CFRelease (transform);
+//
+//        vImage_CGImageFormat inputFormat;
+//        inputFormat.bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Little;
+//        inputFormat.renderingIntent = kCGRenderingIntentPerceptual;
+//        inputFormat.colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceITUR_709);
+//        inputFormat.bitsPerPixel = 32;
+//        inputFormat.bitsPerComponent = 8;
+//        inputFormat.decode = NULL;
+//        inputFormat.version = 0;
+//
+//        vImage_CGImageFormat desiredFormat;
+//        desiredFormat.bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Little;
+//        desiredFormat.renderingIntent = kCGRenderingIntentPerceptual;
+//        desiredFormat.colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
+//        desiredFormat.bitsPerPixel = 32;
+//        desiredFormat.bitsPerComponent = 8;
+//        desiredFormat.decode = NULL;
+//        desiredFormat.version = 0;
+//
+//        const CGFloat backColorF[4] = {0.0};
+//
+//        toLinearConverter = vImageConverter_CreateWithColorSyncCodeFragment(codeFragment, &inputFormat, &desiredFormat, backColorF, SynopsisvImageTileFlag, &err);
+//
+//        CFRelease(codeFragment);
+//        CFRelease(srcDict);
+//        CFRelease(dstDict);
+//        CFRelease(profileSequence);
+//        CFRelease(rec709);
+//        CFRelease(linearProfile);
+//    }
+//
+//    // TODO: Create linear pixel buffer pool / reuse memory
+//    vImage_Buffer linear;
+//    linear.data = malloc(CVPixelBufferGetDataSize(pixelBuffer));
+//    linear.height = CVPixelBufferGetHeight(pixelBuffer);
+//    linear.width = CVPixelBufferGetWidth(pixelBuffer);
+//    linear.rowBytes = bytesPerRow;
+//
+//    // TODO: Use temp buffer not NULL
+//
+//    err = vImageConvert_AnyToAny(toLinearConverter, &inBuff, &linear, NULL, SynopsisvImageTileFlag);
+//    if (err != kvImageNoError)
+//        NSLog(@" error %ld", err);
     
     // Scale our transformmed buffer
     CVPixelBufferRef scaledBuffer;
@@ -230,14 +230,14 @@
     
     vImage_Buffer resized = {resizedBytes, CVPixelBufferGetHeight(scaledBuffer), CVPixelBufferGetWidth(scaledBuffer), CVPixelBufferGetBytesPerRow(scaledBuffer)};
     
-    err = vImageScale_ARGB8888(&linear, &resized, NULL, SynopsisvImageTileFlag);
+    err = vImageScale_ARGB8888(&inBuff, &resized, NULL, SynopsisvImageTileFlag);
     if (err != kvImageNoError)
         NSLog(@" error %ld", err);
     
     // Free / unlock
     // Since we converted our inBuff to linear we free it to be clean
-    free(linear.data);
-    linear.data = NULL;
+//    free(linear.data);
+//    linear.data = NULL;
     
     // Since we just proxy our inBuff as our pixelBuffer we unlock and the pool cleans it up
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
