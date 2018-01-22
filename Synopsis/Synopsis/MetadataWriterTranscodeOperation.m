@@ -386,7 +386,7 @@
     CGFloat assetDurationInSeconds = CMTimeGetSeconds(self.transcodeAsset.duration);
     
     // Output a thumbnail if we need to
-    BOOL generateThumbnail = YES;
+    BOOL generateThumbnail = NO;
     if(generateThumbnail)
     {
         AVAssetImageGenerator* imageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:self.transcodeAsset];
