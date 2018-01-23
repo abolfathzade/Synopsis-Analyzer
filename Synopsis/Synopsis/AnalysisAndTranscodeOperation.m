@@ -163,7 +163,7 @@
         
 #pragma mark - Video Requirements
 
-        CMItemCount numBuffers = 0;
+        CMItemCount numBuffers = 3;
         
         // since we are using passthrough - we have to ensure we use DTS not PTS since buffers may be out of order.
         CMBufferQueueCreate(kCFAllocatorDefault, numBuffers, CMBufferQueueGetCallbacksForUnsortedSampleBuffers(), &videoPassthroughBufferQueue);
@@ -766,8 +766,6 @@
 
                             NSLock* dictionaryLock = [[NSLock alloc] init];
                             
-                            NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
-
                             // grab our image buffer
                             CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(uncompressedVideoSampleBuffer);
                             
@@ -782,70 +780,77 @@
                             [self.videoConformSession conformPixelBuffer:pixelBuffer
                                                            withTransform:self.transcodeAssetWriterVideo.transform
                                                                     rect:rectForQualityHint(originalRect, self.analysisQualityHint)
-                                                         completionBlock:^(SynopsisVideoFrameCache* conformedFrameCache, NSError * error){
+                                                         completionBlock:^(id<MTLCommandBuffer>commandBuffer, SynopsisVideoFrameCache* conformedFrameCache, NSError * error){
                                                              
-                                              CFRelease(uncompressedVideoSampleBuffer);
-                                                                                
-                                              // Run an analysis pass on each plugin
-                                              NSMutableArray* analysisOperations = [NSMutableArray array];
-                                              
-                                              for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
-                                              {
-                                                  NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock: ^{
-                                                  
-                                                      NSString* newMetadataKey = [analyzer pluginIdentifier];
-                                                      
-                                                      [analyzer analyzeFrameCache:conformedFrameCache
-                                                                completionHandler:^(NSDictionary * newMetadataValue, NSError *analyzerError) {
-                                                                    if(analyzerError)
-                                                                    {
-                                                                        // TODO: Check for Concurrency Issues?
-                                                                        self.operationState.operationState = OperationStateFailed;
-                                                                        NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
-                                                                        [[LogController sharedLogController] appendErrorLog:errorString];
-                                                                    }
-                                                                    
-                                                                    if(newMetadataValue)
-                                                                    {
-                                                                        // provide some thread safety to our now async fetches.
-                                                                        [dictionaryLock lock];
-                                                                        [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
-                                                                        [dictionaryLock unlock];
-                                                                    }
-                                                                }];
-                                                  }];
-
-                                                  [analysisOperations addObject:operation];
-                                              }
-                                              
-                                              NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
-
-                                                  NSValue* timeRangeValue = [NSValue valueWithCMTimeRange:currentSampleTimeRange];
-                                                  NSDictionary* metadata = @{@"TimeRange" : timeRangeValue,
-                                                                             @"Metadata" : aggregatedAndAnalyzedMetadata
-                                                                             };
-
-                                                  [self.inFlightVideoSampleBufferMetadata addObject:metadata];
-
-                                                  self.videoProgress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
-
-                                                  // Leave this 'frame'
-                                                  dispatch_group_leave(analyzedAllFramesGroup);
-                                              }];
-
-                                              for(NSOperation* analysisOperation in analysisOperations)
-                                              {
-                                                  [jsonEncodeOperation addDependency:analysisOperation];
-                                              }
-
-                                             [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
-                                             [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
+                                                             CFRelease(uncompressedVideoSampleBuffer);
+                                                             
+                                                             NSMutableDictionary* aggregatedAndAnalyzedMetadata = [NSMutableDictionary new];
+                                                             
+                                                             // Run an analysis pass on each plugin
+                                                             NSMutableArray* analysisOperations = [NSMutableArray array];
+                                                             
+                                                             for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+                                                             {
+                                                                 NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock: ^{
+                                                                     
+                                                                     NSString* newMetadataKey = [analyzer pluginIdentifier];
+                                                                     
+                                                                     [analyzer analyzeFrameCache:conformedFrameCache
+                                                                                   commandBuffer:commandBuffer
+                                                                               completionHandler:^(NSDictionary * newMetadataValue, NSError *analyzerError) {
+                                                                                   if(analyzerError)
+                                                                                   {
+                                                                                       // TODO: Check for Concurrency Issues?
+                                                                                       self.operationState.operationState = OperationStateFailed;
+                                                                                       NSString* errorString = [@"Error Analyzing Sample buffer: " stringByAppendingString:[analyzerError description]];
+                                                                                       [[LogController sharedLogController] appendErrorLog:errorString];
+                                                                                   }
+                                                                                   
+                                                                                   if(newMetadataValue)
+                                                                                   {
+                                                                                       // provide some thread safety to our now async fetches.
+                                                                                       [dictionaryLock lock];
+                                                                                       [aggregatedAndAnalyzedMetadata setObject:newMetadataValue forKey:newMetadataKey];
+                                                                                       [dictionaryLock unlock];
+                                                                                   }
+                                                                               }];
+                                                                 }];
+                                                                 
+                                                                 [analysisOperations addObject:operation];
+                                                             }
+                                                             
+                                                             NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
+                                                                 
+                                                                 NSValue* timeRangeValue = [NSValue valueWithCMTimeRange:currentSampleTimeRange];
+                                                                 NSDictionary* metadata = @{@"TimeRange" : timeRangeValue,
+                                                                                            @"Metadata" : aggregatedAndAnalyzedMetadata
+                                                                                            };
+                                                                 
+                                                                 [self.inFlightVideoSampleBufferMetadata addObject:metadata];
+                                                                 
+                                                                 self.videoProgress = currentPresetnationTimeInSeconds / assetDurationInSeconds;
+                                                                 
+                                                                 // Leave this 'frame'
+                                                                 dispatch_group_leave(analyzedAllFramesGroup);
+                                                             }];
+                                                             
+                                                             for(NSOperation* analysisOperation in analysisOperations)
+                                                             {
+                                                                 [jsonEncodeOperation addDependency:analysisOperation];
+                                                             }
+                                                             
+                                                             [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
+                                                             [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
                                 }];
                         }
                         else
                         {
                             // Got NULL - were done
                             // TODO: Move Analysis Finalization here
+                            
+                            // Ensure we dont have any additional Analysis ops in flight
+                            [self.concurrentVideoAnalysisQueue waitUntilAllOperationsAreFinished];
+                            
                             dispatch_group_leave(analyzedAllFramesGroup);
                             break;
                         }
