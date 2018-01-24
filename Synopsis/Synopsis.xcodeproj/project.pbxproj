@@ -377,6 +377,7 @@
 		1BC71E841F17E8FE006DD7DC /* ImageMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageMath.h; sourceTree = "<group>"; };
 		1BC71E851F17E8FE006DD7DC /* YCoCg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = YCoCg.c; sourceTree = "<group>"; };
 		1BC71E861F17E8FE006DD7DC /* YCoCg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YCoCg.h; sourceTree = "<group>"; };
+		1BE83EF12017BE33005E141E /* Synopsis Analyzer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Synopsis Analyzer.entitlements"; sourceTree = "<group>"; };
 		1BEA4D191ACB2BCC00AB57C1 /* Synopsis Analyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Synopsis Analyzer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BEA4D1D1ACB2BCC00AB57C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BEA4D1E1ACB2BCC00AB57C1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -918,6 +919,7 @@
 		1BEA4D101ACB2BCC00AB57C1 = {
 			isa = PBXGroup;
 			children = (
+				1BE83EF12017BE33005E141E /* Synopsis Analyzer.entitlements */,
 				1B7350F91DEF4FAE0053BC06 /* Synopsis-Framework.xcodeproj */,
 				1BEA4D1B1ACB2BCC00AB57C1 /* Synopsis */,
 				1B007EC11B4D7D0900DE6E98 /* SpotlightImporter */,
@@ -1054,6 +1056,11 @@
 						CreatedOnToolsVersion = 6.2;
 						DevelopmentTeam = SHG3AW6YV7;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 0;
+							};
+						};
 					};
 				};
 			};
@@ -1495,13 +1502,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = SHG3AW6YV7;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "INCLUDE_ENCODER=1";
 				GCC_UNROLL_LOOPS = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_CFLAGS = "";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
 				PRODUCT_BUNDLE_IDENTIFIER = "info.Synopsis.Synopsis-Analyzer";
@@ -1515,14 +1523,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = SHG3AW6YV7;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "INCLUDE_ENCODER=1";
 				GCC_UNROLL_LOOPS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Synopsis/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_CFLAGS = "";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
 				PRODUCT_BUNDLE_IDENTIFIER = "info.Synopsis.Synopsis-Analyzer";
