@@ -259,14 +259,15 @@
         [requiredSpecifiers addObjectsFromArray:analyzer.pluginFormatSpecfiers];
     }
 
-//    static int roundRobin = 1;
-//    NSArray<id<MTLDevice>>* allDevices = MTLCopyAllDevices();
+    static int roundRobin = 0;
+    NSArray<id<MTLDevice>>* allDevices = MTLCopyAllDevices();
 
-    self.device = MTLCreateSystemDefaultDevice(); //allDevices[roundRobin];
+//    self.device = MTLCreateSystemDefaultDevice();
+    self.device = allDevices[roundRobin];
     self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers device:self.device inFlightBuffers:3];
     
-//    roundRobin++;
-//    roundRobin = roundRobin % allDevices.count;
+    roundRobin++;
+    roundRobin = roundRobin % allDevices.count;
     
     NSError* error = nil;
     
@@ -792,7 +793,7 @@
                                                              for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
                                                              {
                                                                  NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock: ^{
-                                                                     
+                                                                 
                                                                      NSString* newMetadataKey = [analyzer pluginIdentifier];
                                                                      
                                                                      [analyzer analyzeFrameCache:conformedFrameCache
@@ -820,7 +821,7 @@
                                                              }
                                                              
                                                              NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
-                                                                 
+                                                             
                                                                  NSValue* timeRangeValue = [NSValue valueWithCMTimeRange:currentSampleTimeRange];
                                                                  NSDictionary* metadata = @{@"TimeRange" : timeRangeValue,
                                                                                             @"Metadata" : aggregatedAndAnalyzedMetadata
@@ -832,13 +833,14 @@
                                                                  
                                                                  // Leave this 'frame'
                                                                  dispatch_group_leave(analyzedAllFramesGroup);
+
                                                              }];
-                                                             
+
                                                              for(NSOperation* analysisOperation in analysisOperations)
                                                              {
                                                                  [jsonEncodeOperation addDependency:analysisOperation];
                                                              }
-                                                             
+
                                                              [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
                                                              [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
                                 }];
