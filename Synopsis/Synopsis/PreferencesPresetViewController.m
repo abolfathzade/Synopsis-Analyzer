@@ -299,7 +299,7 @@ const NSString* value = @"Value";
         
         // 422
         PresetVideoSettings* appleProRes422VideoSetting = [[PresetVideoSettings alloc] init];
-        appleProRes422VideoSetting.settingsDictionary = @{AVVideoCodecKey:AVVideoCodecAppleProRes422};
+        appleProRes422VideoSetting.settingsDictionary = @{AVVideoCodecKey:AVVideoCodecTypeAppleProRes422};
         
         PresetObject* appleProRes422Preset = [[PresetObject alloc] initWithTitle:@"Apple Pro Res 422"
                                                                    audioSettings:[PresetAudioSettings none]
@@ -384,7 +384,7 @@ const NSString* value = @"Value";
 #pragma mark - Motion Jpeg
         
         PresetVideoSettings* photoJPEGVideoSetting = [[PresetVideoSettings alloc] init];
-        photoJPEGVideoSetting.settingsDictionary = @{AVVideoCodecKey:AVVideoCodecJPEG};
+        photoJPEGVideoSetting.settingsDictionary = @{AVVideoCodecKey:AVVideoCodecTypeJPEG};
         
         PresetObject* photoJPEGPreset = [[PresetObject alloc] initWithTitle:@"Photo JPEG"
                                                               audioSettings:[PresetAudioSettings none]
@@ -621,7 +621,7 @@ const NSString* value = @"Value";
         
         // h.264 Baseline Auto / AAC 48khz Stereo 256
         PresetVideoSettings* baseLineAutoLevelVideoSetting = [[PresetVideoSettings alloc] init];
-        baseLineAutoLevelVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecH264,
+        baseLineAutoLevelVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecTypeH264,
                                                              
                                                              AVVideoCompressionPropertiesKey : @{
                                                                      AVVideoProfileLevelKey : AVVideoProfileLevelH264BaselineAutoLevel,
@@ -645,7 +645,7 @@ const NSString* value = @"Value";
         
         // h.264 Main Auto / AAC 48khz Stereo 256
         PresetVideoSettings* mainAutoLevelVideoSetting = [[PresetVideoSettings alloc] init];
-        mainAutoLevelVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecH264,
+        mainAutoLevelVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecTypeH264,
                                                          AVVideoCompressionPropertiesKey : @{
                                                                  AVVideoProfileLevelKey : AVVideoProfileLevelH264BaselineAutoLevel,
                                                                  },
@@ -667,7 +667,7 @@ const NSString* value = @"Value";
         
         // h.264 Main Auto / AAC 48khz Stereo 256
         PresetVideoSettings* highAutoLevelVideoSetting = [[PresetVideoSettings alloc] init];
-        highAutoLevelVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecH264,
+        highAutoLevelVideoSetting.settingsDictionary = @{AVVideoCodecKey : AVVideoCodecTypeH264,
                                                          AVVideoCompressionPropertiesKey : @{
                                                                  AVVideoProfileLevelKey : AVVideoProfileLevelH264BaselineAutoLevel,
                                                                  },
