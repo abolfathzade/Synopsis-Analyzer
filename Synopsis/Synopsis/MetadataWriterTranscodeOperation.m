@@ -101,6 +101,9 @@
     self.analyzedVideoSampleBufferMetadata = nil;
     self.analyzedAudioSampleBufferMetadata = nil;
     self.analyzedGlobalMetadata = nil;
+    
+    self.metadataOptions = nil;
+    self.metadataEncoder = nil;
 
 }
 

@@ -217,6 +217,14 @@
     self.transcodeAssetWriter = nil;
     self.transcodeAssetWriterVideo = nil;
     self.transcodeAssetWriterAudio = nil;
+    
+    self.inFlightVideoSampleBufferMetadata = nil;
+    self.inFlightAudioSampleBufferMetadata = nil;
+    self.inFlightGlobalMetadata = nil;
+    
+    self.analyzedGlobalMetadata = nil;
+    self.analyzedVideoSampleBufferMetadata = nil;
+    self.analyzedAudioSampleBufferMetadata = nil;
 }
 
 - (NSString*) description
@@ -820,7 +828,7 @@
                                                                  [analysisOperations addObject:operation];
                                                              }
                                                              
-                                                             NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
+//                                                             NSBlockOperation* jsonEncodeOperation = [NSBlockOperation blockOperationWithBlock: ^{
                                                              
                                                                  NSValue* timeRangeValue = [NSValue valueWithCMTimeRange:currentSampleTimeRange];
                                                                  NSDictionary* metadata = @{@"TimeRange" : timeRangeValue,
@@ -834,14 +842,14 @@
                                                                  // Leave this 'frame'
                                                                  dispatch_group_leave(analyzedAllFramesGroup);
 
-                                                             }];
-
-                                                             for(NSOperation* analysisOperation in analysisOperations)
-                                                             {
-                                                                 [jsonEncodeOperation addDependency:analysisOperation];
-                                                             }
-
-                                                             [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
+//                                                             }];
+//
+//                                                             for(NSOperation* analysisOperation in analysisOperations)
+//                                                             {
+//                                                                 [jsonEncodeOperation addDependency:analysisOperation];
+//                                                             }
+//
+//                                                             [self.jsonEncodeQueue addOperation:jsonEncodeOperation];
                                                              [self.concurrentVideoAnalysisQueue addOperations:analysisOperations waitUntilFinished:YES];
                                 }];
                         }
@@ -852,6 +860,38 @@
                             
                             // Ensure we dont have any additional Analysis ops in flight
                             [self.concurrentVideoAnalysisQueue waitUntilAllOperationsAreFinished];
+                            
+                            
+                            // TODO: AGGREGATE METADATA THAT ISNT PER FRAME
+                            NSError* analyzerError = nil;
+                            for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
+                            {
+                                NSDictionary* finalizedMetadata = [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
+                                if(analyzerError)
+                                {
+                                    NSString* errorString = [@"Error Finalizing Analysis - bailing: " stringByAppendingString:[analyzerError description]];
+                                    [[LogController sharedLogController] appendErrorLog:errorString];
+                                    self.operationState.operationState = OperationStateFailed;
+                                    dispatch_group_leave(g);
+                                    
+                                    break;
+                                }
+                                
+                                // set our global metadata for the analyzer
+                                if(finalizedMetadata)
+                                {
+                                    self.inFlightGlobalMetadata[analyzer.pluginIdentifier] = finalizedMetadata;
+                                }
+                                else
+                                {
+                                    NSString* warning = [@"No Global Analysis Data for Analyzer " stringByAppendingString:analyzer.pluginIdentifier];
+                                    [[LogController sharedLogController] appendWarningLog:warning];
+                                }
+                            }
+                            
+                            self.inFlightGlobalMetadata[kSynopsisMetadataVersionKey] = @(kSynopsisMetadataVersionValue);
+                            
+                            
                             
                             dispatch_group_leave(analyzedAllFramesGroup);
                             break;
@@ -993,34 +1033,7 @@
 
                         if(CMBufferQueueIsEmpty(videoPassthroughBufferQueue) && CMBufferQueueIsEmpty(videoUncompressedBufferQueue))
                         {
-                            // TODO: AGGREGATE METADATA THAT ISNT PER FRAME
-                            NSError* analyzerError = nil;
-                            for(id<AnalyzerPluginProtocol> analyzer in self.availableAnalyzers)
-                            {
-                                NSDictionary* finalizedMetadata = [analyzer finalizeMetadataAnalysisSessionWithError:&analyzerError];
-                                if(analyzerError)
-                                {
-                                    NSString* errorString = [@"Error Finalizing Analysis - bailing: " stringByAppendingString:[analyzerError description]];
-                                    [[LogController sharedLogController] appendErrorLog:errorString];
-                                    self.operationState.operationState = OperationStateFailed;
-                                    dispatch_group_leave(g);
 
-                                    break;
-                                }
-                                
-                                // set our global metadata for the analyzer
-                                if(finalizedMetadata)
-                                {
-                                    self.inFlightGlobalMetadata[analyzer.pluginIdentifier] = finalizedMetadata;
-                                }
-                                else
-                                {
-                                    NSString* warning = [@"No Global Analysis Data for Analyzer " stringByAppendingString:analyzer.pluginIdentifier];
-                                    [[LogController sharedLogController] appendWarningLog:warning];
-                                }
-                            }
-                        
-                            self.inFlightGlobalMetadata[kSynopsisMetadataVersionKey] = @(kSynopsisMetadataVersionValue);
                             
                             [self.transcodeAssetWriterVideo markAsFinished];
                             
