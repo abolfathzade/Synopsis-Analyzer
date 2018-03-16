@@ -276,9 +276,12 @@
     self.device = allDevices[roundRobin];
     self.videoConformSession = [[SynopsisVideoFrameConformSession alloc] initWithRequiredFormatSpecifiers:requiredSpecifiers device:self.device inFlightBuffers:3];
     
-    roundRobin++;
-    roundRobin = roundRobin % allDevices.count;
-    
+//    @synchronized(roundRobin)
+//    {
+//        roundRobin++;
+//        roundRobin = roundRobin % allDevices.count;
+//    }
+
     NSError* error = nil;
     
     if([self setupTranscode:&error])
