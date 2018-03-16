@@ -225,6 +225,8 @@
     self.analyzedGlobalMetadata = nil;
     self.analyzedVideoSampleBufferMetadata = nil;
     self.analyzedAudioSampleBufferMetadata = nil;
+    
+    self.videoConformSession = nil;
 }
 
 - (NSString*) description
