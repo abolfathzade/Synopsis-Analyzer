@@ -626,10 +626,10 @@ const NSString* value = @"Value";
                                                              AVVideoCompressionPropertiesKey : @{
                                                                      AVVideoProfileLevelKey : AVVideoProfileLevelH264BaselineAutoLevel,
                                                                      },
-                                                             
-                                                             AVVideoEncoderSpecificationKey : @{
-                                                                     (NSString*)kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder : @YES,
-                                                                     }
+//
+//                                                             AVVideoEncoderSpecificationKey : @{
+//                                                                     (NSString*)kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder : @YES,
+//                                                                     }
                                                              };
         
         PresetObject* baseLineAutoLevelPreset = [[PresetObject alloc] initWithTitle:@"h.264 Baseline Auto Level / Stereo AAC, 48Khz 240kbps"
@@ -649,9 +649,9 @@ const NSString* value = @"Value";
                                                          AVVideoCompressionPropertiesKey : @{
                                                                  AVVideoProfileLevelKey : AVVideoProfileLevelH264BaselineAutoLevel,
                                                                  },
-                                                         AVVideoEncoderSpecificationKey : @{
-                                                                 (NSString*)kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder : @YES,
-                                                                 }
+//                                                         AVVideoEncoderSpecificationKey : @{
+//                                                                 (NSString*)kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder : @YES,
+//                                                                 }
                                                          };
         
         PresetObject* mainAutoLevelPreset = [[PresetObject alloc] initWithTitle:@"h.264 Main Auto Level / Stereo AAC, 48Khz 240kbps"
@@ -671,9 +671,9 @@ const NSString* value = @"Value";
                                                          AVVideoCompressionPropertiesKey : @{
                                                                  AVVideoProfileLevelKey : AVVideoProfileLevelH264BaselineAutoLevel,
                                                                  },
-                                                         AVVideoEncoderSpecificationKey : @{
-                                                                 (NSString*)kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder : @YES,
-                                                                 }
+//                                                         AVVideoEncoderSpecificationKey : @{
+//                                                                 (NSString*)kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder : @YES,
+//                                                                 }
                                                          };
         
         PresetObject* highAutoLevelPreset = [[PresetObject alloc] initWithTitle:@"h.264 High Auto Level / Stereo AAC, 48Khz 240kbps"
