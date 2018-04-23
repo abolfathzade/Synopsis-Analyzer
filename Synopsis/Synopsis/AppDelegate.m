@@ -1072,7 +1072,7 @@ static NSUInteger kMetadataOperationIndex = 1;
     
     [openPanel beginSheetModalForWindow:[self window] completionHandler:^(NSInteger result)
      {
-         if (result == NSFileHandlingPanelOKButton)
+         if (result == NSModalResponseOK)
          {
              [self analysisSessionForFiles:openPanel.URLs sessionCompletionBlock:^{
                  
