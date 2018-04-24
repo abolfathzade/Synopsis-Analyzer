@@ -828,6 +828,7 @@
 
 //                            dont vend a pixel buffer, vend an object that has cached format variants for our plugins to use.
                             [self.videoConformSession conformPixelBuffer:pixelBuffer
+                                                                  atTime:currentSamplePTS
                                                            withTransform:self.transcodeAssetWriterVideo.transform
                                                                     rect:rectForQualityHint(originalRect, self.analysisQualityHint)
                                                          completionBlock:^(id<MTLCommandBuffer>commandBuffer, SynopsisVideoFrameCache* conformedFrameCache, NSError * error){
