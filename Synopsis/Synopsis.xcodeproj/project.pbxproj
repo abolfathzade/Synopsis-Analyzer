@@ -35,8 +35,6 @@
 		1B61BD091ACF37200013418D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
 		1B6A628F1F9523910045F1BD /* OperationRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B6A628E1F9523910045F1BD /* OperationRowView.m */; };
 		1B6A62941F953BBB0045F1BD /* SessionRowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B6A62931F953BBB0045F1BD /* SessionRowView.m */; };
-		1B7351041DEF4FE40053BC06 /* Synopsis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; };
-		1B7351061DEF50300053BC06 /* Synopsis.framework in Copy Files */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1B805E401B028BB6005D7354 /* LogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B805E3F1B028BB6005D7354 /* LogController.m */; };
 		1BA68C501AD02E97003B3CE9 /* BaseTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C4F1AD02E97003B3CE9 /* BaseTranscodeOperation.m */; };
 		1BA68C551AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BA68C541AD0C899003B3CE9 /* MetadataWriterTranscodeOperation.m */; };
@@ -95,6 +93,8 @@
 		1BEA4D3D1ACB2BDD00AB57C1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3C1ACB2BDC00AB57C1 /* AVFoundation.framework */; };
 		1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BEA4D3E1ACB2BE100AB57C1 /* CoreMedia.framework */; };
 		1BEA4D421ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BEA4D411ACB2F6F00AB57C1 /* AnalysisAndTranscodeOperation.m */; };
+		1BF4B0A22090DC6B00418201 /* Synopsis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; };
+		1BF4B0A32090DC6B00418201 /* Synopsis.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1B7350FE1DEF4FAF0053BC06 /* Synopsis.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1BFB12421F1D4705002C4651 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BFB12411F1D4705002C4651 /* libz.tbd */; };
 /* End PBXBuildFile section */
 
@@ -120,13 +120,6 @@
 			remoteGlobalIDString = 1BBB10DD1D5542A200C22439;
 			remoteInfo = Synopsis;
 		};
-		1B7351021DEF4FE00053BC06 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1B7350F91DEF4FAE0053BC06 /* Synopsis-Framework.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 1BBB10DC1D5542A200C22439;
-			remoteInfo = Synopsis;
-		};
 		1B87FA4F205AEF6600755B6C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1B7350F91DEF4FAE0053BC06 /* Synopsis-Framework.xcodeproj */;
@@ -140,6 +133,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = 1B4446B81EE1FE4A0075575D;
 			remoteInfo = "Synopsis-iOS";
+		};
+		1BF4B0A42090DC6B00418201 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1B7350F91DEF4FAE0053BC06 /* Synopsis-Framework.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 1BBB10DC1D5542A200C22439;
+			remoteInfo = "Synopsis-macOS";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -163,15 +163,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		1B7351051DEF4FF00053BC06 /* Copy Files */ = {
+		1BF4B0A62090DC6B00418201 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1B7351061DEF50300053BC06 /* Synopsis.framework in Copy Files */,
+				1BF4B0A32090DC6B00418201 /* Synopsis.framework in Embed Frameworks */,
 			);
-			name = "Copy Files";
+			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -427,10 +427,10 @@
 			files = (
 				1BFB12421F1D4705002C4651 /* libz.tbd in Frameworks */,
 				1B3233D91C30C6CE00C9CF5E /* Accelerate.framework in Frameworks */,
+				1BF4B0A22090DC6B00418201 /* Synopsis.framework in Frameworks */,
 				1B61BCDA1ACB90850013418D /* VideoToolbox.framework in Frameworks */,
 				1BEA4D3F1ACB2BE100AB57C1 /* CoreMedia.framework in Frameworks */,
 				1BEA4D3D1ACB2BDD00AB57C1 /* AVFoundation.framework in Frameworks */,
-				1B7351041DEF4FE40053BC06 /* Synopsis.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1032,13 +1032,13 @@
 				1BEA4D161ACB2BCC00AB57C1 /* Frameworks */,
 				1BEA4D171ACB2BCC00AB57C1 /* Resources */,
 				1B007EDC1B4EC6AB00DE6E98 /* CopyFiles */,
-				1B7351051DEF4FF00053BC06 /* Copy Files */,
+				1BF4B0A62090DC6B00418201 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				1B7351031DEF4FE00053BC06 /* PBXTargetDependency */,
 				1B007ECD1B4D7D0900DE6E98 /* PBXTargetDependency */,
+				1BF4B0A52090DC6B00418201 /* PBXTargetDependency */,
 			);
 			name = "Synopsis Analyzer";
 			productName = MetadataTranscoderTestHarness;
@@ -1274,10 +1274,10 @@
 			target = 1B007EBF1B4D7D0900DE6E98 /* SynopsisImporter */;
 			targetProxy = 1B007ECC1B4D7D0900DE6E98 /* PBXContainerItemProxy */;
 		};
-		1B7351031DEF4FE00053BC06 /* PBXTargetDependency */ = {
+		1BF4B0A52090DC6B00418201 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = Synopsis;
-			targetProxy = 1B7351021DEF4FE00053BC06 /* PBXContainerItemProxy */;
+			name = "Synopsis-macOS";
+			targetProxy = 1BF4B0A42090DC6B00418201 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
